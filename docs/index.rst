@@ -1,20 +1,17 @@
-.. Taiwan E-Invoice documentation master file, created by
-   sphinx-quickstart on Sat Oct 26 11:05:00 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+導入財政部電子發票文件集
+================================================================================
 
-Welcome to Taiwan E-Invoice's documentation!
-============================================
+目的:
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+* 協助營業人生成、上傳、撤消電子發票，包含 B2B, B2C 類型
 
+營業人
+--------------------------------------------------------------------------------
 
+事前準備
+--------------------------------------------------------------------------------
 
-Indices and tables
-==================
+財政部電子發票整合服務平台： `營業人身份 <https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 。
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+1. 以工商憑證註冊
+#. 開立一般帳密登入的帳號
