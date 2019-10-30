@@ -29,6 +29,6 @@
     :caption: 目錄
 
     consumer
-    merchant
+    merchant_prepare
     agent
     inquire_api
