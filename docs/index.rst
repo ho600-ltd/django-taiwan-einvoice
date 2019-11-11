@@ -28,7 +28,8 @@
     :maxdepth: 1
     :caption: 目錄
 
-    consumer
+    consumer_operations
     merchant_prepare
+    merchant_operations
     agent
     inquire_api
