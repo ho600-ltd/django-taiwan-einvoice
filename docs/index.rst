@@ -19,10 +19,22 @@
 本文件集之目標
 -------------------------------------------------------------------------------
 
-* 協助消費者設定發票載具
-* 協助營業人自行生成、上傳、撤消電子發票，包含 B2B, B2C 類型
-* 協助營業人透過專業代理人完成電子發票相關服務
-* 「查詢電子發票API」教學
+* 協助消費者設定發票載具 (完成)
+* 協助營業人自行生成、上傳、作廢電子發票，包含 B2B, B2C 類型 (撰寫中)
+* 協助營業人透過加值服務中心完成電子發票相關服務 (待續)
+* 「查詢電子發票API」教學 (待續)
+
+事前準備說明
+-------------------------------------------------------------------------------
+
+1. **測試用** 財政部電子發票整合服務平台: `營業人身份(https://wwwtest.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449) <https://wwwtest.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 頁面
+#. **正式用** 財政部電子發票整合服務平台: `營業人身份(https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449) <https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 頁面
+#. 效期內的「工商憑證」 - 一般營利事業單位用，申請網站請到 `MOEACA <https://moeaca.nat.gov.tw/>`_
+#. 效期內的「XCA 憑證」 - 一般組織、團體單位用，申請網站請到 `XCA <https://xca.nat.gov.tw/>`_
+#. 效期內的「GCA 憑證」 - 一般政府機關單位用，申請網站請到 `GCA <https://gca.nat.gov.tw/>`_
+#. 效期內的「自然人憑證」 - 一般正常人用，請親自到 **任一** 戶政事務所辦理，說明在 `此 <https://moica.nat.gov.tw/rac.html>`_
+#. 電子發票字軌號碼申請書(含電子發票開立系統自行檢測表) - `下載連結 <https://www.etax.nat.gov.tw/etwmain/front/ETW118W/CON/441/6304811861295645753>`_
+#. 使用電子發票承諾書 - 本文件與「電子發票字軌號碼申請書(含電子發票開立系統自行檢測表)」是放在同一個壓縮檔中
 
 .. toctree::
     :maxdepth: 1
