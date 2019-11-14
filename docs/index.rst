@@ -41,7 +41,7 @@
     :caption: 目錄
 
     consumer_operations
-    merchant_prepare
+    merchant_create_b2b_invoice
     merchant_operations
     agent
     inquire_api
