@@ -51,6 +51,8 @@
 及「多元發票交付」功能，如下圖紅框處:
 
 .. figure:: merchant_only_b2b/merchant_only_b2b_operations.png 
+    :width: 500px
+    :align: center
 
 在「線上銷項發票作業」中的「開立發票」作業中，\
 其發票買受人須在它的「電子發票整合平台」上設定「發票接受方式」，\
@@ -72,6 +74,8 @@
 * 使用電子發票承諾書
 
 .. figure:: merchant_only_b2b/serial_number_01.png
+    :width: 500px
+    :align: center
 
 * 受理機關: 請填寫貴司所屬之分局、稽徵所或服務處，敝司乃屬「財政部中區國稅局埔里稽徵所」管轄
 * 一般稅額計算/首次申請 1 組: 1 組會有 50 個發票號碼，此數值請按貴司慣例自行評斷
@@ -82,14 +86,22 @@
 * 本節操作乃營業人用最精簡方式開立電子發票，所以在檢具文件方面，只須要提供「電子發票承諾書」
 
 .. figure:: merchant_only_b2b/serial_number_02.png
+    :width: 500px
+    :align: center
 
 .. figure:: merchant_only_b2b/serial_number_03.png
+    :width: 500px
+    :align: center
 
 申請人、聯絡方式、事務所、申請日期，請依貴司本身資料填寫，並蓋大章、小章。
 
 .. figure:: merchant_only_b2b/serial_number_04.png
+    :width: 500px
+    :align: center
 
 .. figure:: merchant_only_b2b/promise.png
+    :width: 500px
+    :align: center
 
 再附上「使用電子發票承諾書」，內容主要是提醒每期未開立之空白發票，\
 記得 **在次期 10 日內傳輸至整合服務平台** 。還有不要亂開發票，遵守相關法律，\
@@ -126,8 +138,8 @@
     * 電子發票上傳作業
         * :ref:`上傳未使用空白發票號碼作業`
 
-在營業人管理者登入後，先到「公司基本資料」頁去填寫聯絡電話、電子信箱、地址等資訊，\
-再到「主憑證資料登錄作業」登錄「工商憑證或自然人憑證」，\
+在營業人管理者登入後，先到「 :ref:`公司基本資料` 」頁去填寫聯絡電話、電子信箱、地址等資訊，\
+再到「 :ref:`主憑證資料登錄作業` 」登錄「工商憑證或自然人憑證」，\
 每一張開立的電子發票都須被主憑證簽章，才能算是一張合格的電子發票。
 
 再來是到「交易對象資料維護」去登記「發票的買受人資料」，\
