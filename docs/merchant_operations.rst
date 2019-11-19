@@ -10,6 +10,7 @@
 .. toctree::
     
     merchant_operations/營業人功能選單.rst
+    merchant_operations/電子發票專用字軌號碼取號.rst
 
 
 .. ::
