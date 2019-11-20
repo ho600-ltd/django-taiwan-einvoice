@@ -3,7 +3,8 @@
 
 .. note::
 
-    本文中所提及、引用、截取的文句、畫面多來自 `https://www.einvoice.nat.gov.tw/ <https://www.einvoice.nat.gov.tw/>`_ 。\
+    本文件集中所提及、引用、截取的文句、畫面多來自 \
+    `https://www.einvoice.nat.gov.tw/ <https://www.einvoice.nat.gov.tw/>`_ 。\
     其著作權之合理使用，\
     請詳見該平台之「 `著作權保護政策 <https://www.einvoice.nat.gov.tw/index!showCopyRights>`_ 」一文。
 
@@ -15,6 +16,30 @@
 
     若對本文件集有任何意見、建議或改正，\
     歡迎寄信到 `hoamon@ho600.com <hoamon@ho600.com>`_ 。
+
+本文件集之著作權公開授權模式
+-------------------------------------------------------------------------------
+
+.. raw:: html
+
+    <div class="widget" id="license">
+        <div style="text-align: left;">
+            <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/" rel="license">
+                <img alt="Creative Commons License" style="border-width:0"
+                src="http://i.creativecommons.org/l/by-sa/3.0/tw/88x31.png">
+            </a>
+        </div>
+        <span href="http://purl.org/dc/dcmitype/Text" rel="dct:type">
+            <span href="http://purl.org/dc/dcmitype/Text"
+                rel="dct:type">django-taiwan-einvoice.readthedocs.io</span>
+                網站內容為 <a href="https://www.ho600.info/" rel="cc:attributionURL">ho600 Ltd.</a> 所創作，
+                除非另有說明，否則皆採用
+                <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/"
+                rel="license">創用 CC 姓名標示-相同方式分享 3.0 台灣 授權條款</a>授權。
+        </span>
+    </div>
+    <br/>
+    <br/>
 
 本文件集之目標
 -------------------------------------------------------------------------------
@@ -45,5 +70,14 @@
     merchant_operations
     agent
     inquire_api
+
+.. toctree::
+    :maxdepth: 1
+    :caption: 版本修訂紀錄
+
+    v0_changelog
+
+待辦事項
+-------------------------------------------------------------------------------
 
 .. todolist::

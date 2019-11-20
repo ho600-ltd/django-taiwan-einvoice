@@ -19,7 +19,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'Taiwan E-Invoice'
-copyright = '2019, ho600 Ltd.'
+copyright = '2019, ho600 Ltd.  All the content on this website is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License unless otherwise specified.'
 author = 'ho600 Ltd.'
 
 # The full version, including alpha/beta/rc tags
