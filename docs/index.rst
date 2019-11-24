@@ -58,6 +58,7 @@
 #. 效期內的「XCA 憑證」 - 一般組織、團體單位用，申請網站請到 `XCA <https://xca.nat.gov.tw/>`_
 #. 效期內的「GCA 憑證」 - 一般政府機關單位用，申請網站請到 `GCA <https://gca.nat.gov.tw/>`_
 #. 效期內的「自然人憑證」 - 一般正常人用，請親自到 **任一** 戶政事務所辦理，說明在 `此 <https://moica.nat.gov.tw/rac.html>`_
+#. 使用憑證前，可至 `經濟部工商憑證管理中心的瀏覽器檢測 <https://moeacaweb.nat.gov.tw/MoeaeeWeb/other/checker.aspx>`_ 頁面驗證相關元件
 #. 電子發票字軌號碼申請書(含電子發票開立系統自行檢測表) - `下載連結 <https://www.etax.nat.gov.tw/etwmain/front/ETW118W/CON/441/6304811861295645753>`_
 #. 使用電子發票承諾書 - 本文件與「電子發票字軌號碼申請書(含電子發票開立系統自行檢測表)」是放在同一個壓縮檔中
 
