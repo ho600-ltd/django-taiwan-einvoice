@@ -22,7 +22,7 @@
 * 協助營業人透過加值服務中心完成電子發票相關作業 (待續)
 * 「查詢電子發票API」教學 (待續)
 
-全文件集詳見 `https://django-taiwan-einvoice.readthedocs.io/ <https://django-taiwan-einvoice.readthedocs.io/>`_ 。
+全文件集詳見 [https://django-taiwan-einvoice.readthedocs.io/](https://django-taiwan-einvoice.readthedocs.io/) 。
 
 ## 工具集之目標
 
