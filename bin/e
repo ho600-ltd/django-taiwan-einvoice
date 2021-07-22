@@ -1,2 +1,8 @@
 #!/bin/zsh
-source .py3env/bin/activate
+basename=`basename $PWD`
+
+if [[ -f "./.py3env/bin/activate" ]]; then
+    source ./.py3env/bin/activate
+elif [[ -f "../${basename}.py3env/bin/activate" ]]; then
+    source "../${basename}.py3env/bin/activate"
+fi
