@@ -69,6 +69,11 @@
     * 營業人
         * 財政部傳輸軟體(Turnkey)
             * 線上申請說明下載
+            * 電子發票Turnkey上線前自行檢測作業
+            * 各項手冊與相關文件:
+                * Turnkey-使用手冊_v2.9
+                * 電子發票 PostgreSQL資料庫安裝參考說明
+            * Turnkey-2.0.2-linux
         * 文件下載
             * 營業人常用文件
                 * 電子發票整合服務平台營業人導入與操作說明
@@ -80,6 +85,7 @@
 
     consumer_operations
     merchant_create_b2b_invoice
+    install_turnkey_in_linux
     merchant_create_b2c_invoice
     merchant_operations
     agent
