@@ -66,9 +66,12 @@
 -------------------------------------------------------------------------------
 
 * `財政部電子發票整合服務平台 <https://www.einvoice.nat.gov.tw/>`_
-    * 文件下載
-        * 營業人常用文件
-            * 電子發票整合服務平台營業人導入與操作說明
+    * 營業人
+        * 財政部傳輸軟體(Turnkey)
+            * 線上申請說明下載
+        * 文件下載
+            * 營業人常用文件
+                * 電子發票整合服務平台營業人導入與操作說明
 
 
 .. toctree::
@@ -77,6 +80,7 @@
 
     consumer_operations
     merchant_create_b2b_invoice
+    merchant_create_b2c_invoice
     merchant_operations
     agent
     inquire_api
