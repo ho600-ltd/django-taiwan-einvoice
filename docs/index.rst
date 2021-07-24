@@ -44,23 +44,36 @@
 本文件集之目標
 -------------------------------------------------------------------------------
 
-* 協助消費者設定發票載具 (完成)
-* 協助營業人自行生成、上傳、作廢電子發票，包含 B2B, B2C 類型 (撰寫中)
-* 協助營業人透過加值服務中心完成電子發票相關服務 (待續)
-* 「查詢電子發票API」教學 (待續)
+* (完成)協助消費者在整合平台設定發票載具
+* (撰寫中)協助營業人在整合服務平台上，開立、作廢、開立折讓、作廢折讓、退回 B2B 電子發票
+* (撰寫中)協助營業人透過 **Linux** 版的 Turnkey 系統存證開立、作廢、註銷、開立折讓、
+  作廢折讓 B2C 電子發票。所使用版本:
+    * Turnkey 軟體版本: **2.0.2**
+    * 電子發票資料交換標準訊息建置指引(Message Implementation Guideline)版本: **3.2.1**
+* (待續)協助營業人透過加值服務中心完成電子發票相關服務
+* (待續)「查詢電子發票API」教學
 
 事前準備說明
 -------------------------------------------------------------------------------
 
-1. **測試用** 財政部電子發票整合服務平台: `營業人身份(https://wwwtest.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449) <https://wwwtest.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 頁面
-#. **正式用** 財政部電子發票整合服務平台: `營業人身份(https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449) <https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 頁面
-#. 效期內的「工商憑證」 - 一般營利事業單位用，申請網站請到 `MOEACA <https://moeaca.nat.gov.tw/>`_
-#. 效期內的「XCA 憑證」 - 一般組織、團體單位用，申請網站請到 `XCA <https://xca.nat.gov.tw/>`_
-#. 效期內的「GCA 憑證」 - 一般政府機關單位用，申請網站請到 `GCA <https://gca.nat.gov.tw/>`_
-#. 效期內的「自然人憑證」 - 一般正常人用，請親自到 **任一** 戶政事務所辦理，說明在 `此 <https://moica.nat.gov.tw/rac.html>`_
-#. 使用憑證前，可至 `經濟部工商憑證管理中心的瀏覽器檢測 <https://moeacaweb.nat.gov.tw/MoeaeeWeb/other/checker.aspx>`_ 頁面驗證相關元件
-#. 電子發票字軌號碼申請書(含電子發票開立系統自行檢測表) - `下載連結 <https://www.etax.nat.gov.tw/etwmain/front/ETW118W/CON/441/6304811861295645753>`_
-#. 使用電子發票承諾書 - 本文件與「電子發票字軌號碼申請書(含電子發票開立系統自行檢測表)」是放在同一個壓縮檔中
+1. **測試用** 財政部電子發票整合服務平台:
+   `營業人身份(https://wwwtest.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449)
+   <https://wwwtest.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 頁面
+#. **正式用** 財政部電子發票整合服務平台:
+   `營業人身份(https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449)
+   <https://www.einvoice.nat.gov.tw/index!changeFocusType?newFocus=F1348636625449>`_ 頁面
+#. 效期內的實體憑證，依身份別來申辦:
+    #. 「工商憑證」 - 一般營利事業單位用，申請網站請到 `MOEACA <https://moeaca.nat.gov.tw/>`_
+    #. 「XCA 憑證」 - 一般組織、團體單位用，申請網站請到 `XCA <https://xca.nat.gov.tw/>`_
+    #. 「GCA 憑證」 - 一般政府機關單位用，申請網站請到 `GCA <https://gca.nat.gov.tw/>`_
+    #. 「自然人憑證」 - 一般正常人用，請親自到 **任一** 戶政事務所辦理，說明在
+       `此 <https://moica.nat.gov.tw/rac.html>`_
+#. 使用憑證前，可至 `經濟部工商憑證管理中心的瀏覽器檢測
+   <https://moeacaweb.nat.gov.tw/MoeaeeWeb/other/checker.aspx>`_ 頁面驗證相關元件
+#. 電子發票字軌號碼申請書(含電子發票開立系統自行檢測表) -
+   `下載連結 <https://www.etax.nat.gov.tw/etwmain/front/ETW118W/CON/441/6304811861295645753>`_
+#. 使用電子發票承諾書 -
+   此文件與「電子發票字軌號碼申請書(含電子發票開立系統自行檢測表)」是放在同一個壓縮檔中
 
 參考資料
 -------------------------------------------------------------------------------
@@ -77,6 +90,7 @@
         * 文件下載
             * 營業人常用文件
                 * 電子發票整合服務平台營業人導入與操作說明
+            * 軟體憑證製作手冊
 * 財政部財政資訊中心影片: `電子發票整合服務平台應用系統操作說明Turnkey導入介紹(高級)_108年10月15日 <https://www.youtube.com/watch?v=YFjXEuBJAcs>`_
 
 
@@ -87,6 +101,7 @@
     consumer_operations
     merchant_create_b2b_invoice
     install_turnkey_in_linux
+    b2c_invoice_brief
     merchant_create_b2c_invoice
     merchant_operations
     agent
