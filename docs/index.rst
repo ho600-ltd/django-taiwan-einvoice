@@ -4,9 +4,11 @@
 .. note::
 
     本文件集中所提及、引用、截取的文句、畫面多來自 \
-    `https://www.einvoice.nat.gov.tw/ <https://www.einvoice.nat.gov.tw/>`_ 。\
+    `財政部電子發票整合服務平台(https://www.einvoice.nat.gov.tw/) <https://www.einvoice.nat.gov.tw/>`_、\
+    `財政部北區國稅局(https://www.ntbna.gov.tw/) <https://www.ntbna.gov.tw/>`_。\
     其著作權之合理使用，\
-    請詳見該平台之「 `著作權保護政策 <https://www.einvoice.nat.gov.tw/index!showCopyRights>`_ 」一文。
+    請詳見其平台之「`著作權保護政策 <https://www.einvoice.nat.gov.tw/index!showCopyRights>`_」\
+    及「`政府網站資料開放宣告 <https://www.ntbna.gov.tw/singlehtml/18025799a2014c6e8be6f305f2e474ca>`_」網頁。
 
 .. note::
 
@@ -50,8 +52,16 @@
   作廢折讓 B2C 電子發票。所使用版本:
     * Turnkey 軟體版本: **2.0.2**
     * 電子發票資料交換標準訊息建置指引(Message Implementation Guideline)版本: **3.2.1**
+* (撰寫中)協助營業人利用 django-taiwan-einvoice app 為 Turnkey 系統提供 Web API 服務
 * (待續)協助營業人透過加值服務中心完成電子發票相關服務
 * (待續)「查詢電子發票API」教學
+
+.. note:: 名詞釋疑
+
+    所謂 B2B 、 B2C ，並不完全套用以字面上的 Business 及 Customer 。\
+    因為 B2B 發票可以開給機關、組織，而 B2C 發票也可以開給一般營利公司。
+
+    我這邊提供比較適當的解釋， B 是法人、準法人(商業行號)， C 則是除自然人外，也包含法人、準法人。
 
 事前準備說明
 -------------------------------------------------------------------------------
@@ -91,8 +101,10 @@
             * 營業人常用文件
                 * 電子發票整合服務平台營業人導入與操作說明
             * 軟體憑證製作手冊
-* 財政部財政資訊中心影片: `電子發票整合服務平台應用系統操作說明Turnkey導入介紹(高級)_108年10月15日 <https://www.youtube.com/watch?v=YFjXEuBJAcs>`_
-
+* `財政部北區國稅局>主題專區>稅務專區>營業稅>電子發票專區 <https://www.ntbna.gov.tw/multiplehtml/724e140e325f497d82ba12d7509ec6ec>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-初級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7f7937000009138a0f265d996cb>`_、`影片 <https://reurl.cc/exzk2L>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-中級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7fca430000051f5a5d72c858058>`_、`影片 <https://youtu.be/_jZ2WAduIdY>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-高級: `簡報 <https://www.ntbna.gov.tw/download/16a9f80240a00000ba3b65d37bfc99c6>`_、`影片 <https://youtu.be/YFjXEuBJAcs>`_
 
 .. toctree::
     :maxdepth: 4
@@ -100,10 +112,11 @@
 
     consumer_operations
     merchant_create_b2b_invoice
+    merchant_operations
     install_turnkey_in_linux
     b2c_invoice_brief
     merchant_create_b2c_invoice
-    merchant_operations
+    import_django_taiwan_einvoice
     agent
     inquire_api
 
