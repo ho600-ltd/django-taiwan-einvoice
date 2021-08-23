@@ -13,7 +13,8 @@
 
 1. EI 平台有限制 Turnkey 系統的來源 IP ，所以建議到雲端平台去建立 DTE 伺服器，本文中範例是運作在 AWS
 #. Turnkey 須搭配 Xwindow ，所以建議使用「Amazon Linux 2 with .Net Core, PowerShell, Mono, and MATE Desktop Environment」AMI，有 LTS 支援
-#. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，建議安裝 OpenVPN 伺服器，並設定 NAT 模式
+#. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，可多個 Turnkey 系統置於同一 Linux ，也可各自裝在獨立的 Linux OS , 
+建議安裝 OpenVPN 伺服器，並設定 NAT 模式
 
 創建 PostgreSQL 資料庫:
 

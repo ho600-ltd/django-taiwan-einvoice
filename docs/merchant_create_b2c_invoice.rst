@@ -9,3 +9,10 @@
     * 以管理員帳號登入 https://wwwtest.einvoice.nat.gov.tw/ ，上傳軟體憑證(.cer)，而軟體憑證私錀(.key)置入 Turnkey 系統。
       軟體憑證製作方式請參考「財政部電子發票整合服務平台的申請軟體憑證使用手冊」
 
+.. code-block:: sh
+
+    # ~/.ssh/config
+    Host tsftp.einvoice.nat.gov.tw
+        Ciphers 3des-cbc
+        KexAlgorithms diffie-hellman-group1-sha1
+    $ sftp -P 2222 -o "ProxyCommand /usr/bin/nc -X connect -x $ProxyHost:$ProxyPort %h %p" $account@tsftp.einvoice.nat.gov.tw

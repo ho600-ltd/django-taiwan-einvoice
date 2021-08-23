@@ -68,6 +68,8 @@
 
 * EI: 財政部電子發票整合服務平台
 * DTE: 使用 django-taiwan-einvoice 程式建構的電子發票管理系統
+* CEC: 叫用 DTE 系統的自架電子商務銷售系統(Customize E-Commercial system)
+* DEPS: 使用 django-ecspos-printer-server 程式建構的發票列印管理系統
 
 事前準備說明
 -------------------------------------------------------------------------------
@@ -122,8 +124,8 @@
     consumer_operations
     merchant_create_b2b_invoice
     merchant_operations
-    install_turnkey_in_linux
     b2c_invoice_brief
+    install_turnkey_in_linux
     merchant_create_b2c_invoice
     import_django_taiwan_einvoice
     agent
