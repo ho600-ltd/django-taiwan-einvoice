@@ -8,10 +8,13 @@ class ESCPOSWeb(models.Model):
 
 
 
-class TurnkeySWeb(models.Model):
+class TurnkeyWeb(models.Model):
     name = models.CharField(max_length=32)
     hash_key = models.CharField(max_length=40)
-
+    transport_id = models.CharField(max_length=10)
+    party_id = models.CharField(max_length=10)
+    routing_id = models.CharField(max_length=39)
+    
 
 
 class IdentifierRule(object):
@@ -56,6 +59,7 @@ class Seller(models.Model):
 
 
 class SellerInvoiceTrackNo(models.Model):
+    turnkey_web = models.ForeignKey(TurnkeyWeb, on_delete=models.DO_NOTHING)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     type_choices = (
         ('07', _('General')),
