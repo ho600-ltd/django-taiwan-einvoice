@@ -9,3 +9,29 @@ TE 支援 WebSocket 模式，當 EPW 系統開機後，會連線至 TE Web Api �
 當 TE 要上傳發票至 EI 大平台時，一樣先由 TKW 以 WebSocket 模式連線至 TE Web Api 或 CEC 中，由 TE 提供的 Web Api 。\
 TE 以 WebSocket 模式傳送要上傳的發票 JSON 給 TKW ， TKW 會將發票 JSON 轉成 MIG 標準的 xml ，並存入 Turnkey 系統，\
 由 Turnkey 系統負責與 EI 大平台的發票上傳作業。
+
+安裝設定 EPW
+-------------------------------------------------------------------------------
+
+建議使用 raspberry pi + Linux OS 為 EPW 的伺服器，\
+雖然 EPW 是由 django-based 程式碼及相關 python 函式庫所組成的應用程式，\
+要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用；\
+若要在 Windows 上，則需修改部份硬體控制相關的程式碼。\
+考慮長期運作的高可用性，還是應以 pi 來執行 EPW 。
+
+EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，而有實機測試過的機型僅有 TM-T88IV 及 TM-T88V 。
+
+ESC/POS 印表機設定
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+1. 將執行 EPW 的用戶帳號加入到 lp, lpadmin 群組
+    * .. code-block:: sh
+
+        $ sudo adduser <EPW_account> lp
+        $ sudo adduser <EPW_account> lpadmin
+#. 自動讓 ESC/POS 印表機在插入 USB 後，權限可分享至 lp 群組
+    * .. code-block:: text
+
+        # in /etc/udev/rules.d/50-usb_escpos_printer.rules
+        # 04b8, 0202 是 TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
+        SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"

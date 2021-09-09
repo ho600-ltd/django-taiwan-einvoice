@@ -28,18 +28,19 @@ class Printer(models.Model):
         ("01", "TM-T88V"),
     )
     PRINTERS_DICT = {
-        value:key for key, value in dict(SUPPORT_PRINTERS).iteritems()
+        value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
     RECEIPT_TYPES = (
         ('5', '58mm Receipt'),
         ('6', '58mm E-Invoice'),
         ('8', '80mm Receipt'),
     )
+    PRINTERS = {}
     serial_number = models.CharField(max_length=128, unique=True)
     nickname = models.CharField(max_length=64, unique=True)
     type = models.CharField(max_length=1, choices=PRINTER_TYPES)
-    vendor_number = models.SmallInteger()
-    product_number = models.SmallInteger()
+    vendor_number = models.SmallIntegerField()
+    product_number = models.SmallIntegerField()
     profile = models.CharField(max_length=2, choices=SUPPORT_PRINTERS)
     receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES)
     
@@ -47,7 +48,10 @@ class Printer(models.Model):
 
     @classmethod
     def load_printers(cls, idVendor=0x04b8, idProduct=0x0202):
-        printers = {}
+        for k, v in cls.PRINTERS.items():
+            v.close()
+        cls.PRINTERS = {}
+
         for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
             serial_number = usb.util.get_string(dev, dev.iSerialNumber)
             product = usb.util.get_string(dev, dev.iProduct)
@@ -56,24 +60,30 @@ class Printer(models.Model):
             except cls.DoesNotExist:
                 max_length = cls._meta.get_field('nickname').max_length
                 printer = cls(serial_number=serial_number, nickname=serial_number[-1*max_length:])
-            printer.type = "s"
+            printer.type = "u"
             printer.vendor_number = dev.idVendor
             printer.product_number = dev.idProduct
-            printer.profile = PRINTERS_DICT['product']
+            printer.profile = cls.PRINTERS_DICT[product]
             printer.save()
-            printers[serial_number] = UsbZhHant(printer.vendor_number, printer.product_number, usb_args={
+            cls.PRINTERS[serial_number] = UsbZhHant(printer.vendor_number, printer.product_number, usb_args={
                 "address": dev.address, "bus": dev.bus
             })
-        return printers
+        return cls.PRINTERS
 
 
     def get_escpos_printer(self):
         if 'u' == self.type:
+            usb_zhhant = Printer.PRINTERS.get(self.serial_number, None)
+            if usb_zhhant:
+                usb_zhhant.close()
+                del Printer.PRINTERS[self.serial_number]
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
-                    return UsbZhHant(self.vendor_number, self.product_number, usb_args={
+                    usb_zhhant = UsbZhHant(self.vendor_number, self.product_number, usb_args={
                         "address": dev.address, "bus": dev.bus
                     })
+                    Printer.PRINTERS[self.serial_number] = usb_zhhant
+                    return Printer.PRINTERS[self.serial_number]
 
 
     @property
@@ -89,7 +99,18 @@ class Printer(models.Model):
         if 'u' == self.type:
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
+                    if self.serial_number not in Printer.PRINTERS:
+                        usb_zhhant = UsbZhHant(self.vendor_number, self.product_number, usb_args={
+                            "address": dev.address, "bus": dev.bus
+                        })
+                        Printer.PRINTERS[self.serial_number] = usb_zhhant
                     return True
+            if self.serial_number in Printer.PRINTERS:
+                try:
+                    Printer.PRINTERS[self.serial_number].close()
+                except:
+                    pass
+                del Printer.PRINTERS[self.serial_number]
         return False
 
 
@@ -118,12 +139,24 @@ class ReceiptLog(models.Model):
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     meet_to_tw_einvoice_standard = models.BooleanField(default=False)
     track_no = models.CharField(max_length=32)
-    copy_order = models.SmallInteger(default=0)
+    copy_order = models.SmallIntegerField(default=0)
     generate_time = models.DateTimeField()
-    print_time = models.DateTimeField(auto_now_add=True)
+    WIDTHS = (
+        ('5', '58mm'),
+        ('8', '80mm'),
+    )
+    original_width = models.CharField(max_length=1, choices=WIDTHS, default='5')
+    print_time = models.DateTimeField()
     content = JSONField()
 
 
     
     class Meta:
         unique_together = (('meet_to_tw_einvoice_standard', 'track_no', 'copy_order', ), )
+
+
+    def print(self):
+        if self.print_time:
+            return False
+        #TODO: self.content
+        
