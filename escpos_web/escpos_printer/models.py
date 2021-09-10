@@ -1,7 +1,7 @@
-import usb.core, usb.util
+import usb.core, usb.util, re, json
 from escpos.printer import Usb
 from django.db import models
-from jsonfield import JSONField
+from django.utils.timezone import now
 
 
 
@@ -11,8 +11,90 @@ class UsbZhHant(Usb):
         self.charcode(code='CP1252')
         
 
-    def text(self, text, *args, **kwargs):
-        return super(UsbZhHant, self).text(text.encode('cp950').decode('latin1'), *args, **kwargs)
+    def text(self, text, *args, to_encode='cp950', **kwargs):
+        return super(UsbZhHant, self).text(text.encode(to_encode).decode('latin1'), *args, **kwargs)
+    
+    def barcode(self, code, bc, height=64, width=3, pos="BELOW", font="A",
+                align_ct=True, function_type=None, check=True):
+        from escpos.escpos import (six, BARCODE_TYPES, NUL,
+                                   BarcodeTypeError, BarcodeCodeError, BarcodeSizeError,
+                                   BARCODE_WIDTH, BARCODE_HEIGHT,
+                                   BARCODE_FONT_A, BARCODE_FONT_B,
+                                   TXT_STYLE,
+                                   BARCODE_TXT_OFF, BARCODE_TXT_BTH, BARCODE_TXT_ABV, BARCODE_TXT_BLW,)
+
+        if function_type is None:
+            # Choose the function type automatically.
+            if bc in BARCODE_TYPES['A']:
+                function_type = 'A'
+            else:
+                if bc in BARCODE_TYPES['B']:
+                    if not self.profile.supports(BARCODE_B):
+                        raise BarcodeTypeError((
+                            "Barcode type '{bc} not supported for "
+                            "the current printer profile").format(bc=bc))
+                    function_type = 'B'
+                else:
+                    raise BarcodeTypeError((
+                        "Barcode type '{bc} is not valid").format(bc=bc))
+
+        bc_types = BARCODE_TYPES[function_type.upper()]
+        if bc.upper() not in bc_types.keys():
+            raise BarcodeTypeError((
+                "Barcode '{bc}' not valid for barcode function type "
+                "{function_type}").format(
+                    bc=bc,
+                    function_type=function_type,
+                ))
+
+        if check and not self.check_barcode(bc, code):
+            raise BarcodeCodeError((
+                "Barcode '{code}' not in a valid format for type '{bc}'").format(
+                code=code,
+                bc=bc,
+            ))
+
+        # Align Bar Code()
+        if align_ct:
+            self._raw(TXT_STYLE['align']['center'])
+        # Height
+        if 1 <= height <= 255:
+            self._raw(BARCODE_HEIGHT + six.int2byte(height))
+        else:
+            raise BarcodeSizeError("height = {height}".format(height=height))
+        # Width
+        if 1 <= width <= 6:
+            self._raw(BARCODE_WIDTH + six.int2byte(width))
+        else:
+            raise BarcodeSizeError("width = {width}".format(width=width))
+        # Font
+        if font.upper() == "B":
+            self._raw(BARCODE_FONT_B)
+        else:  # DEFAULT FONT: A
+            self._raw(BARCODE_FONT_A)
+        # Position
+        if pos.upper() == "OFF":
+            self._raw(BARCODE_TXT_OFF)
+        elif pos.upper() == "BOTH":
+            self._raw(BARCODE_TXT_BTH)
+        elif pos.upper() == "ABOVE":
+            self._raw(BARCODE_TXT_ABV)
+        else:  # DEFAULT POSITION: BELOW
+            self._raw(BARCODE_TXT_BLW)
+
+        self._raw(bc_types[bc.upper()])
+
+        if function_type.upper() == "B":
+            self._raw(six.int2byte(len(code)))
+
+        # Print Code
+        if code:
+            self._raw(code.encode())
+        else:
+            raise BarcodeCodeError()
+
+        if function_type.upper() == "A":
+            self._raw(NUL)
 
 
 
@@ -65,9 +147,11 @@ class Printer(models.Model):
             printer.product_number = dev.idProduct
             printer.profile = cls.PRINTERS_DICT[product]
             printer.save()
-            cls.PRINTERS[serial_number] = UsbZhHant(printer.vendor_number, printer.product_number, usb_args={
-                "address": dev.address, "bus": dev.bus
-            })
+            cls.PRINTERS[serial_number] = UsbZhHant(printer.vendor_number,
+                                                    printer.product_number,
+                                                    usb_args={"address": dev.address, "bus": dev.bus},
+                                                    profile=printer.get_profile_display()
+                                                   )
         return cls.PRINTERS
 
 
@@ -121,11 +205,11 @@ class TEWeb(models.Model):
 
 
 
-class ReceiptLog(models.Model):
+class Receipt(models.Model):
     receipt_json_format = """{
         "meet_to_tw_einvoice_standard": [False/True],
         "track_no": "String",
-        "generate_time": "UTC datetime",
+        "generate_time": "datetime_str",
         "width": [58mm/80mm],
         "content": [
             {"type": "text", "size": "", "align": "", "text": ""},
@@ -135,28 +219,146 @@ class ReceiptLog(models.Model):
         ]
 }
 """
+    tw_einvoice_demo_json = """{
+    "meet_to_tw_einvoice_standard": true,
+    "track_no": "HO24634102",
+    "generate_time": "2021-09-10 11:33:00+0800",
+    "width": "58mm",
+    "content": [
+        {"type": "text", "custom_size": true, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
+        {"type": "text", "custom_size": true, "width": 2, "height": 2, "align": "center", "text": "110年07-08月"},
+        {"type": "text", "custom_size": true, "width": 2, "height": 2, "align": "center", "text": "HO-24634102"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 2021-09-08 09:06:04"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 3760 總計 99999999"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 賣方 24634102 買方 24634102"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": ""},
+        {"type": "barcode", "align_ct": true, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": "11008HO246341023760"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": ""}
+    ]
+}
+"""
     te_web = models.ForeignKey(TEWeb, on_delete=models.DO_NOTHING)
-    printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     meet_to_tw_einvoice_standard = models.BooleanField(default=False)
     track_no = models.CharField(max_length=32)
-    copy_order = models.SmallIntegerField(default=0)
     generate_time = models.DateTimeField()
     WIDTHS = (
         ('5', '58mm'),
         ('8', '80mm'),
     )
+    WIDTHS_DICT = {
+        value:key for key, value in dict(WIDTHS).items()
+    }
     original_width = models.CharField(max_length=1, choices=WIDTHS, default='5')
-    print_time = models.DateTimeField()
-    content = JSONField()
+    content = models.JSONField()
 
 
     
     class Meta:
-        unique_together = (('meet_to_tw_einvoice_standard', 'track_no', 'copy_order', ), )
+        unique_together = (('meet_to_tw_einvoice_standard', 'track_no', ), )
+
+
+    @classmethod
+    def create_receipt(cls, te_web, message):
+        J = json.loads(message)
+        try:
+            obj = cls.objects.get(meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
+                                  track_no=J['track_no'])
+        except cls.DoesNotExist:
+            obj = cls(te_web=te_web,
+                      meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
+                      track_no=J['track_no'],
+                      generate_time=J['generate_time'],
+                      original_width=cls.WIDTHS_DICT[J['width']],
+                      content=J["content"])
+            obj.save()
+        return obj
+
+
+    def print(self, printer):
+        copy_order = ReceiptLog.objects.filter(printer=printer, receipt=self).count() + 1
+        rl = ReceiptLog(printer=printer,
+                        receipt=self,
+                        copy_order=copy_order)
+        rl.save()
+        return rl.print()
+        
+
+
+TW_EINVOICE_TITLE_RE = re.compile('電[ 　]*子[ 　]*發[ 　]*票[ 　]*證[ 　]*明[ 　]*聯[ 　]*$')
+TW_EINVOICE_2_COPY_TITLE_RE = re.compile('補[ 　]*印[ 　]*$')
+class ReceiptLog(models.Model):
+    printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
+    receipt = models.ForeignKey(Receipt, on_delete=models.DO_NOTHING)
+    copy_order = models.SmallIntegerField(default=0)
+    print_time = models.DateTimeField(null=True)
+
+
+    
+    class Meta:
+        unique_together = (('printer', 'receipt', 'copy_order', ), )
+
 
 
     def print(self):
         if self.print_time:
             return False
-        #TODO: self.content
-        
+        pd = Printer.PRINTERS.get(self.printer.serial_number, None)
+        if not pd:
+            pd = self.printer.get_escpos_printer()
+        if not pd:
+            return False
+
+        type_method = {
+            "text": self.print_text,
+            "barcode": self.print_barcode,
+            "qrcode_pair": self.print_qrcode_pair,
+        }
+        for line in self.receipt.content:
+            type_method[line['type']](pd, line)
+        pd.cut()
+        self.print_time = now()
+        self.save()
+    
+
+    def print_text(self, printer_device, line):
+        """ Escpos.set's kwargs:
+            {align='left', font='a', bold=False, underline=0, width=1,
+             height=1, density=9, invert=False, smooth=False, flip=False,
+             double_width=False, double_height=False, custom_size=False}
+        """
+        default_args = ['align', 'font', 'bold', 'underline', 'width',
+                        'height', 'density', 'invert', 'smooth', 'flip',
+                        'double_width', 'double_height', 'custom_size']
+        d = {}
+        for k in default_args:
+            if k in line:
+                d[k] = line[k]
+        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+            d['align'] = 'left'
+        text = line['text']
+        if (self.receipt.meet_to_tw_einvoice_standard
+            and self.copy_order > 1
+            and TW_EINVOICE_TITLE_RE.search(text)
+            and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)):
+            text += '補印'
+        printer_device.set(**d)
+        printer_device.textln(text)
+        printer_device.set()
+
+
+    def print_barcode(self, printer_device, line):
+        """ Escpos.barcode's kwargs:
+            {height=64, width=3, pos="BELOW", font="A",
+             align_ct=True, function_type=None, check=True}
+        """
+        default_args = ['height', 'width', 'pos', 'font',
+                        'align_ct', 'function_type', 'check']
+        d = {}
+        for k in default_args:
+            if k in line:
+                d[k] = line[k]
+        printer_device.barcode(line['barcode'], line['code'], **d)
+
+    
+    def print_qrcode_pair(self, printer_device, line):
+        pass
