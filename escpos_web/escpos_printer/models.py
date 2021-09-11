@@ -1,4 +1,5 @@
-import usb.core, usb.util, re, json
+import usb.core, usb.util, re, json, qrcode
+from PIL import Image
 from escpos.printer import Usb
 from django.db import models
 from django.utils.timezone import now
@@ -163,9 +164,9 @@ class Printer(models.Model):
                 del Printer.PRINTERS[self.serial_number]
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
-                    usb_zhhant = UsbZhHant(self.vendor_number, self.product_number, usb_args={
-                        "address": dev.address, "bus": dev.bus
-                    })
+                    usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                           usb_args={"address": dev.address, "bus": dev.bus},
+                                           profile=self.get_profile_display())
                     Printer.PRINTERS[self.serial_number] = usb_zhhant
                     return Printer.PRINTERS[self.serial_number]
 
@@ -184,9 +185,9 @@ class Printer(models.Model):
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if self.serial_number not in Printer.PRINTERS:
-                        usb_zhhant = UsbZhHant(self.vendor_number, self.product_number, usb_args={
-                            "address": dev.address, "bus": dev.bus
-                        })
+                        usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                               usb_args={"address": dev.address, "bus": dev.bus },
+                                               profile=self.get_profile_display())
                         Printer.PRINTERS[self.serial_number] = usb_zhhant
                     return True
             if self.serial_number in Printer.PRINTERS:
@@ -226,14 +227,19 @@ class Receipt(models.Model):
     "width": "58mm",
     "content": [
         {"type": "text", "custom_size": true, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": ""},
         {"type": "text", "custom_size": true, "width": 2, "height": 2, "align": "center", "text": "110年07-08月"},
         {"type": "text", "custom_size": true, "width": 2, "height": 2, "align": "center", "text": "HO-24634102"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": ""},
         {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 2021-09-08 09:06:04"},
         {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 3760 總計 99999999"},
         {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 賣方 24634102 買方 24634102"},
         {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": ""},
         {"type": "barcode", "align_ct": true, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": "11008HO246341023760"},
-        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": ""}
+        {"type": "qrcode_pair", "center": false,
+         "qr1_str": "HO246341021100908888899999999999999992463410224634102ydXZt4LAN1UHN/j1juVcRA==:**********:1:1:1:",
+         "qr2_str": "**何六百專業諮詢服務:1:99999999"},
+        {"type": "text", "custom_size": true, "width": 1, "height": 1, "align": "left", "text": " 退貨須憑證明聯正本辦理"}
     ]
 }
 """
@@ -361,4 +367,28 @@ class ReceiptLog(models.Model):
 
     
     def print_qrcode_pair(self, printer_device, line):
-        pass
+        """ Escpos.image's kwargs:
+            {high_density_vertical=True, high_density_horizontal=True, impl="bitImageRaster",
+             fragment_height=960, center=False}
+        """
+        default_args = ['high_density_vertical', 'high_density_horizontal', 'impl',
+                        'fragment_height', 'center']
+        d = {}
+        for k in default_args:
+            if k in line:
+                d[k] = line[k]
+        images = []
+        for s in [line['qr1_str'], line['qr2_str']]:
+            qr = qrcode.QRCode(version=1,
+                               error_correction=qrcode.constants.ERROR_CORRECT_L,
+                               box_size=5,
+                               border=0)
+            qr.add_data(s)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            img = img.resize((154, 154))
+            images.append(img)
+        qr_image = Image.new("RGB", (347, 180), color='white')
+        qr_image.paste(images[0], (13, 13))
+        qr_image.paste(images[1], (193, 13))
+        printer_device.image(qr_image, **d)
