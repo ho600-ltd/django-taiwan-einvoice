@@ -1,5 +1,5 @@
 # taiwan_einvoice/consumers.py
-import json
+import json, logging
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
@@ -17,6 +17,8 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Leave room group
+        lg = logging.getLogger('django')
+        lg.info("close_code: {}".format(close_code))
         async_to_sync(self.channel_layer.group_discard)(
             self.escpos_web_group_name,
             self.channel_name
@@ -25,22 +27,26 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        serial_number = text_data_json['serial_number']
+        invoice_json = text_data_json['invoice_json']
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
                 'type': 'taiwan_einvoice_message',
-                'message': message
+                'serial_number': serial_number,
+                'invoice_json': invoice_json
             }
         )
 
     
     def taiwan_einvoice_message(self, event):
-        message = event['message']
+        serial_number = event['serial_number']
+        invoice_json = event['invoice_json']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
-            'message': message
+            'serial_number': serial_number,
+            'invoice_json': invoice_json
         }))
