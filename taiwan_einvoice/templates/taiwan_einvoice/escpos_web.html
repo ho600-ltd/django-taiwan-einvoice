@@ -1,0 +1,46 @@
+<!-- taiwan_einvoice/templates/taiwan_einvoice/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>ESCPOS Web List</title>
+</head>
+<body>
+    <textarea id="einvoice-message" cols="100" rows="20"></textarea><br>
+    <textarea id="einvoice-message-input" cols="100" rows="20"></textarea><br>
+    <input id="einvoice-message-submit" type="button" value="Send">
+    {{ escpos_web.id|json_script:"escpos_web_id" }}
+    <script>
+        const escpos_web_id = JSON.parse(document.getElementById('escpos_web_id').textContent);
+
+        const escpos_web_socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/taiwan_einvoice/escpos_web/'
+            + escpos_web_id
+            + '/'
+        );
+
+        escpos_web_socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const j_message = JSON.parse(data.message);
+            document.querySelector('#einvoice-message').value += (j_message.track_no + '\n');
+        };
+
+        escpos_web_socket.onclose = function(e) {
+            console.error('einvoice socket closed unexpectedly');
+        };
+
+        document.querySelector('#einvoice-message-input').focus();
+
+        document.querySelector('#einvoice-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#einvoice-message-input');
+            const message = messageInputDom.value;
+            escpos_web_socket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+        };
+    </script>
+<body>
+</html>

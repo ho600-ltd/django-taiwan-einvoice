@@ -8,6 +8,19 @@ class ESCPOSWeb(models.Model):
 
 
 
+class Printer(models.Model):
+    RECEIPT_TYPES = (
+        ('5', '58mm Receipt'),
+        ('6', '58mm E-Invoice'),
+        ('8', '80mm Receipt'),
+    )
+    escpos_web = models.ForeignKey(ESCPOSWeb, on_delete=models.DO_NOTHING)
+    serial_number = models.CharField(max_length=128, unique=True)
+    nickname = models.CharField(max_length=64, unique=True)
+    receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES)
+    
+
+
 class TurnkeyWeb(models.Model):
     name = models.CharField(max_length=32)
     hash_key = models.CharField(max_length=40)
@@ -47,12 +60,12 @@ class LegalEntity(models.Model, IdentifierRule):
 
 
     class Meta:
-        unique_together = (('identifier', 'customer_number'), )
+        unique_together = (('identifier', 'customer_number_char'), )
 
 
 
 class Seller(models.Model):
-    legal_entity = models.ForeignKey(LegalEntity)
+    legal_entity = models.ForeignKey(LegalEntity, on_delete=models.DO_NOTHING)
     print_with_seller_optional_fields = models.BooleanField(default=False)
     print_with_buyer_optional_fields = models.BooleanField(default=False)
     

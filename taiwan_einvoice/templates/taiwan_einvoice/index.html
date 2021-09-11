@@ -1,0 +1,15 @@
+<!-- taiwan_einvoice/templates/taiwan_einvoice/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>ESCPOS Web List</title>
+</head>
+<body>
+    <ul>
+        {% for escpos_web in escpos_webs %}
+            <li><a href="{% url 'taiwan_einvoice:escpos_web' escpos_web_id=escpos_web.id %}">{{ escpos_web.name }}</a></li>
+        {% endfor %}
+    </ul>
+<body>
+</html>
