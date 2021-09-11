@@ -202,7 +202,7 @@ class Printer(models.Model):
 
 class TEWeb(models.Model):
     url = models.CharField(max_length=755)
-    api_key = models.CharField(max_length=64)
+    hash_key = models.CharField(max_length=64)
 
 
 
