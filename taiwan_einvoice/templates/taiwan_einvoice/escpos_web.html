@@ -11,7 +11,6 @@
     E-Invoice json:<br/>
     <textarea id="einvoice-invoice-input" cols="100" rows="20"></textarea><br>
     <select id="printer-serial_number">
-        <option value='4E3346460074210000'>4E3346460074210000</option>
     </select>
     <input id="einvoice-invoice-submit" type="button" value="Print">
     {{ escpos_web.id|json_script:"escpos_web_id" }}
@@ -29,7 +28,7 @@
         escpos_web_socket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             const invoice_data = JSON.parse(data.invoice_json);
-            document.querySelector('#einvoice-invoice').value += (invoice_data.track_no + '\n');
+            document.querySelector('#einvoice-invoice').value += (data.status+':'+invoice_data.track_no + '\n');
         };
 
         escpos_web_socket.onclose = function(e) {
@@ -39,11 +38,44 @@
         document.querySelector('#einvoice-invoice-submit').onclick = function(e) {
             const invoiceInputDom = document.querySelector('#einvoice-invoice-input');
             const invoice_json = invoiceInputDom.value;
-            escpos_web_socket.send(JSON.stringify({
-                'serial_number': document.querySelector('#printer-serial_number').value,
-                'invoice_json': invoice_json
-            }));
-            invoiceInputDom.value = '';
+            if (invoice_json) {
+                escpos_web_socket.send(JSON.stringify({
+                    'serial_number': document.querySelector('#printer-serial_number').value,
+                    'invoice_json': invoice_json
+                }));
+                invoiceInputDom.value = '';
+            }
+        };
+
+        const escpos_web_status_socket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/taiwan_einvoice/escpos_web/'
+            + escpos_web_id
+            + '/status/'
+        );
+
+        escpos_web_status_socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const select = document.querySelector('#printer-serial_number');
+            const select_value = select.value;
+            let index = select.options.length;
+            while (index--) {
+                select.remove(index);
+            }
+            for (k in data) {
+                const v = data[k];
+                const option = new Option(k, v);
+                if (k == select_value) {
+                    option.selected = true;
+                }
+                select.add(option, undefined);
+                console.log(k, v);
+            }
+        };
+
+        escpos_web_status_socket.onclose = function(e) {
+            console.error('escpos_web_status socket closed unexpectedly');
         };
     </script>
 <body>

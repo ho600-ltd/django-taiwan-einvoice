@@ -130,9 +130,10 @@ class Printer(models.Model):
 
 
     @classmethod
-    def load_printers(cls, idVendor=0x04b8, idProduct=0x0202):
+    def load_printers(cls, idVendor=0x04b8, idProduct=0x0202, setup=True):
         for k, v in cls.PRINTERS.items():
-            v.close()
+            if isinstance(v, UsbZhHant):
+                v.close()
         cls.PRINTERS = {}
 
         for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
@@ -148,11 +149,14 @@ class Printer(models.Model):
             printer.product_number = dev.idProduct
             printer.profile = cls.PRINTERS_DICT[product]
             printer.save()
-            cls.PRINTERS[serial_number] = UsbZhHant(printer.vendor_number,
-                                                    printer.product_number,
-                                                    usb_args={"address": dev.address, "bus": dev.bus},
-                                                    profile=printer.get_profile_display()
-                                                   )
+            if setup:
+                cls.PRINTERS[serial_number] = UsbZhHant(printer.vendor_number,
+                                                        printer.product_number,
+                                                        usb_args={"address": dev.address, "bus": dev.bus},
+                                                        profile=printer.get_profile_display()
+                                                    )
+            else:
+                cls.PRINTERS[serial_number] = printer.nickname
         return cls.PRINTERS
 
 
@@ -321,7 +325,7 @@ class ReceiptLog(models.Model):
         }
         for line in self.receipt.content:
             type_method[line['type']](pd, line)
-        pd.cut()
+        pd.cut(feed=False)
         self.print_time = now()
         self.save()
     

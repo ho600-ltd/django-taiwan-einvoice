@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json, os, django, sys, asyncio, websockets, logging
+from time import sleep
 from channels.db import database_sync_to_async
 
 dir = os.path.abspath(__file__)
@@ -14,7 +15,7 @@ logging.basicConfig()
 lg = logging.getLogger(__name__)
 lg.setLevel('INFO')
 
-async def connect_te_web(te_web):
+async def connect_and_print_receipt(te_web):
     async with websockets.connect(te_web.url) as websocket:
         i = 0
         await database_sync_to_async(print_receipt)(te_web.id, '', i)
@@ -22,6 +23,10 @@ async def connect_te_web(te_web):
             data_json = await websocket.recv()
             data= json.loads(data_json)
             count = await database_sync_to_async(print_receipt)(te_web.id, data['serial_number'], data['invoice_json'])
+            # if 'Print Fail' == count:
+            #     await websocket.send(json.dumps({"serail_number": data['serial_number'], "invoice_json": "", "status": False}))
+            # else:
+            #     await websocket.send(json.dumps({"serail_number": data['serial_number'], "invoice_json": "", "status": True}))
             i += 1
             lg.info("print order: {}".format(i))
 
@@ -39,12 +44,38 @@ def print_receipt(te_web_id, serial_number, invoice_json):
         lg.info("{}: {}".format(k, v))
     te_web = TEWeb.objects.get(id=te_web_id)
     r = Receipt.create_receipt(te_web, invoice_json)
-    p1 = Printer.objects.get(serial_number=serial_number)
-    r.print(p1)
-    return "Print Done: {}".format(invoice_data['track_no'])
+    try:
+        p1 = Printer.objects.get(serial_number=serial_number)
+    except Printer.DoesNotExist:
+        return "Print Fail"
+    else:
+        r.print(p1)
+        return "Print Done: {}".format(invoice_data['track_no'])
+
+
+async def connect_and_check_print_status(te_web):
+    async with websockets.connect(te_web.url + 'status/') as websocket:
+        i = 0
+        while True:
+            printers = await database_sync_to_async(check_print_status)(i)
+            await websocket.send(json.dumps(printers))
+            i += 1
+            sleep(4.5)
+
+        
+def check_print_status(while_order):
+    lg.info("while_order: {}".format(while_order))
+    return Printer.load_printers(setup=False)
 
 
 if '__main__' == __name__:
-    url = sys.argv[1]
-    te_web = TEWeb.objects.get(url=url)
-    asyncio.get_event_loop().run_until_complete(connect_te_web(te_web))
+    method = sys.argv[1]
+    args = sys.argv[2:]
+    if 'print_receipt' == method:
+        url = args[0]
+        te_web = TEWeb.objects.get(url=url)
+        asyncio.get_event_loop().run_until_complete(connect_and_print_receipt(te_web))
+    elif 'check_printer_status' == method:
+        url = args[0]
+        te_web = TEWeb.objects.get(url=url)
+        asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(te_web))
