@@ -401,6 +401,8 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
+        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+            d['align_ct'] = False
         printer_device.barcode(line['barcode'], line['code'], **d)
 
     
@@ -415,6 +417,8 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
+        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+            d['center'] = False
         images = []
         for s in [line['qr1_str'], line['qr2_str']]:
             qr = qrcode.QRCode(version=1,
