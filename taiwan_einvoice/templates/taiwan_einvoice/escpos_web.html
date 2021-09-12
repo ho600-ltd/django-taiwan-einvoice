@@ -64,8 +64,10 @@
                 select.remove(index);
             }
             for (k in data) {
-                const v = data[k];
-                const option = new Option(k, v);
+                console.log(k);
+                console.log(data[k]);
+                const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
+                const option = new Option(v, k);
                 if (k == select_value) {
                     option.selected = true;
                 }

@@ -132,8 +132,8 @@ class Printer(models.Model):
     @classmethod
     def load_printers(cls, idVendor=0x04b8, idProduct=0x0202, setup=True):
         for k, v in cls.PRINTERS.items():
-            if isinstance(v, UsbZhHant):
-                v.close()
+            if isinstance(v.get('printer_device', None), UsbZhHant):
+                v['printer_device'].close()
         cls.PRINTERS = {}
 
         for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
@@ -150,28 +150,46 @@ class Printer(models.Model):
             printer.profile = cls.PRINTERS_DICT[product]
             printer.save()
             if setup:
-                cls.PRINTERS[serial_number] = UsbZhHant(printer.vendor_number,
-                                                        printer.product_number,
-                                                        usb_args={"address": dev.address, "bus": dev.bus},
-                                                        profile=printer.get_profile_display()
-                                                    )
+                printer_device = UsbZhHant(printer.vendor_number,
+                                           printer.product_number,
+                                           usb_args={"address": dev.address, "bus": dev.bus},
+                                           profile=printer.get_profile_display(),
+                                          )
+                cls.PRINTERS[serial_number] = {
+                    'nickname': printer.nickname,
+                    'receipt_type': printer.receipt_type,
+                    'printer_device': printer_device,
+                }
             else:
-                cls.PRINTERS[serial_number] = printer.nickname
+                cls.PRINTERS[serial_number] = {
+                    'nickname': printer.nickname,
+                    'receipt_type': printer.receipt_type,
+                }
         return cls.PRINTERS
 
 
-    def get_escpos_printer(self):
+    def get_escpos_printer(self, setup=True):
         if 'u' == self.type:
-            usb_zhhant = Printer.PRINTERS.get(self.serial_number, None)
+            usb_zhhant = Printer.PRINTERS.get(self.serial_number, {}).get('printer_device', None)
             if usb_zhhant:
                 usb_zhhant.close()
                 del Printer.PRINTERS[self.serial_number]
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
-                    usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
-                                           usb_args={"address": dev.address, "bus": dev.bus},
-                                           profile=self.get_profile_display())
-                    Printer.PRINTERS[self.serial_number] = usb_zhhant
+                    if setup:
+                        usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                            usb_args={"address": dev.address, "bus": dev.bus},
+                                            profile=self.get_profile_display())
+                        Printer.PRINTERS[self.serial_number] = {
+                            'nickname': self.nickname,
+                            'receipt_type': self.receipt_type,
+                            'printer_device': usb_zhhant,
+                        }
+                    else:
+                        Printer.PRINTERS[self.serial_number] = {
+                            'nickname': self.nickname,
+                            'receipt_type': self.receipt_type,
+                        }
                     return Printer.PRINTERS[self.serial_number]
 
 
@@ -184,19 +202,29 @@ class Printer(models.Model):
 
 
     @property
-    def is_connected(self):
+    def is_connected(self, setup=True):
         if 'u' == self.type:
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if self.serial_number not in Printer.PRINTERS:
-                        usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
-                                               usb_args={"address": dev.address, "bus": dev.bus },
-                                               profile=self.get_profile_display())
-                        Printer.PRINTERS[self.serial_number] = usb_zhhant
+                        if setup:
+                            usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                                   usb_args={"address": dev.address, "bus": dev.bus },
+                                                   profile=self.get_profile_display())
+                            Printer.PRINTERS[self.serial_number] = {
+                                'nickname': self.nickname,
+                                'receipt_type': self.receipt_type,
+                                'printer_device': usb_zhhant,
+                            }
+                        else:
+                            Printer.PRINTERS[self.serial_number] = {
+                                'nickname': self.nickname,
+                                'receipt_type': self.receipt_type,
+                            }
                     return True
             if self.serial_number in Printer.PRINTERS:
                 try:
-                    Printer.PRINTERS[self.serial_number].close()
+                    Printer.PRINTERS[self.serial_number]['printer_device'].close()
                 except:
                     pass
                 del Printer.PRINTERS[self.serial_number]
@@ -312,9 +340,9 @@ class ReceiptLog(models.Model):
     def print(self):
         if self.print_time:
             return False
-        pd = Printer.PRINTERS.get(self.printer.serial_number, None)
+        pd = Printer.PRINTERS.get(self.printer.serial_number, {}).get('printer_device', None)
         if not pd:
-            pd = self.printer.get_escpos_printer()
+            pd = self.printer.get_escpos_printer().get('printer_device', None)
         if not pd:
             return False
 

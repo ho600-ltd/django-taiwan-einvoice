@@ -24,9 +24,9 @@ async def connect_and_print_receipt(te_web):
             data= json.loads(data_json)
             count = await database_sync_to_async(print_receipt)(te_web.id, data['serial_number'], data['invoice_json'])
             # if 'Print Fail' == count:
-            #     await websocket.send(json.dumps({"serail_number": data['serial_number'], "invoice_json": "", "status": False}))
+            #     await websocket.send(json.dumps({"serial_number": data['serial_number'], "invoice_json": "", "status": False}))
             # else:
-            #     await websocket.send(json.dumps({"serail_number": data['serial_number'], "invoice_json": "", "status": True}))
+            #     await websocket.send(json.dumps({"serial_number": data['serial_number'], "invoice_json": "", "status": True}))
             i += 1
             lg.info("print order: {}".format(i))
 
@@ -53,19 +53,23 @@ def print_receipt(te_web_id, serial_number, invoice_json):
         return "Print Done: {}".format(invoice_data['track_no'])
 
 
-async def connect_and_check_print_status(te_web):
+async def connect_and_check_print_status(te_web, while_order=0):
     async with websockets.connect(te_web.url + 'status/') as websocket:
-        i = 0
         while True:
-            printers = await database_sync_to_async(check_print_status)(i)
-            await websocket.send(json.dumps(printers))
-            i += 1
-            sleep(4.5)
+            try:
+                printers = await database_sync_to_async(check_print_status)(while_order)
+                await websocket.send(json.dumps(printers))
+            except websockets.ConnectionClosed:
+                break
+            else:
+                sleep(1.7)
+                while_order += 1
 
         
 def check_print_status(while_order):
     lg.info("while_order: {}".format(while_order))
-    return Printer.load_printers(setup=False)
+    result = Printer.load_printers(setup=False)
+    return result
 
 
 if '__main__' == __name__:

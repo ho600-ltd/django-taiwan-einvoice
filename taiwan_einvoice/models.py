@@ -10,9 +10,9 @@ class ESCPOSWeb(models.Model):
 
 class Printer(models.Model):
     RECEIPT_TYPES = (
-        ('5', '58mm Receipt'),
-        ('6', '58mm E-Invoice'),
-        ('8', '80mm Receipt'),
+        ('5', _('58mm Receipt')),
+        ('6', _('58mm E-Invoice')),
+        ('8', _('80mm Receipt')),
     )
     escpos_web = models.ForeignKey(ESCPOSWeb, on_delete=models.DO_NOTHING)
     serial_number = models.CharField(max_length=128, unique=True)
