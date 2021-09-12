@@ -6,4 +6,5 @@ from . import consumers
 websocket_urlpatterns = [
     re_path(r'ws/taiwan_einvoice/escpos_web/(?P<escpos_web_id>\d+)/$', consumers.ESCPOSWebConsumer.as_asgi()),
     re_path(r'ws/taiwan_einvoice/escpos_web/(?P<escpos_web_id>\d+)/status/$', consumers.ESCPOSWebStatusConsumer.as_asgi()),
+    re_path(r'ws/taiwan_einvoice/escpos_web/(?P<escpos_web_id>\d+)/print_result/$', consumers.ESCPOSWebPrintResultConsumer.as_asgi()),
 ]

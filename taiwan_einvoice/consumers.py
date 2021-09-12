@@ -30,6 +30,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         serial_number = text_data_json['serial_number']
+        batch_no = text_data_json['batch_no']
         invoice_json = text_data_json['invoice_json']
 
         # Send message to room group
@@ -38,6 +39,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             {
                 'type': 'taiwan_einvoice_message',
                 'serial_number': serial_number,
+                'batch_no': batch_no,
                 'invoice_json': invoice_json,
             }
         )
@@ -45,12 +47,73 @@ class ESCPOSWebConsumer(WebsocketConsumer):
     
     def taiwan_einvoice_message(self, event):
         serial_number = event['serial_number']
+        batch_no = event['batch_no']
         invoice_json = event['invoice_json']
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'serial_number': serial_number,
+            'batch_no': batch_no,
             'invoice_json': invoice_json,
+        }))
+
+
+
+class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
+    def connect(self):
+        self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
+        self.escpos_web_group_name = 'escpos_web_print_result_%s' % self.escpos_web_id
+        async_to_sync(self.channel_layer.group_add)(
+            self.escpos_web_group_name,
+            self.channel_name
+        )
+
+        self.accept()
+
+
+    def disconnect(self, close_code):
+        # Leave room group
+        lg = logging.getLogger('django')
+        lg.info("close_code: {}".format(close_code))
+        async_to_sync(self.channel_layer.group_discard)(
+            self.escpos_web_group_name,
+            self.channel_name
+        )
+
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        print(text_data_json)
+        track_no = text_data_json['track_no']
+        batch_no = text_data_json['batch_no']
+        status = text_data_json['status']
+        status_message = text_data_json.get('status_message', '')
+
+        # Send message to room group
+        async_to_sync(self.channel_layer.group_send)(
+            self.escpos_web_group_name,
+            {
+                'type': 'taiwan_einvoice_print_status_message',
+                'track_no': track_no,
+                'batch_no': batch_no,
+                'status': status,
+                'status_message': status_message,
+            }
+        )
+
+    
+    def taiwan_einvoice_print_status_message(self, event):
+        track_no = event['track_no']
+        batch_no = event['batch_no']
+        status = event['status']
+        status_message = event.get('status_message', '')
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'track_no': track_no,
+            'batch_no': batch_no,
+            'status': status,
+            'status_message': status_message,
         }))
 
 

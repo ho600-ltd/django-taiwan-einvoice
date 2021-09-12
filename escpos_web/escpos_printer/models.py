@@ -318,7 +318,13 @@ class Receipt(models.Model):
                         receipt=self,
                         copy_order=copy_order)
         rl.save()
-        return rl.print()
+        try:
+            rl.print()
+        except Exception as e:
+            rl.delete()
+            return (False, str(e))
+        else:
+            return True
         
 
 

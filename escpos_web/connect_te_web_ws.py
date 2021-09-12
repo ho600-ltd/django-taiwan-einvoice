@@ -9,6 +9,7 @@ print(dir)
 sys.path.append(dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "escpos_web.settings")
 django.setup()
+from django.utils.translation import ugettext_lazy as _
 from escpos_printer.models import TEWeb, Printer, Receipt, ReceiptLog
 
 logging.basicConfig()
@@ -18,39 +19,54 @@ lg.setLevel('INFO')
 async def connect_and_print_receipt(te_web):
     async with websockets.connect(te_web.url) as websocket:
         i = 0
-        await database_sync_to_async(print_receipt)(te_web.id, '', i)
+        await database_sync_to_async(print_receipt)(te_web.id, i, '', '')
         while True:
             data_json = await websocket.recv()
             data= json.loads(data_json)
-            count = await database_sync_to_async(print_receipt)(te_web.id, data['serial_number'], data['invoice_json'])
-            # if 'Print Fail' == count:
-            #     await websocket.send(json.dumps({"serial_number": data['serial_number'], "invoice_json": "", "status": False}))
-            # else:
-            #     await websocket.send(json.dumps({"serial_number": data['serial_number'], "invoice_json": "", "status": True}))
+            result = await database_sync_to_async(print_receipt)(te_web.id,
+                                                                data['serial_number'],
+                                                                data['batch_no'],
+                                                                data['invoice_json'])
+            async with websockets.connect(te_web.url+'print_result/') as ws:
+                await ws.send(json.dumps(result))
             i += 1
             lg.info("print order: {}".format(i))
 
         
-def print_receipt(te_web_id, serial_number, invoice_json):
+def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
     lg.info("te_web_id: {}".format(te_web_id))
     lg.info("serial_number: {}".format(serial_number))
+    lg.info("batch_no: {}".format(batch_no))
     lg.info("type: {}".format(type(invoice_json)))
     lg.info("invoice_json: {}".format(invoice_json))
     try:
         invoice_data = json.loads(invoice_json)
     except:
-        return "Init"
-    for k, v in Printer.load_printers().items():
-        lg.info("{}: {}".format(k, v))
+        return 'Init'
+    result = {"meet_to_tw_einvoice_standard": invoice_data['meet_to_tw_einvoice_standard'],
+              "track_no": invoice_data['track_no'],
+              "batch_no": batch_no,
+             }
     te_web = TEWeb.objects.get(id=te_web_id)
     r = Receipt.create_receipt(te_web, invoice_json)
     try:
         p1 = Printer.objects.get(serial_number=serial_number)
     except Printer.DoesNotExist:
-        return "Print Fail"
+        result['status'] = False
+        result['status_message'] = _("{} is not exist").format(serial_number)
     else:
-        r.print(p1)
-        return "Print Done: {}".format(invoice_data['track_no'])
+        try:
+            _result = r.print(p1)
+        except Exception as e:
+            result['status'] = False
+            result['status_message'] = str(e)
+        else:
+            if True != _result:
+                result['status'] = False
+                result['status_message'] = _result[1]
+            else:
+                result['status'] = True
+    return result
 
 
 async def connect_and_check_print_status(te_web, while_order=0):
@@ -62,6 +78,7 @@ async def connect_and_check_print_status(te_web, while_order=0):
             except websockets.ConnectionClosed:
                 break
             else:
+                lg.info(printers)
                 sleep(1.7)
                 while_order += 1
 
