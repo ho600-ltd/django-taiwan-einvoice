@@ -23,7 +23,7 @@
             + window.location.host
             + '/ws/taiwan_einvoice/escpos_web/'
             + escpos_web_id
-            + '/'
+            + '/by-log-in/'
         );
 
         escpos_web_socket.onmessage = function(e) {
@@ -59,7 +59,7 @@
             + window.location.host
             + '/ws/taiwan_einvoice/escpos_web/'
             + escpos_web_id
-            + '/status/'
+            + '/status/by-log-in/'
         );
 
         escpos_web_status_socket.onmessage = function(e) {
@@ -93,7 +93,7 @@
             + window.location.host
             + '/ws/taiwan_einvoice/escpos_web/'
             + escpos_web_id
-            + '/print_result/'
+            + '/print_result/by-log-in/'
         );
 
         escpos_web_print_result_socket.onmessage = function(e) {

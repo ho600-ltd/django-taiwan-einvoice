@@ -17,7 +17,9 @@ lg = logging.getLogger(__name__)
 lg.setLevel('INFO')
 
 async def connect_and_print_receipt(te_web):
-    async with websockets.connect(te_web.url) as websocket:
+    token_auth = te_web.generate_token_auth()
+    url = "{}{}/".format(te_web.url, token_auth)
+    async with websockets.connect(url) as websocket:
         i = 0
         await database_sync_to_async(print_receipt)(te_web.id, i, '', '')
         while True:
@@ -27,7 +29,9 @@ async def connect_and_print_receipt(te_web):
                                                                 data['serial_number'],
                                                                 data['batch_no'],
                                                                 data['invoice_json'])
-            async with websockets.connect(te_web.url+'print_result/') as ws:
+            token_auth = te_web.generate_token_auth()
+            url = "{}print_result/{}/".format(te_web.url, token_auth)
+            async with websockets.connect(url) as ws:
                 await ws.send(json.dumps(result))
             i += 1
             lg.info("print order: {}".format(i))
@@ -70,7 +74,9 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
 
 
 async def connect_and_check_print_status(te_web, while_order=0):
-    async with websockets.connect(te_web.url + 'status/') as websocket:
+    token_auth = te_web.generate_token_auth()
+    url = "{}status/{}/".format(te_web.url, token_auth)
+    async with websockets.connect(url) as websocket:
         while True:
             try:
                 printers = await database_sync_to_async(check_print_status)(while_order)

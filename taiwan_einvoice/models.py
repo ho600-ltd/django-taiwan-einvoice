@@ -1,11 +1,75 @@
+from hashlib import sha1
+from random import random, randint
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 
+KEY_CODE_SET = [
+    'C', 'W', 'B', 'E', 'R', 'T', 'Y','6', '7', '8',
+    'U', 'P', 'K', 'X', 'A', 'S', 'D', 'V', 'F', 'H',
+    '3', '5',
+]
+def get_codes(verify_id, seed=0):
+    if seed <= 0:
+        seed = randint(234256, 702768)
+    seed = seed % 234256
+    code1_n = (seed // 10648)
+    code1 = KEY_CODE_SET[code1_n]
+    code2_n = (seed % 10648) // 484
+    code2 = KEY_CODE_SET[code2_n]
+    code3_n = (seed % 10648) % 484 // 22
+    code3 = KEY_CODE_SET[code3_n]
+    code4_n = (seed % 10648) % 484 % 22
+    code4 = KEY_CODE_SET[code4_n]
+    code5 = KEY_CODE_SET[((code1_n + code2_n + code3_n + code4_n) ** 3 + verify_id) % 22]
+    return ''.join((code1, code2, code3, code4, code5))
+
+
+
 class ESCPOSWeb(models.Model):
     name = models.CharField(max_length=32)
-    hash_key = models.CharField(max_length=40)
+    slug = models.CharField(max_length=4, default='')
+    hash_key = models.CharField(max_length=40, default='')
 
+
+
+    def verify_token_auth(self, seed, verify_value):
+        if self.escposwebconnectionlog_set.filter(seed=seed).exists():
+            return False
+        elif verify_value == sha1("{}-{}".format(self.slug, seed).encode('utf-8')).hexdigest():
+            escpos_web_cl = ESCPOSWebConnectionLog(escpos_web=self, seed=seed)
+            escpos_web_cl.save()
+            return True
+        return False
+
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            super().save(*args, **kwargs)
+        need_save = False
+        if not self.slug:
+            while True:
+                slug = get_codes(self.pk)
+                if not ESCPOSWeb.objects.filter(slug=slug).exists():
+                    self.slug = slug
+                    break
+            need_save = True
+        if not self.hash_key:
+            self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
+            need_save = True
+        if need_save:
+            super().save(*args, **kwargs)
+
+
+
+class ESCPOSWebConnectionLog(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True)
+    escpos_web = models.ForeignKey(ESCPOSWeb, on_delete=models.DO_NOTHING)
+    seed = models.CharField(max_length=15)
+
+
+    class Meta:
+        unique_together = (('escpos_web', 'seed', ), )
 
 
 class Printer(models.Model):

@@ -3,10 +3,19 @@ import json, logging
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
-from taiwan_einvoice.models import ESCPOSWeb, Printer
+from taiwan_einvoice.models import ESCPOSWeb, ESCPOSWebConnectionLog, Printer
 
 class ESCPOSWebConsumer(WebsocketConsumer):
     def connect(self):
+        self.user = self.scope["user"]
+        if not self.user.is_superuser:
+            slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
+            try:
+                escpos_web = ESCPOSWeb.objects.get(slug=slug)
+            except ESCPOSWeb.DoesNotExist:
+                return False
+            if not escpos_web.verify_token_auth(seed, verify_value):
+                return False
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
         self.escpos_web_group_name = 'escpos_web_%s' % self.escpos_web_id
         async_to_sync(self.channel_layer.group_add)(
@@ -61,6 +70,15 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
 class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
     def connect(self):
+        self.user = self.scope["user"]
+        if not self.user.is_superuser:
+            slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
+            try:
+                escpos_web = ESCPOSWeb.objects.get(slug=slug)
+            except ESCPOSWeb.DoesNotExist:
+                return False
+            if not escpos_web.verify_token_auth(seed, verify_value):
+                return False
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
         self.escpos_web_group_name = 'escpos_web_print_result_%s' % self.escpos_web_id
         async_to_sync(self.channel_layer.group_add)(
@@ -142,6 +160,15 @@ def save_printer_status(escpos_web_id, data):
 
 class ESCPOSWebStatusConsumer(WebsocketConsumer):
     def connect(self):
+        self.user = self.scope["user"]
+        if not self.user.is_superuser:
+            slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
+            try:
+                escpos_web = ESCPOSWeb.objects.get(slug=slug)
+            except ESCPOSWeb.DoesNotExist:
+                return False
+            if not escpos_web.verify_token_auth(seed, verify_value):
+                return False
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
         self.escpos_web_group_name = 'escpos_web_status_%s' % self.escpos_web_id
         async_to_sync(self.channel_layer.group_add)(

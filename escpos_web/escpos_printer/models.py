@@ -1,4 +1,6 @@
 import usb.core, usb.util, re, json, qrcode
+from random import random
+from hashlib import sha1
 from PIL import Image
 from escpos.printer import Usb
 from django.db import models
@@ -234,7 +236,14 @@ class Printer(models.Model):
 
 class TEWeb(models.Model):
     url = models.CharField(max_length=755)
-    hash_key = models.CharField(max_length=64)
+    slug = models.CharField(max_length=4)
+    hash_key = models.CharField(max_length=40)
+
+
+    def generate_token_auth(self):
+        seed = sha1(str(random()).encode('utf-8')).hexdigest()[:15]
+        verify_value = sha1("{}-{}".format(self.slug, seed).encode('utf-8')).hexdigest()
+        return "{}-{}-{}".format(self.slug, seed, verify_value)
 
 
 
