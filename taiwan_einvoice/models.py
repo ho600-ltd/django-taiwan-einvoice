@@ -28,7 +28,7 @@ def get_codes(verify_id, seed=0):
 
 class ESCPOSWeb(models.Model):
     name = models.CharField(max_length=32)
-    slug = models.CharField(max_length=4, default='')
+    slug = models.CharField(max_length=5, default='')
     hash_key = models.CharField(max_length=40, default='')
 
 
