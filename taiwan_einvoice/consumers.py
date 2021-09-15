@@ -3,12 +3,12 @@ import json, logging
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
-from taiwan_einvoice.models import ESCPOSWeb, ESCPOSWebConnectionLog, Printer
 
 class ESCPOSWebConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
         if not self.user.is_superuser:
+            from taiwan_einvoice.models import ESCPOSWeb
             slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
             try:
                 escpos_web = ESCPOSWeb.objects.get(slug=slug)
@@ -72,6 +72,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
         if not self.user.is_superuser:
+            from taiwan_einvoice.models import ESCPOSWeb
             slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
             try:
                 escpos_web = ESCPOSWeb.objects.get(slug=slug)
@@ -137,6 +138,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
 
 
 def save_printer_status(escpos_web_id, data):
+    from taiwan_einvoice.models import ESCPOSWeb, Printer
     escpos_web = ESCPOSWeb.objects.get(id=escpos_web_id)
     d = {}
     for k, v in data.items():
@@ -162,6 +164,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
         if not self.user.is_superuser:
+            from taiwan_einvoice.models import ESCPOSWeb
             slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
             try:
                 escpos_web = ESCPOSWeb.objects.get(slug=slug)
