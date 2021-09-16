@@ -18,9 +18,9 @@
     <script>
         const escpos_web_id = JSON.parse(document.getElementById('escpos_web_id').textContent);
         if ('https:' == window.location.protocol) {
-            const protocol = 'wss://';
+            var protocol = 'wss://';
         } else {
-            const protocol = 'ws://';
+            var protocol = 'ws://';
         }
 
         const escpos_web_socket = new WebSocket(
