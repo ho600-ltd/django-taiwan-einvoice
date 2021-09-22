@@ -95,8 +95,24 @@ class TurnkeyWeb(models.Model):
 
 
 class IdentifierRule(object):
-    def verify_identifier(self):
-        identifier = self.identifier
+    """ Official rules from https://www.fia.gov.tw/singlehtml/6?cntId=aaa97a9dcf2649d5bdd317f554e24f75
+    Now, the rules use pass_rule_has_7_times_10, pass_rule_has_no_7_times_10.
+    After 2023-Apr-01, the rules use pass_rule_has_7_times_5, pass_rule_has_no_7_times_5.
+    """ 
+    def pass_rule_has_7_times_10(no):
+        pass
+    def pass_rule_has_no_7_times_10(no):
+        pass
+    def pass_rule_has_7_times_5(no):
+        pass
+    def pass_rule_has_no_7_times_5(no):
+        pass
+    def verify_identifier(self, identifier):
+        if (self.pass_rule_has_7_times_10(identifier)
+            or self.pass_rule_has_no_7_times_10(identifier)
+            or self.pass_rule_has_7_times_5(identifier)
+            or self.pass_rule_has_no_7_times_5(identifier)):
+            return True
         return False
 
 
@@ -115,10 +131,10 @@ class LegalEntity(models.Model, IdentifierRule):
         if not self.customer_number_char:
             return str(self.pk)
         else:
-            return self.currency_type_char
+            return self.customer_number_char
     @customer_number.setter
     def customer_number(self, char):
-        self.currency_type_char = char
+        self.customer_number_char = char
         self.save()
     role_remark = models.CharField(max_length=40, default='', db_index=True)
 
