@@ -183,6 +183,9 @@ class SellerInvoiceTrackNo(models.Model):
         ('08', _('Special')),
     )
     type = models.CharField(max_length=2, default='07', choices=type_choices)
+    @property
+    def type_display(self):
+        return self.get_type_display()
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
     track = models.CharField(max_length=2)
@@ -199,10 +202,12 @@ class SellerInvoiceTrackNo(models.Model):
                                              self.begin_no,
                                              self.end_no)
 
+    @property
     def count_blank_no(self):
-        return ''
+        return self.end_no - self.begin_no + 1 - self.einvoice_set.count()
 
 
+    @property
     def next_blank_no(self):
         return ''
 

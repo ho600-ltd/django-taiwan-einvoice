@@ -7,6 +7,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
+from rest_framework.serializers import CharField, IntegerField
 from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer
 from taiwan_einvoice.models import (
     ESCPOSWeb,
@@ -100,6 +101,8 @@ class TurnkeyWebSerializer(ModelSerializer):
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
+    type_display = CharField()
+    count_blank_no = IntegerField()
 
     class Meta:
         model = SellerInvoiceTrackNo

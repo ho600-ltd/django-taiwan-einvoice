@@ -1,5 +1,6 @@
 from django.http import Http404
 from django.shortcuts import render
+from django.utils.timezone import now
 from rest_framework.renderers import JSONRenderer
 from rest_framework.viewsets import ModelViewSet
 
@@ -87,6 +88,14 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     serializer_class = SellerInvoiceTrackNoSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+    def get_queryset(self):
+        queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
+        if self.request.GET.get('now_use', ''):
+            _now = now()
+            queryset = queryset.filter(begin_time__lte=_now, end_time__gt=_now)
+        return queryset
 
 
 
