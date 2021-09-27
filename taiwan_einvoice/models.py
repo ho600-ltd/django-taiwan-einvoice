@@ -44,21 +44,17 @@ class ESCPOSWeb(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            super().save(*args, **kwargs)
-        need_save = False
         if not self.slug:
+            if not self.pk:
+                _fake_pk = ESCPOSWeb.objects.count() + 1
             while True:
-                slug = get_codes(self.pk)
+                slug = get_codes(_fake_pk)
                 if not ESCPOSWeb.objects.filter(slug=slug).exists():
                     self.slug = slug
                     break
-            need_save = True
         if not self.hash_key:
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
-            need_save = True
-        if need_save:
-            super().save(*args, **kwargs)
+        super(ESCPOSWeb, self).save(*args, **kwargs)
 
 
 
@@ -150,6 +146,9 @@ class TurnkeyWeb(models.Model):
     transport_id = models.CharField(max_length=10)
     party_id = models.CharField(max_length=10)
     routing_id = models.CharField(max_length=39)
+    qrcode_seed = models.CharField(max_length=40)
+    turnkey_seed = models.CharField(max_length=40)
+    download_seed = models.CharField(max_length=40)
     note = models.TextField()
     
 
@@ -195,7 +194,7 @@ class EInvoice(models.Model):
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
     generate_batch_no = models.CharField(max_length=16, default='')
 
-    seller = models.ForeignKey(LegalEntity, related_name="as_seller_own_einvoice_set", on_delete=models.DO_NOTHING)
+    seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     seller_name = models.CharField(max_length=60, default='', db_index=True)
     seller_address = models.CharField(max_length=100, default='', db_index=True)
@@ -205,7 +204,7 @@ class EInvoice(models.Model):
     seller_email_address = models.CharField(max_length=80, default='', db_index=True)
     seller_customer_number = models.CharField(max_length=20, default='', db_index=True)
     seller_role_remark = models.CharField(max_length=40, default='', db_index=True)
-    buyer = models.ForeignKey(LegalEntity, related_name="as_buyer_own_einvoice_set", on_delete=models.DO_NOTHING)
+    buyer = models.ForeignKey(LegalEntity, on_delete=models.DO_NOTHING)
     buyer_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_name = models.CharField(max_length=60, default='', db_index=True)
     buyer_address = models.CharField(max_length=100, default='', db_index=True)
@@ -264,3 +263,18 @@ class EInvoicePrintLog(models.Model):
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     copy_order = models.SmallIntegerField(default=0)
     print_time = models.DateTimeField(null=True)
+
+
+
+class CancelEInvoice(models.Model):
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    invoice_date = models.DateField()
+    seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    cancel_date = models.DateField()
+    cancel_time = models.DateTimeField()
+    readon = models.CharField(max_length=20)
+    return_tax_document_number = models.CharField(max_length=60)
+    remark = models.CharField(max_length=200)
+
+
