@@ -85,15 +85,6 @@ class Printer(models.Model):
     
 
 
-class TurnkeyWeb(models.Model):
-    name = models.CharField(max_length=32)
-    hash_key = models.CharField(max_length=40)
-    transport_id = models.CharField(max_length=10)
-    party_id = models.CharField(max_length=10)
-    routing_id = models.CharField(max_length=39)
-    
-
-
 class IdentifierRule(object):
     """ Official rules from https://www.fia.gov.tw/singlehtml/6?cntId=aaa97a9dcf2649d5bdd317f554e24f75
     Now, the rules use pass_rule_has_7_times_10, pass_rule_has_no_7_times_10.
@@ -151,9 +142,20 @@ class Seller(models.Model):
     
 
 
+class TurnkeyWeb(models.Model):
+    on_working = models.BooleanField(default=True)
+    seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
+    name = models.CharField(max_length=32)
+    hash_key = models.CharField(max_length=40)
+    transport_id = models.CharField(max_length=10)
+    party_id = models.CharField(max_length=10)
+    routing_id = models.CharField(max_length=39)
+    note = models.TextField()
+    
+
+
 class SellerInvoiceTrackNo(models.Model):
     turnkey_web = models.ForeignKey(TurnkeyWeb, on_delete=models.DO_NOTHING)
-    seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     type_choices = (
         ('07', _('General')),
         ('08', _('Special')),
@@ -164,6 +166,14 @@ class SellerInvoiceTrackNo(models.Model):
     track = models.CharField(max_length=2)
     begin_no = models.SmallIntegerField()
     end_no = models.SmallIntegerField()
+
+
+    def count_blank_no(self):
+        return ''
+
+
+    def next_blank_no(self):
+        return ''
 
 
 
@@ -183,6 +193,7 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    generate_batch_no = models.CharField(max_length=16, default='')
 
     seller = models.ForeignKey(LegalEntity, related_name="as_seller_own_einvoice_set", on_delete=models.DO_NOTHING)
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
@@ -245,3 +256,11 @@ class EInvoice(models.Model):
                         break
             self.random_number = random_number
             super().save(*args, **kwargs)
+        
+
+
+class EInvoicePrintLog(models.Model):
+    printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    copy_order = models.SmallIntegerField(default=0)
+    print_time = models.DateTimeField(null=True)
