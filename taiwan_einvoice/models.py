@@ -1,3 +1,4 @@
+import pytz, datetime
 from hashlib import sha1
 from random import random, randint
 from django.db import models
@@ -25,6 +26,9 @@ def get_codes(verify_id, seed=0):
     return ''.join((code1, code2, code3, code4, code5))
 
 
+TAIWAN_TIMEZONE = pytz.timezone('Asia/Taipei')
+
+
 
 class ESCPOSWeb(models.Model):
     name = models.CharField(max_length=32)
@@ -45,7 +49,9 @@ class ESCPOSWeb(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            if not self.pk:
+            if self.pk:
+                _fake_pk = self.pk
+            else:
                 _fake_pk = ESCPOSWeb.objects.count() + 1
             while True:
                 slug = get_codes(_fake_pk)
@@ -128,6 +134,10 @@ class LegalEntity(models.Model, IdentifierRule):
 
     class Meta:
         unique_together = (('identifier', 'customer_number_char'), )
+    
+
+    def __str__(self):
+        return "{}({}/{})".format(self.identifier, self.name, self.customer_number)
 
 
 
@@ -136,6 +146,12 @@ class Seller(models.Model):
     print_with_seller_optional_fields = models.BooleanField(default=False)
     print_with_buyer_optional_fields = models.BooleanField(default=False)
     
+
+    def __str__(self):
+        return "{}: {}, {}".format(self.legal_entity,
+                                   self.print_with_seller_optional_fields,
+                                   self.print_with_buyer_optional_fields)
+
 
 
 class TurnkeyWeb(models.Model):
@@ -150,6 +166,13 @@ class TurnkeyWeb(models.Model):
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
     note = models.TextField()
+
+
+    def __str__(self):
+        return "{}({}:{}:{})".format(self.name,
+                                     self.transport_id,
+                                     self.party_id,
+                                     self.routing_id)
     
 
 
@@ -163,9 +186,18 @@ class SellerInvoiceTrackNo(models.Model):
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
     track = models.CharField(max_length=2)
-    begin_no = models.SmallIntegerField()
-    end_no = models.SmallIntegerField()
+    begin_no = models.IntegerField()
+    end_no = models.IntegerField()
 
+
+    def __str__(self):
+        return "{}{}({}~{}: {}{}-{})".format(self.turnkey_web,
+                                             self.type,
+                                             self.begin_time.astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d'),
+                                             (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d'),
+                                             self.track,
+                                             self.begin_no,
+                                             self.end_no)
 
     def count_blank_no(self):
         return ''
@@ -194,7 +226,6 @@ class EInvoice(models.Model):
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
     generate_batch_no = models.CharField(max_length=16, default='')
 
-    seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     seller_name = models.CharField(max_length=60, default='', db_index=True)
     seller_address = models.CharField(max_length=100, default='', db_index=True)

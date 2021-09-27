@@ -34,13 +34,13 @@ class TaiwanEInvoiceRouter(routers.DefaultRouter):
 
 router = TaiwanEInvoiceRouter()
 router.register('escposweb', views.ESCPOSWebModelViewSet, basename="escposweb")
-# router.register('legalentity', views.LegalEntityModelViewSet, basename="legalentity")
-# router.register('seller', views.SellerModelViewSet, basename="seller")
-# router.register('turnkeyweb', views.TurnkeyWebModelViewSet, basename="turnkeyweb")
-# router.register('sellerinvoicetrackno', views.SellerInvoiceTrackNoModelViewSet, basename="sellerinvoicetrackno")
-# router.register('einvoice', views.EInvoiceModelViewSet, basename="einvoice")
-# router.register('einvoiceprintlog', views.EInvoicePrintLogModelViewSet, basename="einvoiceprintlog")
-# router.register('canceleinvoice', views.CancelEInvoiceModelViewSet, basename="canceleinvoice")
+router.register('legalentity', views.LegalEntityModelViewSet, basename="legalentity")
+router.register('seller', views.SellerModelViewSet, basename="seller")
+router.register('turnkeyweb', views.TurnkeyWebModelViewSet, basename="turnkeyweb")
+router.register('sellerinvoicetrackno', views.SellerInvoiceTrackNoModelViewSet, basename="sellerinvoicetrackno")
+router.register('einvoice', views.EInvoiceModelViewSet, basename="einvoice")
+router.register('einvoiceprintlog', views.EInvoicePrintLogModelViewSet, basename="einvoiceprintlog")
+router.register('canceleinvoice', views.CancelEInvoiceModelViewSet, basename="canceleinvoice")
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [
