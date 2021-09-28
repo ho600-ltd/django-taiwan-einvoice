@@ -2,6 +2,7 @@ import pytz, datetime
 from hashlib import sha1
 from random import random, randint
 from django.db import models
+from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -111,7 +112,7 @@ class IdentifierRule(object):
 
 
 class LegalEntity(models.Model, IdentifierRule):
-    identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     name = models.CharField(max_length=60, default='', db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
     person_in_charge = models.CharField(max_length=30, default='', db_index=True)
@@ -210,6 +211,22 @@ class SellerInvoiceTrackNo(models.Model):
     @property
     def next_blank_no(self):
         return ''
+    
+
+    def create_einvoice(self, data):
+        data['seller_invoice_track_no'] = self
+        data['type'] = self.type
+        data['track'] = self.track
+        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        if not max_no:
+            data['no'] = self.begin_no
+        elif max_no >= self.end_no:
+            raise Exception('Not enough numbers')
+        else:
+            data['no'] = max_no + 1
+        ei = EInvoice(**data)
+        ei.save()
+        return ei
 
 
 
@@ -218,7 +235,10 @@ class EInvoice(models.Model):
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.SmallIntegerField(db_index=True)
+    no = models.IntegerField(db_index=True)
+    @property
+    def track_no(self):
+        return "{}{}".format(self.track, self.no)
     npoban = models.CharField(max_length=7, default='', db_index=True)
     @property
     def donate_mark(self):
@@ -229,7 +249,7 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    generate_batch_no = models.CharField(max_length=16, default='')
+    generate_batch_no = models.CharField(max_length=40, default='')
 
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     seller_name = models.CharField(max_length=60, default='', db_index=True)
@@ -241,7 +261,7 @@ class EInvoice(models.Model):
     seller_customer_number = models.CharField(max_length=20, default='', db_index=True)
     seller_role_remark = models.CharField(max_length=40, default='', db_index=True)
     buyer = models.ForeignKey(LegalEntity, on_delete=models.DO_NOTHING)
-    buyer_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     buyer_name = models.CharField(max_length=60, default='', db_index=True)
     buyer_address = models.CharField(max_length=100, default='', db_index=True)
     buyer_person_in_charge = models.CharField(max_length=30, default='', db_index=True)
@@ -250,10 +270,9 @@ class EInvoice(models.Model):
     buyer_email_address = models.CharField(max_length=80, default='', db_index=True)
     buyer_customer_number = models.CharField(max_length=20, default='', db_index=True)
     buyer_role_remark = models.CharField(max_length=40, default='', db_index=True)
+    details = models.JSONField(null=False)
+    amounts = models.JSONField(null=False)
 
-    #TODO
-    #details
-    #amounts
 
 
     class Meta:
@@ -277,16 +296,16 @@ class EInvoice(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            seller = self.seller_invoice_track_no.seller
+            turnkey_web = self.seller_invoice_track_no.turnkey_web
             while True:
-                random_number = '{04d}'.format(randint(0, 10000))
-                objs = self._meta.model.objects.filter(seller_invoice_track_no__seller=seller).order_by('-id')[:1000]
+                random_number = '{:04d}'.format(randint(0, 10000))
+                objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
                 if not objs.exists():
                     break
                 else:
                     obj = objs[len(objs)-1]
                     if not self._meta.model.objects.filter(id__gte=obj.id,
-                                                           seller_invoice_track_no__seller=seller,
+                                                           seller_invoice_track_no__turnkey_web=turnkey_web,
                                                            random_number=random_number).exists():
                         break
             self.random_number = random_number
