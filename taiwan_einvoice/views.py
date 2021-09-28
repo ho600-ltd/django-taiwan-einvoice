@@ -94,7 +94,11 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
         queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
         if self.request.GET.get('now_use', ''):
             _now = now()
-            queryset = queryset.filter(begin_time__lte=_now, end_time__gt=_now)
+            ids = []
+            for sitn in queryset.filter(begin_time__lte=_now, end_time__gt=_now):
+                if sitn.count_blank_no > 0:
+                    ids.append(sitn.id)
+            queryset = queryset.filter(id__in=ids)
         return queryset
 
 
