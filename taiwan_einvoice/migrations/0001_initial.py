@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('seller_email_address', models.CharField(db_index=True, default='', max_length=80)),
                 ('seller_customer_number', models.CharField(db_index=True, default='', max_length=20)),
                 ('seller_role_remark', models.CharField(db_index=True, default='', max_length=40)),
-                ('buyer_identifier', models.CharField(db_index=True, max_length=8)),
+                ('buyer_identifier', models.CharField(db_index=True, max_length=10)),
                 ('buyer_name', models.CharField(db_index=True, default='', max_length=60)),
                 ('buyer_address', models.CharField(db_index=True, default='', max_length=100)),
                 ('buyer_person_in_charge', models.CharField(db_index=True, default='', max_length=30)),
