@@ -116,9 +116,9 @@
                 * 電子發票QRCode加解密工具/營業人啟用第2層資訊防偽機制流程說明文件v20160817
                 * 軟體憑證製作手冊
 * `財政部北區國稅局>主題專區>稅務專區>營業稅>電子發票專區 <https://www.ntbna.gov.tw/multiplehtml/724e140e325f497d82ba12d7509ec6ec>`_
-    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-初級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7f7937000009138a0f265d996cb>`_、`影片 <https://reurl.cc/exzk2L>`_
-    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-中級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7fca430000051f5a5d72c858058>`_、`影片 <https://youtu.be/_jZ2WAduIdY>`_
-    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-高級: `簡報 <https://www.ntbna.gov.tw/download/16a9f80240a00000ba3b65d37bfc99c6>`_、`影片 <https://youtu.be/YFjXEuBJAcs>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-初級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7f7937000009138a0f265d996cb>`_、`影片 <https://youtu.be/XuMKrTba-KI>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-中級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7fca430000051f5a5d72c858058>`_、`影片 <https://youtu.be/SGrMUKy_LeM>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-高級: `簡報 <https://www.ntbca.gov.tw/registration/detail/e86d4d7cd08644c7a9733caefa1b4d59/bea437d010f6429abbb953dc2b59ab42>`_、`影片 <https://youtu.be/0FNIdsIeUT0>`_
 
 .. toctree::
     :maxdepth: 4

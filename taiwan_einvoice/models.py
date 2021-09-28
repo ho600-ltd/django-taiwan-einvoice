@@ -1,6 +1,8 @@
+import pytz, datetime
 from hashlib import sha1
 from random import random, randint
 from django.db import models
+from django.db.models import Max
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -25,6 +27,9 @@ def get_codes(verify_id, seed=0):
     return ''.join((code1, code2, code3, code4, code5))
 
 
+TAIWAN_TIMEZONE = pytz.timezone('Asia/Taipei')
+
+
 
 class ESCPOSWeb(models.Model):
     name = models.CharField(max_length=32)
@@ -44,21 +49,19 @@ class ESCPOSWeb(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            super().save(*args, **kwargs)
-        need_save = False
         if not self.slug:
+            if self.pk:
+                _fake_pk = self.pk
+            else:
+                _fake_pk = ESCPOSWeb.objects.count() + 1
             while True:
-                slug = get_codes(self.pk)
+                slug = get_codes(_fake_pk)
                 if not ESCPOSWeb.objects.filter(slug=slug).exists():
                     self.slug = slug
                     break
-            need_save = True
         if not self.hash_key:
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
-            need_save = True
-        if need_save:
-            super().save(*args, **kwargs)
+        super(ESCPOSWeb, self).save(*args, **kwargs)
 
 
 
@@ -85,24 +88,31 @@ class Printer(models.Model):
     
 
 
-class TurnkeyWeb(models.Model):
-    name = models.CharField(max_length=32)
-    hash_key = models.CharField(max_length=40)
-    transport_id = models.CharField(max_length=10)
-    party_id = models.CharField(max_length=10)
-    routing_id = models.CharField(max_length=39)
-    
-
-
 class IdentifierRule(object):
-    def verify_identifier(self):
-        identifier = self.identifier
+    """ Official rules from https://www.fia.gov.tw/singlehtml/6?cntId=aaa97a9dcf2649d5bdd317f554e24f75
+    Now, the rules use pass_rule_has_7_times_10, pass_rule_has_no_7_times_10.
+    After 2023-Apr-01, the rules use pass_rule_has_7_times_5, pass_rule_has_no_7_times_5.
+    """ 
+    def pass_rule_has_7_times_10(no):
+        pass
+    def pass_rule_has_no_7_times_10(no):
+        pass
+    def pass_rule_has_7_times_5(no):
+        pass
+    def pass_rule_has_no_7_times_5(no):
+        pass
+    def verify_identifier(self, identifier):
+        if (self.pass_rule_has_7_times_10(identifier)
+            or self.pass_rule_has_no_7_times_10(identifier)
+            or self.pass_rule_has_7_times_5(identifier)
+            or self.pass_rule_has_no_7_times_5(identifier)):
+            return True
         return False
 
 
 
 class LegalEntity(models.Model, IdentifierRule):
-    identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     name = models.CharField(max_length=60, default='', db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
     person_in_charge = models.CharField(max_length=30, default='', db_index=True)
@@ -115,16 +125,20 @@ class LegalEntity(models.Model, IdentifierRule):
         if not self.customer_number_char:
             return str(self.pk)
         else:
-            return self.currency_type_char
+            return self.customer_number_char
     @customer_number.setter
     def customer_number(self, char):
-        self.currency_type_char = char
+        self.customer_number_char = char
         self.save()
     role_remark = models.CharField(max_length=40, default='', db_index=True)
 
 
     class Meta:
         unique_together = (('identifier', 'customer_number_char'), )
+    
+
+    def __str__(self):
+        return "{}({}/{})".format(self.identifier, self.name, self.customer_number)
 
 
 
@@ -134,20 +148,85 @@ class Seller(models.Model):
     print_with_buyer_optional_fields = models.BooleanField(default=False)
     
 
+    def __str__(self):
+        return "{}: {}, {}".format(self.legal_entity,
+                                   self.print_with_seller_optional_fields,
+                                   self.print_with_buyer_optional_fields)
+
+
+
+class TurnkeyWeb(models.Model):
+    on_working = models.BooleanField(default=True)
+    seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
+    name = models.CharField(max_length=32)
+    hash_key = models.CharField(max_length=40)
+    transport_id = models.CharField(max_length=10)
+    party_id = models.CharField(max_length=10)
+    routing_id = models.CharField(max_length=39)
+    qrcode_seed = models.CharField(max_length=40)
+    turnkey_seed = models.CharField(max_length=40)
+    download_seed = models.CharField(max_length=40)
+    note = models.TextField()
+
+
+    def __str__(self):
+        return "{}({}:{}:{})".format(self.name,
+                                     self.transport_id,
+                                     self.party_id,
+                                     self.routing_id)
+    
+
 
 class SellerInvoiceTrackNo(models.Model):
     turnkey_web = models.ForeignKey(TurnkeyWeb, on_delete=models.DO_NOTHING)
-    seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     type_choices = (
         ('07', _('General')),
         ('08', _('Special')),
     )
     type = models.CharField(max_length=2, default='07', choices=type_choices)
+    @property
+    def type_display(self):
+        return self.get_type_display()
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
     track = models.CharField(max_length=2)
-    begin_no = models.SmallIntegerField()
-    end_no = models.SmallIntegerField()
+    begin_no = models.IntegerField()
+    end_no = models.IntegerField()
+
+
+    def __str__(self):
+        return "{}{}({}~{}: {}{}-{})".format(self.turnkey_web,
+                                             self.type,
+                                             self.begin_time.astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d'),
+                                             (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d'),
+                                             self.track,
+                                             self.begin_no,
+                                             self.end_no)
+
+    @property
+    def count_blank_no(self):
+        return self.end_no - self.begin_no + 1 - self.einvoice_set.count()
+
+
+    @property
+    def next_blank_no(self):
+        return ''
+    
+
+    def create_einvoice(self, data):
+        data['seller_invoice_track_no'] = self
+        data['type'] = self.type
+        data['track'] = self.track
+        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        if not max_no:
+            data['no'] = self.begin_no
+        elif max_no >= self.end_no:
+            raise Exception('Not enough numbers')
+        else:
+            data['no'] = max_no + 1
+        ei = EInvoice(**data)
+        ei.save()
+        return ei
 
 
 
@@ -156,7 +235,10 @@ class EInvoice(models.Model):
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.SmallIntegerField(db_index=True)
+    no = models.IntegerField(db_index=True)
+    @property
+    def track_no(self):
+        return "{}{}".format(self.track, self.no)
     npoban = models.CharField(max_length=7, default='', db_index=True)
     @property
     def donate_mark(self):
@@ -167,8 +249,8 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    generate_batch_no = models.CharField(max_length=40, default='')
 
-    seller = models.ForeignKey(LegalEntity, related_name="as_seller_own_einvoice_set", on_delete=models.DO_NOTHING)
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     seller_name = models.CharField(max_length=60, default='', db_index=True)
     seller_address = models.CharField(max_length=100, default='', db_index=True)
@@ -178,8 +260,8 @@ class EInvoice(models.Model):
     seller_email_address = models.CharField(max_length=80, default='', db_index=True)
     seller_customer_number = models.CharField(max_length=20, default='', db_index=True)
     seller_role_remark = models.CharField(max_length=40, default='', db_index=True)
-    buyer = models.ForeignKey(LegalEntity, related_name="as_buyer_own_einvoice_set", on_delete=models.DO_NOTHING)
-    buyer_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer = models.ForeignKey(LegalEntity, on_delete=models.DO_NOTHING)
+    buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     buyer_name = models.CharField(max_length=60, default='', db_index=True)
     buyer_address = models.CharField(max_length=100, default='', db_index=True)
     buyer_person_in_charge = models.CharField(max_length=30, default='', db_index=True)
@@ -188,10 +270,9 @@ class EInvoice(models.Model):
     buyer_email_address = models.CharField(max_length=80, default='', db_index=True)
     buyer_customer_number = models.CharField(max_length=20, default='', db_index=True)
     buyer_role_remark = models.CharField(max_length=40, default='', db_index=True)
+    details = models.JSONField(null=False)
+    amounts = models.JSONField(null=False)
 
-    #TODO
-    #details
-    #amounts
 
 
     class Meta:
@@ -215,17 +296,40 @@ class EInvoice(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            seller = self.seller_invoice_track_no.seller
+            turnkey_web = self.seller_invoice_track_no.turnkey_web
             while True:
-                random_number = '{04d}'.format(randint(0, 10000))
-                objs = self._meta.model.objects.filter(seller_invoice_track_no__seller=seller).order_by('-id')[:1000]
+                random_number = '{:04d}'.format(randint(0, 10000))
+                objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
                 if not objs.exists():
                     break
                 else:
                     obj = objs[len(objs)-1]
                     if not self._meta.model.objects.filter(id__gte=obj.id,
-                                                           seller_invoice_track_no__seller=seller,
+                                                           seller_invoice_track_no__turnkey_web=turnkey_web,
                                                            random_number=random_number).exists():
                         break
             self.random_number = random_number
             super().save(*args, **kwargs)
+        
+
+
+class EInvoicePrintLog(models.Model):
+    printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    copy_order = models.SmallIntegerField(default=0)
+    print_time = models.DateTimeField(null=True)
+
+
+
+class CancelEInvoice(models.Model):
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    invoice_date = models.DateField()
+    seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    cancel_date = models.DateField()
+    cancel_time = models.DateTimeField()
+    readon = models.CharField(max_length=20)
+    return_tax_document_number = models.CharField(max_length=60)
+    remark = models.CharField(max_length=200)
+
+

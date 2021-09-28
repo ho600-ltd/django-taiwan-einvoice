@@ -1,7 +1,31 @@
 from django.http import Http404
 from django.shortcuts import render
+from django.utils.timezone import now
+from rest_framework.renderers import JSONRenderer
+from rest_framework.viewsets import ModelViewSet
 
-from taiwan_einvoice.models import ESCPOSWeb
+from taiwan_einvoice.permissions import IsSuperUser
+from taiwan_einvoice.renderers import TEBrowsableAPIRenderer
+from taiwan_einvoice.models import (
+    ESCPOSWeb,
+    LegalEntity,
+    Seller,
+    TurnkeyWeb,
+    SellerInvoiceTrackNo,
+    EInvoice,
+    EInvoicePrintLog,
+    CancelEInvoice,
+)
+from taiwan_einvoice.serializers import (
+    ESCPOSWebSerializer,
+    LegalEntitySerializer,
+    SellerSerializer,
+    TurnkeyWebSerializer,
+    SellerInvoiceTrackNoSerializer,
+    EInvoiceSerializer,
+    EInvoicePrintLogSerializer,
+    CancelEInvoiceSerializer,
+)
 
 
 def index(request):
@@ -19,3 +43,87 @@ def escpos_web(request, escpos_web_id):
     return render(request,
                   'taiwan_einvoice/escpos_web.html',
                   {"escpos_web": escpos_web})
+
+
+
+class ESCPOSWebModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = ESCPOSWeb.objects.all().order_by('-id')
+    serializer_class = ESCPOSWebSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+
+class LegalEntityModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = LegalEntity.objects.all().order_by('-id')
+    serializer_class = LegalEntitySerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+
+class SellerModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = Seller.objects.all().order_by('-id')
+    serializer_class = SellerSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+
+class TurnkeyWebModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = TurnkeyWeb.objects.all().order_by('-id')
+    serializer_class = TurnkeyWebSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+
+class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = SellerInvoiceTrackNo.objects.all().order_by('-id')
+    serializer_class = SellerInvoiceTrackNoSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+    def get_queryset(self):
+        queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
+        if self.request.GET.get('now_use', ''):
+            _now = now()
+            ids = []
+            for sitn in queryset.filter(begin_time__lte=_now, end_time__gt=_now):
+                if sitn.count_blank_no > 0:
+                    ids.append(sitn.id)
+            queryset = queryset.filter(id__in=ids)
+        return queryset
+
+
+
+class EInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = EInvoice.objects.all().order_by('-id')
+    serializer_class = EInvoiceSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+
+class EInvoicePrintLogModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = EInvoicePrintLog.objects.all().order_by('-id')
+    serializer_class = EInvoicePrintLogSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
+
+
+
+class CancelEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    queryset = CancelEInvoice.objects.all().order_by('-id')
+    serializer_class = CancelEInvoiceSerializer
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', 'delete', 'patch')
