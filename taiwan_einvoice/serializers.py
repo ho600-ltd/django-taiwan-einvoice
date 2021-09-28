@@ -101,8 +101,8 @@ class TurnkeyWebSerializer(ModelSerializer):
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
-    type_display = CharField()
-    count_blank_no = IntegerField()
+    type_display = CharField(read_only=True)
+    count_blank_no = IntegerField(read_only=True)
 
     class Meta:
         model = SellerInvoiceTrackNo
