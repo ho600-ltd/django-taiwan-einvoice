@@ -325,7 +325,7 @@ class CancelEInvoice(models.Model):
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     invoice_date = models.DateField()
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
-    buyer_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     cancel_date = models.DateField()
     cancel_time = models.DateTimeField()
     readon = models.CharField(max_length=20)
