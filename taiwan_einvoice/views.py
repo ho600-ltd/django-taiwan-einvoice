@@ -26,6 +26,9 @@ from taiwan_einvoice.serializers import (
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
 )
+from taiwan_einvoice.filters import (
+    SellerInvoiceTrackNoFilter,
+)
 
 
 def index(request):
@@ -86,19 +89,13 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-id')
     serializer_class = SellerInvoiceTrackNoSerializer
+    filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
 
     def get_queryset(self):
         queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
-        if self.request.GET.get('now_use', ''):
-            _now = now()
-            ids = []
-            for sitn in queryset.filter(begin_time__lte=_now, end_time__gt=_now):
-                if sitn.count_blank_no > 0:
-                    ids.append(sitn.id)
-            queryset = queryset.filter(id__in=ids)
         return queryset
 
 

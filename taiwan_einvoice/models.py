@@ -185,7 +185,7 @@ class SellerInvoiceTrackNo(models.Model):
     )
     type = models.CharField(max_length=2, default='07', choices=type_choices)
     @property
-    def type_display(self):
+    def type__display(self):
         return self.get_type_display()
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
