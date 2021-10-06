@@ -27,6 +27,7 @@ from taiwan_einvoice.serializers import (
     CancelEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
+    TurnkeyWebFilter,
     SellerInvoiceTrackNoFilter,
 )
 
@@ -80,6 +81,7 @@ class TurnkeyWebModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = TurnkeyWeb.objects.all().order_by('-id')
     serializer_class = TurnkeyWebSerializer
+    filter_class = TurnkeyWebFilter
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
@@ -105,7 +107,7 @@ class EInvoiceModelViewSet(ModelViewSet):
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('get', )
 
 
 
@@ -114,7 +116,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', )
 
 
 
@@ -123,4 +125,4 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', )
