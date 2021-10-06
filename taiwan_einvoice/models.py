@@ -3,6 +3,7 @@ from hashlib import sha1
 from random import random, randint
 from django.db import models
 from django.db.models import Max
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -143,7 +144,7 @@ class LegalEntity(models.Model, IdentifierRule):
 
 
 class Seller(models.Model):
-    legal_entity = models.ForeignKey(LegalEntity, on_delete=models.DO_NOTHING)
+    legal_entity = models.ForeignKey(LegalEntity, unique=True, on_delete=models.DO_NOTHING)
     print_with_seller_optional_fields = models.BooleanField(default=False)
     print_with_buyer_optional_fields = models.BooleanField(default=False)
     
@@ -166,6 +167,18 @@ class TurnkeyWeb(models.Model):
     qrcode_seed = models.CharField(max_length=40)
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
+    @property
+    def count_now_use_07_sellerinvoicetrackno_blank_no(self):
+        count = 0
+        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='07'):
+            count += sitn.count_blank_no
+        return count
+    @property
+    def count_now_use_08_sellerinvoicetrackno_blank_no(self):
+        count = 0
+        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='08'):
+            count += sitn.count_blank_no
+        return count
     note = models.TextField()
 
 
@@ -174,6 +187,11 @@ class TurnkeyWeb(models.Model):
                                      self.transport_id,
                                      self.party_id,
                                      self.routing_id)
+    
+
+
+    class Meta:
+        unique_together = (('seller', 'name'), )
     
 
 
@@ -202,6 +220,27 @@ class SellerInvoiceTrackNo(models.Model):
                                              self.track,
                                              self.begin_no,
                                              self.end_no)
+
+
+    @classmethod
+    def filter_now_use_sitns(cls, *args, **kwargs):
+        if 'ignore_count_blank_no' in kwargs:
+            ignore_count_blank_no = kwargs['ignore_count_blank_no']
+            del kwargs['ignore_count_blank_no']
+        else:
+            ignore_count_blank_no = False
+        queryset = cls.objects.filter(**kwargs)
+        _now = now()
+        ids = []
+        for sitn in queryset.filter(begin_time__lte=_now,
+                                    end_time__gt=_now).order_by('track', 'begin_no'):
+            if ignore_count_blank_no:
+                ids.append(sitn.id)
+            elif sitn.count_blank_no > 0:
+                ids.append(sitn.id)
+        queryset = queryset.filter(id__in=ids)
+        return queryset
+
 
     @property
     def count_blank_no(self):

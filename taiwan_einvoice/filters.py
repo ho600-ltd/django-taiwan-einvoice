@@ -3,7 +3,16 @@ import rest_framework_filters as filters
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import SellerInvoiceTrackNo
+from taiwan_einvoice.models import TurnkeyWeb, SellerInvoiceTrackNo
+
+
+class TurnkeyWebFilter(filters.FilterSet):
+    class Meta:
+        model = TurnkeyWeb
+        fields = {
+            'on_working': ('exact', ),
+        }
+
 
 
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
@@ -21,10 +30,6 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
 
     def filter_now_use(self, queryset, name, value):
         if value == 'true':
-            _now = now()
-            ids = []
-            for sitn in queryset.filter(begin_time__lte=_now, end_time__gt=_now):
-                if sitn.count_blank_no > 0:
-                    ids.append(sitn.id)
-            queryset = queryset.filter(id__in=ids)
-        return queryset
+            return SellerInvoiceTrackNo.filter_now_use_sitns()
+        else:
+            return queryset

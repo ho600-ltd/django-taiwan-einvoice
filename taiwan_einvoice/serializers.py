@@ -63,6 +63,7 @@ class LegalEntitySerializer(ModelSerializer):
 class SellerSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:seller-detail", lookup_field='pk')
+    legal_entity = LegalEntitySerializer()
 
     class Meta:
         model = Seller
@@ -82,6 +83,9 @@ class SellerSerializer(ModelSerializer):
 class TurnkeyWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-detail", lookup_field='pk')
+    seller = SellerSerializer()
+    count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
+    count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
 
     class Meta:
         model = TurnkeyWeb
