@@ -127,6 +127,7 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
 
     class Meta:
         model = EInvoice

@@ -1,4 +1,7 @@
 import pytz, datetime
+from base64 import b64encode, b64decode
+from binascii import unhexlify 
+from Crypto.Cipher import AES
 from hashlib import sha1
 from random import random, randint
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -8,6 +11,22 @@ from django.db.models import Max
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+
+def _pad(byte_array):
+    BLOCK_SIZE = 16
+    pad_len = BLOCK_SIZE - len(byte_array) % BLOCK_SIZE
+    return byte_array + (bytes([pad_len]) * pad_len)
+
+def _unpad(byte_array):
+    last_byte = byte_array[-1]
+    return byte_array[0:-last_byte]
+
+def qrcode_aes_encrypt(key, plain_text):
+    iv = b64decode('Dt8lyToo17X/XkXaQvihuA==')
+    key = unhexlify(key)
+    cipher = AES.new(key, mode=AES.MODE_CBC, IV=iv)
+    pad_string = _pad(plain_text.encode('utf-8'))
+    return b64encode(cipher.encrypt(pad_string)).decode('utf-8')
 
 KEY_CODE_SET = [
     'C', 'W', 'B', 'E', 'R', 'T', 'Y','6', '7', '8',
@@ -291,6 +310,7 @@ class EInvoice(models.Model):
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
     generate_batch_no = models.CharField(max_length=40, default='')
+    generate_batch_no_sha1 = models.CharField(max_length=10, default='')
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
@@ -324,6 +344,67 @@ class EInvoice(models.Model):
         unique_together = (('seller_invoice_track_no', 'track', 'no'), )
     
 
+    @property
+    def escpos_print_scripts(self):
+        def _hex_amount(amount):
+            a = hex(int(amount))[2:]
+            return '0' * (8 - len(a)) + a
+        details = self.details
+        amounts = self.amounts
+        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
+        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        end_month = begin_month + 1
+        generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
+        barcode_str = "{}{}{}{}".format(
+            cwmk_year,
+            end_month,
+            self.track_no,
+            self.random_number,
+        )
+        sales_amount_str = _hex_amount(amounts['SalesAmount'])
+        total_amount_str = _hex_amount(amounts['TotalAmount'])
+        _d = {
+            "meet_to_tw_einvoice_standard": True,
+            "track_no": self.track_no,
+            "generate_time": generate_time.strftime('%Y-%m-%d %H:%M:%S%z'),
+            "width": "58mm",
+            "content": [
+                {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}年{}-{}月".format(cwmk_year, begin_month, end_month)},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'))},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
+                    "text": " 賣方 {} {}".format(self.seller_identifier,
+                                                      "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": barcode_str},
+                {"type": "qrcode_pair", "center": False,
+                    "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
+                        track_no=self.track_no,
+                        year_m_d="{}{}".format(cwmk_year, generate_time.strftime('%m%d')),
+                        random_number=self.random_number,
+                        sales_amount=sales_amount_str,
+                        total_amount=total_amount_str,
+                        buyer_identifier="00000000" if '0000000000' == self.buyer_identifier else self.buyer_identifier,
+                        seller_identifier=self.seller_identifier,
+                        generate_batch_no_sha1=self.generate_batch_no_sha1,
+                        qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
+                        product_in_einvoice_count=len(details[:5]),
+                        product_in_order_count=len(details),
+                        codepage='1' if 'utf-8' else '0',
+                    ),
+                    "qr2_str": "**" + ":".join(
+                        ["{}:{}:{}".format(_p['Description'].replace(":", "-"), _p['Quantity'], _p['UnitPrice'])
+                            for _p in details[:5]]),
+                },
+            ],
+        }
+        return _d
+
+
     def set_print_mark_true(self):
         if False == self.print_mark:
             self.print_mark = True
@@ -354,6 +435,7 @@ class EInvoice(models.Model):
                                                            random_number=random_number).exists():
                         break
             self.random_number = random_number
+            self.generate_batch_no_sha1 = sha1(self.generate_batch_no.encode('utf-8')).hexdigest()[:10]
             super().save(*args, **kwargs)
         
 
