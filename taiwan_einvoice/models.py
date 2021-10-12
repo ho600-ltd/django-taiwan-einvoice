@@ -1,6 +1,8 @@
 import pytz, datetime
 from hashlib import sha1
 from random import random, randint
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Max
 from django.utils.timezone import now
@@ -289,6 +291,10 @@ class EInvoice(models.Model):
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
     generate_batch_no = models.CharField(max_length=40, default='')
+
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
 
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     seller_name = models.CharField(max_length=60, default='', db_index=True)
