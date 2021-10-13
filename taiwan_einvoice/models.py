@@ -8,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Max
+from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -292,6 +293,7 @@ class SellerInvoiceTrackNo(models.Model):
 
 class EInvoice(models.Model):
     only_fields_can_update = ['print_mark']
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
     track = models.CharField(max_length=2, db_index=True)
