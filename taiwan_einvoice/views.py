@@ -1,11 +1,18 @@
+import json
 from django.http import Http404
 from django.shortcuts import render
 from django.utils.timezone import now
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from taiwan_einvoice.permissions import IsSuperUser
-from taiwan_einvoice.renderers import TEBrowsableAPIRenderer
+from taiwan_einvoice.renderers import (
+    TEBrowsableAPIRenderer,
+    ESCPOSWebHtmlRenderer,
+)
 from taiwan_einvoice.models import (
     ESCPOSWeb,
     LegalEntity,
@@ -54,7 +61,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
 
@@ -108,6 +115,16 @@ class EInvoiceModelViewSet(ModelViewSet):
     serializer_class = EInvoiceSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
+
+
+    @action(detail=True, methods=['get'])
+    def get_escpos_print_scripts(self, request, pk=None):
+        ei = self.get_object()
+        if ei:
+            return Response(ei.escpos_print_scripts)
+        else:
+            return Response({"error_message": ""},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 

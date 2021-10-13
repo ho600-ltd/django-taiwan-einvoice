@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-28 05:50+0800\n"
+"POT-Creation-Date: 2021-10-13 18:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,3 +35,94 @@ msgstr "特種稅額"
 
 msgid "Taiwan EInvoice Api"
 msgstr "臺灣電子發票 Api"
+
+msgid "Taiwan E-Invoice Management"
+msgstr "臺灣電子發票管理"
+
+msgid "Toggle navigation"
+msgstr "導引切換"
+
+msgid "Permissions"
+msgstr "權限"
+
+msgid "ESC/POS Printer"
+msgstr "發票機"
+
+msgid "Track No."
+msgstr "字軌"
+
+msgid "E-Invoice"
+msgstr "電子發票"
+
+msgid "Cancel EI."
+msgstr "作廢發票"
+
+msgid "Audit"
+msgstr "查驗"
+
+msgid "Timezone"
+msgstr "時區"
+
+msgid "Asia/Taipei"
+msgstr "亞洲/臺北"
+
+msgid "Logout"
+msgstr "登出"
+
+msgid "change language to your choice"
+msgstr "切換語言"
+
+msgid "Change"
+msgstr "切換"
+
+msgid "Close"
+msgstr "關閉"
+
+#, python-format
+msgid ""
+"\n"
+"            Deploy Date: %(build_date)s\n"
+"            Deploy Number: %(build_number)s\n"
+"            Build Version: %(build_version)s"
+msgstr ""
+"\n"
+"            發佈日期: %(build_date)s\n"
+"            發佈編號: %(build_number)s\n"
+"            編譯版本: %(build_version)s"
+
+msgid "System Build Version"
+msgstr "系統編譯版面"
+
+msgid "Create time later than"
+msgstr "創建時間晚於"
+
+msgid "Create time earlier than"
+msgstr "創建時間早於"
+
+msgid "Update time later than"
+msgstr "更新時間大於"
+
+msgid "Update time earlier than"
+msgstr "更新時間小於"
+
+msgid "Name contains"
+msgstr "名稱包含"
+
+msgid "Search"
+msgstr "搜尋"
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr "共 %(total_count)s 筆"
+
+msgid "No."
+msgstr "No."
+
+msgid "Name"
+msgstr "名稱"
+
+msgid "Slug"
+msgstr "代號"
+
+msgid "Hash Key"
+msgstr "驗證金錀"

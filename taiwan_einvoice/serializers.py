@@ -25,6 +25,7 @@ from taiwan_einvoice.models import (
 class ESCPOSWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweb-detail", lookup_field='pk')
+    mask_hash_key = CharField(read_only=True)
 
     class Meta:
         model = ESCPOSWeb
@@ -54,16 +55,16 @@ class LegalEntitySerializer(ModelSerializer):
     def get_queryset(self):
         request = self.context.get('request', None)
         if request and request.user and request.user.is_superuser:
-            return ESCPOSWeb.objects.all().order_by('-id')
+            return LegalEntity.objects.all().order_by('-id')
         else:
-            return ESCPOSWeb.objects.none()
+            return LegalEntity.objects.none()
 
 
 
 class SellerSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:seller-detail", lookup_field='pk')
-    legal_entity = LegalEntitySerializer()
+    legal_entity_dict = LegalEntitySerializer(source='legal_entity', read_only=True)
 
     class Meta:
         model = Seller
@@ -83,7 +84,7 @@ class SellerSerializer(ModelSerializer):
 class TurnkeyWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-detail", lookup_field='pk')
-    seller = SellerSerializer()
+    seller_dict = SellerSerializer(source='seller', read_only=True)
     count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
     count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
 
@@ -105,6 +106,7 @@ class TurnkeyWebSerializer(ModelSerializer):
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
+    turnkey_web_dict = TurnkeyWebSerializer(source='turnkey_web', read_only=True)
     type__display = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
 
@@ -126,6 +128,7 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
 
     class Meta:
         model = EInvoice
