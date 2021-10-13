@@ -29,6 +29,10 @@ setup(name='taiwan_einvoice',
                     },
       package_data={
                     'taiwan_einvoice': [
+                        'static/taiwan_einvoice/assets/*.css',
+                        'static/taiwan_einvoice/assets/*.js',
+                        'static/taiwan_einvoice/*.css',
+                        'static/taiwan_einvoice/*.js',
                         'templates/taiwan_einvoice/*.html',
                         'locale/zh_Hant/LC_MESSAGES/*.po',
                        ],
