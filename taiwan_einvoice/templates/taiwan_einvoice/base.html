@@ -1,0 +1,175 @@
+{% load static %}
+{% load i18n %}
+{% load compress %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>{% trans "Taiwan E-Invoice Management" %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css">
+    {% compress css %}
+        <link rel="stylesheet" href="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Navigation-Clean.css" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{{ settings.STATIC_URL }}taiwan_einvoice/assets/bootstrap-multiselect.css" type="text/css" charset="utf-8">
+    {% endcompress %}
+    {% block css %}
+    {% endblock %}
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
+    {% block js %}
+    {% endblock %}
+    <script type="text/javascript">
+        var DEBUG = "{% if settings.DEBUG %}true{% endif %}";
+        var BUGPAGE_URL = "{% url 'ho600_lib-index' %}bugpage/";
+        $(function(){
+            $('.language_form input[type=submit]').hide();
+            $('.language_form select[name=language]').change(function() {
+                $.cookie('django_language', $(this).val(), {expires: 365, path: '/'});
+                $(this).parent().find('input[type=submit]').show();
+                $(this).parents('.language_form').submit();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div>
+        <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean">
+            <div class="container">
+                <a class="navbar-brand" href="#"
+                    style="color: {% ifequal settings.PRODUCTION_TYPE "online" %}#054C24{% else %}#BD0000{% endifequal %};">
+                    {% trans "Taiwan E-Invoice Management" %}
+                </a>
+                <button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1">
+                    <span class="sr-only">{% trans "Toggle navigation" %}</span><span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse"
+                    id="navcol-1">
+                    <ul class="nav navbar-nav ml-auto" id="nav">
+                        <li class="nav-item nav_permission" role="presentation">
+                            <a class="nav-link" href="#">{% trans "Permissions" %}</a>
+                        </li>
+                        <li class="nav-item nav_escposweb" role="presentation">
+                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
+                        </li>
+                        <li class="nav-item nav_sellerinvoicetrackno" role="presentation">
+                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-list' %}?format=html">{% trans "Track No." %}</a>
+                        </li>
+                        <li class="nav-item nav_einvoice" role="presentation">
+                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?format=html">{% trans "E-Invoice" %}</a>
+                        </li>
+                        <li class="nav-item nav_canceleinvoice" role="presentation">
+                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}?format=html">{% trans "Cancel EI." %}</a>
+                        </li>
+                        <li class="nav-item nav_audit" role="presentation">
+                            <a class="nav-link" href="#">{% trans "Audit" %}</a>
+                        </li>
+                        <li class="dropdown nav-item">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{{ user.last_name }}{{ user.first_name }}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <span role="presentation" class="dropdown-item">{{ user.email }}</span>
+                                    <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
+                                        {% trans "Timezone" %}: {% trans "Asia/Taipei" %}
+                                    </span>
+                                <a role="presentation" class="dropdown-item" href="{{ settings.LOGIN_URL }}logout/">{% trans "Logout" %}</a>
+                            </div>
+                        </li>
+                        <li class="nav-item nav_change_language" role="presentation">
+                            <form class="language_form form-inline" action='{% url "set_language" %}' method="POST">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <input name="next" type="hidden" value="{{ request.META.PATH_INFO }}?{{ request.META.QUERY_STRING }}" />
+                                    <select name="language" class="form-control">
+                                        {% get_available_languages as languages %}
+                                        {% for code, name in languages %}
+                                            <option {% ifequal code LANGUAGE_CODE %}selected{% endifequal %}
+                                                value="{{ code }}">{{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <input class="btn btn-default" type="submit" title="{% trans 'change language to your choice' %}" value='{% trans "Change" %}' />
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="container" style="margin-top:72px;">
+        {% block body %}{% endblock %}
+    </div>
+
+    {% block modals %}
+
+    {% endblock %}
+
+    <div class="modal" id="danger_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-danger"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="success_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-success"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="error_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-danger"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div title='{% blocktrans with build_date=settings.BUILD_DATE build_number=settings.BUILD_NUMBER build_version=settings.VERSION %}
+            Deploy Date: {{ build_date }}
+            Deploy Number: {{ build_number }}
+            Build Version: {{ build_version }}{% endblocktrans %}
+            '>
+            {% trans "System Build Version" %}:
+            {{ settings.BUILD_DATE }}-{{ settings.BUILD_NUMBER }}-{{ settings.VERSION }}
+        </div>
+    </div>
+
+</body>
+
+</html>

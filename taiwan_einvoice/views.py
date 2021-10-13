@@ -9,7 +9,10 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from taiwan_einvoice.permissions import IsSuperUser
-from taiwan_einvoice.renderers import TEBrowsableAPIRenderer
+from taiwan_einvoice.renderers import (
+    TEBrowsableAPIRenderer,
+    ESCPOSWebHtmlRenderer,
+)
 from taiwan_einvoice.models import (
     ESCPOSWeb,
     LegalEntity,
@@ -58,7 +61,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
 

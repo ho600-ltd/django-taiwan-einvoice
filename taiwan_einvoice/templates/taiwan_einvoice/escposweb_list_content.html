@@ -1,0 +1,28 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="17%">{% trans "No." %}</th>
+            <th width="17%">{% trans "Name" %}</th>
+            <th width="18%">{% trans "Slug" %}</th>
+            <th width="18%">{% trans "Hash Key" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for escposweb in data.results %}
+            <tr>
+                <td></td>
+                <td>{{ escposweb.name }}</td>
+                <td>{{ escposweb.slug }}</td>
+                <td>{{ escposweb.mask_hash_key }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

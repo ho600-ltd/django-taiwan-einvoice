@@ -25,6 +25,7 @@ from taiwan_einvoice.models import (
 class ESCPOSWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweb-detail", lookup_field='pk')
+    mask_hash_key = CharField(read_only=True)
 
     class Meta:
         model = ESCPOSWeb

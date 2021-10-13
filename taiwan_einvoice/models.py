@@ -61,6 +61,11 @@ class ESCPOSWeb(models.Model):
 
 
 
+    @property
+    def mask_hash_key(self):
+        return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+
+
     def verify_token_auth(self, seed, verify_value):
         if self.escposwebconnectionlog_set.filter(seed=seed).exists():
             return False
