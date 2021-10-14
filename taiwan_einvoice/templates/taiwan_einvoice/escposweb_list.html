@@ -12,10 +12,6 @@
 
 {% block body %}
 
-{% if user.is_authenticated %}
-    <input type="hidden" name="owner" value="{{ user.id }}">
-{% endif %}
-
 <div class="form_container" id="id_search_options">
     <form method="GET" action="./" onsubmit="return false;">
         <input type='hidden' name='format' value='html' />
