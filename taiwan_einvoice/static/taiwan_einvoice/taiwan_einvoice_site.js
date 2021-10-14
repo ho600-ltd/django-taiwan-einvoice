@@ -97,6 +97,19 @@ $(function () {
         $modal.modal('show');
     };
 
+
+    TAIWAN_EINVOICE_SITE.prototype.choose_all_check_in_the_same_td = function($self) {
+        return function () {
+            var $i = $(this);
+            var $table = $i.parents('table');
+            var field = $i.parents('th').attr('field');
+            $('td[field='+field+']', $table).each(function(){
+                $('td[field="'+field+'"] input', $(this).parents('tr')).prop('checked', $i.prop('checked'));
+            });
+        };
+    };
+
+
     TAIWAN_EINVOICE_SITE.prototype.after_document_ready = function () {
         var $self = this;
         $('.datetime').each($self.convert_class_datetime($self));
@@ -129,6 +142,18 @@ $(function () {
             var update_time__lt_time_str = convert_iso8601_time_str_to_time_str(update_time__lt_time);
             $("input[name='update_time__lt']").val(update_time__lt_time_str);
         }
+        var generate_time__gte_param = url.searchParams.get('generate_time__gte');
+        if (generate_time__gte_param) {
+            var generate_time__gte_time = new Date(generate_time__gte_param);
+            var generate_time__gte_time_str = convert_iso8601_time_str_to_time_str(generate_time__gte_time);
+            $("input[name='generate_time__gte']").val(generate_time__gte_time_str);
+        }
+        var generate_time__lt_param = url.searchParams.get('generate_time__lt');
+        if (generate_time__lt_param) {
+            var generate_time__lt_time = new Date(generate_time__lt_param);
+            var generate_time__lt_time_str = convert_iso8601_time_str_to_time_str(generate_time__lt_time);
+            $("input[name='generate_time__lt']").val(generate_time__lt_time_str);
+        }
         var name__icontains_param = url.searchParams.get('name__icontains');
         if (name__icontains_param) {
             $("input[name='name__icontains']").val(name__icontains_param);
@@ -137,12 +162,27 @@ $(function () {
         if (slug__icontains_param) {
             $("input[name='slug__icontains']").val(slug__icontains_param);
         }
+        var track_no__icontains_param = url.searchParams.get('track_no__icontains');
+        if (track_no__icontains_param) {
+            $("input[name='track_no__icontains']").val(track_no__icontains_param);
+        }
+        var any_words__icontains_param = url.searchParams.get('any_words__icontains');
+        if (any_words__icontains_param) {
+            $("input[name='any_words__icontains']").val(any_words__icontains_param);
+        }
+        var details__description__icontains_param = url.searchParams.get('details__description__icontains');
+        if (details__description__icontains_param) {
+            $("input[name='details__description__icontains']").val(details__description__icontains_param);
+        }
 
         $('#create_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
         $('#create_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
         $('#update_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
         $('#update_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
+        $('#generate_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
+        $('#generate_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
 
+        $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
     }
 
     TAIWAN_EINVOICE_SITE.prototype.rest_error = function ($self, dialog_id) {

@@ -21,6 +21,14 @@ from taiwan_einvoice.models import (
 )
 
 
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id', 'last_name', 'first_name', 'email', 'username',
+        )
+
+
 
 class ESCPOSWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
@@ -116,6 +124,7 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     turnkey_web_dict = TurnkeyWebSerializer(source='turnkey_web', read_only=True)
     type__display = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
+    year_month_range = CharField(read_only=True)
 
     class Meta:
         model = SellerInvoiceTrackNo
@@ -135,7 +144,10 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    creator_dict = UserSerializer(source='creator', read_only=True)
     seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
+    track_no = CharField(read_only=True)
+    track_no_ = CharField(read_only=True)
 
     class Meta:
         model = EInvoice

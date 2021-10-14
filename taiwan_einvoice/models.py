@@ -234,6 +234,12 @@ class SellerInvoiceTrackNo(models.Model):
         return self.get_type_display()
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    @property
+    def year_month_range(self):
+        cwmk_year = self.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
+        begin_month = self.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        end_month = begin_month + 1
+        return "{}年{}-{}月".format(cwmk_year, begin_month, end_month)
     track = models.CharField(max_length=2)
     begin_no = models.IntegerField()
     end_no = models.IntegerField()
@@ -306,6 +312,9 @@ class EInvoice(models.Model):
     @property
     def track_no(self):
         return "{}{}".format(self.track, self.no)
+    @property
+    def track_no_(self):
+        return "{}-{}".format(self.track, self.no)
     npoban = models.CharField(max_length=7, default='', db_index=True)
     @property
     def donate_mark(self):
@@ -378,7 +387,7 @@ class EInvoice(models.Model):
             "content": [
                 {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}年{}-{}月".format(cwmk_year, begin_month, end_month)},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'))},

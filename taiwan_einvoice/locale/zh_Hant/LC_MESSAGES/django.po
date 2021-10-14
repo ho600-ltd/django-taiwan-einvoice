@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-14 13:31+0800\n"
+"POT-Creation-Date: 2021-10-14 15:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,12 +102,23 @@ msgstr "開立時間早於"
 msgid "Track No. contains"
 msgstr "字軌號碼包含"
 
+msgctxt "taiwan_einvoice"
+msgid "Product Details contains"
+msgstr "商品明細包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Any Words(Exclude Track No., Product Details) contains"
+msgstr "任何文數字欄位(除字軌號碼、商品明細外)包含"
+
 msgid "Search"
 msgstr "搜尋"
 
 #, python-format
 msgid "%(total_count)s records"
 msgstr "共 %(total_count)s 筆"
+
+msgid "Choose"
+msgstr "勾選"
 
 msgid "No."
 msgstr "No."
@@ -121,6 +132,9 @@ msgstr "稅額類別"
 
 msgid "Total Amount"
 msgstr "總金額"
+
+msgid "Footprint No."
+msgstr "追蹤編號"
 
 msgctxt "taiwan_einvoice"
 msgid "Creator"

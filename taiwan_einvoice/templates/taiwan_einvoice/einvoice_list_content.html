@@ -1,0 +1,43 @@
+{% load i18n %}{% load tz %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%" field="check" class="print_einvoice">
+                <input type="checkbox" class="choose_all_check_in_the_same_td" />
+                {% trans "Choose" %}
+            </th>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="15%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+            <th width="15%">{% trans "Track No." %}</th>
+            <th width="10%">{% trans "Tax Type" %}</th>
+            <th width="10%">{% trans "Total Amount" %}</th>
+            <th width="15%">{% trans "Footprint No." %}</th>
+            <th width="15%">{% trans "Creator" context "taiwan_einvoice" %}</th>
+            <th width="20%">{% trans "Generate Time" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for einvoice in data.results %}
+            <tr>
+                <td field="check" class="print_einvoice">
+                    <input type="checkbox" name="print_einvoice" />
+                </td>
+                <td>{{ forloop.counter }}.</td>
+                <td>{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
+                <td>{{ einvoice.track_no_ }}</td>
+                <td>{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
+                <td>{{ einvoice.amounts.TotalAmount }}</td>
+                <td>{{ einvoice.generate_batch_no }}</td>
+                <td>{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
+                <td class="datetime" value="{{ einvoice.generate_time }}" format="Y-m-d H:i:s"></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

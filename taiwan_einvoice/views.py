@@ -38,6 +38,7 @@ from taiwan_einvoice.filters import (
     ESCPOSWebFilter,
     TurnkeyWebFilter,
     SellerInvoiceTrackNoFilter,
+    EInvoiceFilter,
 )
 
 
@@ -116,6 +117,7 @@ class EInvoiceModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
+    filter_class = EInvoiceFilter
     renderer_classes = (EInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
