@@ -12,6 +12,7 @@ from taiwan_einvoice.permissions import IsSuperUser
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     ESCPOSWebHtmlRenderer,
+    EInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     ESCPOSWeb,
@@ -34,8 +35,10 @@ from taiwan_einvoice.serializers import (
     CancelEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
+    ESCPOSWebFilter,
     TurnkeyWebFilter,
     SellerInvoiceTrackNoFilter,
+    EInvoiceFilter,
 )
 
 
@@ -61,6 +64,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
+    filter_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
@@ -113,7 +117,8 @@ class EInvoiceModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    filter_class = EInvoiceFilter
+    renderer_classes = (EInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
 

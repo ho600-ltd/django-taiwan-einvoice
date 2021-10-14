@@ -2,26 +2,15 @@
 {% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
 
 {% block css %}
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css" />
 {% endblock %}
 
 {% block js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
-    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
-    {% if not user.is_authenticated %}
-        <script>
-            window.location.href = "{{ login_url }}";
-        </script>
-    {% endif %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/escposweb_list.js"></script>
+    {% endcompress %}
 {% endblock %}
 
 {% block body %}
-
-{% if user.is_authenticated %}
-    <input type="hidden" name="owner" value="{{ user.id }}">
-{% endif %}
 
 <div class="form_container" id="id_search_options">
     <form method="GET" action="./" onsubmit="return false;">
@@ -30,67 +19,19 @@
         <div class="row">
             <div class="col-sm-12 col-md-6">
                 <div class="form-group">
-                    <label for="create_time__gte">{% trans "Create time later than" %}</label>
-                    <div class="input-group date" id="create_time__gte" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
-                            name="create_time__gte" id="id_create_time__gte" />
-                        <div class="input-group-append" data-target="#create_time__gte" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12 col-md-6">
-                <div class="form-group">
-                    <label for="create_time__lt">{% trans "Create time earlier than" %}</label>
-                    <div class="input-group date" id="create_time__lt" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
-                            name="create_time__lt" id="id_create_time__lt" />
-                        <div class="input-group-append" data-target="#create_time__lt" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-12 col-md-6">
-                <div class="form-group">
-                    <label for="update_time__gte">{% trans "Update time later than" %}</label>
-                    <div class="input-group date" id="update_time__gte" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#update_time__gte"
-                            name="update_time__gte" id="id_update_time__gte" />
-                        <div class="input-group-append" data-target="#update_time__gte" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12 col-md-6">
-                <div class="form-group">
-                    <label for="update_time__lt">{% trans "Update time earlier than" %}</label>
-                    <div class="input-group date" id="update_time__lt" data-target-input="nearest">
-                        <input type="text" class="form-control datetimepicker-input" data-target="#update_time__lt"
-                            name="update_time__lt" id="id_update_time__lt" />
-                        <div class="input-group-append" data-target="#update_time__lt" data-toggle="datetimepicker">
-                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-12 col-md-6">
-                <div class="form-group">
                     <label for="name__icontains">{% trans "Name contains" %}</label>
-                    <div class="input-group date" id="name__icontains" data-target-input="nearest">
+                    <div class="input-group" id="name__icontains" data-target-input="nearest">
                         <input type="text" class="form-control" name="name__icontains" id="id_name__icontains" />
                     </div>
                 </div>
             </div>
             <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="slug__icontains">{% trans "Slug contains" %}</label>
+                    <div class="input-group" id="slug__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                    </div>
+                </div>
             </div>
         </div>
 

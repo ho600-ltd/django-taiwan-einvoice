@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-13 18:38+0800\n"
+"POT-Creation-Date: 2021-10-14 15:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,7 +49,7 @@ msgid "ESC/POS Printer"
 msgstr "發票機"
 
 msgid "Track No."
-msgstr "字軌"
+msgstr "字軌號碼"
 
 msgid "E-Invoice"
 msgstr "電子發票"
@@ -93,20 +93,22 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
-msgid "Create time later than"
-msgstr "創建時間晚於"
+msgid "Generate time later than"
+msgstr "開立時間晚於"
 
-msgid "Create time earlier than"
-msgstr "創建時間早於"
+msgid "Generate time earlier than"
+msgstr "開立時間早於"
 
-msgid "Update time later than"
-msgstr "更新時間大於"
+msgid "Track No. contains"
+msgstr "字軌號碼包含"
 
-msgid "Update time earlier than"
-msgstr "更新時間小於"
+msgctxt "taiwan_einvoice"
+msgid "Product Details contains"
+msgstr "商品明細包含"
 
-msgid "Name contains"
-msgstr "名稱包含"
+msgctxt "taiwan_einvoice"
+msgid "Any Words(Exclude Track No., Product Details) contains"
+msgstr "任何文數字欄位(除字軌號碼、商品明細外)包含"
 
 msgid "Search"
 msgstr "搜尋"
@@ -115,8 +117,37 @@ msgstr "搜尋"
 msgid "%(total_count)s records"
 msgstr "共 %(total_count)s 筆"
 
+msgid "Choose"
+msgstr "勾選"
+
 msgid "No."
 msgstr "No."
+
+msgctxt "taiwan_einvoice"
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Tax Type"
+msgstr "稅額類別"
+
+msgid "Total Amount"
+msgstr "總金額"
+
+msgid "Footprint No."
+msgstr "追蹤編號"
+
+msgctxt "taiwan_einvoice"
+msgid "Creator"
+msgstr "開立者"
+
+msgid "Generate Time"
+msgstr "開立時間"
+
+msgid "Name contains"
+msgstr "名稱包含"
+
+msgid "Slug contains"
+msgstr "代號包含"
 
 msgid "Name"
 msgstr "名稱"
@@ -126,3 +157,13 @@ msgstr "代號"
 
 msgid "Hash Key"
 msgstr "驗證金錀"
+
+msgctxt "taiwan_einvoice:escposweb"
+msgid "Usage"
+msgstr "使用狀態"
+
+msgid "Button"
+msgstr "按鈕"
+
+msgid "Set default"
+msgstr "設為預設值"

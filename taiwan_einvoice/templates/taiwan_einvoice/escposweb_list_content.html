@@ -9,19 +9,27 @@
 <table class="table">
     <thead>
         <tr>
-            <th width="17%">{% trans "No." %}</th>
-            <th width="17%">{% trans "Name" %}</th>
-            <th width="18%">{% trans "Slug" %}</th>
-            <th width="18%">{% trans "Hash Key" %}</th>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="15%">{% trans "Name" %}</th>
+            <th width="15%">{% trans "Slug" %}</th>
+            <th width="25%">{% trans "Hash Key" %}</th>
+            <th width="15%">{% trans "Usage" context "taiwan_einvoice:escposweb" %}</th>
+            <th width="10%">{% trans "Button" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for escposweb in data.results %}
-            <tr>
-                <td></td>
-                <td>{{ escposweb.name }}</td>
+            <tr escposweb_id="{{ escposweb.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="name">{{ escposweb.name }}</td>
                 <td>{{ escposweb.slug }}</td>
                 <td>{{ escposweb.mask_hash_key }}</td>
+                <td field="usage"></td>
+                <td>
+                    <button class="btn btn-primary set_default_escposweb_printer">
+                        {% trans "Set default" %}
+                    </button>
+                </td>
             </tr>
         {% endfor %}
     </tbody>

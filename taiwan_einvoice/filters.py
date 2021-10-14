@@ -1,9 +1,21 @@
+import re
 import rest_framework_filters as filters
 
+from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TurnkeyWeb, SellerInvoiceTrackNo
+from taiwan_einvoice.models import ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice
+
+
+class ESCPOSWebFilter(filters.FilterSet):
+    class Meta:
+        model = ESCPOSWeb
+        fields = {
+            'name': ('exact', 'iexact', 'contains', 'icontains'),
+            'slug': ('exact', 'iexact', 'contains', 'icontains'),
+        }
+
 
 
 class TurnkeyWebFilter(filters.FilterSet):
@@ -33,3 +45,83 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return SellerInvoiceTrackNo.filter_now_use_sitns()
         else:
             return queryset
+
+
+
+RE_ALPHABET = re.compile('([a-zA-Z]+)', flags=re.I)
+RE_DIGIT = re.compile('([0-9]+)')
+class EInvoiceFilter(filters.FilterSet):
+    filter_any_words_in_those_fields = (
+        'creator__id',
+        'creator__first_name',
+        'npoban',
+        'random_number',
+        'generate_batch_no',
+        'generate_batch_no_sha1',
+        'seller_identifier',
+        'seller_name',
+        'buyer_identifier',
+        'buyer_name',
+    )
+    filter_product_descriptions = (
+        'details__0__Description',
+        'details__1__Description',
+        'details__2__Description',
+        'details__3__Description',
+        'details__4__Description',
+        'details__5__Description',
+        'details__6__Description',
+        'details__7__Description',
+        'details__8__Description',
+        'details__9__Description',
+    )
+    track_no__icontains = filters.CharFilter(method='filter_track_no__icontains')
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+    details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')
+
+
+
+    class Meta:
+        model = EInvoice
+        fields = {
+            'generate_time': ('gte', 'lt', ),
+        }
+
+
+    def filter_track_no__icontains(self, queryset, name, value):
+        if value:
+            alphabet = ''
+            digit = ''
+            re_alphabet_re = RE_ALPHABET.search(value)
+            if re_alphabet_re:
+                alphabet = re_alphabet_re.groups()[0]
+            re_digit_re = RE_DIGIT.search(value)
+            if re_digit_re:
+                digit = re_digit_re.groups()[0]
+
+            if alphabet and digit:
+                queryset = queryset.filter(track__iendswith=alphabet, no__startswith=digit)
+            else:
+                if digit:
+                    queryset = queryset.filter(no__contains=digit)
+                if alphabet:
+                    queryset = queryset.filter(track__icontains=alphabet)
+        return queryset
+
+
+    def filter_any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
+    def filter_details__description__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_product_descriptions]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
