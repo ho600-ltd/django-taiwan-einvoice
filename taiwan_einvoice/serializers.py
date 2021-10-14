@@ -27,9 +27,16 @@ class ESCPOSWebSerializer(ModelSerializer):
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweb-detail", lookup_field='pk')
     mask_hash_key = CharField(read_only=True)
 
+
+
     class Meta:
         model = ESCPOSWeb
-        fields = '__all__'
+        fields = (
+            'id', 'resource_uri', 'mask_hash_key', 'name', 'slug', 'hash_key',
+        )
+        extra_kwargs = {
+            'hash_key': {'write_only': True},
+        }
 
 
 
