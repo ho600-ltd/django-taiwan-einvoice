@@ -1,0 +1,33 @@
+.total_count_row {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.pagination_row {
+    display: flex;
+    justify-content: center;
+}
+
+.form_container {
+    width: 100%;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.form_container form {
+    width: 100%;
+}
+
+.search_button_row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.fixed-top {
+    background-color: rgba(255,255,255,0.8);
+}
+
+.multiselect-container {
+    z-index: 1031;
+}

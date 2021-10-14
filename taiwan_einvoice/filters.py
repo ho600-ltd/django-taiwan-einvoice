@@ -3,7 +3,17 @@ import rest_framework_filters as filters
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TurnkeyWeb, SellerInvoiceTrackNo
+from taiwan_einvoice.models import ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo
+
+
+class ESCPOSWebFilter(filters.FilterSet):
+    class Meta:
+        model = ESCPOSWeb
+        fields = {
+            'name': ('exact', 'iexact', 'contains', 'icontains'),
+            'slug': ('exact', 'iexact', 'contains', 'icontains'),
+        }
+
 
 
 class TurnkeyWebFilter(filters.FilterSet):

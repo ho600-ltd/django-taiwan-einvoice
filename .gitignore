@@ -4,3 +4,4 @@ assets/
 docs/_build
 .py3env/
 *.pyc
+*.mo
