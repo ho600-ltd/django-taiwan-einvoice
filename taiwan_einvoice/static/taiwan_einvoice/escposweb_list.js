@@ -18,12 +18,13 @@ $(function () {
         window.location.href = result_url;
     });
 
+    var usage_message = gettext('Default ESC/POS Printer');
     var cookie_name = 'default_escposweb_printer';
     var show_default_escposweb_printer = function () {
-        var default_escposweb_printer_id = $.cookie(cookie_name);
+        var default_escposweb_printer_id_name = $.cookie(cookie_name);
         $('table tbody td[field=usage]').text('');
-        if (default_escposweb_printer_id) {
-            var usage_message = gettext('Default ESC/POS Printer');
+        if (default_escposweb_printer_id_name) {
+            var default_escposweb_printer_id = default_escposweb_printer_id_name.split(':')[0];
             $('table tbody tr[escposweb_id='+default_escposweb_printer_id+'] td[field=usage]').text(usage_message);
         };
     };
@@ -33,7 +34,8 @@ $(function () {
         var $btn = $(this);
         var $tr = $btn.parents('tr');
         var default_escposweb_printer_id = $tr.attr('escposweb_id');
-        $.cookie(cookie_name, default_escposweb_printer_id);
+        var default_escposweb_printer_id_name = default_escposweb_printer_id + ':' + $('td[field=name]', $tr).text().replace(/:/g, '%3A');
+        $.cookie(cookie_name, default_escposweb_printer_id_name);
         show_default_escposweb_printer();
     });
 });

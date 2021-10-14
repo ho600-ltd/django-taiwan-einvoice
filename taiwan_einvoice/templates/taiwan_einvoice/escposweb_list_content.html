@@ -21,7 +21,7 @@
         {% for escposweb in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
                 <td>{{ forloop.counter }}.</td>
-                <td>{{ escposweb.name }}</td>
+                <td field="name">{{ escposweb.name }}</td>
                 <td>{{ escposweb.slug }}</td>
                 <td>{{ escposweb.mask_hash_key }}</td>
                 <td field="usage"></td>

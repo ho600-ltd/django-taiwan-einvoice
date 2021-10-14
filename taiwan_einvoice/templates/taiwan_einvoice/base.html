@@ -12,7 +12,7 @@
     <title>{% trans "Taiwan E-Invoice Management" %}</title>
     {% if not user.is_authenticated %}
         <script>
-            window.location.href = "{{ login_url }}";
+            window.location.href = "/";
         </script>
     {% endif %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css">
