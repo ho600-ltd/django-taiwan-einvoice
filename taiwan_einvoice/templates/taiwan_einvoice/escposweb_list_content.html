@@ -18,7 +18,7 @@
     <tbody>
         {% for escposweb in data.results %}
             <tr>
-                <td></td>
+                <td>{{ forloop.counter }}.</td>
                 <td>{{ escposweb.name }}</td>
                 <td>{{ escposweb.slug }}</td>
                 <td>{{ escposweb.mask_hash_key }}</td>
