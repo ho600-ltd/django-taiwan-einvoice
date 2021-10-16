@@ -1,11 +1,11 @@
-import re
+import re, datetime
 import rest_framework_filters as filters
 
 from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice
+from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice
 
 
 class ESCPOSWebFilter(filters.FilterSet):
@@ -50,6 +50,7 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
 
 RE_ALPHABET = re.compile('([a-zA-Z]+)', flags=re.I)
 RE_DIGIT = re.compile('([0-9]+)')
+RE_CODE39_BARCODE = re.compile('^([0-9]{3})([0-1][0-9])([A-Z][A-Z])([0-9]{8})([0-9]{4})$')
 class EInvoiceFilter(filters.FilterSet):
     filter_any_words_in_those_fields = (
         'creator__id',
@@ -76,8 +77,9 @@ class EInvoiceFilter(filters.FilterSet):
         'details__9__Description',
     )
     track_no__icontains = filters.CharFilter(method='filter_track_no__icontains')
-    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
     details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')
+    code39__exact = filters.CharFilter(method='filter_code39__exact')
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
 
 
 
@@ -86,6 +88,23 @@ class EInvoiceFilter(filters.FilterSet):
         fields = {
             'generate_time': ('gte', 'lt', ),
         }
+
+
+    def filter_code39__exact(self, queryset, name, value):
+        code39_barcode_re = RE_CODE39_BARCODE.search(value)
+        if value and not code39_barcode_re:
+            queryset = queryset.none()
+        else:
+            year, month, track, no, random_number = code39_barcode_re.groups()
+            year = int(year) + 1911
+            month = int(month)
+            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIWAN_TIMEZONE)
+            queryset = queryset.filter(seller_invoice_track_no__begin_time__lt=middle_time,
+                                       seller_invoice_track_no__end_time__gt=middle_time,
+                                       track=track,
+                                       no=no,
+                                       random_number=random_number)
+        return queryset
 
 
     def filter_track_no__icontains(self, queryset, name, value):
