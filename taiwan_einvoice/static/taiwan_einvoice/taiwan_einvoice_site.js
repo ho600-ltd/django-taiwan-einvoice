@@ -14,6 +14,7 @@ $(function () {
             5: gettext("May"), 6: gettext("Jun"), 7: gettext("Jul"), 8: gettext("Aug"),
             9: gettext("Sep"), 10: gettext("Oct"), 11: gettext("Nov"), 12: gettext("Dec")
         }
+        this.default_escposweb_printer_cookie_name = 'default_escposweb_printer';
 
         for (var k in configure) {
             this[k] = configure[k];

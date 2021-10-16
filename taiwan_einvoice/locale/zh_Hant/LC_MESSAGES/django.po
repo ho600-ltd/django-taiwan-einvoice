@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-16 14:13+0800\n"
+"POT-Creation-Date: 2021-10-16 17:26+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,11 +93,9 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
-msgid "Generate time later than"
-msgstr "開立時間晚於"
-
-msgid "Generate time earlier than"
-msgstr "開立時間早於"
+msgctxt "taiwan_einvoice"
+msgid "One-dimensional Barcode"
+msgstr "一維條碼"
 
 msgid "Track No. contains"
 msgstr "字軌號碼包含"
@@ -107,22 +105,20 @@ msgid "Product Details contains"
 msgstr "商品明細包含"
 
 msgctxt "taiwan_einvoice"
-msgid "One-dimensional Barcode"
-msgstr "一維條碼"
-
-msgctxt "taiwan_einvoice"
 msgid "Any Words(Exclude Track No., Product Details) contains"
 msgstr "除字軌號碼、商品明細外的其他文數字欄位包含"
+
+msgid "Generate time later than"
+msgstr "開立時間晚於"
+
+msgid "Generate time earlier than"
+msgstr "開立時間早於"
 
 msgid "Search"
 msgstr "搜尋"
 
-#, python-format
-msgid "%(total_count)s records"
-msgstr "共 %(total_count)s 筆"
-
-msgid "Choose"
-msgstr "勾選"
+msgid "Print E-Invoice"
+msgstr "列印電子發票"
 
 msgid "No."
 msgstr "No."
@@ -140,12 +136,38 @@ msgstr "總金額"
 msgid "Footprint No."
 msgstr "追蹤編號"
 
+msgid "Print Mark"
+msgstr "正本已列印"
+
+msgid "Status"
+msgstr "狀態"
+
+msgid "Cancel"
+msgstr "關閉"
+
+msgid "Print"
+msgstr "列印"
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr "共 %(total_count)s 筆"
+
+msgid "Print E-Invoice with \"<span id=\"default_escpos_print_name\"></span>\""
+msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電子發票"
+
+msgid "Choose"
+msgstr "勾選"
+
 msgctxt "taiwan_einvoice"
 msgid "Creator"
 msgstr "開立者"
 
 msgid "Generate Time"
 msgstr "開立時間"
+
+msgctxt "taiwan_einvoice_print_mark"
+msgid "Yes"
+msgstr "已印出"
 
 msgid "Name contains"
 msgstr "名稱包含"
