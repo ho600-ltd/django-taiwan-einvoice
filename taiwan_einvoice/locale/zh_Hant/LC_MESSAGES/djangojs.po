@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-14 15:03+0800\n"
+"POT-Creation-Date: 2021-10-18 16:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+msgctxt "taiwan_einvoice"
+msgid "Error"
+msgstr "錯誤"
+
+msgid "It can not connect ESC/POS Printer Server"
+msgstr "無法連線發票機伺服器"
+
+msgid "Please choose one record at least"
+msgstr "請至少選擇 1 筆紀錄"
+
+msgid "Set up 'Default ESC/POS Printer first'"
+msgstr "請先設定預設的發票機"
 
 msgid "Default ESC/POS Printer"
 msgstr "預設發票機"

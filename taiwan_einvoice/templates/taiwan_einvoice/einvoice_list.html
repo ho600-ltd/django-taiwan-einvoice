@@ -19,6 +19,44 @@
             <div class="row">
                 <div class="col-sm-12 col-md-6">
                     <div class="form-group">
+                        <label for="code39__exact">{% trans "One-dimensional Barcode" context "taiwan_einvoice" %} <i class="fa fa-barcode" aria-hidden="true"></i></label>
+                        <div class="input-group" id="code39__exact" data-target-input="nearest">
+                            <input type="text" class="form-control" name="code39__exact" id="id_code39__exact" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="track_no__icontains">{% trans "Track No. contains" %}</label>
+                        <div class="input-group" id="track_no__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="track_no__icontains" id="id_track_no__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="details__description__icontains">{% trans "Product Details contains" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="details__description__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="details__description__icontains" id="id_details__description__icontains" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="any_words__icontains">{% trans "Any Words(Exclude Track No., Product Details) contains" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="any_words__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="any_words__icontains" id="id_any_words__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
                         <label for="generate_time__gte">{% trans "Generate time later than" %}</label>
                         <div class="input-group date" id="generate_time__gte" data-target-input="nearest">
                             <input type="text" class="form-control datetimepicker-input" data-target="#generate_time__gte"
@@ -40,38 +78,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12 col-md-6">
-                    <div class="form-group">
-                        <label for="track_no__icontains">{% trans "Track No. contains" %}</label>
-                        <div class="input-group" id="track_no__icontains" data-target-input="nearest">
-                            <input type="text" class="form-control" name="track_no__icontains" id="id_track_no__icontains" />
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-md-6">
-                    <div class="form-group">
-                        <label for="details__description__icontains">{% trans "Product Details contains" context "taiwan_einvoice" %}</label>
-                        <div class="input-group" id="details__description__icontains" data-target-input="nearest">
-                            <input type="text" class="form-control" name="details__description__icontains" id="id_details__description__icontains" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12 col-md-6">
-                    <div class="form-group">
-                        <label for="any_words__icontains">{% trans "Any Words(Exclude Track No., Product Details) contains" context "taiwan_einvoice" %}</label>
-                        <div class="input-group" id="any_words__icontains" data-target-input="nearest">
-                            <input type="text" class="form-control" name="any_words__icontains" id="id_any_words__icontains" />
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-12 col-md-6">
                 </div>
             </div>
 
@@ -104,4 +110,72 @@
     {% endblock %}
 
 {% block modals %}
+
+<div class="modal fade" id="print_einvoice_modal" tabindex="-1" role="dialog"
+    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}/{id}/get_escpos_print_scripts/"
+    aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="print_einvoice_modal_label">{% trans "Print E-Invoice" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li>{% trans "58mm E-Invoice" %}:
+                        <select name="einvoice_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Details" %}(
+                        <input type="checkbox" name="append_to_einvoice"/>
+                        {% trans "Print details at the same time" %} ):
+                        <select name="details_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Interval seconds of printing" %}:
+                        <select name="interval_seconds_of_printing" class="form-control">
+                            <option value="10">{% trans "10 seconds" %}</option>
+                            <option value="5">{% trans "5 seconds" %}</option>
+                            <option value="3">{% trans "3 seconds" %}</option>
+                            <option value="1">{% trans "1 seconds" %}</option>
+                        </select>
+                    </li>
+                </ul>
+                <table class="table table-hover table-striped">
+                    <thead>
+                            <tr>
+                                <th field="no">{% trans "No." %}</th>
+                                <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                                <th field="track_no_">{% trans "Track No." %}</th>
+                                <th field="type__display">{% trans "Tax Type" %}</th>
+                                <th field="TotalAmount"{% trans "Total Amount" %}></th>
+                                <th field="generate_batch_no">{% trans "Footprint No." %}</th>
+                                <th field="print_mark">{% trans "Print Mark" %}</th>
+                                <th field="status">{% trans "Status" %}</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tr_tmpl" style="display: none;">
+                            <td field="no"></td>
+                            <td field="year_month_range"></td>
+                            <td field="track_no_"></td>
+                            <td field="type__display"></td>
+                            <td field="TotalAmount"></td>
+                            <td field="generate_batch_no"></td>
+                            <td field="print_mark"></td>
+                            <td field="status"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="print_einvoice btn btn-primary">{% trans "Print" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

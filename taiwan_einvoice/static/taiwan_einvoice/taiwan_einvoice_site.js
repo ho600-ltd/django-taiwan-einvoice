@@ -14,6 +14,11 @@ $(function () {
             5: gettext("May"), 6: gettext("Jun"), 7: gettext("Jul"), 8: gettext("Aug"),
             9: gettext("Sep"), 10: gettext("Oct"), 11: gettext("Nov"), 12: gettext("Dec")
         }
+        this.default_escposweb_cookie_name = 'default_escposweb';
+        this.default_einvoice_printer_cookie_name = 'default_einvoice_printer';
+        this.default_details_printer_cookie_name = 'default_details_printer';
+        this.default_append_to_einvoice_cookie_name = 'default_append_to_einvoice';
+        this.default_interval_seconds_of_printing_cookie_name = 'default_interval_seconds_of_printing';
 
         for (var k in configure) {
             this[k] = configure[k];
@@ -166,13 +171,17 @@ $(function () {
         if (track_no__icontains_param) {
             $("input[name='track_no__icontains']").val(track_no__icontains_param);
         }
-        var any_words__icontains_param = url.searchParams.get('any_words__icontains');
-        if (any_words__icontains_param) {
-            $("input[name='any_words__icontains']").val(any_words__icontains_param);
-        }
         var details__description__icontains_param = url.searchParams.get('details__description__icontains');
         if (details__description__icontains_param) {
             $("input[name='details__description__icontains']").val(details__description__icontains_param);
+        }
+        var code39__exact_param = url.searchParams.get('code39__exact');
+        if (code39__exact_param) {
+            $("input[name='code39__exact']").val(code39__exact_param);
+        }
+        var any_words__icontains_param = url.searchParams.get('any_words__icontains');
+        if (any_words__icontains_param) {
+            $("input[name='any_words__icontains']").val(any_words__icontains_param);
         }
 
         $('#create_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
@@ -183,6 +192,9 @@ $(function () {
         $('#generate_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
 
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
+        $("input[name='code39__exact']").click(function(){
+            $(this).val('');
+        }).focus();
     }
 
     TAIWAN_EINVOICE_SITE.prototype.rest_error = function ($self, dialog_id) {
