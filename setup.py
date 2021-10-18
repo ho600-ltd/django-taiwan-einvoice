@@ -31,6 +31,7 @@ setup(name='taiwan_einvoice',
                     'taiwan_einvoice': [
                         'static/taiwan_einvoice/assets/*.css',
                         'static/taiwan_einvoice/assets/*.js',
+                        'static/taiwan_einvoice/assets/*.svg',
                         'static/taiwan_einvoice/*.css',
                         'static/taiwan_einvoice/*.js',
                         'templates/taiwan_einvoice/*.html',
