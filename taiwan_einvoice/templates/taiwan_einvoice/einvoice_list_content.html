@@ -10,6 +10,8 @@
         <button class="btn print_einvoice_modal" data-toggle="modal"
             set_up_default_escpos_printer_url="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html"
             >
+            <img class="status-off" style="width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Red_Light_Icon.svg" />
+            <img class="status-on" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/led-green-black.svg" />
             {% blocktrans %}Print E-Invoice with "<span id="default_escpos_print_name"></span>"{% endblocktrans %}
         </button>
     {% endif %}

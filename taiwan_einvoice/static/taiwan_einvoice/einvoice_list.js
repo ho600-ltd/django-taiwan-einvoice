@@ -25,7 +25,13 @@ $(function () {
         $('span#default_escpos_print_name', $btn).text(escposweb_printer_name);
         var $table = $('table.table');
         $btn.removeClass('btn-danger').addClass('btn-secondary').click(function(){
-            if($('input[name=print_einvoice]:checked', $table).length == 0) {
+            if (0 >= $('img.status-on:visible').length) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNINNG_MODAL,
+                    pgettext('taiwan_einvoice', 'Error'),
+                    gettext('It can not connect ESC/POS Printer Server'));
+                return false;
+            } else if($('input[name=print_einvoice]:checked', $table).length == 0) {
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$WARNINNG_MODAL,
                     pgettext('taiwan_einvoice', 'Error'),

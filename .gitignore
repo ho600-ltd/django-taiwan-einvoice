@@ -1,5 +1,9 @@
 *.sqlite3
-assets/
+assets/*.pdf
+assets/*.zip
+assets/*.docx
+assets/*.odt
+assets/*/
 .vscode/
 docs/_build
 .py3env/
