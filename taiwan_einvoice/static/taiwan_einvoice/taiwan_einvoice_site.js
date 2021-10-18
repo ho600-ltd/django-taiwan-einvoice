@@ -14,7 +14,11 @@ $(function () {
             5: gettext("May"), 6: gettext("Jun"), 7: gettext("Jul"), 8: gettext("Aug"),
             9: gettext("Sep"), 10: gettext("Oct"), 11: gettext("Nov"), 12: gettext("Dec")
         }
-        this.default_escposweb_printer_cookie_name = 'default_escposweb_printer';
+        this.default_escposweb_cookie_name = 'default_escposweb';
+        this.default_einvoice_printer_cookie_name = 'default_einvoice_printer';
+        this.default_details_printer_cookie_name = 'default_details_printer';
+        this.default_append_to_einvoice_cookie_name = 'default_append_to_einvoice';
+        this.default_interval_seconds_of_printing_cookie_name = 'default_interval_seconds_of_printing';
 
         for (var k in configure) {
             this[k] = configure[k];

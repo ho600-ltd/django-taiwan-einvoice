@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-16 17:26+0800\n"
+"POT-Creation-Date: 2021-10-18 16:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -119,6 +119,27 @@ msgstr "搜尋"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
+
+msgid "Details"
+msgstr "明細"
+
+msgid "Print details at the same time"
+msgstr "同時列印明細"
+
+msgid "Interval seconds of printing"
+msgstr "列印間隔秒數"
+
+msgid "10 seconds"
+msgstr "10秒"
+
+msgid "5 seconds"
+msgstr "5秒"
+
+msgid "3 seconds"
+msgstr "3秒"
+
+msgid "1 seconds"
+msgstr "1秒"
 
 msgid "No."
 msgstr "No."

@@ -124,6 +124,26 @@
                 </button>
             </div>
             <div class="modal-body">
+                <ul>
+                    <li>{% trans "58mm E-Invoice" %}:
+                        <select name="einvoice_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Details" %}(
+                        <input type="checkbox" name="append_to_einvoice"/>
+                        {% trans "Print details at the same time" %} ):
+                        <select name="details_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Interval seconds of printing" %}:
+                        <select name="interval_seconds_of_printing" class="form-control">
+                            <option value="10">{% trans "10 seconds" %}</option>
+                            <option value="5">{% trans "5 seconds" %}</option>
+                            <option value="3">{% trans "3 seconds" %}</option>
+                            <option value="1">{% trans "1 seconds" %}</option>
+                        </select>
+                    </li>
+                </ul>
                 <table class="table table-hover table-striped">
                     <thead>
                             <tr>
