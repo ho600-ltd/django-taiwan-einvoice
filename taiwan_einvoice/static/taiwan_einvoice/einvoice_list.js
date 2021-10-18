@@ -24,7 +24,7 @@ $(function () {
         var $btn = $('button.print_einvoice_modal');
         $('span#default_escpos_print_name', $btn).text(escposweb_printer_name);
         var $table = $('table.table');
-        $btn.click(function(){
+        $btn.removeClass('btn-danger').addClass('btn-secondary').click(function(){
             if($('input[name=print_einvoice]:checked', $table).length == 0) {
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$WARNINNG_MODAL,
@@ -52,7 +52,8 @@ $(function () {
             $modal.modal('show');
         });
     } else {
-        $('button.print_einvoice_modal').text(gettext("Set up 'Default ESC/POS Printer first'")).click(function() {
+        $('button.print_einvoice_modal').removeClass('btn-secondary').addClass('btn-danger'
+            ).text(gettext("Set up 'Default ESC/POS Printer first'")).click(function() {
             window.location = $(this).attr('set_up_default_escpos_printer_url');
         });
     }

@@ -21,7 +21,6 @@ $(function () {
     var usage_message = gettext('Default ESC/POS Printer');
     var show_default_escposweb_printer = function () {
         var default_escposweb_printer_id_name = Cookies.get(taiwan_einvoice_site.default_escposweb_printer_cookie_name);
-        alert("show_default_escposweb_printer: "+default_escposweb_printer_id_name);
         $('table tbody td[field=usage]').text('');
         if (default_escposweb_printer_id_name) {
             var default_escposweb_printer_id = default_escposweb_printer_id_name.split(':')[0];

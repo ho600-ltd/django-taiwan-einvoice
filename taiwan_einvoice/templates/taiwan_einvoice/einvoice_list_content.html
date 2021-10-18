@@ -7,7 +7,7 @@
     {% endwith %}
 
     {% if perms.turnkeyweb.print_einvoice %}
-        <button class="btn btn-success print_einvoice_modal" data-toggle="modal"
+        <button class="btn print_einvoice_modal" data-toggle="modal"
             set_up_default_escpos_printer_url="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html"
             >
             {% blocktrans %}Print E-Invoice with "<span id="default_escpos_print_name"></span>"{% endblocktrans %}
