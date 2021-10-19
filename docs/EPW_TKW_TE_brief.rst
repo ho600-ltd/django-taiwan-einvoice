@@ -116,3 +116,23 @@ TE supports ASGI with daphne, supervisor and nginx
 
     $ sudo nginx -t
     $ sudo systemctl restart nginx
+
+
+讓 EPW 支援 Web API 關機
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+先讓 EPW 在每次開機時，產製出驗證碼，供 Web API 執行時驗證用:
+
+.. code-block:: sh
+
+    $ sudo su -
+    $ cat << 'EOF' > /etc/rc.local
+#!/bin/sh -e
+
+date "+%Y%m%d%H%M%S.%N Whatever words" | md5sum > /var/run/boot_random_seed
+
+exit 0
+
+EOF
+    $ exit
+    $ chmod a+x /etc/rc.local
