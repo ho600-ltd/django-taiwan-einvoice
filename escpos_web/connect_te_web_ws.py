@@ -109,3 +109,4 @@ if '__main__' == __name__:
     elif 'check_printer_status' == method:
         te_web = TEWeb.objects.get(url=url)
         asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(te_web))
+
