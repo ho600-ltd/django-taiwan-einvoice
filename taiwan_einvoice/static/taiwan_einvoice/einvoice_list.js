@@ -9,6 +9,14 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
         const escpos_web_status_socket = new WebSocket(host+ws_escposweb_status_url);
         const escpos_web_print_result_socket = new WebSocket(host+ws_escposweb_print_status_url);
 
+        escpos_web_status_socket.onerror = function(e) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$WARNINNG_MODAL,
+                pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
+                gettext('Could not connect web server with websocket protocol.  It will cause printing job, except searching E-Invoice.  If you need to print E-Invoice, please try again later, or reload your page'));
+            escpos_web_status_socket.close();
+        };
+
         escpos_web_status_socket.onclose = function(e) {
             console.error('escpos_web_status socket closed unexpectedly');
             $('img.status-off', $button).show();
