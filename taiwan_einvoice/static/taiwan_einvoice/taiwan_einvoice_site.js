@@ -1,7 +1,11 @@
 $(function () {
 
     var TAIWAN_EINVOICE_SITE = function (name, configure) {
-
+        if ('https:' == window.location.protocol) {
+            this.WS_PROTOCOL = 'wss://' + window.location.host;
+        } else {
+            this.WS_PROTOCOL = 'ws://' + window.location.host;
+        }
         this.name = name ? name : '__none__';
         this.second_offset = 0;
         this.DEFAULT_DATETIME_RE = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.[0-9]*)?Z?$');

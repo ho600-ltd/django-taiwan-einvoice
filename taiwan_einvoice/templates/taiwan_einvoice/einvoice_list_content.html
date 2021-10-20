@@ -7,13 +7,14 @@
     {% endwith %}
 
     {% if perms.turnkeyweb.print_einvoice %}
-        <button class="btn print_einvoice_modal" data-toggle="modal"
+        <button id="print_einvoice_modal_button_0" class="btn print_einvoice_modal" data-toggle="modal"
             set_up_default_escpos_printer_url="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html"
             ws_escposweb_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/by-log-in/"
             ws_escposweb_status_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/status/by-log-in/"
             ws_escposweb_print_status_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/print_status/by-log-in/"
             >
-            <img class="status-off" style="width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Red_Light_Icon.svg" />
+            <img class="status-error" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Red_Light_Icon.svg" />
+            <img class="status-off" style="width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Gray_Light_Icon.svg" />
             <img class="status-on" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/led-green-black.svg" />
             {% blocktrans %}Print E-Invoice with "<span id="default_escpos_print_name"></span>"{% endblocktrans %}
         </button>

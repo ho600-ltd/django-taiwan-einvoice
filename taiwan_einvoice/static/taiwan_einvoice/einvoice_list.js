@@ -1,31 +1,56 @@
-function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_escposweb_url, ws_escposweb_status_url, ws_escposweb_print_status_url) {
-        if ('https:' == window.location.protocol) {
-            var host = 'wss://' + window.location.host;
-        } else {
-            var host = 'ws://' + window.location.host;
-        }
+function delay_set_up_the_escpos_printer (button_id, modal_id, ws_escposweb_status_url) {
+    var d = new Date();
+    console.log(d + ': Execute delay_set_up_the_escpos_printer');
+    var $button = $('#'+button_id);
+    var $modal = $('#'+modal_id);
+    return set_up_the_escpos_printer(window.taiwan_einvoice_site, $button, $modal, ws_escposweb_status_url);
+};
 
-        const escpos_web_socket = new WebSocket(host+ws_escposweb_url);
-        const escpos_web_status_socket = new WebSocket(host+ws_escposweb_status_url);
-        const escpos_web_print_result_socket = new WebSocket(host+ws_escposweb_print_status_url);
 
+function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_escposweb_status_url) {
+        const escpos_web_status_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_status_url);
         escpos_web_status_socket.onerror = function(e) {
-            taiwan_einvoice_site.show_modal(
-                taiwan_einvoice_site.$WARNINNG_MODAL,
-                pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
-                gettext('Could not connect web server with websocket protocol.  It will cause printing job, except searching E-Invoice.  If you need to print E-Invoice, please try again later, or reload your page'));
-            escpos_web_status_socket.close();
+            var d = new Date();
+            console.error(d + ': escpos_web_status socket connect fails');
+            $('img.status-error', $button).show();
+            $('img.status-on', $button).hide();
+            $('img.status-off', $button).hide();
+            if (!taiwan_einvoice_site.done_show_websocket_connection_error) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNINNG_MODAL,
+                    pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
+                    gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
+                taiwan_einvoice_site.done_show_websocket_connection_error = true;
+            }
+            var button_id = $button.attr('id');
+            var modal_id = $modal.attr('id');
+            setTimeout('delay_set_up_the_escpos_printer("'+button_id+'", "'+modal_id+'", "'+ws_escposweb_status_url+'")', 60000);
         };
 
         escpos_web_status_socket.onclose = function(e) {
-            console.error('escpos_web_status socket closed unexpectedly');
-            $('img.status-off', $button).show();
-            $('img.status-on', $button).hide();
+            var d = new Date();
+            console.error(d + ': escpos_web_status socket closed unexpectedly');
+            if (0 < $('img.status-on:visible', $button).length) {
+                $('img.status-off', $button).show();
+                $('img.status-error', $button).hide();
+                $('img.status-on', $button).hide();
+                if (!taiwan_einvoice_site.done_show_websocket_connection_error) {
+                    taiwan_einvoice_site.show_modal(
+                        taiwan_einvoice_site.$WARNINNG_MODAL,
+                        pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
+                        gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
+                    taiwan_einvoice_site.done_show_websocket_connection_error = true;
+                }
+                var button_id = $button.attr('id');
+                var modal_id = $modal.attr('id');
+                setTimeout('delay_set_up_the_escpos_printer("'+button_id+'", "'+modal_id+'", "'+ws_escposweb_status_url+'")', 5000);
+            }
         };
 
         escpos_web_status_socket.onmessage = function(e) {
             $('img.status-on', $button).show();
             $('img.status-off', $button).hide();
+            $('img.status-error', $button).hide();
             const data = JSON.parse(e.data);
             var $einvoice_printer = $('select[name=einvoice_printer]', $modal);
             var einvoice_printer_value = Cookies.get(taiwan_einvoice_site.default_einvoice_printer_cookie_name);
@@ -49,6 +74,9 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
                 $('option[value='+details_printer_value+']', $details_printer).attr('selected', 'selected');
             }
         };
+
+        // const escpos_web_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_url);
+        // const escpos_web_print_status_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_print_status_url);
 
         // escpos_web_socket.onmessage = function(e) {
         //     const data = JSON.parse(e.data);
@@ -108,6 +136,7 @@ $(function () {
     });
 
     taiwan_einvoice_site.after_document_ready();
+    window.taiwan_einvoice_site = taiwan_einvoice_site;
 
     adjust_pagination_html();
 
@@ -187,10 +216,10 @@ $(function () {
             });
             $modal.modal('show');
         });
-        var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
         var ws_escposweb_status_url = $btn.attr('ws_escposweb_status_url_tmpl').replace('{id}', escposweb_id);
+        set_up_the_escpos_printer(taiwan_einvoice_site, $btn, $modal, ws_escposweb_status_url);
+        var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
         var ws_escposweb_print_status_url = $btn.attr('ws_escposweb_print_status_url_tmpl').replace('{id}', escposweb_id);
-        set_up_the_escpos_printer(taiwan_einvoice_site, $btn, $modal, ws_escposweb_url, ws_escposweb_status_url, ws_escposweb_print_status_url);
     } else {
         $('button.print_einvoice_modal').removeClass('btn-secondary').addClass('btn-danger'
             ).text(gettext("Set up 'Default ESC/POS Printer first'")).click(function() {

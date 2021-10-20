@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!--This icon download from https://commons.wikimedia.org/wiki/File:Red_Light_Icon.svg, the licence is at https://creativecommons.org/licenses/by/3.0/-->
+<!--This icon download from https://ja.wikipedia.org/wiki/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB:Gray_Light_Icon.svg, the licence is at https://creativecommons.org/licenses/by/3.0/-->
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -15,7 +15,7 @@
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.46"
-   sodipodi:docname="colorbutton_red.svg"
+   sodipodi:docname="colorbuttongray.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.0">
   <defs
@@ -34,11 +34,11 @@
     <linearGradient
        id="linearGradient3157">
       <stop
-         style="stop-color:#101010;stop-opacity:1;"
+         style="stop-color:#202020;stop-opacity:1;"
          offset="0"
          id="stop3159" />
       <stop
-         style="stop-color:#404040;stop-opacity:1;"
+         style="stop-color:#7f7f7f;stop-opacity:1;"
          offset="1"
          id="stop3161" />
     </linearGradient>
@@ -70,6 +70,15 @@
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3199"
+       id="linearGradient3197"
+       x1="347.49249"
+       y1="366.4686"
+       x2="377.79706"
+       y2="465.46356"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3199"
        id="linearGradient3206"
        gradientUnits="userSpaceOnUse"
        x1="348.50266"
@@ -87,9 +96,9 @@
      objecttolerance="10"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="129.01404"
-     inkscape:cy="133.01925"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="-82.874057"
+     inkscape:cy="125.90946"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -137,7 +146,7 @@
        transform="matrix(1.0306123,0,0,1.0306123,-11.565216,-13.166579)" />
     <path
        sodipodi:type="arc"
-       style="opacity:1;fill:#f00000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="opacity:1;fill:#bfbfbf;fill-opacity:1;stroke:none;stroke-width:0.20000000000000001;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path2383"
        sodipodi:cx="377.79706"
        sodipodi:cy="430.10822"
