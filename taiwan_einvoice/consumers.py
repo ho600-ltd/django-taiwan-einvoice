@@ -142,6 +142,8 @@ def save_printer_status(escpos_web_id, data):
     escpos_web = ESCPOSWeb.objects.get(id=escpos_web_id)
     d = {}
     for k, v in data.items():
+        if 'interval_seconds' == k:
+            continue
         need_save = False
         try:
             p = Printer.objects.get(escpos_web=escpos_web, serial_number=k)

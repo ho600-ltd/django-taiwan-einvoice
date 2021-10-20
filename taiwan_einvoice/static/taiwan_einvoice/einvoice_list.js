@@ -7,6 +7,27 @@ function delay_set_up_the_escpos_printer (button_id, modal_id, ws_escposweb_stat
 };
 
 
+function check_receive_escpos_printer_status_timestamp () {
+    var $button = $('button.print_einvoice_modal');
+    var d = new Date();
+    console.log(d + ': Execute check_receive_escpos_printer_status_timestamp');
+    var now = Date.now();
+    var $status_on = $('img.status-on', $button)
+    var privous_timestamp = $status_on.attr('receive_timestamp');
+    var interval_seconds = $status_on.attr('interval_seconds');
+    if (privous_timestamp && interval_seconds && now - privous_timestamp >= 2000 * interval_seconds) {
+        $('img.status-off', $button).show();interval_seconds
+        $('img.status-error', $button).hide();
+        $('img.status-on', $button).hide();
+    }
+    if (interval_seconds && interval_seconds > 0) {
+        setTimeout('check_receive_escpos_printer_status_timestamp()', 4000 * interval_seconds);
+    } else {
+        setTimeout('check_receive_escpos_printer_status_timestamp()', 10000);
+    }
+}
+
+
 function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_escposweb_status_url) {
         const escpos_web_status_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_status_url);
         escpos_web_status_socket.onerror = function(e) {
@@ -48,7 +69,7 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
         };
 
         escpos_web_status_socket.onmessage = function(e) {
-            $('img.status-on', $button).show();
+            $('img.status-on', $button).show().attr('receive_timestamp', Date.now());
             $('img.status-off', $button).hide();
             $('img.status-error', $button).hide();
             const data = JSON.parse(e.data);
@@ -59,6 +80,10 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
             $('option', $einvoice_printer).remove();
             $('option', $details_printer).remove();
             for (k in data) {
+                if (k == 'interval_seconds') {
+                    $('img.status-on', $button).attr('interval_seconds', data[k]['value']);
+                    continue;
+                }
                 const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
                 var $option = $('<option value="'+k+'">'+v+'</option>');
                 $details_printer.append($option);
@@ -217,6 +242,7 @@ $(function () {
             $modal.modal('show');
         });
         var ws_escposweb_status_url = $btn.attr('ws_escposweb_status_url_tmpl').replace('{id}', escposweb_id);
+        check_receive_escpos_printer_status_timestamp();
         set_up_the_escpos_printer(taiwan_einvoice_site, $btn, $modal, ws_escposweb_status_url);
         var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
         var ws_escposweb_print_status_url = $btn.attr('ws_escposweb_print_status_url_tmpl').replace('{id}', escposweb_id);
