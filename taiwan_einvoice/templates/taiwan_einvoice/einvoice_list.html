@@ -111,7 +111,7 @@
 
 {% block modals %}
 
-<div class="modal fade" id="print_einvoice_modal" tabindex="-1" role="dialog"
+<div class="modal fade" id="print_einvoice_modal_0" tabindex="-1" role="dialog"
     resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}/{id}/get_escpos_print_scripts/"
     aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -150,8 +150,9 @@
                                 <th field="no">{% trans "No." %}</th>
                                 <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
                                 <th field="track_no_">{% trans "Track No." %}</th>
-                                <th field="type__display">{% trans "Tax Type" %}</th>
-                                <th field="TotalAmount"{% trans "Total Amount" %}></th>
+                                <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                <th field="TotalAmount">{% trans "Total Amount" %}</th>
                                 <th field="generate_batch_no">{% trans "Footprint No." %}</th>
                                 <th field="print_mark">{% trans "Print Mark" %}</th>
                                 <th field="status">{% trans "Status" %}</th>
@@ -162,7 +163,8 @@
                             <td field="no"></td>
                             <td field="year_month_range"></td>
                             <td field="track_no_"></td>
-                            <td field="type__display"></td>
+                            <td field="SalesAmount"></td>
+                            <td field="TaxAmount"></td>
                             <td field="TotalAmount"></td>
                             <td field="generate_batch_no"></td>
                             <td field="print_mark"></td>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-18 16:37+0800\n"
+"POT-Creation-Date: 2021-10-20 14:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -148,8 +148,11 @@ msgctxt "taiwan_einvoice"
 msgid "Year Month Range"
 msgstr "期別"
 
-msgid "Tax Type"
-msgstr "稅額類別"
+msgid "Sales Amount"
+msgstr "銷售額"
+
+msgid "Tax Amount"
+msgstr "稅額"
 
 msgid "Total Amount"
 msgstr "總金額"
@@ -178,6 +181,9 @@ msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電�
 
 msgid "Choose"
 msgstr "勾選"
+
+msgid "Tax Type"
+msgstr "稅額類別"
 
 msgctxt "taiwan_einvoice"
 msgid "Creator"
