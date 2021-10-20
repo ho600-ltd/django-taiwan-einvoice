@@ -171,7 +171,13 @@ $(function () {
                 var $tr = $i.parents('tr');
                 var $tr_tmpl = $('tr.tr_tmpl', $modal_table).clone().removeClass('tr_tmpl').addClass('data');
                 $('td[field=no]', $tr_tmpl).text(no);
-                var keys = ['year_month_range', 'track_no_', 'type__display', 'TotalAmount', 'generate_batch_no', 'print_mark'];
+                var keys = [];
+                $('td', $tr_tmpl).each(function(){
+                    var field = $(this).attr('field');
+                    if(field && field != 'no') {
+                        keys.push(field);
+                    }
+                })
                 for (var i=0; i<keys.length; i++) {
                     var value = $('td[field='+keys[i]+']', $tr).text();
                     $('td[field='+keys[i]+']', $tr_tmpl).attr('value', value).text(value);

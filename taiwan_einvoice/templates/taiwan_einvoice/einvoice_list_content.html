@@ -32,7 +32,9 @@
             <th width="5%">{% trans "No." %}</th>
             <th width="15%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
             <th width="15%">{% trans "Track No." %}</th>
-            <th width="10%">{% trans "Tax Type" %}</th>
+            <th width="15%">{% trans "Tax Type" %}</th>
+            <th width="10%">{% trans "Sales Amount" %}</th>
+            <th width="10%">{% trans "Tax Amount" %}</th>
             <th width="10%">{% trans "Total Amount" %}</th>
             <th width="15%">{% trans "Footprint No." %}</th>
             <th width="15%">{% trans "Creator" context "taiwan_einvoice" %}</th>
@@ -52,6 +54,8 @@
                 <td field="year_month_range">{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
                 <td field="track_no_">{{ einvoice.track_no_ }}</td>
                 <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
+                <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
+                <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
                 <td field="TotalAmount">{{ einvoice.amounts.TotalAmount }}</td>
                 <td field="generate_batch_no">{{ einvoice.generate_batch_no }}</td>
                 <td>{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
