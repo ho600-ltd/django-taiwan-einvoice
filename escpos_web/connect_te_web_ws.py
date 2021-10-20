@@ -75,6 +75,7 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
 
 
 async def connect_and_check_print_status(te_web):
+    interval_seconds = 1.7
     while_order = 0
     token_auth = te_web.generate_token_auth()
     url = "{}status/{}/".format(te_web.url, token_auth)
@@ -82,12 +83,13 @@ async def connect_and_check_print_status(te_web):
         while True:
             try:
                 printers = await database_sync_to_async(check_print_status)(while_order)
+                printers['interval_seconds'] = {"value": interval_seconds}
                 await websocket.send(json.dumps(printers))
             except websockets.ConnectionClosed:
                 break
             else:
                 lg.info(printers)
-                sleep(1.7)
+                sleep(interval_seconds)
                 while_order += 1
 
         
