@@ -16,9 +16,11 @@ function check_receive_escpos_printer_status_timestamp () {
     var privous_timestamp = $status_on.attr('receive_timestamp');
     var interval_seconds = $status_on.attr('interval_seconds');
     if (privous_timestamp && interval_seconds && now - privous_timestamp >= 2000 * interval_seconds) {
-        $('img.status-off', $button).show();
-        $('img.status-error', $button).hide();
-        $('img.status-on', $button).hide();
+        if (0 >= $('img.status-error:visible', $button).length) {
+            $('img.status-off', $button).show();
+            $('img.status-error', $button).hide();
+            $('img.status-on', $button).hide();
+        }
     }
     if (interval_seconds && interval_seconds > 0) {
         setTimeout('check_receive_escpos_printer_status_timestamp()', 4000 * interval_seconds);
@@ -91,6 +93,9 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
                     $('img.status-error', $button).show();
                     $('img.status-on', $button).hide();
                     $('img.status-off', $button).hide();
+                    var button_id = $button.attr('id');
+                    var modal_id = $modal.attr('id');
+                    setTimeout('delay_set_up_the_escpos_printer("'+button_id+'", "'+modal_id+'", "'+ws_escposweb_status_url+'")', 60000);
                     return false;
                 }
                 const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
@@ -222,7 +227,7 @@ $(function () {
             } else if($('input[name=print_einvoice]:checked', $table).length == 0) {
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$WARNING_MODAL,
-                    pgettext('taiwan_einvoice', 'Error'),
+                    pgettext('taiwan_einvoice', 'WARNING'),
                     gettext('Please choose one record at least'));
                 return false;
             }
