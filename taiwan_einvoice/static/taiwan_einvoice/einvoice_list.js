@@ -113,23 +113,43 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
                 $('option[value='+details_printer_value+']', $details_printer).attr('selected', 'selected');
             }
         };
+};
 
-        // const escpos_web_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_url);
-        // const escpos_web_print_status_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_print_status_url);
 
-        // escpos_web_socket.onmessage = function(e) {
-        //     const data = JSON.parse(e.data);
-        //     const invoice_data = JSON.parse(data.invoice_json);
-        //     const ul = document.querySelector('#einvoice-invoice');
-        //     const li = document.createElement("li");
-        //     li.setAttribute("id", data.batch_no);
-        //     li.appendChild(document.createTextNode(invoice_data.track_no));
-        //     ul.prepend(li);
-        // };
+function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url, $button) {
+    var $modal = $button.parents('.modal');
+    const escpos_web_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_url);
+    const escpos_web_print_status_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_print_status_url);
+    escpos_web_socket.onopen = function(e) {
+        $button.attr('escpos_web_socket', true);
+    };
+    escpos_web_socket.onerror = function(e) {
+        $button.attr('escpos_web_socket', false);
+    };
+    escpos_web_socket.onclose = function(e) {
+        var d = new Date();
+        console.log(d + ': escpos_web socket closed');
+    };
+    escpos_web_socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const invoice_data = JSON.parse(data.invoice_json);
+        const ul = document.querySelector('#einvoice-invoice');
+        const li = document.createElement("li");
+        li.setAttribute("id", data.batch_no);
+        li.appendChild(document.createTextNode(invoice_data.track_no));
+        ul.prepend(li);
+    };
+};
 
-        // escpos_web_socket.onclose = function(e) {
-        //     console.error('escpos_web socket closed unexpectedly');
-        // };
+
+function print_einvoice (taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url) {
+    return function () {
+        var $btn = $(this);
+        var wss = build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url, $btn);
+        var escpos_web_socket = wss['escpos_web_socket'];
+        var escpos_web_print_status_socket = wss['escpos_web_print_status_socket'];
+
+
 
         // document.querySelector('#einvoice-invoice-submit').onclick = function(e) {
         //     const invoiceInputDom = document.querySelector('#einvoice-invoice-input');
@@ -163,6 +183,10 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
         // escpos_web_print_result_socket.onclose = function(e) {
         //     console.error('escpos_web_print_result socket closed unexpectedly');
         // };
+
+
+
+    };
 };
 
 
@@ -214,9 +238,14 @@ $(function () {
         var escposweb_id = escposweb_id_name.split(':')[0];
         var escposweb_name = escposweb_id_name.split(':')[1].replace(/%3A/g, ':');
         var $btn = $('button.print_einvoice_modal');
+        var ws_escposweb_status_url = $btn.attr('ws_escposweb_status_url_tmpl').replace('{id}', escposweb_id);
+        var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
+        var ws_escposweb_print_status_url = $btn.attr('ws_escposweb_print_status_url_tmpl').replace('{id}', escposweb_id);
         $('span#default_escpos_print_name', $btn).text(escposweb_name);
         var $table = $('table.table');
         var $modal = $('#print_einvoice_modal');
+        var $print_einvoice_button = $('.print_einvoice', $modal);
+        $print_einvoice_button.click(print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url));
         $btn.removeClass('btn-danger').addClass('btn-secondary').click(function(){
             if (0 >= $('img.status-on:visible').length) {
                 taiwan_einvoice_site.show_modal(
@@ -255,11 +284,8 @@ $(function () {
             });
             $modal.modal('show');
         });
-        var ws_escposweb_status_url = $btn.attr('ws_escposweb_status_url_tmpl').replace('{id}', escposweb_id);
         check_receive_escpos_printer_status_timestamp();
         set_up_the_escpos_printer(taiwan_einvoice_site, $btn, $modal, ws_escposweb_status_url);
-        var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
-        var ws_escposweb_print_status_url = $btn.attr('ws_escposweb_print_status_url_tmpl').replace('{id}', escposweb_id);
     } else {
         $('button.print_einvoice_modal').removeClass('btn-secondary').addClass('btn-danger'
             ).text(gettext("Set up 'Default ESC/POS Printer first'")).click(function() {
