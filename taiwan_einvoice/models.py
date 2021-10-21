@@ -103,6 +103,16 @@ class ESCPOSWebConnectionLog(models.Model):
         unique_together = (('escpos_web', 'seed', ), )
 
 
+
+class UserConnectESCPOSWebLog(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True)
+    escpos_web = models.ForeignKey(ESCPOSWeb, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    channel_name = models.CharField(max_length=255, default='')
+    is_connected = models.BooleanField(default=True)
+
+
+
 class Printer(models.Model):
     RECEIPT_TYPES = (
         ('5', _('58mm Receipt')),

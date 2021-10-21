@@ -16,7 +16,7 @@ function check_receive_escpos_printer_status_timestamp () {
     var privous_timestamp = $status_on.attr('receive_timestamp');
     var interval_seconds = $status_on.attr('interval_seconds');
     if (privous_timestamp && interval_seconds && now - privous_timestamp >= 2000 * interval_seconds) {
-        $('img.status-off', $button).show();interval_seconds
+        $('img.status-off', $button).show();
         $('img.status-error', $button).hide();
         $('img.status-on', $button).hide();
     }
@@ -38,7 +38,7 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
             $('img.status-off', $button).hide();
             if (!taiwan_einvoice_site.done_show_websocket_connection_error) {
                 taiwan_einvoice_site.show_modal(
-                    taiwan_einvoice_site.$WARNINNG_MODAL,
+                    taiwan_einvoice_site.$WARNING_MODAL,
                     pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
                     gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
                 taiwan_einvoice_site.done_show_websocket_connection_error = true;
@@ -57,7 +57,7 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
                 $('img.status-on', $button).hide();
                 if (!taiwan_einvoice_site.done_show_websocket_connection_error) {
                     taiwan_einvoice_site.show_modal(
-                        taiwan_einvoice_site.$WARNINNG_MODAL,
+                        taiwan_einvoice_site.$WARNING_MODAL,
                         pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
                         gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
                     taiwan_einvoice_site.done_show_websocket_connection_error = true;
@@ -83,6 +83,15 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
                 if (k == 'interval_seconds') {
                     $('img.status-on', $button).attr('interval_seconds', data[k]['value']);
                     continue;
+                } else if (k == 'error_message') {
+                    taiwan_einvoice_site.show_modal(
+                        taiwan_einvoice_site.$WARNING_MODAL,
+                        pgettext('taiwan_einvoice', 'WARNING'),
+                        data[k]['value']);
+                    $('img.status-error', $button).show();
+                    $('img.status-on', $button).hide();
+                    $('img.status-off', $button).hide();
+                    return false;
                 }
                 const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
                 var $option = $('<option value="'+k+'">'+v+'</option>');
@@ -157,7 +166,7 @@ $(function () {
 
     taiwan_einvoice_site = new TAIWAN_EINVOICE_SITE('taiwan_einvoice_site', {
         $SUCCESS_MODAL: $('#success_modal'),
-        $WARNINNG_MODAL: $('#warning_modal')
+        $WARNING_MODAL: $('#warning_modal')
     });
 
     taiwan_einvoice_site.after_document_ready();
@@ -206,13 +215,13 @@ $(function () {
         $btn.removeClass('btn-danger').addClass('btn-secondary').click(function(){
             if (0 >= $('img.status-on:visible').length) {
                 taiwan_einvoice_site.show_modal(
-                    taiwan_einvoice_site.$WARNINNG_MODAL,
+                    taiwan_einvoice_site.$WARNING_MODAL,
                     pgettext('taiwan_einvoice', 'Error'),
                     gettext('It can not connect ESC/POS Printer Server'));
                 return false;
             } else if($('input[name=print_einvoice]:checked', $table).length == 0) {
                 taiwan_einvoice_site.show_modal(
-                    taiwan_einvoice_site.$WARNINNG_MODAL,
+                    taiwan_einvoice_site.$WARNING_MODAL,
                     pgettext('taiwan_einvoice', 'Error'),
                     gettext('Please choose one record at least'));
                 return false;
