@@ -145,10 +145,7 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
 function print_einvoice (taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url) {
     return function () {
         var $btn = $(this);
-        var wss = build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url, $btn);
-        var escpos_web_socket = wss['escpos_web_socket'];
-        var escpos_web_print_status_socket = wss['escpos_web_print_status_socket'];
-
+        window.WSS = build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_status_url, $btn);
 
 
         // document.querySelector('#einvoice-invoice-submit').onclick = function(e) {
