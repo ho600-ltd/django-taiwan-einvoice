@@ -122,20 +122,29 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
     const escpos_web_print_status_socket = new WebSocket(taiwan_einvoice_site.WS_PROTOCOL+ws_escposweb_print_status_url);
     escpos_web_socket.onopen = function(e) {
         $button.attr('escpos_web_socket', true);
+        var d = new Date();
+        console.log(d + ': escpos_web socket onopen');
     };
     escpos_web_socket.onerror = function(e) {
         $button.attr('escpos_web_socket', false);
+        var d = new Date();
+        console.log(d + ': escpos_web socket onerror');
     };
     escpos_web_socket.onclose = function(e) {
+        $button.attr('escpos_web_socket', false);
         var d = new Date();
         console.log(d + ': escpos_web socket closed');
     };
     escpos_web_socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         const invoice_data = JSON.parse(data.invoice_json);
-        const ul = document.querySelector('#einvoice-invoice');
-        const li = document.createElement("li");
-        li.setAttribute("id", data.batch_no);
+        var $spinner = $('<div class="spinner-border text-primary" role="status">'
+                         +'<span class="sr-only">'+gettext('Loading...')+'</span>'
+                         +'</div>');
+        //             'serial_number': document.querySelector('#printer-serial_number').value,
+        //             'batch_no': batch_no,
+        //             'invoice_json': invoice_json
+        li.setAttribute("id", data.invoice_json);
         li.appendChild(document.createTextNode(invoice_data.track_no));
         ul.prepend(li);
     };

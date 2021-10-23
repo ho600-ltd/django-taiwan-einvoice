@@ -395,6 +395,7 @@ class EInvoice(models.Model):
         total_amount_str = _hex_amount(amounts['TotalAmount'])
         _d = {
             "meet_to_tw_einvoice_standard": True,
+            "id": self.id,
             "track_no": self.track_no,
             "generate_time": generate_time.strftime('%Y-%m-%d %H:%M:%S%z'),
             "width": "58mm",
@@ -432,6 +433,12 @@ class EInvoice(models.Model):
                 },
             ],
         }
+        if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
+            _d["details_content"] = self.content_object.escpos_print_scripts_of_details()
+        else:
+            _d["details_content"] = [
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
+            ]
         return _d
 
 
