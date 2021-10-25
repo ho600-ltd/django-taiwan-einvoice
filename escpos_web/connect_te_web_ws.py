@@ -42,7 +42,7 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
     lg.info("te_web_id: {}".format(te_web_id))
     lg.info("serial_number: {}".format(serial_number))
     lg.info("batch_no: {}".format(batch_no))
-    lg.info("type: {}".format(type(invoice_json)))
+    lg.info("type: {} => should be str".format(type(invoice_json)))
     lg.info("invoice_json: {}".format(invoice_json))
     try:
         invoice_data = json.loads(invoice_json)
@@ -64,13 +64,15 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
             _result = r.print(p1)
         except Exception as e:
             result['status'] = False
-            result['status_message'] = str(e)
+            result['status_message'] = "Exception: {}".format(e)
         else:
             if True != _result:
                 result['status'] = False
                 result['status_message'] = _result[1]
             else:
                 result['status'] = True
+    lg.info('status: {}'.format(result['status']))
+    lg.info('status message: {}'.format(result.get('status_message', '__none__')))
     return result
 
 
