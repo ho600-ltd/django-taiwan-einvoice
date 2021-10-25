@@ -128,6 +128,10 @@ class Printer(models.Model):
     product_number = models.SmallIntegerField()
     profile = models.CharField(max_length=2, choices=SUPPORT_PRINTERS)
     receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES)
+
+
+    def __str__(self):
+        return "{}({}-{})".format(self.nickname, self.get_type_display(), self.get_receipt_type_display())
     
 
 
@@ -331,7 +335,7 @@ class Receipt(models.Model):
             rl.print()
         except Exception as e:
             rl.delete()
-            return (False, str(e))
+            return (False, "Exception in Receipt: {}".format(e))
         else:
             return True
         
@@ -355,13 +359,18 @@ class ReceiptLog(models.Model):
     def print(self):
         if self.print_time:
             return False
-        pd = Printer.PRINTERS.get(self.printer.serial_number, {}).get('printer_device', None)
-        if not pd:
+        if self.printer.is_connected:
+            pd = Printer.PRINTERS.get(self.printer.serial_number, {}).get('printer_device', None)
+            if not pd:
+                pd = self.printer.get_escpos_printer().get('printer_device', None)
+        else:
             pd = self.printer.get_escpos_printer().get('printer_device', None)
+
         if not pd:
             return False
 
         type_method = {
+            "ln": self.print_ln,
             "text": self.print_text,
             "barcode": self.print_barcode,
             "qrcode_pair": self.print_qrcode_pair,
@@ -372,6 +381,10 @@ class ReceiptLog(models.Model):
         self.print_time = now()
         self.save()
     
+
+    def print_ln(self, printer_device, line):
+        printer_device.ln(line['count'])
+
 
     def print_text(self, printer_device, line):
         """ Escpos.set's kwargs:
