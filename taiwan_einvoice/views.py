@@ -122,7 +122,7 @@ class EInvoiceModelViewSet(ModelViewSet):
     http_method_names = ('get', )
 
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], renderer_classes=[JSONRenderer, ])
     def get_escpos_print_scripts(self, request, pk=None):
         ei = self.get_object()
         if ei:

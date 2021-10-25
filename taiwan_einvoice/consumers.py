@@ -4,6 +4,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
 
+
+
 class ESCPOSWebConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
@@ -142,6 +144,8 @@ def save_printer_status(escpos_web_id, data):
     escpos_web = ESCPOSWeb.objects.get(id=escpos_web_id)
     d = {}
     for k, v in data.items():
+        if 'interval_seconds' == k:
+            continue
         need_save = False
         try:
             p = Printer.objects.get(escpos_web=escpos_web, serial_number=k)
@@ -173,6 +177,14 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
             if not escpos_web.verify_token_auth(seed, verify_value):
                 return False
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
+        if self.user.is_authenticated and self.user.has_perm('taiwan_einvoice.print_einvoice'):
+            from taiwan_einvoice.models import ESCPOSWeb, UserConnectESCPOSWebLog
+            escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+            ucel = UserConnectESCPOSWebLog.objects.get_or_create(escpos_web=escpos_web,
+                                                                 user=self.user,
+                                                                 channel_name=self.channel_name,
+                                                                 is_connected=True,
+            )
         self.escpos_web_group_name = 'escpos_web_status_%s' % self.escpos_web_id
         async_to_sync(self.channel_layer.group_add)(
             self.escpos_web_group_name,
@@ -212,3 +224,10 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
 
         # Send message to WebSocket
         self.send(text_data=json.dumps(printers))
+
+
+    def show_error_message(self, event):
+        error_message = event['error_message']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps(error_message))

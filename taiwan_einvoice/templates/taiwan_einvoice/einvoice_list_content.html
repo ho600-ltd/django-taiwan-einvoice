@@ -45,24 +45,26 @@
     </thead>
     <tbody>
         {% for einvoice in data.results %}
-            <tr resource_uri="{{ einvoice.resource_uri }}">
-                {% if perms.turnkeyweb.print_einvoice %}
-                    <td field="check" class="print_einvoice">
-                        <input type="checkbox" name="print_einvoice" />
-                    </td>
-                {% endif %}
-                <td>{{ forloop.counter }}.</td>
-                <td field="year_month_range">{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
-                <td field="track_no_">{{ einvoice.track_no_ }}</td>
-                <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
-                <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
-                <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
-                <td field="TotalAmount">{{ einvoice.amounts.TotalAmount }}</td>
-                <td field="generate_batch_no">{{ einvoice.generate_batch_no }}</td>
-                <td>{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
-                <td class="datetime" value="{{ einvoice.generate_time }}" format="Y-m-d H:i:s"></td>
-                <td field="print_mark" value="{{ einvoice.print_mark }}">{% if einvoice.print_mark %}{% trans "Yes" context "taiwan_einvoice_print_mark" %}{% endif %}</td>
-            </tr>
+            {% with einvoice.id as einvoice_id %}
+                <tr einvoice_id="{{ einvoice.id }}" get_escpos_print_scripts_url='{% url "taiwan_einvoice:taiwaneinvoiceapi:einvoice-get-escpos-print-scripts" pk=einvoice_id %}'>
+                    {% if perms.turnkeyweb.print_einvoice %}
+                        <td field="check" class="print_einvoice">
+                            <input type="checkbox" name="print_einvoice" />
+                        </td>
+                    {% endif %}
+                    <td>{{ forloop.counter }}.</td>
+                    <td field="year_month_range">{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
+                    <td field="track_no_">{{ einvoice.track_no_ }}</td>
+                    <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
+                    <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
+                    <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
+                    <td field="TotalAmount">{{ einvoice.amounts.TotalAmount }}</td>
+                    <td field="generate_batch_no">{{ einvoice.generate_batch_no }}</td>
+                    <td>{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
+                    <td class="datetime" value="{{ einvoice.generate_time }}" format="Y-m-d H:i:s"></td>
+                    <td field="print_mark" value="{{ einvoice.print_mark }}">{% if einvoice.print_mark %}{% trans "Yes" context "taiwan_einvoice_print_mark" %}{% endif %}</td>
+                </tr>
+            {% endwith %}
         {% endfor %}
     </tbody>
 </table>
