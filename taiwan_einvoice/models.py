@@ -375,6 +375,20 @@ class EInvoice(models.Model):
     
 
     @property
+    def one_dimension_barcode_str(self):
+        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
+        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        end_month = begin_month + 1
+        barcode_str = "{}{}{}{}".format(
+            cwmk_year,
+            end_month,
+            self.track_no,
+            self.random_number,
+        )
+        return barcode_str
+
+
+    @property
     def escpos_print_scripts(self):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
@@ -385,12 +399,6 @@ class EInvoice(models.Model):
         begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
         end_month = begin_month + 1
         generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
-        barcode_str = "{}{}{}{}".format(
-            cwmk_year,
-            end_month,
-            self.track_no,
-            self.random_number,
-        )
         sales_amount_str = _hex_amount(amounts['SalesAmount'])
         total_amount_str = _hex_amount(amounts['TotalAmount'])
         _d = {
@@ -411,7 +419,7 @@ class EInvoice(models.Model):
                     "text": " 賣方 {} {}".format(self.seller_identifier,
                                                       "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": barcode_str},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                 {"type": "qrcode_pair", "center": False,
                     "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
                         track_no=self.track_no,
