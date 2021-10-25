@@ -23,6 +23,11 @@ $(function () {
         this.default_details_printer_cookie_name = 'default_details_printer';
         this.default_append_to_einvoice_cookie_name = 'default_append_to_einvoice';
         this.default_interval_seconds_of_printing_cookie_name = 'default_interval_seconds_of_printing';
+        this.printer_receipt_type_width = {
+            "5": "58mm",
+            "6": "58mm",
+            "8": "80mm"
+        };
 
         for (var k in configure) {
             this[k] = configure[k];
