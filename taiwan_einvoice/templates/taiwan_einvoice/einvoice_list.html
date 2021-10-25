@@ -112,7 +112,7 @@
 {% block modals %}
 
 <div class="modal fade" id="print_einvoice_modal" tabindex="-1" role="dialog"
-    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}/{id}/get_escpos_print_scripts/"
+    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
     aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -137,10 +137,11 @@
                     </li>
                     <li>{% trans "Interval seconds of printing" %}:
                         <select name="interval_seconds_of_printing" class="form-control">
-                            <option value="10">{% trans "10 seconds" %}</option>
-                            <option value="5">{% trans "5 seconds" %}</option>
-                            <option value="3">{% trans "3 seconds" %}</option>
-                            <option value="1">{% trans "1 seconds" %}</option>
+                            <option value="10000">{% trans "10 seconds" %}</option>
+                            <option value="5000">{% trans "5 seconds" %}</option>
+                            <option value="3000">{% trans "3 seconds" %}</option>
+                            <option value="1000">{% trans "1 seconds" %}</option>
+                            <option value="30000">{% trans "30 seconds" %}</option>
                         </select>
                     </li>
                 </ul>
@@ -174,11 +175,8 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button type="button" class="print_einvoice btn btn-primary">{% trans "Print" %}</button>
+                <button type="button" class="btn btn-default suspend_print_einvoice" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="print_einvoice_button_0" type="button" class="print_einvoice btn btn-primary">{% trans "Print" %}</button>
             </div>
         </div>
     </div>

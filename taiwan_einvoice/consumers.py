@@ -83,6 +83,14 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
             if not escpos_web.verify_token_auth(seed, verify_value):
                 return False
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
+        if self.user.is_authenticated and self.user.has_perm('taiwan_einvoice.print_einvoice'):
+            from taiwan_einvoice.models import ESCPOSWeb, UserConnectESCPOSWebLog
+            escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+            ucel = UserConnectESCPOSWebLog.objects.get_or_create(escpos_web=escpos_web,
+                                                                 user=self.user,
+                                                                 channel_name=self.channel_name,
+                                                                 is_connected=True,
+            )
         self.escpos_web_group_name = 'escpos_web_print_result_%s' % self.escpos_web_id
         async_to_sync(self.channel_layer.group_add)(
             self.escpos_web_group_name,
@@ -104,7 +112,8 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        print(text_data_json)
+        lg = logging.getLogger('django')
+        meet_to_tw_einvoice_standard = text_data_json['meet_to_tw_einvoice_standard']
         track_no = text_data_json['track_no']
         batch_no = text_data_json['batch_no']
         status = text_data_json['status']
@@ -114,7 +123,8 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
-                'type': 'taiwan_einvoice_print_status_message',
+                'type': 'taiwan_einvoice_print_result_message',
+                'meet_to_tw_einvoice_standard': meet_to_tw_einvoice_standard,
                 'track_no': track_no,
                 'batch_no': batch_no,
                 'status': status,
@@ -123,7 +133,8 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
         )
 
     
-    def taiwan_einvoice_print_status_message(self, event):
+    def taiwan_einvoice_print_result_message(self, event):
+        meet_to_tw_einvoice_standard = event['meet_to_tw_einvoice_standard']
         track_no = event['track_no']
         batch_no = event['batch_no']
         status = event['status']
@@ -131,6 +142,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
+            'meet_to_tw_einvoice_standard': meet_to_tw_einvoice_standard,
             'track_no': track_no,
             'batch_no': batch_no,
             'status': status,

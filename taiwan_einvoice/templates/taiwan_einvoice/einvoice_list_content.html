@@ -11,7 +11,7 @@
             set_up_default_escpos_printer_url="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html"
             ws_escposweb_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/by-log-in/"
             ws_escposweb_status_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/status/by-log-in/"
-            ws_escposweb_print_status_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/print_status/by-log-in/"
+            ws_escposweb_print_result_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/print_result/by-log-in/"
             >
             <img class="status-error" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Red_Light_Icon.svg" />
             <img class="status-off" style="width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Gray_Light_Icon.svg" />

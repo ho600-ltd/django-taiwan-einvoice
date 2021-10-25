@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-21 13:15+0800\n"
+"POT-Creation-Date: 2021-10-25 19:23+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,6 +28,28 @@ msgstr "<p>目前無法使用 WebSocket 協定與伺服器連線。這會導致�
 msgctxt "taiwan_einvoice"
 msgid "WARNING"
 msgstr "警示"
+
+msgctxt "print_mark"
+msgid "Yes"
+msgstr "已印"
+
+msgctxt "taiwan_einvoice"
+msgid "ESC/POS Printer Error"
+msgstr "發票機錯誤"
+
+msgctxt "taiwan_einvoice"
+msgid "It could not print E-Invoice successfully, please reboot the ESC/POS Printer server."
+msgstr "無法列印電子發票，請將發票機伺服器重開機後，再試。"
+
+msgid "Loading..."
+msgstr "處理中..."
+
+msgctxt "suspend_print_einvoice"
+msgid "Suspend"
+msgstr "暫停"
+
+msgid "Re-print original copy"
+msgstr "重印<br/>正本"
 
 msgctxt "taiwan_einvoice"
 msgid "Error"
