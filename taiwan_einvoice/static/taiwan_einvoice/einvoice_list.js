@@ -206,6 +206,9 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
 function suspend_print_einvoice () {
     return function () {
         var $btn = $(this);
+        var $tr = $btn.parents('tr');
+        var $prev_tr = $tr.prev('tr.data');
+        $('button.re_print_original_copy', $prev_tr).show();
         var $modal = $btn.parents('.modal');
         $modal.data('suspend', true);
         if ('modal' == $btn.attr('data-dismiss')) {
@@ -214,7 +217,14 @@ function suspend_print_einvoice () {
             $btn.hide();
         }
         $('button.print_einvoice', $modal).show();
-    }
+    };
+};
+
+
+function re_print_original_copy () {
+    return function () {
+        alert('re_print_original_copy');
+    };
 };
 
 
@@ -236,7 +246,9 @@ function print_einvoice_each_by_each(allow_number, button_id) {
         console.log("window.WSS['escpos_web_print_result_socket'].readyState: " + window.WSS['escpos_web_print_result_socket'].readyState);
         setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'")', 500);
         return false;
-    } else if ($modal.data('suspend') || 0 >= $td.length) {
+    } else if (0 >= $td.length) {
+        return false;
+    } else if ($modal.data('suspend')) {
         window.WSS['escpos_web_socket'].close();
         window.WSS['escpos_web_print_result_socket'].close();
         return false;
@@ -255,13 +267,18 @@ function print_einvoice_each_by_each(allow_number, button_id) {
                          +'<span class="sr-only">'+gettext('Loading...')+'</span>'
                          +'</div>');
         var $suspend_button = $('<button type="button" class="btn btn-danger suspend_print_einvoice">'+pgettext("suspend_print_einvoice", "Suspend")+'</button>');
-        var $re_print_original_copy = $('<button class="btn btn-info">'+gettext('Re-print original copy')+'</button>');
+        var $re_print_original_copy = $('<button class="btn btn-info re_print_original_copy">'+gettext('Re-print original copy')+'</button>');
+        $re_print_original_copy.click(re_print_original_copy());
+        $re_print_original_copy.hide();
         $('td[field=print_mark]', $tr).append($re_print_original_copy);
         $td.empty().append($spinner);
         $td.attr('value', 'spinner');
         var $next_td = $('td[field=status][value=""]:first', $modal);
         $suspend_button.click(suspend_print_einvoice());
         $suspend_button.appendTo($next_td);
+        if(0 >= $next_td.length) {
+            $('button.re_print_original_copy', $tr).show();
+        }
 
         var resource_uri = $modal.attr('resource_url_tmpl').replace('{id}', $tr.attr('einvoice_id'));
         var einvoice_printer_sn = $('select[name=einvoice_printer]', $modal).val();
@@ -377,6 +394,11 @@ $(function () {
         $('span#default_escpos_print_name', $btn).text(escposweb_name);
         var $table = $('table.table');
         var $modal = $('#print_einvoice_modal');
+        $modal.data({
+            ws_escposweb_status_url: ws_escposweb_status_url,
+            ws_escposweb_url: ws_escposweb_url,
+            ws_escposweb_print_result_url: ws_escposweb_print_result_url
+        });
         var $print_einvoice_button = $('.print_einvoice', $modal);
         $print_einvoice_button.click(print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_result_url));
         $btn.removeClass('btn-danger').addClass('btn-secondary').click(function(){
