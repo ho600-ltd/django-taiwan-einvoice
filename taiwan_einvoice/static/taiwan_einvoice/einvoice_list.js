@@ -228,23 +228,24 @@ function re_print_original_copy () {
 };
 
 
-function print_einvoice_each_by_each(allow_number, button_id) {
+function print_einvoice_each_by_each(allow_number, button_id, target_selector_query) {
     var $button = $('#'+button_id);
     var $modal = $button.parents('.modal');
+    var $target = $(target_selector_query, $modal);
     if (allow_number != $modal.data('allow_number')) {
         console.log('allow_number: '+allow_number+'; modal allow_number: '+$modal.data('allow_number'));
         return false;
     }
     console.log('allow_number: '+allow_number+'; modal allow_number: '+$modal.data('allow_number'));
     var interval_seconds_of_printing = $('select[name=interval_seconds_of_printing]', $modal).val();
-    var $td = $('td[field=status][value=""]:first', $modal);
+    var $td = $('td[field=status][value=""]:first', $target);
     var $tr = $td.parents('tr');
     var $prev_tr = $tr.prev('tr.data');
     if (0 == window.WSS['escpos_web_socket'].readyState || 0 == window.WSS['escpos_web_print_result_socket'].readyState ) {
         console.log("Waiting successful connection");
         console.log("window.WSS['escpos_web_socket'].readyState: " + window.WSS['escpos_web_socket'].readyState);
         console.log("window.WSS['escpos_web_print_result_socket'].readyState: " + window.WSS['escpos_web_print_result_socket'].readyState);
-        setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'")', 500);
+        setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'", "'+target_selector_query+'")', 500);
         return false;
     } else if (0 >= $td.length) {
         return false;
@@ -253,7 +254,7 @@ function print_einvoice_each_by_each(allow_number, button_id) {
         window.WSS['escpos_web_print_result_socket'].close();
         return false;
     } else if ($prev_tr.length >= 1 && $('.spinner-border', $prev_tr).length >= 1) {
-        setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'")', 500);
+        setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'", "'+target_selector_query+'")', 500);
         return false;
     } else {
         if (0 < $prev_tr.length) {
@@ -266,16 +267,30 @@ function print_einvoice_each_by_each(allow_number, button_id) {
         var $spinner = $('<div class="spinner-border text-primary" role="status">'
                          +'<span class="sr-only">'+gettext('Loading...')+'</span>'
                          +'</div>');
-        var $suspend_button = $('<button type="button" class="btn btn-danger suspend_print_einvoice">'+pgettext("suspend_print_einvoice", "Suspend")+'</button>');
-        var $re_print_original_copy = $('<button class="btn btn-info re_print_original_copy">'+gettext('Re-print original copy')+'</button>');
-        $re_print_original_copy.click(re_print_original_copy());
-        $re_print_original_copy.hide();
-        $('td[field=print_mark]', $tr).append($re_print_original_copy);
+        var $print_mark_td = $('td[field=print_mark]', $tr);
+        if (0 == $('.re_print_original_copy', $print_mark_td).length) {
+            var $re_print_original_copy = $('<button class="btn btn-info re_print_original_copy">'+gettext('Re-print original copy')+'</button>');
+            re_print_original_copy_site = new TAIWAN_EINVOICE_SITE('re_print_original_copy_site', {
+                $SUCCESS_MODAL: $('#success_modal'),
+                $ERROR_MODAL: $('#error_modal'),
+                $WARNING_MODAL: $('#warning_modal')
+            });
+            $re_print_original_copy.click(print_einvoice(re_print_original_copy_site, $modal.data('ws_escposweb_url'), $modal.data('ws_escposweb_print_result_url')));
+            $re_print_original_copy.hide();
+            $print_mark_td.append($re_print_original_copy);
+        }
         $td.empty().append($spinner);
         $td.attr('value', 'spinner');
         var $next_td = $('td[field=status][value=""]:first', $modal);
-        $suspend_button.click(suspend_print_einvoice());
-        $suspend_button.appendTo($next_td);
+
+        if (target_selector_query.indexOf('einvoice_id') >= 0) {
+            var re_print_original_copy = true;
+        } else {
+            var re_print_original_copy = false;
+            var $suspend_button = $('<button type="button" class="btn btn-danger suspend_print_einvoice">'+pgettext("suspend_print_einvoice", "Suspend")+'</button>');
+            $suspend_button.click(suspend_print_einvoice());
+            $suspend_button.appendTo($next_td);
+        }
         if(0 >= $next_td.length) {
             $('button.re_print_original_copy', $tr).show();
         }
@@ -284,8 +299,13 @@ function print_einvoice_each_by_each(allow_number, button_id) {
         var einvoice_printer_sn = $('select[name=einvoice_printer]', $modal).val();
         var details_printer_sn = $('select[name=details_printer]', $modal).val();
         var append_to_einvoice = $('input[name=append_to_einvoice]', $modal).prop('checked');
+        if (re_print_original_copy) {
+            resource_uri += '?re_print_original_copy=true';
+        } else {
+            resource_uri += '?';
+        }
         if (append_to_einvoice) {
-            resource_uri += '?with_details_content=true';
+            resource_uri += '&with_details_content=true';
         }
         $.ajax({
             url: resource_uri,
@@ -313,7 +333,7 @@ function print_einvoice_each_by_each(allow_number, button_id) {
                         'invoice_json': JSON.stringify(json)
                     }));
                 }
-                setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'")', parseInt(interval_seconds_of_printing));
+                setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'", "'+target_selector_query+'")', parseInt(interval_seconds_of_printing));
             }
         });
     }
@@ -323,17 +343,33 @@ function print_einvoice_each_by_each(allow_number, button_id) {
 function print_einvoice (taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_result_url) {
     return function () {
         var $btn = $(this);
+        if ($btn.hasClass('print_einvoice')) {
+            var target_selector_query = 'table';
+            var $print_einvoice_btn = $(this);
+            var $modal = $print_einvoice_btn.parents('.modal');
+        } else if ($btn.hasClass('re_print_original_copy')) {
+            var $tr = $btn.parents('tr.data');
+            var target_selector_query = 'table tbody tr.data[einvoice_id='+$tr.attr('einvoice_id')+']';
+            var $modal = $btn.parents('.modal');
+            var $target = $(target_selector_query, $modal);
+            var $print_einvoice_btn = $('button.print_einvoice', $modal);
+            $('td[field=status]', $target).attr('value', '').text('');
+        };
         var allow_number = Math.random();
-        var $modal = $btn.parents('.modal');
         $modal.data({allow_number: allow_number, suspend: false});
         $('select, input', $modal).attr('disabled', 'disabled');
-        if (window.WSS && 1 == window.WSS['escpos_web_socket'].readyState && 1 == window.WSS['escpos_web_print_result_socket'].readyState) {
+        if (window.WSS) {
             window.WSS['escpos_web_socket'].close();
             window.WSS['escpos_web_print_result_socket'].close();
+            delete window.WSS;
         }
-        window.WSS = build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_result_url, $btn);
-        $btn.hide();
-        print_einvoice_each_by_each(allow_number, $btn.attr('id'));
+        window.WSS = build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_result_url, $print_einvoice_btn);
+        if ($btn.hasClass('print_einvoice')) {
+            $print_einvoice_btn.hide();
+        } else if ($btn.hasClass('re_print_original_copy')) {
+            //pass;
+        }
+        print_einvoice_each_by_each(allow_number, $print_einvoice_btn.attr('id'), target_selector_query);
     };
 };
 
