@@ -61,7 +61,7 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
         result['status_message'] = _("{} is not exist").format(serial_number)
     else:
         try:
-            _result = r.print(p1)
+            _result = r.print(p1, re_print_original_copy=invoice_data.get('re_print_original_copy', False))
         except Exception as e:
             result['status'] = False
             result['status_message'] = "Exception: {}".format(e)

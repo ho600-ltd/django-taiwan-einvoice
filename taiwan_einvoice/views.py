@@ -129,6 +129,8 @@ class EInvoiceModelViewSet(ModelViewSet):
             escpos_print_scripts = ei.escpos_print_scripts
             if request.GET.get('with_details_content', False) not in ['true', '1']:
                 del escpos_print_scripts['details_content']
+            if request.GET.get('re_print_original_copy', False) in ['true', '1']:
+                escpos_print_scripts['re_print_original_copy'] = True
             return Response(escpos_print_scripts)
         else:
             return Response({"error_message": ""},
