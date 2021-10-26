@@ -40,10 +40,15 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
         $('img.status-on', $button).hide();
         $('img.status-off', $button).hide();
         if (!taiwan_einvoice_site.done_show_websocket_connection_error) {
-            taiwan_einvoice_site.show_modal(
-                taiwan_einvoice_site.$WARNING_MODAL,
-                pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
-                gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
+            var seen_websocket_connection_error = Cookies.get("Seen WebSocket Connection Error");
+            seen_websocket_connection_error = seen_websocket_connection_error ? parseInt(seen_websocket_connection_error) : 0;
+            if (! seen_websocket_connection_error || seen_websocket_connection_error < 3) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNING_MODAL,
+                    pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
+                    gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
+                Cookies.set("Seen WebSocket Connection Error", seen_websocket_connection_error+1, { path: '/' });
+            }
             taiwan_einvoice_site.done_show_websocket_connection_error = true;
         }
         var button_id = $button.attr('id');
@@ -59,10 +64,15 @@ function set_up_the_escpos_printer (taiwan_einvoice_site, $button, $modal, ws_es
             $('img.status-error', $button).hide();
             $('img.status-on', $button).hide();
             if (!taiwan_einvoice_site.done_show_websocket_connection_error) {
-                taiwan_einvoice_site.show_modal(
-                    taiwan_einvoice_site.$WARNING_MODAL,
-                    pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
-                    gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
+                var seen_websocket_connection_error = Cookies.get("Seen WebSocket Connection Error");
+                seen_websocket_connection_error = seen_websocket_connection_error ? parseInt(seen_websocket_connection_error) : 0;
+                if (! seen_websocket_connection_error || seen_websocket_connection_error < 3) {
+                    taiwan_einvoice_site.show_modal(
+                        taiwan_einvoice_site.$WARNING_MODAL,
+                        pgettext('taiwan_einvoice', 'WebSocket Connection Error'),
+                        gettext('<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>'));
+                    Cookies.set("Seen WebSocket Connection Error", seen_websocket_connection_error+1, { path: '/' });
+                }
                 taiwan_einvoice_site.done_show_websocket_connection_error = true;
             }
             var button_id = $button.attr('id');
