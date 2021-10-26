@@ -103,6 +103,16 @@ class ESCPOSWebConnectionLog(models.Model):
         unique_together = (('escpos_web', 'seed', ), )
 
 
+
+class UserConnectESCPOSWebLog(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True)
+    escpos_web = models.ForeignKey(ESCPOSWeb, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    channel_name = models.CharField(max_length=255, default='')
+    is_connected = models.BooleanField(default=True)
+
+
+
 class Printer(models.Model):
     RECEIPT_TYPES = (
         ('5', _('58mm Receipt')),
@@ -365,6 +375,20 @@ class EInvoice(models.Model):
     
 
     @property
+    def one_dimension_barcode_str(self):
+        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
+        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        end_month = begin_month + 1
+        barcode_str = "{}{}{}{}".format(
+            cwmk_year,
+            end_month,
+            self.track_no,
+            self.random_number,
+        )
+        return barcode_str
+
+
+    @property
     def escpos_print_scripts(self):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
@@ -375,16 +399,11 @@ class EInvoice(models.Model):
         begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
         end_month = begin_month + 1
         generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
-        barcode_str = "{}{}{}{}".format(
-            cwmk_year,
-            end_month,
-            self.track_no,
-            self.random_number,
-        )
         sales_amount_str = _hex_amount(amounts['SalesAmount'])
         total_amount_str = _hex_amount(amounts['TotalAmount'])
         _d = {
             "meet_to_tw_einvoice_standard": True,
+            "id": self.id,
             "track_no": self.track_no,
             "generate_time": generate_time.strftime('%Y-%m-%d %H:%M:%S%z'),
             "width": "58mm",
@@ -400,7 +419,7 @@ class EInvoice(models.Model):
                     "text": " 賣方 {} {}".format(self.seller_identifier,
                                                       "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": barcode_str},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                 {"type": "qrcode_pair", "center": False,
                     "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
                         track_no=self.track_no,
@@ -422,6 +441,12 @@ class EInvoice(models.Model):
                 },
             ],
         }
+        if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
+            _d["details_content"] = self.content_object.escpos_print_scripts_of_details()
+        else:
+            _d["details_content"] = [
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
+            ]
         return _d
 
 
@@ -441,7 +466,10 @@ class EInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
             turnkey_web = self.seller_invoice_track_no.turnkey_web
             while True:
                 random_number = '{:04d}'.format(randint(0, 10000))

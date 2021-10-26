@@ -112,7 +112,7 @@
 {% block modals %}
 
 <div class="modal fade" id="print_einvoice_modal" tabindex="-1" role="dialog"
-    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}/{id}/get_escpos_print_scripts/"
+    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
     aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -137,10 +137,11 @@
                     </li>
                     <li>{% trans "Interval seconds of printing" %}:
                         <select name="interval_seconds_of_printing" class="form-control">
-                            <option value="10">{% trans "10 seconds" %}</option>
-                            <option value="5">{% trans "5 seconds" %}</option>
-                            <option value="3">{% trans "3 seconds" %}</option>
-                            <option value="1">{% trans "1 seconds" %}</option>
+                            <option value="10000">{% trans "10 seconds" %}</option>
+                            <option value="5000">{% trans "5 seconds" %}</option>
+                            <option value="3000">{% trans "3 seconds" %}</option>
+                            <option value="1000">{% trans "1 seconds" %}</option>
+                            <option value="30000">{% trans "30 seconds" %}</option>
                         </select>
                     </li>
                 </ul>
@@ -150,8 +151,9 @@
                                 <th field="no">{% trans "No." %}</th>
                                 <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
                                 <th field="track_no_">{% trans "Track No." %}</th>
-                                <th field="type__display">{% trans "Tax Type" %}</th>
-                                <th field="TotalAmount"{% trans "Total Amount" %}></th>
+                                <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                <th field="TotalAmount">{% trans "Total Amount" %}</th>
                                 <th field="generate_batch_no">{% trans "Footprint No." %}</th>
                                 <th field="print_mark">{% trans "Print Mark" %}</th>
                                 <th field="status">{% trans "Status" %}</th>
@@ -162,7 +164,8 @@
                             <td field="no"></td>
                             <td field="year_month_range"></td>
                             <td field="track_no_"></td>
-                            <td field="type__display"></td>
+                            <td field="SalesAmount"></td>
+                            <td field="TaxAmount"></td>
                             <td field="TotalAmount"></td>
                             <td field="generate_batch_no"></td>
                             <td field="print_mark"></td>
@@ -172,8 +175,8 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button type="button" class="print_einvoice btn btn-primary">{% trans "Print" %}</button>
+                <button type="button" class="btn btn-default suspend_print_einvoice" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="print_einvoice_button_0" type="button" class="print_einvoice btn btn-primary">{% trans "Print" %}</button>
             </div>
         </div>
     </div>

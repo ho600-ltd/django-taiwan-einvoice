@@ -122,11 +122,16 @@ class EInvoiceModelViewSet(ModelViewSet):
     http_method_names = ('get', )
 
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], renderer_classes=[JSONRenderer, ])
     def get_escpos_print_scripts(self, request, pk=None):
         ei = self.get_object()
         if ei:
-            return Response(ei.escpos_print_scripts)
+            escpos_print_scripts = ei.escpos_print_scripts
+            if request.GET.get('with_details_content', False) not in ['true', '1']:
+                del escpos_print_scripts['details_content']
+            if request.GET.get('re_print_original_copy', False) in ['true', '1']:
+                escpos_print_scripts['re_print_original_copy'] = True
+            return Response(escpos_print_scripts)
         else:
             return Response({"error_message": ""},
                             status=status.HTTP_400_BAD_REQUEST)

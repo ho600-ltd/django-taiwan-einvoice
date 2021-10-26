@@ -1,7 +1,11 @@
 $(function () {
 
     var TAIWAN_EINVOICE_SITE = function (name, configure) {
-
+        if ('https:' == window.location.protocol) {
+            this.WS_PROTOCOL = 'wss://' + window.location.host;
+        } else {
+            this.WS_PROTOCOL = 'ws://' + window.location.host;
+        }
         this.name = name ? name : '__none__';
         this.second_offset = 0;
         this.DEFAULT_DATETIME_RE = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.[0-9]*)?Z?$');
@@ -19,6 +23,11 @@ $(function () {
         this.default_details_printer_cookie_name = 'default_details_printer';
         this.default_append_to_einvoice_cookie_name = 'default_append_to_einvoice';
         this.default_interval_seconds_of_printing_cookie_name = 'default_interval_seconds_of_printing';
+        this.printer_receipt_type_width = {
+            "5": "58mm",
+            "6": "58mm",
+            "8": "80mm"
+        };
 
         for (var k in configure) {
             this[k] = configure[k];

@@ -42,7 +42,7 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
     lg.info("te_web_id: {}".format(te_web_id))
     lg.info("serial_number: {}".format(serial_number))
     lg.info("batch_no: {}".format(batch_no))
-    lg.info("type: {}".format(type(invoice_json)))
+    lg.info("type: {} => should be str".format(type(invoice_json)))
     lg.info("invoice_json: {}".format(invoice_json))
     try:
         invoice_data = json.loads(invoice_json)
@@ -61,20 +61,23 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
         result['status_message'] = _("{} is not exist").format(serial_number)
     else:
         try:
-            _result = r.print(p1)
+            _result = r.print(p1, re_print_original_copy=invoice_data.get('re_print_original_copy', False))
         except Exception as e:
             result['status'] = False
-            result['status_message'] = str(e)
+            result['status_message'] = "Exception: {}".format(e)
         else:
             if True != _result:
                 result['status'] = False
                 result['status_message'] = _result[1]
             else:
                 result['status'] = True
+    lg.info('status: {}'.format(result['status']))
+    lg.info('status message: {}'.format(result.get('status_message', '__none__')))
     return result
 
 
 async def connect_and_check_print_status(te_web):
+    interval_seconds = 1.7
     while_order = 0
     token_auth = te_web.generate_token_auth()
     url = "{}status/{}/".format(te_web.url, token_auth)
@@ -82,12 +85,13 @@ async def connect_and_check_print_status(te_web):
         while True:
             try:
                 printers = await database_sync_to_async(check_print_status)(while_order)
+                printers['interval_seconds'] = {"value": interval_seconds}
                 await websocket.send(json.dumps(printers))
             except websockets.ConnectionClosed:
                 break
             else:
                 lg.info(printers)
-                sleep(1.7)
+                sleep(interval_seconds)
                 while_order += 1
 
         
@@ -109,3 +113,4 @@ if '__main__' == __name__:
     elif 'check_printer_status' == method:
         te_web = TEWeb.objects.get(url=url)
         asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(te_web))
+

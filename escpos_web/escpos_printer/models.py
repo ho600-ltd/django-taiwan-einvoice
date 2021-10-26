@@ -128,6 +128,10 @@ class Printer(models.Model):
     product_number = models.SmallIntegerField()
     profile = models.CharField(max_length=2, choices=SUPPORT_PRINTERS)
     receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES)
+
+
+    def __str__(self):
+        return "{}({}-{})".format(self.nickname, self.get_type_display(), self.get_receipt_type_display())
     
 
 
@@ -321,17 +325,19 @@ class Receipt(models.Model):
         return obj
 
 
-    def print(self, printer):
+    def print(self, printer, re_print_original_copy=False):
         copy_order = ReceiptLog.objects.filter(printer=printer, receipt=self).count() + 1
         rl = ReceiptLog(printer=printer,
                         receipt=self,
-                        copy_order=copy_order)
+                        re_print_original_copy=re_print_original_copy,
+                        copy_order=copy_order,
+                        )
         rl.save()
         try:
             rl.print()
         except Exception as e:
             rl.delete()
-            return (False, str(e))
+            return (False, "Exception in Receipt: {}".format(e))
         else:
             return True
         
@@ -342,6 +348,7 @@ TW_EINVOICE_2_COPY_TITLE_RE = re.compile('補[ 　]*印[ 　]*$')
 class ReceiptLog(models.Model):
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     receipt = models.ForeignKey(Receipt, on_delete=models.DO_NOTHING)
+    re_print_original_copy = models.BooleanField(default=False)
     copy_order = models.SmallIntegerField(default=0)
     print_time = models.DateTimeField(null=True)
 
@@ -355,13 +362,18 @@ class ReceiptLog(models.Model):
     def print(self):
         if self.print_time:
             return False
-        pd = Printer.PRINTERS.get(self.printer.serial_number, {}).get('printer_device', None)
-        if not pd:
+        if self.printer.is_connected:
+            pd = Printer.PRINTERS.get(self.printer.serial_number, {}).get('printer_device', None)
+            if not pd:
+                pd = self.printer.get_escpos_printer().get('printer_device', None)
+        else:
             pd = self.printer.get_escpos_printer().get('printer_device', None)
+
         if not pd:
             return False
 
         type_method = {
+            "ln": self.print_ln,
             "text": self.print_text,
             "barcode": self.print_barcode,
             "qrcode_pair": self.print_qrcode_pair,
@@ -372,6 +384,10 @@ class ReceiptLog(models.Model):
         self.print_time = now()
         self.save()
     
+
+    def print_ln(self, printer_device, line):
+        printer_device.ln(line['count'])
+
 
     def print_text(self, printer_device, line):
         """ Escpos.set's kwargs:
@@ -390,6 +406,7 @@ class ReceiptLog(models.Model):
             d['align'] = 'left'
         text = line['text']
         if (self.receipt.meet_to_tw_einvoice_standard
+            and self.re_print_original_copy == False
             and self.copy_order > 1
             and TW_EINVOICE_TITLE_RE.search(text)
             and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)):
