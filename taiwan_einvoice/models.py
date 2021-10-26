@@ -466,7 +466,10 @@ class EInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
             turnkey_web = self.seller_invoice_track_no.turnkey_web
             while True:
                 random_number = '{:04d}'.format(randint(0, 10000))
