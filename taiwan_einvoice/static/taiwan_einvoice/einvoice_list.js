@@ -159,7 +159,7 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
         const unixtimestamp = data.unixtimestamp;
         const track_no = data.track_no;
         const status = data.status;
-        var $tr = $('tr.data[unixtimestamp='+unixtimestamp+'][track_no='+track_no+']');
+        var $tr = $('tr.data[unixtimestamp="'+unixtimestamp+'"][track_no="'+track_no+'"]');
         if (0 >= $tr.length) {
             return false;
         }
