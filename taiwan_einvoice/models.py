@@ -489,10 +489,21 @@ class EInvoice(models.Model):
 
 
 class EInvoicePrintLog(models.Model):
+    user = models.ForeignKey(User, default=102, on_delete=models.DO_NOTHING)
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    copy_order = models.SmallIntegerField(default=0)
+    is_original_copy = models.BooleanField(default=True)
+    done_status = models.BooleanField(default=False)
     print_time = models.DateTimeField(null=True)
+
+
+    def __str__(self):
+        return "{}:{} print einvoice id({}) with printer({}) at {}".format(
+            self.user.first_name, self.user.id,
+            self.einvoice.id,
+            self.printer.nickname,
+            self.print_time
+        )
 
 
 

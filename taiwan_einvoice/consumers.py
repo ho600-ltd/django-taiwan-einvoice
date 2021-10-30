@@ -1,5 +1,5 @@
 # taiwan_einvoice/consumers.py
-import json, logging
+import json, logging, datetime
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -7,7 +7,52 @@ from channels.db import database_sync_to_async
 
 
 def save_print_einvoice_log(escpos_web_id, user, data):
-    print("save_print_einvoice_log user: {}".format(user))
+    serial_number = data['serial_number']
+    unixtimestamp = data['unixtimestamp']
+    invoice_data = json.loads(data['invoice_json'])
+    if not invoice_data.get('meet_to_tw_einvoice_standard', False):
+        return
+    from taiwan_einvoice.models import Printer, User, EInvoice, EInvoicePrintLog
+    try:
+        einvoice = EInvoice.objects.get(id=invoice_data['id'])
+    except EInvoice.DoesNotExist:
+        return
+    try:
+        printer = Printer.objects.get(escpos_web__id=escpos_web_id,
+                                      serial_number=serial_number)
+    except Printer.DoesNotExist:
+        return
+    is_original_copy = not einvoice.einvoiceprintlog_set.exists()
+    epl = EInvoicePrintLog(user=user,
+        printer=printer,
+        einvoice=einvoice,
+        done_status=False,
+        is_original_copy=
+            True if invoice_data.get('re_print_original_copy', False)
+            else is_original_copy,
+        print_time=datetime.datetime.utcfromtimestamp(unixtimestamp)
+    )
+    epl.save()
+
+
+def update_print_einvoice_log(data):
+    meet_to_tw_einvoice_standard = data['meet_to_tw_einvoice_standard']
+    track = data['track_no'][:2]
+    no = int(data['track_no'][2:])
+    unixtimestamp = data['unixtimestamp']
+    status = data['status']
+    if not meet_to_tw_einvoice_standard:
+        return
+    from taiwan_einvoice.models import EInvoicePrintLog
+    try:
+        epl = EInvoicePrintLog.objects.get(einvoice__track=track,
+            einvoice__no=no,
+            print_time=datetime.datetime.utcfromtimestamp(unixtimestamp))
+    except EInvoicePrintLog.DoesNotExist:
+        return
+    else:
+        epl.done_status = status
+        epl.save()
 
 
 
@@ -50,7 +95,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         unixtimestamp = text_data_json['unixtimestamp']
         invoice_json = text_data_json['invoice_json']
 
-        data = save_print_einvoice_log(self.escpos_web_id, self.user, text_data_json)
+        save_print_einvoice_log(self.escpos_web_id, self.user, text_data_json)
 
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
@@ -124,6 +169,8 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
         status = text_data_json['status']
         status_message = text_data_json.get('status_message', '')
 
+        update_print_einvoice_log(text_data_json)
+
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
@@ -154,7 +201,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
 
 
 
-def save_printer_status(escpos_web_id, data):
+def save_printer_status_and_parse_receipt_type(escpos_web_id, data):
     from taiwan_einvoice.models import ESCPOSWeb, Printer
     escpos_web = ESCPOSWeb.objects.get(id=escpos_web_id)
     d = {}
@@ -163,9 +210,13 @@ def save_printer_status(escpos_web_id, data):
             continue
         need_save = False
         try:
-            p = Printer.objects.get(escpos_web=escpos_web, serial_number=k)
+            p = Printer.objects.get(serial_number=k)
         except Printer.DoesNotExist:
             p = Printer(escpos_web=escpos_web, serial_number=k)
+            need_save = True
+        if p.escpos_web != escpos_web:
+            p.escpos_web = escpos_web
+            need_save = True
         if v['nickname'] != p.nickname:
             p.nickname = v['nickname']
             need_save = True
@@ -221,7 +272,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
     def receive(self, text_data):
         data= json.loads(text_data)
 
-        data = save_printer_status(self.escpos_web_id, data)
+        data = save_printer_status_and_parse_receipt_type(self.escpos_web_id, data)
 
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
