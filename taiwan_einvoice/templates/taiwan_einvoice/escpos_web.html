@@ -78,6 +78,9 @@
             for (k in data) {
                 console.log(k);
                 console.log(data[k]);
+                if (undefined == data[k]['nickname']) {
+                    continue;
+                }
                 const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
                 const option = new Option(v, k);
                 if (k == select_value) {

@@ -6,11 +6,8 @@ from channels.db import database_sync_to_async
 
 
 
-def save_print_einvoice_log(escpos_web_id, user, data):
-    serial_number = data['serial_number']
-    unixtimestamp = data['unixtimestamp']
-    invoice_data = json.loads(data['invoice_json'])
-    if not invoice_data.get('meet_to_tw_einvoice_standard', False):
+def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
+    if not invoice_data['meet_to_tw_einvoice_standard']:
         return
     from taiwan_einvoice.models import Printer, User, EInvoice, EInvoicePrintLog
     try:
@@ -19,7 +16,7 @@ def save_print_einvoice_log(escpos_web_id, user, data):
         return
     try:
         printer = Printer.objects.get(escpos_web__id=escpos_web_id,
-                                      serial_number=serial_number)
+                                      serial_number=data['serial_number'])
     except Printer.DoesNotExist:
         return
     is_original_copy = not einvoice.einvoiceprintlog_set.exists()
@@ -30,7 +27,7 @@ def save_print_einvoice_log(escpos_web_id, user, data):
         is_original_copy=
             True if invoice_data.get('re_print_original_copy', False)
             else is_original_copy,
-        print_time=datetime.datetime.utcfromtimestamp(unixtimestamp)
+        print_time=datetime.datetime.utcfromtimestamp(data['unixtimestamp'])
     )
     epl.save()
 
@@ -90,12 +87,23 @@ class ESCPOSWebConsumer(WebsocketConsumer):
     def receive(self, text_data):
         if not self.user.is_authenticated:
             return 
-        text_data_json = json.loads(text_data)
-        serial_number = text_data_json['serial_number']
-        unixtimestamp = text_data_json['unixtimestamp']
-        invoice_json = text_data_json['invoice_json']
+        data = json.loads(text_data)
+        einvoice_id = int(data.get('einvoice_id', 0))
+        serial_number = data['serial_number']
+        unixtimestamp = data['unixtimestamp']
+        invoice_json = data['invoice_json']
+        invoice_data = json.loads(invoice_json)
+        if einvoice_id > 0:
+            from taiwan_einvoice.models import EInvoice
+            if EInvoice.escpos_einvoice_scripts(einvoice_id) in invoice_json:
+                if invoice_data['meet_to_tw_einvoice_standard']:
+                    ei = EInvoice.objects.get(id=einvoice_id)
+                    content = ei._escpos_einvoice_scripts
+                    invoice_data['content'] = content
+                    invoice_json = json.dumps(invoice_data)
 
-        save_print_einvoice_log(self.escpos_web_id, self.user, text_data_json)
+        if invoice_data['meet_to_tw_einvoice_standard']:
+            save_print_einvoice_log(self.escpos_web_id, self.user, data, invoice_data)
 
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,

@@ -388,7 +388,25 @@ class EInvoice(models.Model):
         return barcode_str
 
 
-    def escpos_einvoice_scripts(self, generate_time, cwmk_year, amounts, sales_amount_str, total_amount_str, details):
+    @classmethod
+    def escpos_einvoice_scripts(cls, id=0):
+        _sha1 = sha1(str(id).encode('utf-8')).hexdigest()
+        return "*{}*".format(_sha1)
+
+
+    @property
+    def _escpos_einvoice_scripts(self):
+        def _hex_amount(amount):
+            a = hex(int(amount))[2:]
+            return '0' * (8 - len(a)) + a
+        details = self.details
+        amounts = self.amounts
+        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
+        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        end_month = begin_month + 1
+        generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
+        sales_amount_str = _hex_amount(amounts['SalesAmount'])
+        total_amount_str = _hex_amount(amounts['TotalAmount'])
         return [
                 {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
@@ -426,24 +444,13 @@ class EInvoice(models.Model):
 
     @property
     def escpos_print_scripts(self):
-        def _hex_amount(amount):
-            a = hex(int(amount))[2:]
-            return '0' * (8 - len(a)) + a
-        details = self.details
-        amounts = self.amounts
-        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
-        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
-        end_month = begin_month + 1
-        generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
-        sales_amount_str = _hex_amount(amounts['SalesAmount'])
-        total_amount_str = _hex_amount(amounts['TotalAmount'])
         _d = {
             "meet_to_tw_einvoice_standard": True,
             "id": self.id,
             "track_no": self.track_no,
-            "generate_time": generate_time.strftime('%Y-%m-%d %H:%M:%S%z'),
+            "generate_time": self.generate_time.astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
             "width": "58mm",
-            "content": self.escpos_einvoice_scripts(generate_time, cwmk_year, amounts, sales_amount_str, total_amount_str, details),
+            "content": EInvoice.escpos_einvoice_scripts(self.id),
         }
         if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
             _d["details_content"] = self.content_object.escpos_print_scripts_of_details()

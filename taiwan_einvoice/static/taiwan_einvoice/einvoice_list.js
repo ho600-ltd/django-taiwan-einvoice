@@ -295,7 +295,8 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
             $('button.re_print_original_copy', $tr).show();
         }
 
-        var resource_uri = $modal.attr('resource_url_tmpl').replace('{id}', $tr.attr('einvoice_id'));
+        var einvoice_id = $tr.attr('einvoice_id');
+        var resource_uri = $modal.attr('resource_url_tmpl').replace('{id}', einvoice_id);
         var einvoice_printer_sn = $('select[name=einvoice_printer]', $modal).val();
         var details_printer_sn = $('select[name=details_printer]', $modal).val();
         var append_to_einvoice = $('input[name=append_to_einvoice]', $modal).prop('checked');
@@ -317,9 +318,10 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                 var unixtimestamp = Date.now() / 1000;
                 $tr.attr({unixtimestamp: unixtimestamp, track_no: json["track_no"]});
                 window.WSS['escpos_web_socket'].send(JSON.stringify({
-                    'serial_number': einvoice_printer_sn,
-                    'unixtimestamp': unixtimestamp,
-                    'invoice_json': JSON.stringify(json)
+                    einvoice_id: einvoice_id,
+                    serial_number: einvoice_printer_sn,
+                    unixtimestamp: unixtimestamp,
+                    invoice_json: JSON.stringify(json)
                 }));
                 if (append_to_einvoice && details_conent) {
                     var pdata = window.PRINTERS_DATA;
@@ -328,9 +330,9 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                     json['content'] = details_conent;
                     var unixtimestamp = Date.now() / 1000;
                     window.WSS['escpos_web_socket'].send(JSON.stringify({
-                        'serial_number': details_printer_sn,
-                        'unixtimestamp': unixtimestamp,
-                        'invoice_json': JSON.stringify(json)
+                        serial_number: details_printer_sn,
+                        unixtimestamp: unixtimestamp,
+                        invoice_json: JSON.stringify(json)
                     }));
                 }
                 setTimeout('print_einvoice_each_by_each('+allow_number+', "'+button_id+'", "'+target_selector_query+'")', parseInt(interval_seconds_of_printing));
