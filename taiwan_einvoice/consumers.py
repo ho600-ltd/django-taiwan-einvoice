@@ -6,6 +6,11 @@ from channels.db import database_sync_to_async
 
 
 
+def save_print_einvoice_log(escpos_web_id, user, data):
+    print("save_print_einvoice_log user: {}".format(user))
+
+
+
 class ESCPOSWebConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
@@ -38,10 +43,14 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
+        if not self.user.is_authenticated:
+            return 
         text_data_json = json.loads(text_data)
         serial_number = text_data_json['serial_number']
         batch_no = text_data_json['batch_no']
         invoice_json = text_data_json['invoice_json']
+
+        data = save_print_einvoice_log(self.escpos_web_id, self.user, text_data_json)
 
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
