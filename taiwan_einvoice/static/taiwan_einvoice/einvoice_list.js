@@ -160,6 +160,7 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
         const track_no = data.track_no;
         const status = data.status;
         var $tr = $('tr.data[unixtimestamp="'+unixtimestamp+'"][track_no="'+track_no+'"]');
+        var einvoice_id = $tr.attr('einvoice_id');
         if (0 >= $tr.length) {
             return false;
         }
@@ -169,6 +170,8 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
                 $('td[field=print_mark]', $prev_tr).text(pgettext('print_mark', 'Yes'));
             }
             $('td[field=status]', $tr).empty().append($('<i class="far fa-check-circle"></i>'));
+            $('td[field=print_mark]', $prev_tr).text(pgettext('print_mark', 'Yes'));
+            $('table.search_result tr[einvoice_id='+einvoice_id+'] td[field=print_mark]').attr('value', 'True').text(pgettext('taiwan_einvoice_print_mark', 'Yes'));
         } else {
             const status_message = data.status_message;
             var fmts = ngettext('<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
@@ -208,7 +211,9 @@ function suspend_print_einvoice () {
         var $btn = $(this);
         var $tr = $btn.parents('tr');
         var $prev_tr = $tr.prev('tr.data');
-        $('button.re_print_original_copy', $prev_tr).show();
+        if (0 < $('td[field=print_mark][value=""]', $prev_tr).length) {
+            $('button.re_print_original_copy', $prev_tr).show();
+        }
         var $modal = $btn.parents('.modal');
         $modal.data('suspend', true);
         if ('modal' == $btn.attr('data-dismiss')) {
@@ -291,7 +296,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
             $suspend_button.click(suspend_print_einvoice());
             $suspend_button.appendTo($next_td);
         }
-        if(0 >= $next_td.length) {
+        if(0 >= $next_td.length && 0 < $('td[field=print_mark][value=""]', $tr).length) {
             $('button.re_print_original_copy', $tr).show();
         }
 
@@ -472,8 +477,8 @@ $(function () {
                     }
                 })
                 for (var i=0; i<keys.length; i++) {
-                    var value = $('td[field='+keys[i]+']', $tr).text();
-                    $('td[field='+keys[i]+']', $tr_tmpl).attr('value', value).text(value);
+                    var t = $('td[field='+keys[i]+']', $tr).text();
+                    $('td[field='+keys[i]+']', $tr_tmpl).attr('value', t).text(t);
                 }
                 $tr_tmpl.show().appendTo($('tbody', $modal_table));
                 no += 1;
