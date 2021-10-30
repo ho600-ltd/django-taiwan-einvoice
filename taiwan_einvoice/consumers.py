@@ -29,7 +29,6 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
 
     def disconnect(self, close_code):
-        # Leave room group
         lg = logging.getLogger('django')
         lg.info("close_code: {}".format(close_code))
         async_to_sync(self.channel_layer.group_discard)(
@@ -44,7 +43,6 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         batch_no = text_data_json['batch_no']
         invoice_json = text_data_json['invoice_json']
 
-        # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
@@ -61,7 +59,6 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         batch_no = event['batch_no']
         invoice_json = event['invoice_json']
 
-        # Send message to WebSocket
         self.send(text_data=json.dumps({
             'serial_number': serial_number,
             'batch_no': batch_no,
@@ -101,7 +98,6 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
 
 
     def disconnect(self, close_code):
-        # Leave room group
         lg = logging.getLogger('django')
         lg.info("close_code: {}".format(close_code))
         async_to_sync(self.channel_layer.group_discard)(
@@ -119,7 +115,6 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
         status = text_data_json['status']
         status_message = text_data_json.get('status_message', '')
 
-        # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
@@ -140,7 +135,6 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
         status = event['status']
         status_message = event.get('status_message', '')
 
-        # Send message to WebSocket
         self.send(text_data=json.dumps({
             'meet_to_tw_einvoice_standard': meet_to_tw_einvoice_standard,
             'track_no': track_no,
@@ -207,7 +201,6 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
 
 
     def disconnect(self, close_code):
-        # Leave room group
         lg = logging.getLogger('django')
         lg.info("close_code: {}".format(close_code))
         async_to_sync(self.channel_layer.group_discard)(
@@ -221,7 +214,6 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
 
         data = save_printer_status(self.escpos_web_id, data)
 
-        # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
@@ -234,12 +226,11 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
     def printers_message(self, event):
         printers = event['printers']
 
-        # Send message to WebSocket
         self.send(text_data=json.dumps(printers))
 
 
     def show_error_message(self, event):
+        #INFO: show_error_message trigger in taiwan_einvoice.signals.on_user_logout
         error_message = event['error_message']
 
-        # Send message to WebSocket
         self.send(text_data=json.dumps(error_message))
