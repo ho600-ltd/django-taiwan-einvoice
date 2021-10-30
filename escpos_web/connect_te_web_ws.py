@@ -28,7 +28,7 @@ async def connect_and_print_receipt(te_web):
             data= json.loads(data_json)
             result = await database_sync_to_async(print_receipt)(te_web.id,
                                                                 data['serial_number'],
-                                                                data['batch_no'],
+                                                                data['unixtimestamp'],
                                                                 data['invoice_json'])
             token_auth = te_web.generate_token_auth()
             url = "{}print_result/{}/".format(te_web.url, token_auth)
@@ -38,10 +38,10 @@ async def connect_and_print_receipt(te_web):
             lg.info("print order: {}".format(i))
 
         
-def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
+def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
     lg.info("te_web_id: {}".format(te_web_id))
     lg.info("serial_number: {}".format(serial_number))
-    lg.info("batch_no: {}".format(batch_no))
+    lg.info("unixtimestamp: {}".format(unixtimestamp))
     lg.info("type: {} => should be str".format(type(invoice_json)))
     lg.info("invoice_json: {}".format(invoice_json))
     try:
@@ -50,7 +50,7 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
         return 'Init'
     result = {"meet_to_tw_einvoice_standard": invoice_data['meet_to_tw_einvoice_standard'],
               "track_no": invoice_data['track_no'],
-              "batch_no": batch_no,
+              "unixtimestamp": unixtimestamp,
              }
     te_web = TEWeb.objects.get(id=te_web_id)
     r = Receipt.create_receipt(te_web, invoice_json)

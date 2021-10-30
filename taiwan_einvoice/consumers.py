@@ -47,7 +47,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             return 
         text_data_json = json.loads(text_data)
         serial_number = text_data_json['serial_number']
-        batch_no = text_data_json['batch_no']
+        unixtimestamp = text_data_json['unixtimestamp']
         invoice_json = text_data_json['invoice_json']
 
         data = save_print_einvoice_log(self.escpos_web_id, self.user, text_data_json)
@@ -57,7 +57,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             {
                 'type': 'taiwan_einvoice_message',
                 'serial_number': serial_number,
-                'batch_no': batch_no,
+                'unixtimestamp': unixtimestamp,
                 'invoice_json': invoice_json,
             }
         )
@@ -65,12 +65,12 @@ class ESCPOSWebConsumer(WebsocketConsumer):
     
     def taiwan_einvoice_message(self, event):
         serial_number = event['serial_number']
-        batch_no = event['batch_no']
+        unixtimestamp = event['unixtimestamp']
         invoice_json = event['invoice_json']
 
         self.send(text_data=json.dumps({
             'serial_number': serial_number,
-            'batch_no': batch_no,
+            'unixtimestamp': unixtimestamp,
             'invoice_json': invoice_json,
         }))
 
@@ -120,7 +120,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
         lg = logging.getLogger('django')
         meet_to_tw_einvoice_standard = text_data_json['meet_to_tw_einvoice_standard']
         track_no = text_data_json['track_no']
-        batch_no = text_data_json['batch_no']
+        unixtimestamp = text_data_json['unixtimestamp']
         status = text_data_json['status']
         status_message = text_data_json.get('status_message', '')
 
@@ -130,7 +130,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
                 'type': 'taiwan_einvoice_print_result_message',
                 'meet_to_tw_einvoice_standard': meet_to_tw_einvoice_standard,
                 'track_no': track_no,
-                'batch_no': batch_no,
+                'unixtimestamp': unixtimestamp,
                 'status': status,
                 'status_message': status_message,
             }
@@ -140,14 +140,14 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
     def taiwan_einvoice_print_result_message(self, event):
         meet_to_tw_einvoice_standard = event['meet_to_tw_einvoice_standard']
         track_no = event['track_no']
-        batch_no = event['batch_no']
+        unixtimestamp = event['unixtimestamp']
         status = event['status']
         status_message = event.get('status_message', '')
 
         self.send(text_data=json.dumps({
             'meet_to_tw_einvoice_standard': meet_to_tw_einvoice_standard,
             'track_no': track_no,
-            'batch_no': batch_no,
+            'unixtimestamp': unixtimestamp,
             'status': status,
             'status_message': status_message,
         }))

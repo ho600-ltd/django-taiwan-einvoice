@@ -156,10 +156,10 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
         if (!meet_to_tw_einvoice_standard) {
             return false;
         }
-        const batch_no = data.batch_no;
+        const unixtimestamp = data.unixtimestamp;
         const track_no = data.track_no;
         const status = data.status;
-        var $tr = $('tr.data[batch_no='+batch_no+'][track_no='+track_no+']');
+        var $tr = $('tr.data[unixtimestamp='+unixtimestamp+'][track_no='+track_no+']');
         if (0 >= $tr.length) {
             return false;
         }
@@ -314,11 +314,11 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
             success: function (json) {
                 var details_conent = json['details_content'];
                 delete json['details_content'];
-                var batch_no = Date.now();
-                $tr.attr({batch_no: batch_no, track_no: json["track_no"]});
+                var unixtimestamp = Date.now() / 1000;
+                $tr.attr({unixtimestamp: unixtimestamp, track_no: json["track_no"]});
                 window.WSS['escpos_web_socket'].send(JSON.stringify({
                     'serial_number': einvoice_printer_sn,
-                    'batch_no': batch_no,
+                    'unixtimestamp': unixtimestamp,
                     'invoice_json': JSON.stringify(json)
                 }));
                 if (append_to_einvoice && details_conent) {
@@ -326,10 +326,10 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                     json['meet_to_tw_einvoice_standard'] = false;
                     json['width'] = pdata[details_printer_sn]['width'];
                     json['content'] = details_conent;
-                    var batch_no = Date.now();
+                    var unixtimestamp = Date.now() / 1000;
                     window.WSS['escpos_web_socket'].send(JSON.stringify({
                         'serial_number': details_printer_sn,
-                        'batch_no': batch_no,
+                        'unixtimestamp': unixtimestamp,
                         'invoice_json': JSON.stringify(json)
                     }));
                 }
