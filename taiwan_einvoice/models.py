@@ -216,6 +216,20 @@ class TurnkeyWeb(models.Model):
         for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='08'):
             count += sitn.count_blank_no
         return count
+    @property
+    def mask_hash_key(self):
+        return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    @property
+    def mask_qrcode_seed(self):
+        return self.qrcode_seed[:4] + '************************' + self.qrcode_seed[-4:]
+    @property
+    def mask_turnkey_seed(self):
+        return self.turnkey_seed[:4] + '************************' + self.turnkey_seed[-4:]
+    @property
+    def mask_download_seed(self):
+        return self.download_seed[:4] + '************************' + self.download_seed[-4:]
+
+
     note = models.TextField()
 
 

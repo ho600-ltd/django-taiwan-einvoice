@@ -102,11 +102,37 @@ class TurnkeyWebSerializer(ModelSerializer):
     seller_dict = SellerSerializer(source='seller', read_only=True)
     count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
     count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
+    mask_hash_key = CharField(read_only=True)
+    mask_qrcode_seed = CharField(read_only=True)
+    mask_turnkey_seed = CharField(read_only=True)
+    mask_download_seed = CharField(read_only=True)
+
+
 
     class Meta:
         model = TurnkeyWeb
-        fields = '__all__'
-
+        fields = (
+            'id', 'resource_uri', 'seller_dict',
+            'count_now_use_07_sellerinvoicetrackno_blank_no',
+            'count_now_use_08_sellerinvoicetrackno_blank_no',
+            'on_working',
+            'name',
+            'mask_hash_key',
+            'transport_id',
+            'party_id',
+            'routing_id',
+            'mask_qrcode_seed',
+            'mask_turnkey_seed',
+            'mask_download_seed',
+            'note',
+            'seller'
+        )
+        extra_kwargs = {
+            'hash_key': {'write_only': True},
+            'qrcode_seed': {'write_only': True},
+            'turnkey_seed': {'write_only': True},
+            'download_seed': {'write_only': True},
+        }
 
 
     def get_queryset(self):
