@@ -476,15 +476,9 @@ class EInvoice(models.Model):
 
 
     def set_print_mark_true(self):
-        if False == self.print_mark:
-            self.print_mark = True
-            self.update(update_fields=self.only_fields_can_update)
+        if False == self.print_mark and 'print_mark' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
-
-    def update(self, *args, **kwargs):
-        if self.only_fields_can_update == kwargs.get('update_fields', []):
-            super().update(update_fields=self.only_fields_can_update)
-
 
     def delete(self, *args, **kwargs):
         raise Exception('Can not delete')
