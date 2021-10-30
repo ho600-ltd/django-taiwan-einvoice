@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-25 19:23+0800\n"
+"POT-Creation-Date: 2021-10-30 21:21+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,8 +63,20 @@ msgstr "電子發票"
 msgid "Cancel EI."
 msgstr "作廢發票"
 
-msgid "Audit"
-msgstr "查驗"
+msgid "Else"
+msgstr "其他"
+
+msgid "Acounter Audit"
+msgstr "會計查驗"
+
+msgid "Print Log"
+msgstr "列印紀錄"
+
+msgid "Legal Entity"
+msgstr "買受人"
+
+msgid "Turnkey Web"
+msgstr "Turnkey 伺服器"
 
 msgid "Timezone"
 msgstr "時區"
@@ -229,3 +241,6 @@ msgstr "按鈕"
 
 msgid "Set default"
 msgstr "設為預設值"
+
+#~ msgid "Audit"
+#~ msgstr "查驗"
