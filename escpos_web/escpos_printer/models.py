@@ -309,7 +309,7 @@ class Receipt(models.Model):
 
 
     @classmethod
-    def create_receipt(cls, te_web, message):
+    def create_receipt(cls, te_web, message, re_print_original_copy=False):
         J = json.loads(message)
         try:
             obj = cls.objects.get(meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
@@ -322,6 +322,10 @@ class Receipt(models.Model):
                       original_width=cls.WIDTHS_DICT[J['width']],
                       content=J["content"])
             obj.save()
+        else:
+            if re_print_original_copy:
+                obj.content = J["content"]
+                obj.save()
         return obj
 
 

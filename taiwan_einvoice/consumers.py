@@ -1,6 +1,7 @@
 # taiwan_einvoice/consumers.py
 import json, logging, datetime
 from asgiref.sync import async_to_sync
+from django.utils.translation import ugettext_lazy as _
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
 
@@ -30,6 +31,7 @@ def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
         print_time=datetime.datetime.utcfromtimestamp(data['unixtimestamp'])
     )
     epl.save()
+    return epl.id
 
 
 def update_print_einvoice_log(data):
@@ -105,7 +107,16 @@ class ESCPOSWebConsumer(WebsocketConsumer):
                     invoice_json = json.dumps(invoice_data)
 
         if invoice_data['meet_to_tw_einvoice_standard']:
-            save_print_einvoice_log(self.escpos_web_id, self.user, data, invoice_data)
+            epl_id = save_print_einvoice_log(self.escpos_web_id, self.user, data, invoice_data)
+            invoice_data['content'].append({
+                "type": "text",
+                "custom_size": True,
+                "width": 1,
+                "height": 1,
+                "align": "left",
+                "text": _("Print Serial No.:{}").format(epl_id),
+            })
+            invoice_json = json.dumps(invoice_data)
 
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,

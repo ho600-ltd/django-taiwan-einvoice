@@ -52,6 +52,7 @@ def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
               "track_no": invoice_data['track_no'],
               "unixtimestamp": unixtimestamp,
              }
+    re_print_original_copy = invoice_data.get('re_print_original_copy', False)
     te_web = TEWeb.objects.get(id=te_web_id)
     r = Receipt.create_receipt(te_web, invoice_json)
     try:
@@ -61,7 +62,7 @@ def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
         result['status_message'] = _("{} is not exist").format(serial_number)
     else:
         try:
-            _result = r.print(p1, re_print_original_copy=invoice_data.get('re_print_original_copy', False))
+            _result = r.print(p1, re_print_original_copy=re_print_original_copy)
         except Exception as e:
             result['status'] = False
             result['status_message'] = "Exception: {}".format(e)
