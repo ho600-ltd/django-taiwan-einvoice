@@ -8,7 +8,7 @@
 <body>
     <ul>
         {% for escpos_web in escpos_webs %}
-            <li><a href="{% url 'taiwan_einvoice:escpos_web' escpos_web_id=escpos_web.id %}">{{ escpos_web.name }}</a></li>
+            <li><a href="{% url 'taiwan_einvoice:escpos_web_demo' escpos_web_id=escpos_web.id %}">{{ escpos_web.name }}</a></li>
         {% endfor %}
     </ul>
 <body>
