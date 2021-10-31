@@ -112,7 +112,7 @@
 {% block modals %}
 
 <div class="modal fade" id="print_einvoice_modal" tabindex="-1" role="dialog"
-    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
     aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -177,6 +177,29 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default suspend_print_einvoice" data-dismiss="modal">{% trans "Cancel" %}</button>
                 <button id="print_einvoice_button_0" type="button" class="print_einvoice btn btn-secondary">{% trans "Print" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="show_einvoice_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/"
+    aria-labelledby="show_einvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "E-Invoice" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>
     </div>

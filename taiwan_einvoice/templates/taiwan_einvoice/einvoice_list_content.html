@@ -46,7 +46,7 @@
     <tbody>
         {% for einvoice in data.results %}
             {% with einvoice.id as einvoice_id %}
-                <tr einvoice_id="{{ einvoice.id }}" get_escpos_print_scripts_url='{% url "taiwan_einvoice:taiwaneinvoiceapi:einvoice-get-escpos-print-scripts" pk=einvoice_id %}'>
+                <tr einvoice_id="{{ einvoice.id }}">
                     {% if perms.turnkeyweb.print_einvoice %}
                         <td field="check" class="print_einvoice">
                             <input type="checkbox" name="print_einvoice" />
@@ -54,7 +54,7 @@
                     {% endif %}
                     <td>{{ forloop.counter }}.</td>
                     <td field="year_month_range">{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
-                    <td field="track_no_">{{ einvoice.track_no_ }}</td>
+                    <td field="track_no_"><button class="btn btn-primary show_einvoice_modal">{{ einvoice.track_no_ }}</button></td>
                     <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
                     <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
                     <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
