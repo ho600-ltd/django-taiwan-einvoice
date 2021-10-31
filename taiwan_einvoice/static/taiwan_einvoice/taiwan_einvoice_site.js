@@ -75,9 +75,10 @@ $(function () {
         var s = in_02d(offseted_d.getUTCSeconds());
         var D = $self.WEEKDAY[Number(offseted_d.getUTCDay())];
         var M = $self.MONTH[Number(m)];
+        var A = H >= 12 ? pgettext('timezone', 'PM') : pgettext('timezone', 'AM');
         return display_format.replace('Y', Y).replace('m', m).replace('d', d)
                             .replace('H', H).replace('i', i).replace('s', s)
-                            .replace('D', D).replace('M', M);
+                            .replace('D', D).replace('M', M).replace('A', A);
     };
 
     TAIWAN_EINVOICE_SITE.prototype.convert_class_datetime = function ($self) {

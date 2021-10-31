@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-30 22:27+0800\n"
+"POT-Creation-Date: 2021-10-31 17:04+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,6 +44,10 @@ msgstr[0] "<p>無法列印電子發票，請將發票機伺服器重開機後，
 msgctxt "taiwan_einvoice"
 msgid "ESC/POS Printer Error"
 msgstr "發票機錯誤"
+
+msgid "E-Invoice: %(track_no_)s"
+msgid_plural "E-Invoice: %(track_no_)s"
+msgstr[0] "電子發票: %(track_no_)s"
 
 msgid "Loading..."
 msgstr "處理中..."
@@ -127,6 +131,14 @@ msgstr "十一月"
 
 msgid "Dec"
 msgstr "十二月"
+
+msgctxt "timezone"
+msgid "PM"
+msgstr "下午"
+
+msgctxt "timezone"
+msgid "AM"
+msgstr "上午"
 
 msgid "No Internet Connection"
 msgstr "無網路連線"

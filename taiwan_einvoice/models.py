@@ -457,6 +457,17 @@ class EInvoice(models.Model):
 
 
     @property
+    def details_content(self):
+        if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
+            details_content = self.content_object.escpos_print_scripts_of_details()
+        else:
+            details_content = [
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
+            ]
+        return details_content
+
+
+    @property
     def escpos_print_scripts(self):
         _d = {
             "meet_to_tw_einvoice_standard": True,
@@ -466,12 +477,7 @@ class EInvoice(models.Model):
             "width": "58mm",
             "content": EInvoice.escpos_einvoice_scripts(self.id),
         }
-        if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
-            _d["details_content"] = self.content_object.escpos_print_scripts_of_details()
-        else:
-            _d["details_content"] = [
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
-            ]
+        _d["details_content"] = self.details_content
         return _d
 
 

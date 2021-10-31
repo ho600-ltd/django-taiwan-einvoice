@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-30 22:27+0800\n"
+"POT-Creation-Date: 2021-10-31 17:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -193,6 +193,36 @@ msgstr "關閉"
 msgid "Print"
 msgstr "列印"
 
+msgctxt "taiwan_einvoice"
+msgid "Creator"
+msgstr "開立者"
+
+msgctxt "taiwan_einvoice"
+msgid "Random Number"
+msgstr "隨機碼"
+
+msgid "Generating Time"
+msgstr "開立時間"
+
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Tax Type"
+msgstr "稅額類別"
+
+msgid "Seller identifier"
+msgstr "賣方統編"
+
+msgid "Buyer identifier"
+msgstr "買方統編"
+
+msgctxt "E-Invoice"
+msgid "Is Cancel?"
+msgstr "是否作廢?"
+
+msgid "Re-Print Original Copy"
+msgstr "再列印正本"
+
 #, python-format
 msgid "%(total_count)s records"
 msgstr "共 %(total_count)s 筆"
@@ -202,13 +232,6 @@ msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電�
 
 msgid "Choose"
 msgstr "勾選"
-
-msgid "Tax Type"
-msgstr "稅額類別"
-
-msgctxt "taiwan_einvoice"
-msgid "Creator"
-msgstr "開立者"
 
 msgid "Generate Time"
 msgstr "開立時間"
@@ -241,6 +264,9 @@ msgstr "按鈕"
 
 msgid "Set default"
 msgstr "設為預設值"
+
+#~ msgid "Re-Print"
+#~ msgstr "列印"
 
 #~ msgid "Audit"
 #~ msgstr "查驗"

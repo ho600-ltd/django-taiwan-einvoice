@@ -243,6 +243,33 @@ function show_einvoice_modal(taiwan_einvoice_site) {
             dataType: 'json',
             contentType: 'application/json',
             success: function (json) {
+                var $modal_body = $('.modal-body', $modal);
+                $('span[field!=""]', $modal_body).each(function(){
+                    var $span = $(this);
+                    var field = $span.attr('field');
+                    if ($span.hasClass('datetime')) {
+                        var value = $('td[field="'+field+'"]', $tr).attr('value');
+                    } else {
+                        var value = $('td[field="'+field+'"]', $tr).text();
+                    }
+                    if (! value && json[field]) {
+                        value = json[field];
+                    }
+                    if (!value) {
+                        value = '';
+                    }
+                    $span.attr('value', value).text(value);
+                });
+                $('.datetime', $modal_body).each(taiwan_einvoice_site.convert_class_datetime(taiwan_einvoice_site));
+                for (var i=0; i<json['details_content'].length; i++) {
+                    if ('text' != json['details_content'][i]['type']) {
+                        continue;
+                    }
+                    var line = json['details_content'][i];
+                    $('div[field=details_content]', $modal_body).append(
+                        $("<pre>"+line['text']+"</pre>")
+                    );
+                }
                 $modal.modal('show');
             }
         });

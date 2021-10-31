@@ -31,16 +31,16 @@
                 </th>
             {% endif %}
             <th width="5%">{% trans "No." %}</th>
-            <th width="15%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
-            <th width="15%">{% trans "Track No." %}</th>
-            <th width="15%">{% trans "Tax Type" %}</th>
+            <th width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+            <th width="10%">{% trans "Track No." %}</th>
+            <th width="10%">{% trans "Tax Type" %}</th>
             <th width="10%">{% trans "Sales Amount" %}</th>
             <th width="10%">{% trans "Tax Amount" %}</th>
             <th width="10%">{% trans "Total Amount" %}</th>
-            <th width="15%">{% trans "Footprint No." %}</th>
-            <th width="15%">{% trans "Creator" context "taiwan_einvoice" %}</th>
-            <th width="20%">{% trans "Generate Time" %}</th>
-            <th width="10%">{% trans "Print Mark" %}</th>
+            <th width="10%">{% trans "Footprint No." %}</th>
+            <th width="10%">{% trans "Creator" context "taiwan_einvoice" %}</th>
+            <th width="30%">{% trans "Generate Time" %}</th>
+            <th width="5%">{% trans "Print Mark" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -60,8 +60,8 @@
                     <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
                     <td field="TotalAmount">{{ einvoice.amounts.TotalAmount }}</td>
                     <td field="generate_batch_no">{{ einvoice.generate_batch_no }}</td>
-                    <td>{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
-                    <td class="datetime" value="{{ einvoice.generate_time }}" format="Y-m-d H:i:s"></td>
+                    <td field="creator_first_name_id">{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
+                    <td class="datetime" field="generate_time" value="{{ einvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
                     <td field="print_mark" value="{{ einvoice.print_mark }}">{% if einvoice.print_mark %}{% trans "Yes" context "taiwan_einvoice_print_mark" %}{% endif %}</td>
                 </tr>
             {% endwith %}

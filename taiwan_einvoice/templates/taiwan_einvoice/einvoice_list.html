@@ -184,7 +184,7 @@
 
 
 <div class="modal fade" id="show_einvoice_modal" tabindex="-1" role="dialog"
-    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/?with_details_content=true"
     aria-labelledby="show_einvoice_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -196,9 +196,106 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Creator" context "taiwan_einvoice" %}</b><br/>
+                            <b>{% trans "Random Number" context "taiwan_einvoice" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="creator_first_name_id"></span><br/>
+                            <span field="random_number"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Generating Time" %}</b>
+                        </div>
+                        <div class="col">
+                            <span class="datetime" field="generate_time" value="" format="Y-m-d A H:i:s"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Year Month Range" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="year_month_range"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Footprint No." %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="generate_batch_no"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Tax Type" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="type__display"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Sales Amount" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="SalesAmount"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Tax Amount" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="TaxAmount"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Total Amount" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="TotalAmount"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Seller identifier" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="seller_identifier"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Buyer identifier" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="buyer_identifier"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Print Mark" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="print_mark"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Is Cancel?" context "E-Invoice" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="is_cancel"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Details" %}</b>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col" field="details_content">
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
-                <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print" %}</button>
+                <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print Original Copy" %}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>
