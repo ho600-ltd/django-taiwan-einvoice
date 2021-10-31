@@ -226,13 +226,6 @@ function suspend_print_einvoice () {
 };
 
 
-function re_print_original_copy () {
-    return function () {
-        alert('re_print_original_copy');
-    };
-};
-
-
 function print_einvoice_each_by_each(allow_number, button_id, target_selector_query) {
     var $button = $('#'+button_id);
     var $modal = $button.parents('.modal');
