@@ -54,7 +54,7 @@ def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
              }
     re_print_original_copy = invoice_data.get('re_print_original_copy', False)
     te_web = TEWeb.objects.get(id=te_web_id)
-    r = Receipt.create_receipt(te_web, invoice_json)
+    r = Receipt.create_receipt(te_web, invoice_json, re_print_original_copy=re_print_original_copy)
     try:
         p1 = Printer.objects.get(serial_number=serial_number)
     except Printer.DoesNotExist:
