@@ -85,7 +85,7 @@ async def connect_and_check_print_status(te_web):
     async with websockets.connect(url, ssl=SSL) as websocket:
         while True:
             try:
-                printers = await database_sync_to_async(check_print_status)(while_order)
+                printers = await database_sync_to_async(check_printer_status)(while_order)
                 printers['interval_seconds'] = {"value": interval_seconds}
                 await websocket.send(json.dumps(printers))
             except websockets.ConnectionClosed:
@@ -96,7 +96,7 @@ async def connect_and_check_print_status(te_web):
                 while_order += 1
 
         
-def check_print_status(while_order):
+def check_printer_status(while_order):
     lg.info("while_order: {}".format(while_order))
     result = Printer.load_printers(setup=False)
     return result
