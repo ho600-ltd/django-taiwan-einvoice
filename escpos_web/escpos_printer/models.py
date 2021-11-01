@@ -129,7 +129,7 @@ class Printer(models.Model):
     vendor_number = models.SmallIntegerField()
     product_number = models.SmallIntegerField()
     profile = models.CharField(max_length=2, choices=SUPPORT_PRINTERS)
-    receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES)
+    receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES, default='0')
 
 
     def __str__(self):
