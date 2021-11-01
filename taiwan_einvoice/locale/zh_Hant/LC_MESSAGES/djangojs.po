@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-31 17:04+0800\n"
+"POT-Creation-Date: 2021-11-01 13:41+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,6 +49,13 @@ msgid "E-Invoice: %(track_no_)s"
 msgid_plural "E-Invoice: %(track_no_)s"
 msgstr[0] "電子發票: %(track_no_)s"
 
+msgctxt "taiwan_einvoice"
+msgid "Error"
+msgstr "錯誤"
+
+msgid "It can not connect ESC/POS Printer Server"
+msgstr "無法連線發票機伺服器"
+
 msgid "Loading..."
 msgstr "處理中..."
 
@@ -58,13 +65,6 @@ msgstr "重印<br/>正本"
 msgctxt "suspend_print_einvoice"
 msgid "Suspend"
 msgstr "暫停"
-
-msgctxt "taiwan_einvoice"
-msgid "Error"
-msgstr "錯誤"
-
-msgid "It can not connect ESC/POS Printer Server"
-msgstr "無法連線發票機伺服器"
 
 msgid "Please choose one record at least"
 msgstr "請至少選擇 1 筆紀錄"

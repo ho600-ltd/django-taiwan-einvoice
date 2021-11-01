@@ -285,10 +285,12 @@
                     </div>
                     <div class="row">
                         <div class="col">
-                            <b>{% trans "Details" %}</b>
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#details_content_0" aria-expanded="true" aria-controls="details_content_0">
+                                {% trans "Details" %}
+                            </button>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row collapse" id="details_content_0">
                         <div class="col" field="details_content">
                         </div>
                     </div>
@@ -296,6 +298,43 @@
             </div>
             <div class="modal-footer">
                 <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print Original Copy" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="re_print_einvoice_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/?with_details_content=true"
+    aria-labelledby="show_einvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "Re-Print E-Invoice Original Copy" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>{% trans "Reason Example" %}:</h4>
+                <ol>
+                    <li>{% trans "ESC/POS Web: Sudden power trip" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Web: Suddenly Network down" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Sudden power trip" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Out of paper" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Paper in the wrong side" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Paper in the wrong type" context "escpos printing error example" %}</li>
+                    <li>{% trans "Original Copy: Lost" context "escpos printing error example" %}</li>
+                    <li>{% trans "Original Copy: Printing is not clear" context "escpos printing error example" %}</li>
+                    <li>{% trans "Else: Please descript the problem with the detailed comments to help the administrator improve this system" context "escpos printing error example" %}</li>
+                </ol>
+                <h4 style="color: red;">{% trans "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy" %}</h4>
+                <h4><span class="text-danger">*</span> {% trans "Re-Print Reason" %}:</h4>
+                <textarea class="form-control" cols="50" placeholder="{% trans 'Please input the re-print reason. You can copy the similar example as the above list.' %}"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="re_print_einvoice_sure_modal_button_0" type="button" class="re_print_einvoice_sure_modal btn btn-secondary">{% trans "Sure" %}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>

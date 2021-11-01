@@ -279,6 +279,23 @@ function show_einvoice_modal(taiwan_einvoice_site) {
 };
 
 
+function re_print_einvoice_modal(taiwan_einvoice_site) {
+    return function () {
+        var $status_button = $('#print_einvoice_modal_button_0');
+        if (0 >= $('img.status-on:visible', $status_button).length) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$WARNING_MODAL,
+                pgettext('taiwan_einvoice', 'Error'),
+                gettext('It can not connect ESC/POS Printer Server'));
+            return false;
+        }
+        var $btn = $(this);
+        var $modal = $('#re_print_einvoice_modal');
+        $modal.modal('show');
+    };
+};
+
+
 function print_einvoice_each_by_each(allow_number, button_id, target_selector_query) {
     var $button = $('#' + button_id);
     var $modal = $button.parents('.modal');
@@ -473,6 +490,7 @@ $(function () {
     }
     $('button.suspend_print_einvoice').click(suspend_print_einvoice(taiwan_einvoice_site));
     $('button.show_einvoice_modal').click(show_einvoice_modal(taiwan_einvoice_site));
+    $('button.re_print_einvoice_modal').click(re_print_einvoice_modal(taiwan_einvoice_site));
 
     var escposweb_id_name = $.cookie.get(taiwan_einvoice_site.default_escposweb_cookie_name);
     if (escposweb_id_name) {
@@ -493,9 +511,10 @@ $(function () {
         var $print_einvoice_button = $('.print_einvoice', $modal);
         $print_einvoice_button.click(print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_result_url));
         $btn.removeClass('btn-danger').addClass('btn-secondary').click(function () {
+            var $b = $(this);
             $('button.print_einvoice', $modal).show();
             $('select, input', $modal).removeAttr("disabled");
-            if (0 >= $('img.status-on:visible').length) {
+            if (0 >= $('img.status-on:visible', $b).length) {
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$WARNING_MODAL,
                     pgettext('taiwan_einvoice', 'Error'),
