@@ -109,6 +109,7 @@ class Printer(models.Model):
         ("u", "USB"),
     )
     SUPPORT_PRINTERS = (
+        ("-1", "default"),
         ("00", "TM-T88IV"),
         ("01", "TM-T88V"),
     )
@@ -154,7 +155,7 @@ class Printer(models.Model):
                 printer.type = "u"
                 printer.vendor_number = dev.idVendor
                 printer.product_number = dev.idProduct
-                printer.profile = cls.PRINTERS_DICT[product]
+                printer.profile = cls.PRINTERS_DICT.get(product, '-1')
                 printer.save()
                 if setup:
                     printer_device = UsbZhHant(printer.vendor_number,
