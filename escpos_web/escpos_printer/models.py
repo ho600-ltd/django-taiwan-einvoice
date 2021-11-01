@@ -117,6 +117,7 @@ class Printer(models.Model):
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
     RECEIPT_TYPES = (
+        ('0', "DOES NOT WORK"),
         ('5', '58mm Receipt'),
         ('6', '58mm E-Invoice'),
         ('8', '80mm Receipt'),
