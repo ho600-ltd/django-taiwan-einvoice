@@ -136,41 +136,42 @@ class Printer(models.Model):
 
 
     @classmethod
-    def load_printers(cls, idVendor=0x04b8, idProduct=0x0202, setup=True):
+    def load_printers(cls, idVendor_idProduct_set=((0x04b8, 0x0202),), setup=True):
         for k, v in cls.PRINTERS.items():
             if isinstance(v.get('printer_device', None), UsbZhHant):
                 v['printer_device'].close()
         cls.PRINTERS = {}
 
-        for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
-            serial_number = usb.util.get_string(dev, dev.iSerialNumber)
-            product = usb.util.get_string(dev, dev.iProduct)
-            try:
-                printer = cls.objects.get(serial_number=serial_number)
-            except cls.DoesNotExist:
-                max_length = cls._meta.get_field('nickname').max_length
-                printer = cls(serial_number=serial_number, nickname=serial_number[-1*max_length:])
-            printer.type = "u"
-            printer.vendor_number = dev.idVendor
-            printer.product_number = dev.idProduct
-            printer.profile = cls.PRINTERS_DICT[product]
-            printer.save()
-            if setup:
-                printer_device = UsbZhHant(printer.vendor_number,
-                                           printer.product_number,
-                                           usb_args={"address": dev.address, "bus": dev.bus},
-                                           profile=printer.get_profile_display(),
-                                          )
-                cls.PRINTERS[serial_number] = {
-                    'nickname': printer.nickname,
-                    'receipt_type': printer.receipt_type,
-                    'printer_device': printer_device,
-                }
-            else:
-                cls.PRINTERS[serial_number] = {
-                    'nickname': printer.nickname,
-                    'receipt_type': printer.receipt_type,
-                }
+        for (idVendor, idProduct) in idVendor_idProduct_set:
+            for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
+                serial_number = usb.util.get_string(dev, dev.iSerialNumber)
+                product = usb.util.get_string(dev, dev.iProduct)
+                try:
+                    printer = cls.objects.get(serial_number=serial_number)
+                except cls.DoesNotExist:
+                    max_length = cls._meta.get_field('nickname').max_length
+                    printer = cls(serial_number=serial_number, nickname=serial_number[-1*max_length:])
+                printer.type = "u"
+                printer.vendor_number = dev.idVendor
+                printer.product_number = dev.idProduct
+                printer.profile = cls.PRINTERS_DICT[product]
+                printer.save()
+                if setup:
+                    printer_device = UsbZhHant(printer.vendor_number,
+                                            printer.product_number,
+                                            usb_args={"address": dev.address, "bus": dev.bus},
+                                            profile=printer.get_profile_display(),
+                                            )
+                    cls.PRINTERS[serial_number] = {
+                        'nickname': printer.nickname,
+                        'receipt_type': printer.receipt_type,
+                        'printer_device': printer_device,
+                    }
+                else:
+                    cls.PRINTERS[serial_number] = {
+                        'nickname': printer.nickname,
+                        'receipt_type': printer.receipt_type,
+                    }
         return cls.PRINTERS
 
 
