@@ -216,6 +216,20 @@ class TurnkeyWeb(models.Model):
         for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='08'):
             count += sitn.count_blank_no
         return count
+    @property
+    def mask_hash_key(self):
+        return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    @property
+    def mask_qrcode_seed(self):
+        return self.qrcode_seed[:4] + '************************' + self.qrcode_seed[-4:]
+    @property
+    def mask_turnkey_seed(self):
+        return self.turnkey_seed[:4] + '************************' + self.turnkey_seed[-4:]
+    @property
+    def mask_download_seed(self):
+        return self.download_seed[:4] + '************************' + self.download_seed[-4:]
+
+
     note = models.TextField()
 
 
@@ -388,8 +402,14 @@ class EInvoice(models.Model):
         return barcode_str
 
 
+    @classmethod
+    def escpos_einvoice_scripts(cls, id=0):
+        _sha1 = sha1(str(id).encode('utf-8')).hexdigest()
+        return "*{}*".format(_sha1)
+
+
     @property
-    def escpos_print_scripts(self):
+    def _escpos_einvoice_scripts(self):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
             return '0' * (8 - len(a)) + a
@@ -401,13 +421,7 @@ class EInvoice(models.Model):
         generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
         sales_amount_str = _hex_amount(amounts['SalesAmount'])
         total_amount_str = _hex_amount(amounts['TotalAmount'])
-        _d = {
-            "meet_to_tw_einvoice_standard": True,
-            "id": self.id,
-            "track_no": self.track_no,
-            "generate_time": generate_time.strftime('%Y-%m-%d %H:%M:%S%z'),
-            "width": "58mm",
-            "content": [
+        return [
                 {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
@@ -439,27 +453,38 @@ class EInvoice(models.Model):
                         ["{}:{}:{}".format(_p['Description'].replace(":", "-"), _p['Quantity'], _p['UnitPrice'])
                             for _p in details[:5]]),
                 },
-            ],
-        }
+            ]
+
+
+    @property
+    def details_content(self):
         if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
-            _d["details_content"] = self.content_object.escpos_print_scripts_of_details()
+            details_content = self.content_object.escpos_print_scripts_of_details()
         else:
-            _d["details_content"] = [
+            details_content = [
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
             ]
+        return details_content
+
+
+    @property
+    def escpos_print_scripts(self):
+        _d = {
+            "meet_to_tw_einvoice_standard": True,
+            "id": self.id,
+            "track_no": self.track_no,
+            "generate_time": self.generate_time.astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
+            "width": "58mm",
+            "content": EInvoice.escpos_einvoice_scripts(self.id),
+        }
+        _d["details_content"] = self.details_content
         return _d
 
 
     def set_print_mark_true(self):
-        if False == self.print_mark:
-            self.print_mark = True
-            self.update(update_fields=self.only_fields_can_update)
+        if False == self.print_mark and 'print_mark' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
-
-    def update(self, *args, **kwargs):
-        if self.only_fields_can_update == kwargs.get('update_fields', []):
-            super().update(update_fields=self.only_fields_can_update)
-
 
     def delete(self, *args, **kwargs):
         raise Exception('Can not delete')
@@ -489,10 +514,22 @@ class EInvoice(models.Model):
 
 
 class EInvoicePrintLog(models.Model):
+    user = models.ForeignKey(User, default=102, on_delete=models.DO_NOTHING)
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    copy_order = models.SmallIntegerField(default=0)
+    is_original_copy = models.BooleanField(default=True)
+    done_status = models.BooleanField(default=False)
     print_time = models.DateTimeField(null=True)
+    reason = models.TextField(default='')
+
+
+    def __str__(self):
+        return "{}:{} print einvoice id({}) with printer({}) at {}".format(
+            self.user.first_name, self.user.id,
+            self.einvoice.id,
+            self.printer.nickname,
+            self.print_time
+        )
 
 
 

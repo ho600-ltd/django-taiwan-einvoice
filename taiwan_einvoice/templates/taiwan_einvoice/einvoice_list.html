@@ -112,7 +112,7 @@
 {% block modals %}
 
 <div class="modal fade" id="print_einvoice_modal" tabindex="-1" role="dialog"
-    resource_url_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
     aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -176,9 +176,234 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default suspend_print_einvoice" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button id="print_einvoice_button_0" type="button" class="print_einvoice btn btn-primary">{% trans "Print" %}</button>
+                <button id="print_einvoice_button_0" type="button" class="print_einvoice btn btn-secondary">{% trans "Print" %}</button>
             </div>
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="show_einvoice_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/?with_details_content=true"
+    aria-labelledby="show_einvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "E-Invoice" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Creator" context "taiwan_einvoice" %}</b><br/>
+                            <b>{% trans "Random Number" context "taiwan_einvoice" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="creator_first_name_id"></span><br/>
+                            <span field="random_number"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Generating Time" %}</b>
+                        </div>
+                        <div class="col">
+                            <span class="datetime" field="generate_time" value="" format="Y-m-d A H:i:s"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Year Month Range" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="year_month_range"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Footprint No." %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="generate_batch_no"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Tax Type" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="type__display"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Sales Amount" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="SalesAmount"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Tax Amount" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="TaxAmount"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Total Amount" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="TotalAmount"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Seller identifier" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="seller_identifier"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Buyer identifier" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="buyer_identifier"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Print Mark" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="print_mark"></span>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Is Cancel?" context "E-Invoice" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="is_cancel"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-link" data-toggle="collapse" data-target="#details_content_0" aria-expanded="true" aria-controls="details_content_0">
+                                {% trans "Details" %}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row collapse" id="details_content_0">
+                        <div class="col" field="details_content">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print Original Copy" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="re_print_einvoice_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/?with_details_content=true"
+    aria-labelledby="show_einvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "Re-Print E-Invoice Original Copy" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>{% trans "Reason Example" %}:</h4>
+                <ol>
+                    <li>{% trans "ESC/POS Web: Sudden power trip" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Web: Suddenly Network down" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Sudden power trip" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Out of paper" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Paper in the wrong side" context "escpos printing error example" %}</li>
+                    <li>{% trans "ESC/POS Printer: Paper in the wrong type" context "escpos printing error example" %}</li>
+                    <li>{% trans "Original Copy: Lost" context "escpos printing error example" %}</li>
+                    <li>{% trans "Original Copy: Printing is not clear" context "escpos printing error example" %}</li>
+                    <li>{% trans "Else: Please descript the problem with the detailed comments to help the administrator improve this system" context "escpos printing error example" %}</li>
+                </ol>
+                <h4 style="color: red;">{% trans "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy" %}</h4>
+                <h4><span class="text-danger">*</span> {% trans "Re-Print Reason" %}:</h4>
+                <textarea name="reason" class="form-control" cols="50" placeholder="{% trans 'Please input the re-print reason. You can copy the similar example as the above list.' %}"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="re_print_einvoice_sure_modal_button_0" type="button" class="re_print_einvoice_sure_modal btn btn-secondary">{% trans "Configure" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="re_print_einvoice_sure_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
+    aria-labelledby="show_einvoice_sure_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_sure_modal_label">{% trans "Sure to Re-Print E-Invoice Original Copy?" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4 style="color: red;">{% trans "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy" %}</h4>
+                <h5>{% trans "Re-Print Original Copy Reason" %}: <span class="text-danger" field="reason"></span></h5>
+                <ul>
+                    <li>{% trans "58mm E-Invoice" %}:
+                        <select name="einvoice_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Details" %}(
+                        <input type="checkbox" name="append_to_einvoice"/>
+                        {% trans "Print details at the same time" %} ):
+                        <select name="details_printer" class="form-control">
+                        </select>
+                    </li>
+                </ul>
+                <table class="table table-hover table-striped">
+                    <thead>
+                            <tr>
+                                <th field="no">{% trans "No." %}</th>
+                                <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                                <th field="track_no_">{% trans "Track No." %}</th>
+                                <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                <th field="TotalAmount">{% trans "Total Amount" %}</th>
+                                <th field="generate_batch_no">{% trans "Footprint No." %}</th>
+                                <th field="print_mark">{% trans "Re-Print" %}</th>
+                                <th field="status">{% trans "Status" %}</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tr_tmpl" style="display: none;">
+                            <td field="no"></td>
+                            <td field="year_month_range"></td>
+                            <td field="track_no_"></td>
+                            <td field="SalesAmount"></td>
+                            <td field="TaxAmount"></td>
+                            <td field="TotalAmount"></td>
+                            <td field="generate_batch_no"></td>
+                            <td field="print_mark"></td>
+                            <td field="status"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="print_einvoice_button_1" type="button" style="display: none;"
+                    class="print_einvoice btn btn-secondary">{% trans "Print Duplication" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

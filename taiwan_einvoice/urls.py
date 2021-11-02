@@ -44,7 +44,7 @@ router.register('canceleinvoice', views.CancelEInvoiceModelViewSet, basename="ca
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [
-    path('escpos_web/<int:escpos_web_id>/', views.escpos_web, name='escpos_web'),
+    path('escpos_web_demo/<int:escpos_web_id>/', views.escpos_web_demo, name='escpos_web_demo'),
     re_path(r'^api/{}/'.format(TaiwanEInvoiceAPIRootView.version),
         include((router.urls, "taiwaneinvoiceapi"), namespace="taiwaneinvoiceapi")),
     path('', views.index, name='index'),

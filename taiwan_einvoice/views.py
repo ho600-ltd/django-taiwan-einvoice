@@ -49,13 +49,13 @@ def index(request):
     })
 
 
-def escpos_web(request, escpos_web_id):
+def escpos_web_demo(request, escpos_web_id):
     try:
         escpos_web = ESCPOSWeb.objects.get(id=escpos_web_id)
     except ESCPOSWeb.DoesNotExist:
         raise Http404("ESCPOS Web does not exist!")
     return render(request,
-                  'taiwan_einvoice/escpos_web.html',
+                  'taiwan_einvoice/escpos_web_demo.html',
                   {"escpos_web": escpos_web})
 
 

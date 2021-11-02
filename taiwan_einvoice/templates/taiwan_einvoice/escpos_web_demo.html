@@ -36,7 +36,7 @@
             const invoice_data = JSON.parse(data.invoice_json);
             const ul = document.querySelector('#einvoice-invoice');
             const li = document.createElement("li");
-            li.setAttribute("id", data.batch_no);
+            li.setAttribute("id", data.unixtimestamp);
             li.appendChild(document.createTextNode(invoice_data.track_no));
             ul.prepend(li);
         };
@@ -49,10 +49,10 @@
             const invoiceInputDom = document.querySelector('#einvoice-invoice-input');
             const invoice_json = invoiceInputDom.value;
             if (invoice_json) {
-                const batch_no = Math.random();
+                const unixtimestamp = Date.now() / 1000;
                 escpos_web_socket.send(JSON.stringify({
                     'serial_number': document.querySelector('#printer-serial_number').value,
-                    'batch_no': batch_no,
+                    'unixtimestamp': unixtimestamp,
                     'invoice_json': invoice_json
                 }));
                 invoiceInputDom.value = '';
@@ -78,6 +78,9 @@
             for (k in data) {
                 console.log(k);
                 console.log(data[k]);
+                if (undefined == data[k]['nickname']) {
+                    continue;
+                }
                 const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
                 const option = new Option(v, k);
                 if (k == select_value) {
@@ -103,10 +106,10 @@
 
         escpos_web_print_result_socket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            const batch_no = data.batch_no;
+            const unixtimestamp = data.unixtimestamp;
             const track_no = data.track_no;
             const status = data.status;
-            const li = document.getElementById(batch_no);
+            const li = document.getElementById(unixtimestamp);
             if (status) {
                 li.textContent = 'Done: ' + track_no;
             } else {

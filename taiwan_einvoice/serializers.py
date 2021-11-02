@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from rest_framework.serializers import CharField, IntegerField
-from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer
+from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField
 from taiwan_einvoice.models import (
     ESCPOSWeb,
     LegalEntity,
@@ -102,11 +102,37 @@ class TurnkeyWebSerializer(ModelSerializer):
     seller_dict = SellerSerializer(source='seller', read_only=True)
     count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
     count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
+    mask_hash_key = CharField(read_only=True)
+    mask_qrcode_seed = CharField(read_only=True)
+    mask_turnkey_seed = CharField(read_only=True)
+    mask_download_seed = CharField(read_only=True)
+
+
 
     class Meta:
         model = TurnkeyWeb
-        fields = '__all__'
-
+        fields = (
+            'id', 'resource_uri', 'seller_dict',
+            'count_now_use_07_sellerinvoicetrackno_blank_no',
+            'count_now_use_08_sellerinvoicetrackno_blank_no',
+            'on_working',
+            'name',
+            'mask_hash_key',
+            'transport_id',
+            'party_id',
+            'routing_id',
+            'mask_qrcode_seed',
+            'mask_turnkey_seed',
+            'mask_download_seed',
+            'note',
+            'seller'
+        )
+        extra_kwargs = {
+            'hash_key': {'write_only': True},
+            'qrcode_seed': {'write_only': True},
+            'turnkey_seed': {'write_only': True},
+            'download_seed': {'write_only': True},
+        }
 
 
     def get_queryset(self):
@@ -140,6 +166,13 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
             return SellerInvoiceTrackNo.objects.none()
 
 
+class DetailsContentField(ReadOnlyField):
+    def get_attribute(self, instance):
+        request = self.context['request']
+        if request.GET.get('with_details_content', '') in ['true', '1']:
+            return super(DetailsContentField, self).get_attribute(instance)
+        return []
+
 
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
@@ -148,6 +181,7 @@ class EInvoiceSerializer(ModelSerializer):
     seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
     track_no = CharField(read_only=True)
     track_no_ = CharField(read_only=True)
+    details_content = DetailsContentField()
 
     class Meta:
         model = EInvoice

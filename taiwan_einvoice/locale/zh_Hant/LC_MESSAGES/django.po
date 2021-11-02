@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-25 19:23+0800\n"
+"POT-Creation-Date: 2021-11-02 20:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Print Serial No.:{}"
+msgstr "列印序號: {}"
 
 msgid "58mm Receipt"
 msgstr "58mm 收據"
@@ -63,8 +66,20 @@ msgstr "電子發票"
 msgid "Cancel EI."
 msgstr "作廢發票"
 
-msgid "Audit"
-msgstr "查驗"
+msgid "Else"
+msgstr "其他"
+
+msgid "Acounter Audit"
+msgstr "會計查驗"
+
+msgid "Print Log"
+msgstr "列印紀錄"
+
+msgid "Legal Entity"
+msgstr "買受人"
+
+msgid "Turnkey Web"
+msgstr "Turnkey 伺服器"
 
 msgid "Timezone"
 msgstr "時區"
@@ -181,6 +196,102 @@ msgstr "關閉"
 msgid "Print"
 msgstr "列印"
 
+msgctxt "taiwan_einvoice"
+msgid "Creator"
+msgstr "開立者"
+
+msgctxt "taiwan_einvoice"
+msgid "Random Number"
+msgstr "隨機碼"
+
+msgid "Generating Time"
+msgstr "開立時間"
+
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Tax Type"
+msgstr "稅額類別"
+
+msgid "Seller identifier"
+msgstr "賣方統編"
+
+msgid "Buyer identifier"
+msgstr "買方統編"
+
+msgctxt "E-Invoice"
+msgid "Is Cancel?"
+msgstr "是否作廢?"
+
+msgid "Re-Print Original Copy"
+msgstr "再列印正本"
+
+msgid "Re-Print E-Invoice Original Copy"
+msgstr "再列印電子發票正本"
+
+msgid "Reason Example"
+msgstr "理由範例"
+
+msgctxt "escpos printing error example"
+msgid "ESC/POS Web: Sudden power trip"
+msgstr "發票機伺服器: 突然斷電"
+
+msgctxt "escpos printing error example"
+msgid "ESC/POS Web: Suddenly Network down"
+msgstr "發票機伺服器: 網路突然中斷"
+
+msgctxt "escpos printing error example"
+msgid "ESC/POS Printer: Sudden power trip"
+msgstr "感熱式印表機: 突然斷電"
+
+msgctxt "escpos printing error example"
+msgid "ESC/POS Printer: Out of paper"
+msgstr "感熱式印表機: 紙卷用盡"
+
+msgctxt "escpos printing error example"
+msgid "ESC/POS Printer: Paper in the wrong side"
+msgstr "感熱式印表機: 紙卷置入方向錯誤"
+
+msgctxt "escpos printing error example"
+msgid "ESC/POS Printer: Paper in the wrong type"
+msgstr "感熱式印表機: 使用錯誤類型紙卷"
+
+msgctxt "escpos printing error example"
+msgid "Original Copy: Lost"
+msgstr "先前列印的正本已遺失"
+
+msgctxt "escpos printing error example"
+msgid "Original Copy: Printing is not clear"
+msgstr "先前列印的正本字句不清晰"
+
+msgctxt "escpos printing error example"
+msgid "Else: Please descript the problem with the detailed comments to help the administrator improve this system"
+msgstr "其他: 請用詳細註釋描述問題，以幫助管理員改進本系統"
+
+msgid "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy"
+msgstr "備註: 如果先前列印出來的電子發票正本，其字句不清晰、只印一半或是其他問題，須要重印正本的話，請務必在該有問題的正本蓋上'作廢重印'的章"
+
+msgid "Re-Print Reason"
+msgstr "列印理由"
+
+msgid "Please input the re-print reason. You can copy the similar example as the above list."
+msgstr "請輸入重印理由，您可以從上面範列列表中複製合適的項目。"
+
+msgid "Configure"
+msgstr "設定"
+
+msgid "Sure to Re-Print E-Invoice Original Copy?"
+msgstr "確定列印電子發票正本?"
+
+msgid "Re-Print Original Copy Reason"
+msgstr "再列印正本理由"
+
+msgid "Re-Print"
+msgstr "重印"
+
+msgid "Print Duplication"
+msgstr "列印副本"
+
 #, python-format
 msgid "%(total_count)s records"
 msgstr "共 %(total_count)s 筆"
@@ -190,13 +301,6 @@ msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電�
 
 msgid "Choose"
 msgstr "勾選"
-
-msgid "Tax Type"
-msgstr "稅額類別"
-
-msgctxt "taiwan_einvoice"
-msgid "Creator"
-msgstr "開立者"
 
 msgid "Generate Time"
 msgstr "開立時間"
@@ -229,3 +333,9 @@ msgstr "按鈕"
 
 msgid "Set default"
 msgstr "設為預設值"
+
+#~ msgid "Sure"
+#~ msgstr "確定"
+
+#~ msgid "Audit"
+#~ msgstr "查驗"

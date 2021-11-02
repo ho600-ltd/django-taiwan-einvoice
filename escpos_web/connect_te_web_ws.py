@@ -28,7 +28,7 @@ async def connect_and_print_receipt(te_web):
             data= json.loads(data_json)
             result = await database_sync_to_async(print_receipt)(te_web.id,
                                                                 data['serial_number'],
-                                                                data['batch_no'],
+                                                                data['unixtimestamp'],
                                                                 data['invoice_json'])
             token_auth = te_web.generate_token_auth()
             url = "{}print_result/{}/".format(te_web.url, token_auth)
@@ -38,10 +38,10 @@ async def connect_and_print_receipt(te_web):
             lg.info("print order: {}".format(i))
 
         
-def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
+def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
     lg.info("te_web_id: {}".format(te_web_id))
     lg.info("serial_number: {}".format(serial_number))
-    lg.info("batch_no: {}".format(batch_no))
+    lg.info("unixtimestamp: {}".format(unixtimestamp))
     lg.info("type: {} => should be str".format(type(invoice_json)))
     lg.info("invoice_json: {}".format(invoice_json))
     try:
@@ -50,10 +50,11 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
         return 'Init'
     result = {"meet_to_tw_einvoice_standard": invoice_data['meet_to_tw_einvoice_standard'],
               "track_no": invoice_data['track_no'],
-              "batch_no": batch_no,
+              "unixtimestamp": unixtimestamp,
              }
+    re_print_original_copy = invoice_data.get('re_print_original_copy', False)
     te_web = TEWeb.objects.get(id=te_web_id)
-    r = Receipt.create_receipt(te_web, invoice_json)
+    r = Receipt.create_receipt(te_web, invoice_json, re_print_original_copy=re_print_original_copy)
     try:
         p1 = Printer.objects.get(serial_number=serial_number)
     except Printer.DoesNotExist:
@@ -61,7 +62,7 @@ def print_receipt(te_web_id, serial_number, batch_no, invoice_json):
         result['status_message'] = _("{} is not exist").format(serial_number)
     else:
         try:
-            _result = r.print(p1, re_print_original_copy=invoice_data.get('re_print_original_copy', False))
+            _result = r.print(p1, re_print_original_copy=re_print_original_copy)
         except Exception as e:
             result['status'] = False
             result['status_message'] = "Exception: {}".format(e)
@@ -84,7 +85,7 @@ async def connect_and_check_print_status(te_web):
     async with websockets.connect(url, ssl=SSL) as websocket:
         while True:
             try:
-                printers = await database_sync_to_async(check_print_status)(while_order)
+                printers = await database_sync_to_async(check_printer_status)(while_order)
                 printers['interval_seconds'] = {"value": interval_seconds}
                 await websocket.send(json.dumps(printers))
             except websockets.ConnectionClosed:
@@ -95,9 +96,11 @@ async def connect_and_check_print_status(te_web):
                 while_order += 1
 
         
-def check_print_status(while_order):
+def check_printer_status(while_order):
     lg.info("while_order: {}".format(while_order))
-    result = Printer.load_printers(setup=False)
+    result = Printer.load_printers(idVendor_idProduct_set=((0x04b8, 0x0202),
+                                                           (0x0483, 0x5743),
+                                  ), setup=False)
     return result
 
 
