@@ -28,7 +28,8 @@ def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
         is_original_copy=
             True if invoice_data.get('re_print_original_copy', False)
             else is_original_copy,
-        print_time=datetime.datetime.utcfromtimestamp(data['unixtimestamp'])
+        print_time=datetime.datetime.utcfromtimestamp(data['unixtimestamp']),
+        reason=data.get('reason', ''),
     )
     epl.save()
     return epl.id

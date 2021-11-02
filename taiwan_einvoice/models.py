@@ -520,6 +520,7 @@ class EInvoicePrintLog(models.Model):
     is_original_copy = models.BooleanField(default=True)
     done_status = models.BooleanField(default=False)
     print_time = models.DateTimeField(null=True)
+    reason = models.TextField(default='')
 
 
     def __str__(self):

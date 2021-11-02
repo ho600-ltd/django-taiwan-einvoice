@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-02 17:30+0800\n"
+"POT-Creation-Date: 2021-11-02 20:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -59,15 +59,18 @@ msgstr "無法連線發票機伺服器"
 msgid "Reason must has more than 10 words."
 msgstr "理由須超過 10 個字。"
 
-msgid "Loading..."
-msgstr "處理中..."
-
 msgid "Re-print original copy"
 msgstr "重印<br/>正本"
+
+msgid "Loading..."
+msgstr "處理中..."
 
 msgctxt "suspend_print_einvoice"
 msgid "Suspend"
 msgstr "暫停"
+
+msgid "Executed"
+msgstr "已執行"
 
 msgid "Please choose one record at least"
 msgstr "請至少選擇 1 筆紀錄"

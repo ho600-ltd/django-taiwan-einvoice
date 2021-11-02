@@ -342,7 +342,7 @@
 </div>
 
 <div class="modal fade" id="re_print_einvoice_sure_modal" tabindex="-1" role="dialog"
-    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/?with_details_content=true"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts/"
     aria-labelledby="show_einvoice_sure_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -399,6 +399,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="print_einvoice_button_1" type="button" style="display: none;"
+                    class="print_einvoice btn btn-secondary">{% trans "Print Duplication" %}</button>
             </div>
         </div>
     </div>
