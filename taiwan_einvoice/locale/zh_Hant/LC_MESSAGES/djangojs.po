@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-01 13:41+0800\n"
+"POT-Creation-Date: 2021-11-02 17:30+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -55,6 +55,9 @@ msgstr "錯誤"
 
 msgid "It can not connect ESC/POS Printer Server"
 msgstr "無法連線發票機伺服器"
+
+msgid "Reason must has more than 10 words."
+msgstr "理由須超過 10 個字。"
 
 msgid "Loading..."
 msgstr "處理中..."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-01 13:51+0800\n"
+"POT-Creation-Date: 2021-11-02 17:30+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -234,42 +234,42 @@ msgstr "理由範例"
 
 msgctxt "escpos printing error example"
 msgid "ESC/POS Web: Sudden power trip"
-msgstr "發票伺服器: 突然斷電"
+msgstr "發票機伺服器: 突然斷電"
 
 msgctxt "escpos printing error example"
 msgid "ESC/POS Web: Suddenly Network down"
-msgstr "發票伺服器: 網路突然中斷"
+msgstr "發票機伺服器: 網路突然中斷"
 
 msgctxt "escpos printing error example"
 msgid "ESC/POS Printer: Sudden power trip"
-msgstr "印表機: 突然斷電"
+msgstr "感熱式印表機: 突然斷電"
 
 msgctxt "escpos printing error example"
 msgid "ESC/POS Printer: Out of paper"
-msgstr "印表機: 紙卷用盡"
+msgstr "感熱式印表機: 紙卷用盡"
 
 msgctxt "escpos printing error example"
 msgid "ESC/POS Printer: Paper in the wrong side"
-msgstr "印表機: 紙卷置入錯誤"
+msgstr "感熱式印表機: 紙卷置入方向錯誤"
 
 msgctxt "escpos printing error example"
 msgid "ESC/POS Printer: Paper in the wrong type"
-msgstr "印表機: 使用錯誤類型紙卷"
+msgstr "感熱式印表機: 使用錯誤類型紙卷"
 
 msgctxt "escpos printing error example"
 msgid "Original Copy: Lost"
-msgstr "正本: 已遺失"
+msgstr "先前列印的正本已遺失"
 
 msgctxt "escpos printing error example"
 msgid "Original Copy: Printing is not clear"
-msgstr "正本: 列印不清晰"
+msgstr "先前列印的正本字句不清晰"
 
 msgctxt "escpos printing error example"
 msgid "Else: Please descript the problem with the detailed comments to help the administrator improve this system"
 msgstr "其他: 請用詳細註釋描述問題，以幫助管理員改進本系統"
 
 msgid "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy"
-msgstr "備註: 如果原來的電子發票正本列印得有問題，須要重印正本的話，請務必在該有問題的正本上蓋上'作廢重印'的章"
+msgstr "備註: 如果先前列印出來的電子發票正本，其字句不清晰、只印一半或是其他問題，須要重印正本的話，請務必在該有問題的正本蓋上'作廢重印'的章"
 
 msgid "Re-Print Reason"
 msgstr "列印理由"
@@ -277,8 +277,17 @@ msgstr "列印理由"
 msgid "Please input the re-print reason. You can copy the similar example as the above list."
 msgstr "請輸入重印理由，您可以從上面範列列表中複製合適的項目。"
 
-msgid "Sure"
-msgstr "確定"
+msgid "Configure"
+msgstr "設定"
+
+msgid "Sure to Re-Print E-Invoice Original Copy?"
+msgstr "確定列印電子發票正本?"
+
+msgid "Re-Print Original Copy Reason"
+msgstr "再列印正本理由"
+
+msgid "Re-Print"
+msgstr "重印"
 
 #, python-format
 msgid "%(total_count)s records"
@@ -321,6 +330,9 @@ msgstr "按鈕"
 
 msgid "Set default"
 msgstr "設為預設值"
+
+#~ msgid "Sure"
+#~ msgstr "確定"
 
 #~ msgid "Audit"
 #~ msgstr "查驗"

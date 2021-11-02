@@ -272,6 +272,7 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                         $("<pre>"+line['text']+"</pre>")
                     );
                 }
+                $modal.data('einvoice_id', einvoice_id);
                 $modal.modal('show');
             }
         });
@@ -290,7 +291,98 @@ function re_print_einvoice_modal(taiwan_einvoice_site) {
             return false;
         }
         var $btn = $(this);
+        var $from_modal = $btn.parents('.modal');
         var $modal = $('#re_print_einvoice_modal');
+        $modal.data("einvoice_id", $from_modal.data('einvoice_id'));
+        $modal.modal('show');
+    };
+};
+
+
+function re_print_einvoice_sure_modal(taiwan_einvoice_site) {
+    return function () {
+        var $status_button = $('#print_einvoice_modal_button_0');
+        if (0 >= $('img.status-on:visible', $status_button).length) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$WARNING_MODAL,
+                pgettext('taiwan_einvoice', 'Error'),
+                gettext('It can not connect ESC/POS Printer Server'));
+            return false;
+        }
+        var $btn = $(this);
+        var $from_modal = $btn.parents('.modal');
+        var einvoice_id = $from_modal.data("einvoice_id");
+        var reason = $('textarea[name=reason]', $from_modal).val();
+        if (!reason && reason.length < 10) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$WARNING_MODAL,
+                pgettext('taiwan_einvoice', 'Error'),
+                gettext('Reason must has more than 10 words.'));
+            $('textarea[name=reason]', $from_modal).focus();
+            return false;
+        }
+        var $modal = $('#re_print_einvoice_sure_modal');
+        $('[field=reason]', $modal).text(reason);
+        $modal.data('einvoice_id', einvoice_id);
+        $('[name=reason]', $from_modal).val('');
+
+        var $einvoice_printer_select = $('[name=einvoice_printer]', $modal);
+        $('option', $einvoice_printer_select).remove();
+        $('#print_einvoice_modal select[name=einvoice_printer] option').each(function(){
+            var value = $(this).attr('value');
+            var text = $(this).text();
+            $einvoice_printer_select.append($('<option value="'+value+'">'+text+'</option>'));
+        });
+        var $details_printer_select = $('[name=details_printer]', $modal);
+        $('option', $details_printer_select).remove();
+        $('#print_einvoice_modal select[name=details_printer] option').each(function(){
+            var value = $(this).attr('value');
+            var text = $(this).text();
+            $details_printer_select.append($('<option value="'+value+'">'+text+'</option>'));
+        });
+
+        var $table = $('table.search_result');
+        var $modal_table = $('table', $modal);
+        $('tbody tr.data', $modal_table).remove();
+        var no = 1;
+        $('tr[einvoice_id='+einvoice_id+']', $table).each(function () {
+            var $tr = $(this);
+            var $tr_tmpl = $('tr.tr_tmpl', $modal_table).clone().removeClass('tr_tmpl').addClass('data');
+            $tr_tmpl.attr('einvoice_id', einvoice_id);
+            $('td[field=no]', $tr_tmpl).text(no);
+            var keys = [];
+            $('td', $tr_tmpl).each(function () {
+                var field = $(this).attr('field');
+                if (field && field != 'no') {
+                    keys.push(field);
+                }
+            })
+            for (var i = 0; i < keys.length; i++) {
+                var t = $('td[field=' + keys[i] + ']', $tr).text();
+                $('td[field=' + keys[i] + ']', $tr_tmpl).attr('value', t).text(t);
+            }
+            $tr_tmpl.show().appendTo($('tbody', $modal_table));
+            no += 1;
+        });
+
+        $from_modal.modal('hide');
+        $modal.modal('show');
+    };
+};
+
+
+function re_print_einvoice_sure(taiwan_einvoice_site) {
+    return function () {
+        var $status_button = $('#print_einvoice_modal_button_0');
+        if (0 >= $('img.status-on:visible', $status_button).length) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$WARNING_MODAL,
+                pgettext('taiwan_einvoice', 'Error'),
+                gettext('It can not connect ESC/POS Printer Server'));
+            return false;
+        }
+        var $btn = $(this);
+        var $modal = $('#re_print_einvoice_sure_modal');
         $modal.modal('show');
     };
 };
@@ -491,6 +583,7 @@ $(function () {
     $('button.suspend_print_einvoice').click(suspend_print_einvoice(taiwan_einvoice_site));
     $('button.show_einvoice_modal').click(show_einvoice_modal(taiwan_einvoice_site));
     $('button.re_print_einvoice_modal').click(re_print_einvoice_modal(taiwan_einvoice_site));
+    $('button.re_print_einvoice_sure_modal').click(re_print_einvoice_sure_modal(taiwan_einvoice_site));
 
     var escposweb_id_name = $.cookie.get(taiwan_einvoice_site.default_escposweb_cookie_name);
     if (escposweb_id_name) {
@@ -501,7 +594,7 @@ $(function () {
         var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
         var ws_escposweb_print_result_url = $btn.attr('ws_escposweb_print_result_url_tmpl').replace('{id}', escposweb_id);
         $('span#default_escpos_print_name', $btn).text(escposweb_name);
-        var $table = $('table.table');
+        var $table = $('table.search_result');
         var $modal = $('#print_einvoice_modal');
         $modal.data({
             ws_escposweb_status_url: ws_escposweb_status_url,

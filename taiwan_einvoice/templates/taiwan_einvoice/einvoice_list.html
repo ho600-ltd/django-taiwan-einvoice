@@ -331,13 +331,77 @@
                 </ol>
                 <h4 style="color: red;">{% trans "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy" %}</h4>
                 <h4><span class="text-danger">*</span> {% trans "Re-Print Reason" %}:</h4>
-                <textarea class="form-control" cols="50" placeholder="{% trans 'Please input the re-print reason. You can copy the similar example as the above list.' %}"></textarea>
+                <textarea name="reason" class="form-control" cols="50" placeholder="{% trans 'Please input the re-print reason. You can copy the similar example as the above list.' %}"></textarea>
             </div>
             <div class="modal-footer">
-                <button id="re_print_einvoice_sure_modal_button_0" type="button" class="re_print_einvoice_sure_modal btn btn-secondary">{% trans "Sure" %}</button>
+                <button id="re_print_einvoice_sure_modal_button_0" type="button" class="re_print_einvoice_sure_modal btn btn-secondary">{% trans "Configure" %}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="re_print_einvoice_sure_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/?with_details_content=true"
+    aria-labelledby="show_einvoice_sure_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_sure_modal_label">{% trans "Sure to Re-Print E-Invoice Original Copy?" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4 style="color: red;">{% trans "Note: If the Original E-Invoice Copy was generated as not well, please stamp the 'Invalid and Re-Print' on this copy" %}</h4>
+                <h5>{% trans "Re-Print Original Copy Reason" %}: <span class="text-danger" field="reason"></span></h5>
+                <ul>
+                    <li>{% trans "58mm E-Invoice" %}:
+                        <select name="einvoice_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Details" %}(
+                        <input type="checkbox" name="append_to_einvoice"/>
+                        {% trans "Print details at the same time" %} ):
+                        <select name="details_printer" class="form-control">
+                        </select>
+                    </li>
+                </ul>
+                <table class="table table-hover table-striped">
+                    <thead>
+                            <tr>
+                                <th field="no">{% trans "No." %}</th>
+                                <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                                <th field="track_no_">{% trans "Track No." %}</th>
+                                <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                <th field="TotalAmount">{% trans "Total Amount" %}</th>
+                                <th field="generate_batch_no">{% trans "Footprint No." %}</th>
+                                <th field="print_mark">{% trans "Re-Print" %}</th>
+                                <th field="status">{% trans "Status" %}</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tr_tmpl" style="display: none;">
+                            <td field="no"></td>
+                            <td field="year_month_range"></td>
+                            <td field="track_no_"></td>
+                            <td field="SalesAmount"></td>
+                            <td field="TaxAmount"></td>
+                            <td field="TotalAmount"></td>
+                            <td field="generate_batch_no"></td>
+                            <td field="print_mark"></td>
+                            <td field="status"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
