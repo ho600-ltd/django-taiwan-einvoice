@@ -254,7 +254,14 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                     } else {
                         var value = $('td[field="'+field+'"]', $tr).text();
                     }
-                    if (! value && json[field]) {
+                    if (field == 'print_mark') {
+                        value = json[field];
+                        if (value) {
+                            $('.re_print_einvoice_modal', $modal).show();
+                        } else {
+                            $('.re_print_einvoice_modal', $modal).hide();
+                        }
+                    } else if (!value && json[field]) {
                         value = json[field];
                     }
                     if (!value) {
@@ -521,6 +528,7 @@ function print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_pri
             var target_selector_query = 'table';
             var $print_einvoice_btn = $(this);
             var $modal = $print_einvoice_btn.parents('.modal');
+            $('span[field=reason]', $modal).text('');
         } else if ($btn.hasClass('re_print_original_copy')) {
             var $tr = $btn.parents('tr.data');
             var target_selector_query = 'table tbody tr.data[einvoice_id=' + $tr.attr('einvoice_id') + ']';
@@ -528,6 +536,10 @@ function print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_pri
             var $target = $(target_selector_query, $modal);
             var $print_einvoice_btn = $('button.print_einvoice', $modal);
             $('td[field=status]', $target).attr('value', '').text('');
+            var reason = $('span[field=reason]', $modal).text();
+            if (!reason) {
+                $('span[field=reason]', $modal).text(gettext('Print original copy before close the modal.'));
+            }
         };
         var allow_number = Math.random();
         $modal.data({ allow_number: allow_number, suspend: false });
