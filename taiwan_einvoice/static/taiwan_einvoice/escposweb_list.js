@@ -10,14 +10,6 @@ $(function () {
 
     adjust_pagination_html();
 
-    $("button.search").click(function () {
-        var url_parts = window.location.href.split('?');
-        var params = new URLSearchParams($('form:not(".language_form")').serialize());
-
-        var result_url = url_parts[0] + '?' + params.toString();
-        window.location.href = result_url;
-    });
-
     var usage_message = gettext('Default ESC/POS Printer');
     var show_default_escposweb = function () {
         var default_escposweb_id_name = Cookies.get(taiwan_einvoice_site.default_escposweb_cookie_name);

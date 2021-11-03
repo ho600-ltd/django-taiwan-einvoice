@@ -28,6 +28,8 @@ $(function () {
             "6": "58mm",
             "8": "80mm"
         };
+        this.datetimepicker_format = 'YYYY-MM-DD HH:mm:ss';
+        this.django_datetime_format = 'Y-m-d H:i:s';
 
         for (var k in configure) {
             this[k] = configure[k];
@@ -48,7 +50,7 @@ $(function () {
         }
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.convert_time_from_str = function (time_str, second_offset, display_format) {
+    TAIWAN_EINVOICE_SITE.prototype.convert_time_from_utc_str = function (time_str, second_offset, display_format) {
         function in_02d (d) {
             if (d >= 0 && d <= 9) {
                 return '0'+String(d);
@@ -81,26 +83,37 @@ $(function () {
                             .replace('D', D).replace('M', M).replace('A', A);
     };
 
+    TAIWAN_EINVOICE_SITE.prototype.get_second_offset_by_timezone_id_value = function ($self) {
+        var timezone = $('#timezone').attr('value');
+        var second_offset = 0;
+        if (timezone == 'Asia/Taipei'){
+            second_offset = 28800;
+        } else if (timezone == 'Asia/Tokyo'){
+            second_offset = 32400;
+        }
+        return second_offset;
+    };
+
     TAIWAN_EINVOICE_SITE.prototype.convert_class_datetime = function ($self) {
         return function() {
             var $span = $(this);
-            var timezone = $('#timezone').attr('value');
-            if (timezone == 'Asia/Taipei'){
-                var second_offset = 28800;
+            var second_offset = $self.get_second_offset_by_timezone_id_value($self);
+            if (second_offset != 0) {
+                //pass
             } else if ($self.second_offset) {
-                var second_offset = $self.second_offset;
+                second_offset = $self.second_offset;
             } else {
-                var second_offset = 0;
+                second_offset = 0;
             }
             if ($span.prop('tagName').toUpperCase() == 'INPUT') {
-                var s = $self.convert_time_from_str($span.attr('init_value'),
-                                                    second_offset,
-                                                    $span.attr('format'));
+                var s = $self.convert_time_from_utc_str($span.attr('init_value'),
+                                                        second_offset,
+                                                        $span.attr('format'));
                 $span.val(s);
             } else {
-                var s = $self.convert_time_from_str($span.attr('value'),
-                                                    second_offset,
-                                                    $span.attr('format'));
+                var s = $self.convert_time_from_utc_str($span.attr('value'),
+                                                        second_offset,
+                                                        $span.attr('format'));
                 $span.text(s);
             }
         };
@@ -131,55 +144,56 @@ $(function () {
         $.ajaxSetup({
             error: $self.rest_error($self, 'danger_modal')
         });
-        var timezone = $('#timezon').attr('value');
-
+        var second_offset = $self.get_second_offset_by_timezone_id_value($self);
         var url = new URL(window.location.href);
         var create_time__gte_param = url.searchParams.get('create_time__gte');
         if (create_time__gte_param) {
             var create_time__gte_time = new Date(create_time__gte_param);
-            var create_time__gte_time_str = convert_iso8601_time_str_to_time_str(create_time__gte_time);
+            var create_time__gte_time_str = convert_iso8601_time_to_time_str(create_time__gte_time);
             $("input[name='create_time__gte']").val(create_time__gte_time_str);
         }
         var create_time__lt_param = url.searchParams.get('create_time__lt');
         if (create_time__lt_param) {
             var create_time__lt_time = new Date(create_time__lt_param);
-            var create_time__lt_time_str = convert_iso8601_time_str_to_time_str(create_time__lt_time);
+            var create_time__lt_time_str = convert_iso8601_time_to_time_str(create_time__lt_time);
             $("input[name='create_time__lt']").val(create_time__lt_time_str);
         }
         var update_time__gte_param = url.searchParams.get('update_time__gte');
         if (update_time__gte_param) {
             var update_time__gte_time = new Date(update_time__gte_param);
-            var update_time__gte_time_str = convert_iso8601_time_str_to_time_str(update_time__gte_time);
+            var update_time__gte_time_str = convert_iso8601_time_to_time_str(update_time__gte_time);
             $("input[name='update_time__gte']").val(update_time__gte_time_str);
         }
         var update_time__lt_param = url.searchParams.get('update_time__lt');
         if (update_time__lt_param) {
             var update_time__lt_time = new Date(update_time__lt_param);
-            var update_time__lt_time_str = convert_iso8601_time_str_to_time_str(update_time__lt_time);
+            var update_time__lt_time_str = convert_iso8601_time_to_time_str(update_time__lt_time);
             $("input[name='update_time__lt']").val(update_time__lt_time_str);
         }
-        var generate_time__gte_param = url.searchParams.get('generate_time__gte');
+        var generate_time__gte_param = $self.convert_time_from_utc_str(url.searchParams.get('generate_time__gte'),
+                                                                       second_offset,
+                                                                       $self.django_datetime_format);
         if (generate_time__gte_param) {
             var generate_time__gte_time = new Date(generate_time__gte_param);
-            var generate_time__gte_time_str = convert_iso8601_time_str_to_time_str(generate_time__gte_time);
+            var generate_time__gte_time_str = convert_iso8601_time_to_time_str(generate_time__gte_time);
             $("input[name='generate_time__gte']").val(generate_time__gte_time_str);
         }
         var generate_time__lt_param = url.searchParams.get('generate_time__lt');
         if (generate_time__lt_param) {
             var generate_time__lt_time = new Date(generate_time__lt_param);
-            var generate_time__lt_time_str = convert_iso8601_time_str_to_time_str(generate_time__lt_time);
+            var generate_time__lt_time_str = convert_iso8601_time_to_time_str(generate_time__lt_time);
             $("input[name='generate_time__lt']").val(generate_time__lt_time_str);
         }
         var print_time__gte_param = url.searchParams.get('print_time__gte');
         if (print_time__gte_param) {
             var print_time__gte_time = new Date(print_time__gte_param);
-            var print_time__gte_time_str = convert_iso8601_time_str_to_time_str(print_time__gte_time);
+            var print_time__gte_time_str = convert_iso8601_time_to_time_str(print_time__gte_time);
             $("input[name='print_time__gte']").val(print_time__gte_time_str);
         }
         var print_time__lt_param = url.searchParams.get('print_time__lt');
         if (print_time__lt_param) {
             var print_time__lt_time = new Date(print_time__lt_param);
-            var print_time__lt_time_str = convert_iso8601_time_str_to_time_str(print_time__lt_time);
+            var print_time__lt_time_str = convert_iso8601_time_to_time_str(print_time__lt_time);
             $("input[name='print_time__lt']").val(print_time__lt_time_str);
         }
         var name__icontains_param = url.searchParams.get('name__icontains');
@@ -223,14 +237,14 @@ $(function () {
             $("input[name='einvoice__any_words__icontains']").val(einvoice__any_words__icontains_param);
         }
 
-        $('#create_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#create_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#update_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#update_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#generate_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#generate_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#print_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
-        $('#print_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
+        $('#create_time__gte').datetimepicker({ format: $self.datetimepicker_format });
+        $('#create_time__lt').datetimepicker({ format: $self.datetimepicker_format });
+        $('#update_time__gte').datetimepicker({ format: $self.datetimepicker_format });
+        $('#update_time__lt').datetimepicker({ format: $self.datetimepicker_format });
+        $('#generate_time__gte').datetimepicker({ format: $self.datetimepicker_format });
+        $('#generate_time__lt').datetimepicker({ format: $self.datetimepicker_format });
+        $('#print_time__gte').datetimepicker({ format: $self.datetimepicker_format });
+        $('#print_time__lt').datetimepicker({ format: $self.datetimepicker_format });
 
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){
@@ -239,6 +253,24 @@ $(function () {
         $("input[name='einvoice__code39__exact']").click(function(){
             $(this).val('');
         }).focus();
+
+        $("button.search").click(function () {
+            var url_parts = window.location.href.split('?');
+            var $form = $('form:not(".language_form")');
+            var params = new URLSearchParams($form.serialize());
+            var second_offset = $self.get_second_offset_by_timezone_id_value();
+            for (var k of params.keys()) {
+                if ($('[name='+k+']', $form).hasClass('datetimepicker-input')) {
+                    var value = $self.convert_time_from_utc_str(params.get(k),
+                                                                -1 * second_offset,
+                                                                $self.django_datetime_format);
+                    params.set(k, value);
+                }
+            }
+
+            var result_url = url_parts[0] + '?' + params.toString();
+            window.location.href = result_url;
+        });
     }
 
     TAIWAN_EINVOICE_SITE.prototype.rest_error = function ($self, dialog_id) {
