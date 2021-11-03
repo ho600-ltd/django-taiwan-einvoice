@@ -563,14 +563,15 @@ class EInvoicePrintLog(models.Model):
     reason = models.TextField(default='')
 
 
+    base_set = 'GHIJKLMNOPQRSTUVWXYZ'
     @property
     def customize_hax_from_id(self):
-        return customize_hex_from_integer(self.id, base='GHIJKLMNOPQRSTUVWXYZ')
+        return customize_hex_from_integer(self.id, base=self.base_set)
 
 
     @classmethod
     def get_id_from_customize_hax(self, hex):
-        return integer_from_customize_hex(hex, base='GHIJKLMNOPQRSTUVWXYZ')
+        return integer_from_customize_hex(hex, base=self.base_set)
 
 
     def __str__(self):
