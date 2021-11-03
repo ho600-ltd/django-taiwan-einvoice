@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice
+from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
 
 class ESCPOSWebFilter(filters.FilterSet):
@@ -144,3 +144,16 @@ class EInvoiceFilter(filters.FilterSet):
         for q in querys:
             query |= q
         return queryset.filter(query)
+
+
+class EInvoicePrintLogFilter(filters.FilterSet):
+    einvoice = filters.RelatedFilter(EInvoiceFilter, field_name='einvoice', queryset=EInvoice.objects.all())
+
+
+
+    class Meta:
+        model = EInvoicePrintLog
+        fields = {
+            'id': ('exact', ),
+            'print_time': ('gte', 'lt', ),
+        }

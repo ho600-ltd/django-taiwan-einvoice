@@ -49,4 +49,9 @@ class ESCPOSWebHtmlRenderer(TEOriginHTMLRenderer):
 class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('einvoice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('einvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
-    pass
+
+
+
+class EInvoicePrintLogHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('einvoiceprintlog_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('einvoiceprintlog_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)

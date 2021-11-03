@@ -13,6 +13,7 @@ from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     ESCPOSWebHtmlRenderer,
     EInvoiceHtmlRenderer,
+    EInvoicePrintLogHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     ESCPOSWeb,
@@ -39,6 +40,7 @@ from taiwan_einvoice.filters import (
     TurnkeyWebFilter,
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
+    EInvoicePrintLogFilter,
 )
 
 
@@ -142,8 +144,9 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', )
+    filter_class = EInvoicePrintLogFilter
+    renderer_classes = (EInvoicePrintLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
 
 
 

@@ -193,6 +193,22 @@ $(function () {
         if (any_words__icontains_param) {
             $("input[name='any_words__icontains']").val(any_words__icontains_param);
         }
+        var einvoice__code39__exact_param = url.searchParams.get('einvoice__code39__exact');
+        if (einvoice__code39__exact_param) {
+            $("input[name='einvoice__code39__exact']").val(einvoice__code39__exact_param);
+        }
+        var id_param = url.searchParams.get('id');
+        if (id_param) {
+            $("input[name='id']").val(id_param);
+        }
+        var einvoice__track_no__icontains_param = url.searchParams.get('einvoice__track_no__icontains');
+        if (einvoice__track_no__icontains_param) {
+            $("input[name='einvoice__track_no__icontains']").val(einvoice__track_no__icontains_param);
+        }
+        var einvoice__any_words__icontains_param = url.searchParams.get('einvoice__any_words__icontains');
+        if (einvoice__any_words__icontains_param) {
+            $("input[name='einvoice__any_words__icontains']").val(einvoice__any_words__icontains_param);
+        }
 
         $('#create_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
         $('#create_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
@@ -203,6 +219,9 @@ $(function () {
 
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){
+            $(this).val('');
+        }).focus();
+        $("input[name='einvoice__code39__exact']").click(function(){
             $(this).val('');
         }).focus();
     }

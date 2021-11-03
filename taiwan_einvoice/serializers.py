@@ -11,6 +11,7 @@ from rest_framework.serializers import CharField, IntegerField
 from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField
 from taiwan_einvoice.models import (
     ESCPOSWeb,
+    Printer,
     LegalEntity,
     Seller,
     TurnkeyWeb,
@@ -54,6 +55,17 @@ class ESCPOSWebSerializer(ModelSerializer):
             return ESCPOSWeb.objects.all().order_by('-id')
         else:
             return ESCPOSWeb.objects.none()
+
+
+
+class PrinterSerializer(ModelSerializer):
+    escpos_web_dict = ESCPOSWebSerializer(source='escpos_web', read_only=True)
+
+
+
+    class Meta:
+        model = Printer
+        fields = '__all__'
 
 
 
@@ -201,6 +213,9 @@ class EInvoiceSerializer(ModelSerializer):
 class EInvoicePrintLogSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-detail", lookup_field='pk')
+    user_dict = UserSerializer(source='user', read_only=True)
+    printer_dict = PrinterSerializer(source='printer', read_only=True)
+    einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
 
     class Meta:
         model = EInvoicePrintLog
