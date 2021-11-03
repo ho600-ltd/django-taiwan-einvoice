@@ -184,6 +184,16 @@ $(function () {
                 $("input[name='"+param+"']").val(string_kind_param);
             }
         }
+        var select_kind_params = [
+            'is_original_copy',
+        ]
+        for (var param of select_kind_params) {
+            var select_kind_param = url.searchParams.get(param);
+            if (select_kind_param) {
+                $("select[name='"+param+"']").val(select_kind_param);
+                $("select[name='"+param+"'] option[value='"+select_kind_param+"']").prop('selected', true);
+            }
+        }
 
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){

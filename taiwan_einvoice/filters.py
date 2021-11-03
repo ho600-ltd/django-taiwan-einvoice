@@ -155,5 +155,6 @@ class EInvoicePrintLogFilter(filters.FilterSet):
         model = EInvoicePrintLog
         fields = {
             'id': ('exact', ),
+            'is_original_copy': ('exact', ),
             'print_time': ('gte', 'lt', ),
         }

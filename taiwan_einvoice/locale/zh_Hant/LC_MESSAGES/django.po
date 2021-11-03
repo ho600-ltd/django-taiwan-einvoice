@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-03 12:36+0800\n"
+"POT-Creation-Date: 2021-11-03 14:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -320,6 +320,18 @@ msgid "Print time earlier than"
 msgstr "列印時間早於"
 
 msgctxt "taiwan_einvoice_einvoiceprintlog"
+msgid "Original Copy?"
+msgstr "是否正本?"
+
+msgctxt "taiwan_einvoice_einvoiceprintlog_is_original_copy"
+msgid "Yes"
+msgstr "正本"
+
+msgctxt "taiwan_einvoice_einvoiceprintlog_is_original_copy"
+msgid "No"
+msgstr "副本"
+
+msgctxt "taiwan_einvoice_einvoiceprintlog"
 msgid "Printer"
 msgstr "印表機"
 
@@ -346,10 +358,6 @@ msgstr "狀態"
 
 msgid "Reason"
 msgstr "理由"
-
-msgctxt "taiwan_einvoice_einvoiceprintlog_is_original_copy"
-msgid "Yes"
-msgstr "正本"
 
 msgctxt "taiwan_einvoice_einvoiceprintlog_done_status"
 msgid "Done"
