@@ -146,105 +146,44 @@ $(function () {
         });
         var second_offset = $self.get_second_offset_by_timezone_id_value($self);
         var url = new URL(window.location.href);
-        var create_time__gte_param = url.searchParams.get('create_time__gte');
-        if (create_time__gte_param) {
-            var create_time__gte_time = new Date(create_time__gte_param);
-            var create_time__gte_time_str = convert_iso8601_time_to_time_str(create_time__gte_time);
-            $("input[name='create_time__gte']").val(create_time__gte_time_str);
+        var datetime_kind_params = [
+            'create_time__gte', 'create_time__lt',
+            'update_time__gte', 'update_time__lt',
+            'generate_time__gte', 'generate_time__lt',
+            'print_time__gte', 'print_time__lt'
+        ];
+        for (var param of datetime_kind_params) {
+            var datetime_kind_param = $self.convert_time_from_utc_str(url.searchParams.get(param),
+                                                                      second_offset,
+                                                                      $self.django_datetime_format);
+            if (datetime_kind_param) {
+                var datetime_kind_time = new Date(datetime_kind_param);
+                var datetime_kind_time_str = convert_iso8601_time_to_time_str(datetime_kind_time);
+                $("input[name='"+param+"']").val(datetime_kind_time_str);
+            }
         }
-        var create_time__lt_param = url.searchParams.get('create_time__lt');
-        if (create_time__lt_param) {
-            var create_time__lt_time = new Date(create_time__lt_param);
-            var create_time__lt_time_str = convert_iso8601_time_to_time_str(create_time__lt_time);
-            $("input[name='create_time__lt']").val(create_time__lt_time_str);
-        }
-        var update_time__gte_param = url.searchParams.get('update_time__gte');
-        if (update_time__gte_param) {
-            var update_time__gte_time = new Date(update_time__gte_param);
-            var update_time__gte_time_str = convert_iso8601_time_to_time_str(update_time__gte_time);
-            $("input[name='update_time__gte']").val(update_time__gte_time_str);
-        }
-        var update_time__lt_param = url.searchParams.get('update_time__lt');
-        if (update_time__lt_param) {
-            var update_time__lt_time = new Date(update_time__lt_param);
-            var update_time__lt_time_str = convert_iso8601_time_to_time_str(update_time__lt_time);
-            $("input[name='update_time__lt']").val(update_time__lt_time_str);
-        }
-        var generate_time__gte_param = $self.convert_time_from_utc_str(url.searchParams.get('generate_time__gte'),
-                                                                       second_offset,
-                                                                       $self.django_datetime_format);
-        if (generate_time__gte_param) {
-            var generate_time__gte_time = new Date(generate_time__gte_param);
-            var generate_time__gte_time_str = convert_iso8601_time_to_time_str(generate_time__gte_time);
-            $("input[name='generate_time__gte']").val(generate_time__gte_time_str);
-        }
-        var generate_time__lt_param = url.searchParams.get('generate_time__lt');
-        if (generate_time__lt_param) {
-            var generate_time__lt_time = new Date(generate_time__lt_param);
-            var generate_time__lt_time_str = convert_iso8601_time_to_time_str(generate_time__lt_time);
-            $("input[name='generate_time__lt']").val(generate_time__lt_time_str);
-        }
-        var print_time__gte_param = url.searchParams.get('print_time__gte');
-        if (print_time__gte_param) {
-            var print_time__gte_time = new Date(print_time__gte_param);
-            var print_time__gte_time_str = convert_iso8601_time_to_time_str(print_time__gte_time);
-            $("input[name='print_time__gte']").val(print_time__gte_time_str);
-        }
-        var print_time__lt_param = url.searchParams.get('print_time__lt');
-        if (print_time__lt_param) {
-            var print_time__lt_time = new Date(print_time__lt_param);
-            var print_time__lt_time_str = convert_iso8601_time_to_time_str(print_time__lt_time);
-            $("input[name='print_time__lt']").val(print_time__lt_time_str);
-        }
-        var name__icontains_param = url.searchParams.get('name__icontains');
-        if (name__icontains_param) {
-            $("input[name='name__icontains']").val(name__icontains_param);
-        }
-        var slug__icontains_param = url.searchParams.get('slug__icontains');
-        if (slug__icontains_param) {
-            $("input[name='slug__icontains']").val(slug__icontains_param);
-        }
-        var track_no__icontains_param = url.searchParams.get('track_no__icontains');
-        if (track_no__icontains_param) {
-            $("input[name='track_no__icontains']").val(track_no__icontains_param);
-        }
-        var details__description__icontains_param = url.searchParams.get('details__description__icontains');
-        if (details__description__icontains_param) {
-            $("input[name='details__description__icontains']").val(details__description__icontains_param);
-        }
-        var code39__exact_param = url.searchParams.get('code39__exact');
-        if (code39__exact_param) {
-            $("input[name='code39__exact']").val(code39__exact_param);
-        }
-        var any_words__icontains_param = url.searchParams.get('any_words__icontains');
-        if (any_words__icontains_param) {
-            $("input[name='any_words__icontains']").val(any_words__icontains_param);
-        }
-        var einvoice__code39__exact_param = url.searchParams.get('einvoice__code39__exact');
-        if (einvoice__code39__exact_param) {
-            $("input[name='einvoice__code39__exact']").val(einvoice__code39__exact_param);
-        }
-        var id_param = url.searchParams.get('id');
-        if (id_param) {
-            $("input[name='id']").val(id_param);
-        }
-        var einvoice__track_no__icontains_param = url.searchParams.get('einvoice__track_no__icontains');
-        if (einvoice__track_no__icontains_param) {
-            $("input[name='einvoice__track_no__icontains']").val(einvoice__track_no__icontains_param);
-        }
-        var einvoice__any_words__icontains_param = url.searchParams.get('einvoice__any_words__icontains');
-        if (einvoice__any_words__icontains_param) {
-            $("input[name='einvoice__any_words__icontains']").val(einvoice__any_words__icontains_param);
+        for (var param of datetime_kind_params) {
+            $('#'+param).datetimepicker({ format: $self.datetimepicker_format });
         }
 
-        $('#create_time__gte').datetimepicker({ format: $self.datetimepicker_format });
-        $('#create_time__lt').datetimepicker({ format: $self.datetimepicker_format });
-        $('#update_time__gte').datetimepicker({ format: $self.datetimepicker_format });
-        $('#update_time__lt').datetimepicker({ format: $self.datetimepicker_format });
-        $('#generate_time__gte').datetimepicker({ format: $self.datetimepicker_format });
-        $('#generate_time__lt').datetimepicker({ format: $self.datetimepicker_format });
-        $('#print_time__gte').datetimepicker({ format: $self.datetimepicker_format });
-        $('#print_time__lt').datetimepicker({ format: $self.datetimepicker_format });
+        var string_kind_params = [
+            'name__icontains',
+            'slug__icontains',
+            'track_no__icontains',
+            'details__description__icontains',
+            'code39__exact',
+            'any_words__icontains',
+            'einvoice__code39__exact',
+            'id',
+            'einvoice__track_no__icontains',
+            'einvoice__any_words__icontains'
+        ];
+        for (var param of string_kind_params) {
+            var string_kind_param = url.searchParams.get(param);
+            if (string_kind_param) {
+                $("input[name='"+param+"']").val(string_kind_param);
+            }
+        }
 
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){
