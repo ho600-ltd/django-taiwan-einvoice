@@ -32,7 +32,7 @@ def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
         reason=data.get('reason', ''),
     )
     epl.save()
-    return epl.id
+    return epl
 
 
 def update_print_einvoice_log(data):
@@ -98,24 +98,36 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         unixtimestamp = data['unixtimestamp']
         invoice_json = data['invoice_json']
         invoice_data = json.loads(invoice_json)
+        einvoice = ''
         if einvoice_id > 0:
             from taiwan_einvoice.models import EInvoice
             if EInvoice.escpos_einvoice_scripts(einvoice_id) in invoice_json:
                 if invoice_data['meet_to_tw_einvoice_standard']:
-                    ei = EInvoice.objects.get(id=einvoice_id)
-                    content = ei._escpos_einvoice_scripts
+                    einvoice = EInvoice.objects.get(id=einvoice_id)
+                    content = einvoice._escpos_einvoice_scripts
                     invoice_data['content'] = content
                     invoice_json = json.dumps(invoice_data)
 
-        if invoice_data['meet_to_tw_einvoice_standard']:
-            epl_id = save_print_einvoice_log(self.escpos_web_id, self.user, data, invoice_data)
+        if invoice_data['meet_to_tw_einvoice_standard'] and einvoice:
+            epl = save_print_einvoice_log(self.escpos_web_id, self.user, data, invoice_data)
+            for _i in range(1, 1+len(invoice_data['content'])):
+                index = -1 * _i
+                line = invoice_data['content'][index]
+                ori_word = ":{}:".format(einvoice.generate_batch_no_sha1)
+                if 'qrcode_pair' == line['type'] and ori_word in line['qr1_str']:
+                    customize_hax_from_id = epl.customize_hax_from_id
+                    customize_hax_from_id_len = len(customize_hax_from_id)
+                    new_word = ":{}{}:".format(einvoice.generate_batch_no_sha1[:-1*customize_hax_from_id_len], customize_hax_from_id)
+                    print(new_word)
+                    invoice_data['content'][index]['qr1_str'] = invoice_data['content'][index]['qr1_str'].replace(ori_word, new_word)
+                    break
             invoice_data['content'].append({
                 "type": "text",
                 "custom_size": True,
                 "width": 1,
                 "height": 1,
                 "align": "left",
-                "text": _("Print Serial No.:{}").format(epl_id),
+                "text": _("Print Serial No.:{}").format(epl.id),
             })
             invoice_json = json.dumps(invoice_data)
 
