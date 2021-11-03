@@ -131,6 +131,7 @@ $(function () {
         $.ajaxSetup({
             error: $self.rest_error($self, 'danger_modal')
         });
+        var timezone = $('#timezon').attr('value');
 
         var url = new URL(window.location.href);
         var create_time__gte_param = url.searchParams.get('create_time__gte');
@@ -168,6 +169,18 @@ $(function () {
             var generate_time__lt_time = new Date(generate_time__lt_param);
             var generate_time__lt_time_str = convert_iso8601_time_str_to_time_str(generate_time__lt_time);
             $("input[name='generate_time__lt']").val(generate_time__lt_time_str);
+        }
+        var print_time__gte_param = url.searchParams.get('print_time__gte');
+        if (print_time__gte_param) {
+            var print_time__gte_time = new Date(print_time__gte_param);
+            var print_time__gte_time_str = convert_iso8601_time_str_to_time_str(print_time__gte_time);
+            $("input[name='print_time__gte']").val(print_time__gte_time_str);
+        }
+        var print_time__lt_param = url.searchParams.get('print_time__lt');
+        if (print_time__lt_param) {
+            var print_time__lt_time = new Date(print_time__lt_param);
+            var print_time__lt_time_str = convert_iso8601_time_str_to_time_str(print_time__lt_time);
+            $("input[name='print_time__lt']").val(print_time__lt_time_str);
         }
         var name__icontains_param = url.searchParams.get('name__icontains');
         if (name__icontains_param) {
@@ -216,6 +229,8 @@ $(function () {
         $('#update_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
         $('#generate_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
         $('#generate_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
+        $('#print_time__gte').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
+        $('#print_time__lt').datetimepicker({ format: 'YYYY-MM-DD HH:mm:ss' });
 
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){
