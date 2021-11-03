@@ -76,10 +76,23 @@ function adjust_pagination_html() {
 }
 
 
-function convert_time_str_to_iso8601_time_str(time_str) {
+function convert_time_str_to_iso8601_time_str(time_str, timezone) {
+    var timezone_clock = '';
+    if (timezone) {
+        if ('Asia/Taipei' == timezone) {
+            timezone_clock = '+08:00';
+        } else if ('Asia/Tokyo' == timezone) {
+            timezone_clock = '+09:00';
+        } else if ('UTC' == timezone) {
+            timezone_clock = '+00:00';
+        }
+    }
+    if (!timezone_clock) {
+        timezone_clock = '+00:00';
+    }
     var list = time_str.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
     if (list) {
-        return list[1] + '-' + list[2] + '-' + list[3] + 'T' + list[4] + ':' + list[5] + ':' + list[6] + '+08:00';
+        return list[1] + '-' + list[2] + '-' + list[3] + 'T' + list[4] + ':' + list[5] + ':' + list[6] + timezone_clock;
     } else {
         return '';
     }
@@ -94,7 +107,7 @@ function pad(number) {
 }
 
 
-function convert_iso8601_time_str_to_time_str(time) {
+function convert_iso8601_time_to_time_str(time) {
     return time.getFullYear() +
         '-' + pad(time.getMonth() + 1) +
         '-' + pad(time.getDate()) +

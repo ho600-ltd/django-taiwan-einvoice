@@ -566,13 +566,6 @@ $(function () {
 
     adjust_pagination_html();
 
-    $(".search").click(function () {
-        var url_parts = window.location.href.split('?');
-        var params = new URLSearchParams($('form:not(".language_form")').serialize());
-
-        var result_url = url_parts[0] + '?' + params.toString();
-        window.location.href = result_url;
-    });
     $('select[name=einvoice_printer').change(function () {
         var value = $(this).val();
         Cookies.set(taiwan_einvoice_site.default_einvoice_printer_cookie_name, value, { path: '/' });

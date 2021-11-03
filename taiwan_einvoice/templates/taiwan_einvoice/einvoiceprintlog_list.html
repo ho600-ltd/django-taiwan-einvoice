@@ -1,0 +1,147 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/einvoiceprintlog_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+    <div class="form_container" id="id_search_options">
+        <form method="GET" action="./" onsubmit="return false;">
+            <input type='hidden' name='format' value='html' />
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="einvoice__code39__exact">{% trans "One-dimensional Barcode" context "taiwan_einvoice" %} <i class="fa fa-barcode" aria-hidden="true"></i></label>
+                        <div class="input-group" id="einvoice__code39__exact" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__code39__exact" id="id_einvoice__code39__exact" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="einvoice__track_no__icontains">{% trans "Track No. contains" %}</label>
+                        <div class="input-group" id="einvoice__track_no__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__track_no__icontains" id="id_einvoice__track_no__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="print_id">{% trans "Print ID" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="id" data-target-input="nearest">
+                            <input type="text" class="form-control" name="id" id="id_id" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="einvoice__any_words__icontains">{% trans "Any Words(Exclude Track No., Product Details) contains" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="einvoice__any_words__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__any_words__icontains" id="id_einvoice__any_words__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="print_time__gte">{% trans "Print time later than" %}</label>
+                        <div class="input-group date" id="print_time__gte" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#print_time__gte"
+                                name="print_time__gte" id="id_print_time__gte" />
+                            <div class="input-group-append" data-target="#print_time__gte" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="print_time__lt">{% trans "Print time earlier than" %}</label>
+                        <div class="input-group date" id="print_time__lt" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#print_time__lt"
+                                name="print_time__lt" id="id_print_time__lt" />
+                            <div class="input-group-append" data-target="#print_time__lt" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-4">
+                    <div class="form-group">
+                        <label for="printer">{% trans "Printer" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group date" id="printer" data-target-input="nearest">
+                            <select class="form-control">
+                                <option value="">#TODO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="form-group">
+                        <label for="einvoice__creator">{% trans "Creator" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group date" id="einvoice__creator" data-target-input="nearest">
+                            <select class="form-control">
+                                <option value="">#TODO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-4">
+                    <div class="form-group">
+                        <label for="user">{% trans "User" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group date" id="user" data-target-input="nearest">
+                            <select class="form-control">
+                                <option value="">#TODO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search_button_row">
+                <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% block content %}
+    {% if content %}{{ content|safe }}{% endif %}
+    {% endblock %}
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% endblock %}
+
+{% block modals %}
+
+{% endblock %}
