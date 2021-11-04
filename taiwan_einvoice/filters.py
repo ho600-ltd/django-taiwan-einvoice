@@ -2,7 +2,7 @@ import re, datetime
 import rest_framework_filters as filters
 
 from django.db.models import Q
-from django.utils.timezone import now
+from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
 from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
@@ -101,6 +101,7 @@ class TurnkeyWebFilter(filters.FilterSet):
 
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
     now_use = filters.BooleanFilter(method='filter_now_use')
+    date_in_year_month_range = filters.CharFilter(method='filter_date_in_year_month_range')
 
 
 
@@ -108,6 +109,7 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
         model = SellerInvoiceTrackNo
         fields = {
             'type': ('exact', ),
+            'track': ('contains', 'icontains'),
         }
 
 
@@ -117,6 +119,16 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return SellerInvoiceTrackNo.filter_now_use_sitns()
         else:
             return queryset
+
+
+
+    def filter_date_in_year_month_range(self, queryset, name, value):
+        try:
+            d = datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S').replace(tzinfo=utc)
+        except ValueError:
+            return queryset
+        else:
+            return queryset.filter(begin_time__lte=d, end_time__gte=d)
 
 
 

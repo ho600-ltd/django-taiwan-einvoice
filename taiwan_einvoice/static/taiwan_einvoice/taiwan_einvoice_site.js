@@ -150,7 +150,8 @@ $(function () {
             'create_time__gte', 'create_time__lt',
             'update_time__gte', 'update_time__lt',
             'generate_time__gte', 'generate_time__lt',
-            'print_time__gte', 'print_time__lt'
+            'print_time__gte', 'print_time__lt',
+            'date_in_year_month_range'
         ];
         for (var param of datetime_kind_params) {
             var datetime_kind_param = $self.convert_time_from_utc_str(url.searchParams.get(param),

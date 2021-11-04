@@ -14,6 +14,7 @@ from taiwan_einvoice.renderers import (
     ESCPOSWebHtmlRenderer,
     TurnkeyWebHtmlRenderer,
     LegalEntityHtmlRenderer,
+    SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
 )
@@ -109,7 +110,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-id')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
 

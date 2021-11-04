@@ -1,0 +1,34 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="10%">{% trans "Turnkey Web" %}</th>
+            <th width="10%">{% trans "Tax Type" %}</th>
+            <th width="20%">{% trans "Year Month Range" %}</th>
+            <th width="10%">{% trans "Track" %}</th>
+            <th width="10%">{% trans "Begin No." %}</th>
+            <th width="10%">{% trans "End No." %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sellerinvoicetrackno in data.results %}
+            <tr sellerinvoicetrackno_id="{{ sellerinvoicetrackno.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="turnkey_web">{{ sellerinvoicetrackno.turnkey_web_dict.name }}</td>
+                <td field="type">{{ sellerinvoicetrackno.type__display }}</td>
+                <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
+                <td field="track">{{ sellerinvoicetrackno.track }}</td>
+                <td field="begin_no">{{ sellerinvoicetrackno.begin_no }}</td>
+                <td field="end_no">{{ sellerinvoicetrackno.end_no }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

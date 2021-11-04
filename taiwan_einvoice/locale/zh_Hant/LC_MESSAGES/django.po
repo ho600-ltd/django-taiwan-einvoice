@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-04 15:01+0800\n"
+"POT-Creation-Date: 2021-11-04 17:48+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -409,6 +409,22 @@ msgstr "角色註記"
 
 msgid "Extra information"
 msgstr "其他資訊"
+
+msgid "Datetime is included by the Year Month Range"
+msgstr "期別所含括的時間"
+
+msgctxt "taiwan_einvoice"
+msgid "Track contains"
+msgstr "字軌包含"
+
+msgid "Track"
+msgstr "字軌"
+
+msgid "Begin No."
+msgstr "起始號碼"
+
+msgid "End No."
+msgstr "結束號碼"
 
 msgid "Is on working?"
 msgstr "是否使用中?"
