@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
 
 class ESCPOSWebFilter(filters.FilterSet):
@@ -30,6 +30,9 @@ class LegalEntityFilter(filters.FilterSet):
         'role_remark',
     )
     any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+
+
+
     class Meta:
         model = LegalEntity
         fields = {
@@ -50,12 +53,49 @@ class LegalEntityFilter(filters.FilterSet):
 
 
 
+class SellerFilter(filters.FilterSet):
+    legal_entity = filters.RelatedFilter(LegalEntityFilter, field_name='legal_entity', queryset=LegalEntity.objects.all())
+
+
+
+    class Meta:
+        model = Seller
+        fields = {
+        }
+
+
+
 class TurnkeyWebFilter(filters.FilterSet):
+    filter_any_words_in_those_fields = (
+        'name',
+        'hash_key',
+        'transport_id',
+        'party_id',
+        'routing_id',
+        'qrcode_seed',
+        'turnkey_seed',
+        'download_seed',
+    )
+    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=Seller.objects.all())
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+
+
+
     class Meta:
         model = TurnkeyWeb
         fields = {
             'on_working': ('exact', ),
         }
+
+
+
+    def filter_any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
 
 
 

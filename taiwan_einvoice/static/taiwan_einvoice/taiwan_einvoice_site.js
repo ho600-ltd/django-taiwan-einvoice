@@ -177,7 +177,8 @@ $(function () {
             'id',
             'einvoice__track_no__icontains',
             'einvoice__any_words__icontains',
-            'identifier__icontains'
+            'identifier__icontains',
+            'seller__legal_entity__identifier__icontains'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);

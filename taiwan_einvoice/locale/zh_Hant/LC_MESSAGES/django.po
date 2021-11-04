@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-04 14:34+0800\n"
+"POT-Creation-Date: 2021-11-04 15:01+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -409,3 +409,30 @@ msgstr "角色註記"
 
 msgid "Extra information"
 msgstr "其他資訊"
+
+msgid "Is on working?"
+msgstr "是否使用中?"
+
+msgid "Seller Identifier"
+msgstr "賣方統編"
+
+msgid "Transport ID"
+msgstr ""
+
+msgid "Party ID"
+msgstr ""
+
+msgid "Routing ID"
+msgstr ""
+
+msgid "Qrcode Seed"
+msgstr ""
+
+msgid "Turnkey Seed"
+msgstr ""
+
+msgid "Download Seed"
+msgstr ""
+
+msgid "On Working"
+msgstr "使用中"

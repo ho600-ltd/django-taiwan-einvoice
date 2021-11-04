@@ -52,6 +52,12 @@ class LegalEntityHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
+class TurnkeyWebHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('turnkeyweb_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('turnkeyweb_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
 class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('einvoice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('einvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)

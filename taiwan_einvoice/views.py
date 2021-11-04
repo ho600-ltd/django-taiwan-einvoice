@@ -12,6 +12,7 @@ from taiwan_einvoice.permissions import IsSuperUser
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     ESCPOSWebHtmlRenderer,
+    TurnkeyWebHtmlRenderer,
     LegalEntityHtmlRenderer,
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
@@ -98,7 +99,7 @@ class TurnkeyWebModelViewSet(ModelViewSet):
     queryset = TurnkeyWeb.objects.all().order_by('-id')
     serializer_class = TurnkeyWebSerializer
     filter_class = TurnkeyWebFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (TurnkeyWebHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
 
