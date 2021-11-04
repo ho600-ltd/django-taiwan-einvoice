@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-03 14:56+0800\n"
+"POT-Creation-Date: 2021-11-04 14:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -387,3 +387,25 @@ msgstr "按鈕"
 
 msgid "Set default"
 msgstr "設為預設值"
+
+msgid "Identifier contains"
+msgstr "統編包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Any Words(Exclude Identifier) contains"
+msgstr "除統編外的其他文數字欄位包含"
+
+msgid "Identifier"
+msgstr "統編"
+
+msgid "Person in Charge"
+msgstr "負責人"
+
+msgid "Customize Number CHar"
+msgstr "自定代號"
+
+msgid "Role Remark"
+msgstr "角色註記"
+
+msgid "Extra information"
+msgstr "其他資訊"

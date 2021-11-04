@@ -1,0 +1,39 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="15%">{% trans "Identifier" %}</th>
+            <th width="15%">{% trans "Name" %}</th>
+            <th width="25%">{% trans "Person in Charge" %}</th>
+            <th width="15%">{% trans "Customize Number CHar" %}</th>
+            <th width="15%">{% trans "Role Remark" %}</th>
+            <th width="25%">{% trans "Extra information" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for legalentity in data.results %}
+            <tr legalentity_id="{{ legalentity.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="identifier">{{ legalentity.identifier }}</td>
+                <td field="name">{{ legalentity.name }}</td>
+                <td field="person_in_charge">{{ legalentity.person_in_charge }}</td>
+                <td field="customer_number_char">{{ legalentity.customer_number_char }}</td>
+                <td field="role_remark">{{ legalentity.role_remark }}</td>
+                <td>
+                    <div field="telephone_number">{{ legalentity.telephone_number }}</div>
+                    <div field="facsimile_number">{{ legalentity.facsimile_number }}</div>
+                    <div field="email_address">{{ legalentity.email_address }}</div>
+                    <div field="address">{{ legalentity.address }}</div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

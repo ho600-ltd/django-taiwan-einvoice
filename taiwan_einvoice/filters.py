@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
 
 class ESCPOSWebFilter(filters.FilterSet):
@@ -15,6 +15,38 @@ class ESCPOSWebFilter(filters.FilterSet):
             'name': ('exact', 'iexact', 'contains', 'icontains'),
             'slug': ('exact', 'iexact', 'contains', 'icontains'),
         }
+
+
+
+class LegalEntityFilter(filters.FilterSet):
+    filter_any_words_in_those_fields = (
+        'name',
+        'address',
+        'person_in_charge',
+        'telephone_number',
+        'facsimile_number',
+        'email_address',
+        'customer_number_char',
+        'role_remark',
+    )
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+    class Meta:
+        model = LegalEntity
+        fields = {
+            'identifier': ('contains', 'icontains'),
+        }
+
+
+
+    def filter_any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
 
 
 

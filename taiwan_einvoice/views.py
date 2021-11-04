@@ -12,6 +12,7 @@ from taiwan_einvoice.permissions import IsSuperUser
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     ESCPOSWebHtmlRenderer,
+    LegalEntityHtmlRenderer,
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
 )
@@ -37,6 +38,7 @@ from taiwan_einvoice.serializers import (
 )
 from taiwan_einvoice.filters import (
     ESCPOSWebFilter,
+    LegalEntityFilter,
     TurnkeyWebFilter,
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
@@ -76,7 +78,8 @@ class LegalEntityModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = LegalEntity.objects.all().order_by('-id')
     serializer_class = LegalEntitySerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    filter_class = LegalEntityFilter
+    renderer_classes = (LegalEntityHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
 
