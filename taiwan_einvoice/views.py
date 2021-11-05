@@ -1,6 +1,7 @@
 import json, datetime
 from django.http import Http404
 from django.shortcuts import render
+from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -153,6 +154,22 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                         "error_message": _("{} has error: \n\n\n{}").format(line, e)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
+                
+                begin_no = cols[5]
+                end_no = cols[6]
+                if begin_no[-2:] not in ('00', '50'):
+                    er = {
+                        "error_title": "Begin No. Error",
+                        "error_message": _("{} has error: \n\n\nThe suffix of begin_no should be 00 or 50.").format(line)
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                if end_no[-2:] not in ('49', '99'):
+                    er = {
+                        "error_title": "End No. Error",
+                        "error_message": _("{} has error: \n\n\nThe suffix of end_no should be 49 or 99.").format(line)
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
 
                 data = {
                     "turnkey_web": turnkey_web.id,
@@ -160,21 +177,40 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     "begin_time": begin_time,
                     "end_time": end_time,
                     "track": cols[4],
-                    "begin_no": cols[5],
-                    "end_no": cols[6],
+                    "begin_no": begin_no,
+                    "end_no": end_no,
                 }
                 sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
                 if sitns.is_valid():
                     datas.append(data)
                 else:
+                    if 'unique' in str(sitns.errors):
+                        error_message = _("{} exists").format(line)
+                    else:
+                        error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
                     er = {
                         "error_title": "Data Error",
-                        "error_message": _("{} has error: \n\n\n{}").format(line, sitns.errors)
+                        "error_message": error_message,
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
+        for data in datas:
+            if SellerInvoiceTrackNo.objects.filter(type=data['type'],
+                                                   begin_time=data['begin_time'],
+                                                   end_time=data['end_time'],
+                                                   track=data['track']
+                                                  ).filter(Q(begin_no__lte=data['begin_no'], end_no__gte=data['begin_no'])
+                                                            |Q(begin_no__lte=data['end_no'], end_no__gte=data['end_no'])).exists():
+                
+                error_message = _("{} ~ {} has error: \n\n\nnumber overlapping").format(data['begin_no'], data['end_no'])
+                er = {
+                    "error_title": "Data Error",
+                    "error_message": error_message,
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            serializer = self.get_serializer(data=data, many=False)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
         serializer = self.get_serializer(data=datas, many=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 

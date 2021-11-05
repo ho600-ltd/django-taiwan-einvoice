@@ -321,6 +321,12 @@ class SellerInvoiceTrackNo(models.Model):
     end_no = models.IntegerField()
 
 
+
+    class Meta:
+        unique_together = (("type", "begin_time", "end_time", "track", "begin_no", "end_no"), )
+
+
+
     def __str__(self):
         return "{}{}({}~{}: {}{}-{})".format(self.turnkey_web,
                                              self.type,
