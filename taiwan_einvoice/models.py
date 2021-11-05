@@ -280,6 +280,13 @@ class TurnkeyWeb(models.Model):
                                      self.routing_id)
     
 
+    def save(self, *args, **kwargs):
+        if not self.hash_key:
+            self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
+            
+        super(TurnkeyWeb, self).save(*args, **kwargs)
+
+
 
     class Meta:
         unique_together = (('seller', 'name'), )
