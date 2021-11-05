@@ -72,7 +72,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', )
 
 
 
@@ -82,7 +82,7 @@ class LegalEntityModelViewSet(ModelViewSet):
     serializer_class = LegalEntitySerializer
     filter_class = LegalEntityFilter
     renderer_classes = (LegalEntityHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', 'patch')
 
 
 
@@ -91,7 +91,7 @@ class SellerModelViewSet(ModelViewSet):
     queryset = Seller.objects.all().order_by('-id')
     serializer_class = SellerSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', 'patch')
 
 
 
@@ -101,7 +101,7 @@ class TurnkeyWebModelViewSet(ModelViewSet):
     serializer_class = TurnkeyWebSerializer
     filter_class = TurnkeyWebFilter
     renderer_classes = (TurnkeyWebHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', 'patch')
 
 
 
@@ -111,7 +111,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete', 'patch')
+    http_method_names = ('post', 'get', )
 
 
     def get_queryset(self):
