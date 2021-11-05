@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-03 14:56+0800\n"
+"POT-Creation-Date: 2021-11-05 17:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -83,6 +83,22 @@ msgstr "請先設定預設的發票機"
 
 msgid "Default ESC/POS Printer"
 msgstr "預設發票機"
+
+msgid "File Error"
+msgstr "檔案錯誤"
+
+msgid "Please choose .csv"
+msgstr "請選擇 .csv"
+
+msgid "import %(count)s record"
+msgid_plural "import %(count)s records"
+msgstr[0] "匯入 %(count)s 筆"
+
+msgid "Importing Successfully"
+msgstr "成功匯入"
+
+msgid "NEW Record"
+msgstr "新紀錄"
 
 msgid "Sun"
 msgstr "日"

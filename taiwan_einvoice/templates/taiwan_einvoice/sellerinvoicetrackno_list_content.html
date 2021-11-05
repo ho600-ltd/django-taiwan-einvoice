@@ -13,28 +13,30 @@
     {% endif %}
 </div>
 
-<table class="table">
+<table class="table search_result">
     <thead>
         <tr>
-            <th width="5%">{% trans "No." %}</th>
-            <th width="10%">{% trans "Turnkey Web" %}</th>
-            <th width="10%">{% trans "Tax Type" %}</th>
-            <th width="20%">{% trans "Year Month Range" %}</th>
-            <th width="10%">{% trans "Track" %}</th>
-            <th width="10%">{% trans "Begin No." %}</th>
-            <th width="10%">{% trans "End No." %}</th>
+            <th field="no" width="5%">{% trans "No." %}</th>
+            <th field="turnkey_web" width="10%">{% trans "Turnkey Web" %}</th>
+            <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
+            <th field="year_month_range" width="20%">{% trans "Year Month Range" %}</th>
+            <th field="track" width="10%">{% trans "Track" %}</th>
+            <th field="begin_no" width="10%">{% trans "Begin No." %}</th>
+            <th field="end_no" width="10%">{% trans "End No." %}</th>
+            <th field="count_blank_no" width="10%">{% trans "Blank No. Count" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for sellerinvoicetrackno in data.results %}
             <tr sellerinvoicetrackno_id="{{ sellerinvoicetrackno.id }}">
-                <td>{{ forloop.counter }}.</td>
+                <td field="no">{{ forloop.counter }}.</td>
                 <td field="turnkey_web">{{ sellerinvoicetrackno.turnkey_web_dict.name }}</td>
-                <td field="type">{{ sellerinvoicetrackno.type__display }}</td>
+                <td field="type__display">{{ sellerinvoicetrackno.type__display }}</td>
                 <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
                 <td field="track">{{ sellerinvoicetrackno.track }}</td>
                 <td field="begin_no">{{ sellerinvoicetrackno.begin_no }}</td>
                 <td field="end_no">{{ sellerinvoicetrackno.end_no }}</td>
+                <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
             </tr>
         {% endfor %}
     </tbody>

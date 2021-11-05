@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIPEI_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
 
 class ESCPOSWebFilter(filters.FilterSet):
@@ -182,7 +182,7 @@ class EInvoiceFilter(filters.FilterSet):
             year, month, track, no, random_number = code39_barcode_re.groups()
             year = int(year) + 1911
             month = int(month)
-            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIWAN_TIMEZONE)
+            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIPEI_TIMEZONE)
             queryset = queryset.filter(seller_invoice_track_no__begin_time__lt=middle_time,
                                        seller_invoice_track_no__end_time__gt=middle_time,
                                        track=track,

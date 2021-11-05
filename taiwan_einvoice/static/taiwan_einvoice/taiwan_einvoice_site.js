@@ -121,6 +121,7 @@ $(function () {
 
     TAIWAN_EINVOICE_SITE.prototype.show_modal = function ($modal, title, body) {
         $('.modal-title', $modal).html(title);
+        body = body.replace(/\n/g, "<br/>");
         $('.modal-body', $modal).html(body);
         $modal.modal('show');
     };

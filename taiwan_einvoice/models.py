@@ -90,7 +90,7 @@ def get_codes(verify_id, seed=0):
     return ''.join((code1, code2, code3, code4, code5))
 
 
-TAIWAN_TIMEZONE = pytz.timezone('Asia/Taipei')
+TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
@@ -312,10 +312,10 @@ class SellerInvoiceTrackNo(models.Model):
     end_time = models.DateTimeField()
     @property
     def year_month_range(self):
-        cwmk_year = self.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
-        begin_month = self.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
-        return "{}年{}-{}月".format(cwmk_year, begin_month, end_month)
+        return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track = models.CharField(max_length=2)
     begin_no = models.IntegerField()
     end_no = models.IntegerField()
@@ -324,8 +324,8 @@ class SellerInvoiceTrackNo(models.Model):
     def __str__(self):
         return "{}{}({}~{}: {}{}-{})".format(self.turnkey_web,
                                              self.type,
-                                             self.begin_time.astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d'),
-                                             (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d'),
+                                             self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
+                                             (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
                                              self.track,
                                              self.begin_no,
                                              self.end_no)
@@ -438,11 +438,11 @@ class EInvoice(models.Model):
 
     @property
     def one_dimension_barcode_str(self):
-        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
-        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
         barcode_str = "{}{}{}{}".format(
-            cwmk_year,
+            chmk_year,
             end_month,
             self.track_no,
             self.random_number,
@@ -463,10 +463,10 @@ class EInvoice(models.Model):
             return '0' * (8 - len(a)) + a
         details = self.details
         amounts = self.amounts
-        cwmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).year - 1911
-        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIWAN_TIMEZONE).month
+        chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
-        generate_time = self.generate_time.astimezone(TAIWAN_TIMEZONE)
+        generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
         sales_amount_str = _hex_amount(amounts['SalesAmount'])
         total_amount_str = _hex_amount(amounts['TotalAmount'])
         return [
@@ -485,7 +485,7 @@ class EInvoice(models.Model):
                 {"type": "qrcode_pair", "center": False,
                     "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
                         track_no=self.track_no,
-                        year_m_d="{}{}".format(cwmk_year, generate_time.strftime('%m%d')),
+                        year_m_d="{}{}".format(chmk_year, generate_time.strftime('%m%d')),
                         random_number=self.random_number,
                         sales_amount=sales_amount_str,
                         total_amount=total_amount_str,
@@ -521,7 +521,7 @@ class EInvoice(models.Model):
             "meet_to_tw_einvoice_standard": True,
             "id": self.id,
             "track_no": self.track_no,
-            "generate_time": self.generate_time.astimezone(TAIWAN_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
+            "generate_time": self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
             "width": "58mm",
             "content": EInvoice.escpos_einvoice_scripts(self.id),
         }
