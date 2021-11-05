@@ -109,7 +109,7 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
         model = SellerInvoiceTrackNo
         fields = {
             'type': ('exact', ),
-            'track': ('contains', 'icontains'),
+            'track': ('icontains', ),
         }
 
 

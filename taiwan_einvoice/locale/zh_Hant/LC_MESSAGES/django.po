@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-05 08:55+0800\n"
+"POT-Creation-Date: 2021-11-05 14:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -425,6 +425,15 @@ msgstr "起始號碼"
 
 msgid "End No."
 msgstr "結束號碼"
+
+msgid "Upload .csv to Create Seller Invoice Track No"
+msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
+
+msgid "Choose .csv"
+msgstr "選擇 .csv"
+
+msgid "Create"
+msgstr "新增"
 
 msgid "Is on working?"
 msgstr "是否使用中?"

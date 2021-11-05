@@ -4,6 +4,13 @@
     {% with data.count as total_count %}
         {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
     {% endwith %}
+
+    {% if turnkey_web_options_in_post_form %}
+        <button id="upload_csv_to_multiple_create_modal_button_0"
+            class="btn btn-success upload_csv_to_multiple_create_modal" data-toggle="modal">
+            {% trans "Create Seller Invoice Track No" %}
+        </button>
+    {% endif %}
 </div>
 
 <table class="table">
@@ -32,3 +39,77 @@
         {% endfor %}
     </tbody>
 </table>
+
+
+<div class="modal fade" id="upload_csv_to_multiple_create_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-upload-csv-to-multiple-create' %}"
+    aria-labelledby="upload_csv_to_multiple_create_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="upload_csv_to_multiple_create_modal_label">{% trans "Upload .csv to Create Seller Invoice Track No" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="turnkey_web" class="form-label">{% trans "Turnkey Web" %}</label>
+                    <select name="turnkey_web" class="form-control">
+                        {% for two in turnkey_web_options_in_post_form %}
+                            <option value="{{ two.id }}">{{ two.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="csv_file" class="form-label">{% trans "Choose .csv" %}</label>
+                    <input class="form-control" type="file" id="csv_file">
+                    <div id="csv_file_help" class="form-text">
+                        .csv 內容格式應如下:
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>營業人統編</th>
+                                    <th>發票類別代號</th>
+                                    <th>發票類別</th>
+                                    <th>發票期別</th>
+                                    <th>發票字軌名稱</th>
+                                    <th>發票起號</th>
+                                    <th>發票迄號</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>24634102</td>
+                                    <td>7</td>
+                                    <td>一般稅額計算</td>
+                                    <td>110/11 ~ 110/12</td>
+                                    <td>NQ</td>
+                                    <td>42519550</td>
+                                    <td>42522049</td>
+                                </tr>
+                                <tr>
+                                    <td>24634102</td>
+                                    <td>7</td>
+                                    <td>一般稅額計算</td>
+                                    <td>110/11 ~ 110/12</td>
+                                    <td>TN</td>
+                                    <td>42539550</td>
+                                    <td>42542049</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <span class="text-danger">起號的後 2 碼必定為 00 或 50 ; 迄號的後 2 碼必為 49 或 99 。</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="upload_csv_to_multiple_create_button_0" type="button" class="upload_csv_to_multiple_create btn btn-success">{% trans "Create" %}</button>
+            </div>
+        </div>
+    </div>
+</div>

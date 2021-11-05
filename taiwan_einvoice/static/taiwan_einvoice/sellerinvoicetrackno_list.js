@@ -1,3 +1,12 @@
+function upload_csv_to_multiple_create_modal (taiwan_einvoice_site) {
+    return function () {
+        var $btn = $(this);
+        var $modal = $('#upload_csv_to_multiple_create_modal');
+        $modal.modal('show');
+    }
+}
+
+
 $(function () {
     $(".nav_sellerinvoicetrackno").addClass("nav_active");
 
@@ -10,4 +19,5 @@ $(function () {
 
     adjust_pagination_html();
 
+    $('button.upload_csv_to_multiple_create_modal').click(upload_csv_to_multiple_create_modal(taiwan_einvoice_site));
 });

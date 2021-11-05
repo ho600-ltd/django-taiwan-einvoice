@@ -291,6 +291,7 @@ class TurnkeyWeb(models.Model):
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
+            ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
             ("view_te_einvoice", "View E-Invoice"),
             ("print_te_einvoice", "Print E-Invoice"),
         )

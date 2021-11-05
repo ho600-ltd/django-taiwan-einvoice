@@ -24,15 +24,6 @@ class TEOriginHTMLRenderer(TEBrowsableAPIRenderer):
     format = 'html'
 
 
-    def get_filter_form(self, data, view, request):
-        t = get_template(self.filter_template)
-        html = t.render({"data": data,
-                         "querystring": request.GET,
-                         "view": view},
-                        request)
-        return html
-
-
     def get_content(self, renderer, data, accepted_media_type, renderer_context):
         request = renderer_context['request']
         t = get_template(self.content_template)
@@ -61,6 +52,18 @@ class TurnkeyWebHtmlRenderer(TEOriginHTMLRenderer):
 class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('sellerinvoicetrackno_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('sellerinvoicetrackno_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+    def get_content(self, renderer, data, accepted_media_type, renderer_context):
+        t = get_template(self.content_template)
+        view = renderer_context['view']
+        request = renderer_context['request']
+        serializer = self._get_serializer(view.serializer_class, view, request)
+        turnkey_web_queryset_in_post_form = serializer.fields['turnkey_web'].get_queryset()
+        html = t.render({"data": data,
+                         "turnkey_web_options_in_post_form": turnkey_web_queryset_in_post_form,
+                        }, request)
+        return html
 
 
 
