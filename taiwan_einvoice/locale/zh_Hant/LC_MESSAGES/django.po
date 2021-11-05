@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-04 17:48+0800\n"
+"POT-Creation-Date: 2021-11-05 08:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -450,5 +450,19 @@ msgstr ""
 msgid "Download Seed"
 msgstr ""
 
+msgid "Remaining Count of the current period"
+msgstr "當期剩餘張數"
+
+msgctxt "tax_type"
+msgid "General"
+msgstr "一般稅額"
+
+msgctxt "tax_type"
+msgid "Special"
+msgstr "特種稅額"
+
 msgid "On Working"
 msgstr "使用中"
+
+#~ msgid "Remain Count"
+#~ msgstr "剩餘張數"

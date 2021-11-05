@@ -9,19 +9,26 @@
 <table class="table">
     <thead>
         <tr>
-            <th width="5%">{% trans "No." %}</th>
-            <th width="10%">{% trans "Is on working?" %}</th>
-            <th width="10%">{% trans "Seller Identifier" %}</th>
-            <th width="20%">{% trans "Name" %}</th>
-            <th width="10%">{% trans "Transport ID" %}</th>
-            <th width="10%">{% trans "Party ID" %}</th>
-            <th width="10%">{% trans "Routing ID" %}</th>
-            <th width="20%">
+            <th rowspan="2" width="5%">{% trans "No." %}</th>
+            <th rowspan="2" width="10%">{% trans "Is on working?" %}</th>
+            <th rowspan="2" width="10%">{% trans "Seller Identifier" %}</th>
+            <th rowspan="2" width="20%">{% trans "Name" %}</th>
+            <th rowspan="2" width="10%">{% trans "Transport ID" %}</th>
+            <th rowspan="2" width="10%">{% trans "Party ID" %}</th>
+            <th rowspan="2" width="10%">{% trans "Routing ID" %}</th>
+            <th rowspan="2" width="20%">
                 {% trans "Hash Key" %}<br/>
                 {% trans "Qrcode Seed" %}<br/>
                 {% trans "Turnkey Seed" %}<br/>
                 {% trans "Download Seed" %}
             </th>
+            <th width="20%" colspan="2">
+                {% trans "Remaining Count of the current period" %}
+            </th>
+        </tr>
+        <tr>
+            <th width="10%">{% trans "General" context "tax_type" %}</th>
+            <th width="10%">{% trans "Special" context "tax_type" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -40,6 +47,8 @@
                     <div field="turnkey_seed">{{ turnkeyweb.mask_turnkey_seed }}</div>
                     <div field="download_seed">{{ turnkeyweb.mask_download_seed }}</div>
                 </td>
+                <td field="count_now_use_07_sellerinvoicetrackno_blank_no">{{ turnkeyweb.count_now_use_07_sellerinvoicetrackno_blank_no }}</td>
+                <td field="count_now_use_08_sellerinvoicetrackno_blank_no">{{ turnkeyweb.count_now_use_08_sellerinvoicetrackno_blank_no }}</td>
             </tr>
         {% endfor %}
     </tbody>
