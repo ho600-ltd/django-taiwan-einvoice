@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-03 14:56+0800\n"
+"POT-Creation-Date: 2021-11-05 18:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -387,3 +387,150 @@ msgstr "按鈕"
 
 msgid "Set default"
 msgstr "設為預設值"
+
+msgid "Identifier contains"
+msgstr "統編包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Any Words(Exclude Identifier) contains"
+msgstr "除統編外的其他文數字欄位包含"
+
+msgid "Identifier"
+msgstr "統編"
+
+msgid "Person in Charge"
+msgstr "負責人"
+
+msgid "Customize Number CHar"
+msgstr "自定代號"
+
+msgid "Role Remark"
+msgstr "角色註記"
+
+msgid "Extra information"
+msgstr "其他資訊"
+
+msgid "Datetime is included by the Year Month Range"
+msgstr "期別所含括的時間"
+
+msgctxt "taiwan_einvoice"
+msgid "Track contains"
+msgstr "字軌包含"
+
+msgid "Create Seller Invoice Track No"
+msgstr "新增字軌號碼檔"
+
+msgid "Track"
+msgstr "字軌"
+
+msgid "Begin No."
+msgstr "起始號碼"
+
+msgid "End No."
+msgstr "結束號碼"
+
+msgid "Blank No. Count"
+msgstr "空白張數"
+
+msgid "Upload .csv to Create Seller Invoice Track No"
+msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
+
+msgid "Choose .csv"
+msgstr "選擇 .csv"
+
+msgid "Create"
+msgstr "新增"
+
+msgid "Is on working?"
+msgstr "是否使用中?"
+
+msgid "Seller Identifier"
+msgstr "賣方統編"
+
+msgid "Transport ID"
+msgstr ""
+
+msgid "Party ID"
+msgstr ""
+
+msgid "Routing ID"
+msgstr ""
+
+msgid "Qrcode Seed"
+msgstr ""
+
+msgid "Turnkey Seed"
+msgstr ""
+
+msgid "Download Seed"
+msgstr ""
+
+msgid "Remaining Count of the current period"
+msgstr "當期剩餘張數"
+
+msgctxt "tax_type"
+msgid "General"
+msgstr "一般稅額"
+
+msgctxt "tax_type"
+msgid "Special"
+msgstr "特種稅額"
+
+msgid "On Working"
+msgstr "使用中"
+
+msgid "TurnkeyWeb(id: {}) does not exist"
+msgstr "Turnkwy 伺服器(id: {})不存在"
+
+msgid ""
+"{} has error: \n"
+"\n"
+"\n"
+"{}"
+msgstr ""
+"{} 有誤: \n"
+"\n"
+"\n"
+"{}"
+
+msgid ""
+"{} has error: \n"
+"\n"
+"\n"
+"The suffix of begin_no should be 00 or 50."
+msgstr ""
+"{} 有誤: \n"
+"\n"
+"\n"
+"起號的後 2 碼須為 00 或 50 。"
+
+msgid ""
+"{} has error: \n"
+"\n"
+"\n"
+"The suffix of end_no should be 49 or 99."
+msgstr ""
+"{} 有誤: \n"
+"\n"
+"\n"
+"迄號的後 2 碼須為 49 或 99 。"
+
+msgid "{} exists"
+msgstr "{} 已存在"
+
+msgid ""
+"{} ~ {} has error: \n"
+"\n"
+"\n"
+"number overlapping"
+msgstr ""
+"{} ~ {} 有誤: \n"
+"\n"
+"\n"
+"與先前字軌號碼有重疊"
+
+msgid "E-Invoice Error"
+msgstr "電子發票錯誤"
+
+msgid "{} does not exist"
+msgstr "{} 不存在"

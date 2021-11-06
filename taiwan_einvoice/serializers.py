@@ -3,12 +3,13 @@ import logging
 import pytz
 
 from django.conf import settings
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import User, Permission, AnonymousUser 
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from rest_framework.serializers import CharField, IntegerField
-from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField
+from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField, ChoiceField
+from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     ESCPOSWeb,
     Printer,
@@ -34,6 +35,7 @@ class UserSerializer(ModelSerializer):
 class ESCPOSWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweb-detail", lookup_field='pk')
+    slug = ReadOnlyField()
     mask_hash_key = CharField(read_only=True)
 
 
@@ -72,6 +74,7 @@ class PrinterSerializer(ModelSerializer):
 class LegalEntitySerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:legalentity-detail", lookup_field='pk')
+    identifier = ReadOnlyField()
 
     class Meta:
         model = LegalEntity
@@ -156,10 +159,25 @@ class TurnkeyWebSerializer(ModelSerializer):
 
 
 
+class TurnkeyWebRelatedField(PrimaryKeyRelatedField):
+    def get_queryset(self):
+        request = self.context.get('request', None)
+        return get_objects_for_user(request.user if request else AnonymousUser,
+                                    ("taiwan_einvoice.add_te_sellerinvoicetrackno",
+                                    ),
+                                    any_perm=True,
+                                    with_superuser=True,
+                                    accept_global_perms=False,
+                                    ).order_by('id')
+
+
+
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
+    turnkey_web = TurnkeyWebRelatedField(required=True, allow_null=False)
     turnkey_web_dict = TurnkeyWebSerializer(source='turnkey_web', read_only=True)
+    type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
     type__display = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
     year_month_range = CharField(read_only=True)

@@ -1,0 +1,69 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/sellerinvoicetrackno_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="date_in_year_month_range">{% trans "Datetime is included by the Year Month Range" %}</label>
+                    <div class="input-group date" id="date_in_year_month_range" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#date_in_year_month_range"
+                            name="date_in_year_month_range" id="id_date_in_year_month_range" />
+                        <div class="input-group-append" data-target="#date_in_year_month_range" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="track__icontains">{% trans "Track contains" context "taiwan_einvoice" %}</label>
+                    <div class="input-group" id="track__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="track__icontains" id="id_track__icontains" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}

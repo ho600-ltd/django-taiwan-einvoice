@@ -2,10 +2,10 @@ import re, datetime
 import rest_framework_filters as filters
 
 from django.db.models import Q
-from django.utils.timezone import now
+from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIWAN_TIMEZONE, ESCPOSWeb, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIPEI_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
 
 class ESCPOSWebFilter(filters.FilterSet):
@@ -18,7 +18,69 @@ class ESCPOSWebFilter(filters.FilterSet):
 
 
 
+class LegalEntityFilter(filters.FilterSet):
+    filter_any_words_in_those_fields = (
+        'name',
+        'address',
+        'person_in_charge',
+        'telephone_number',
+        'facsimile_number',
+        'email_address',
+        'customer_number_char',
+        'role_remark',
+    )
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+
+
+
+    class Meta:
+        model = LegalEntity
+        fields = {
+            'identifier': ('contains', 'icontains'),
+        }
+
+
+
+    def filter_any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
+
+
+
+class SellerFilter(filters.FilterSet):
+    legal_entity = filters.RelatedFilter(LegalEntityFilter, field_name='legal_entity', queryset=LegalEntity.objects.all())
+
+
+
+    class Meta:
+        model = Seller
+        fields = {
+        }
+
+
+
 class TurnkeyWebFilter(filters.FilterSet):
+    filter_any_words_in_those_fields = (
+        'name',
+        'hash_key',
+        'transport_id',
+        'party_id',
+        'routing_id',
+        'qrcode_seed',
+        'turnkey_seed',
+        'download_seed',
+    )
+    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=Seller.objects.all())
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+
+
+
     class Meta:
         model = TurnkeyWeb
         fields = {
@@ -27,8 +89,19 @@ class TurnkeyWebFilter(filters.FilterSet):
 
 
 
+    def filter_any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
+
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
     now_use = filters.BooleanFilter(method='filter_now_use')
+    date_in_year_month_range = filters.CharFilter(method='filter_date_in_year_month_range')
 
 
 
@@ -36,6 +109,7 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
         model = SellerInvoiceTrackNo
         fields = {
             'type': ('exact', ),
+            'track': ('icontains', ),
         }
 
 
@@ -45,6 +119,16 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return SellerInvoiceTrackNo.filter_now_use_sitns()
         else:
             return queryset
+
+
+
+    def filter_date_in_year_month_range(self, queryset, name, value):
+        try:
+            d = datetime.datetime.strptime(value, '%Y-%m-%d %H:%M:%S').replace(tzinfo=utc)
+        except ValueError:
+            return queryset
+        else:
+            return queryset.filter(begin_time__lte=d, end_time__gte=d)
 
 
 
@@ -98,7 +182,7 @@ class EInvoiceFilter(filters.FilterSet):
             year, month, track, no, random_number = code39_barcode_re.groups()
             year = int(year) + 1911
             month = int(month)
-            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIWAN_TIMEZONE)
+            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIPEI_TIMEZONE)
             queryset = queryset.filter(seller_invoice_track_no__begin_time__lt=middle_time,
                                        seller_invoice_track_no__end_time__gt=middle_time,
                                        track=track,

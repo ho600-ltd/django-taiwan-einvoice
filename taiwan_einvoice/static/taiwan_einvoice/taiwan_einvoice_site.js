@@ -121,6 +121,7 @@ $(function () {
 
     TAIWAN_EINVOICE_SITE.prototype.show_modal = function ($modal, title, body) {
         $('.modal-title', $modal).html(title);
+        body = body.replace(/\n/g, "<br/>");
         $('.modal-body', $modal).html(body);
         $modal.modal('show');
     };
@@ -150,7 +151,8 @@ $(function () {
             'create_time__gte', 'create_time__lt',
             'update_time__gte', 'update_time__lt',
             'generate_time__gte', 'generate_time__lt',
-            'print_time__gte', 'print_time__lt'
+            'print_time__gte', 'print_time__lt',
+            'date_in_year_month_range'
         ];
         for (var param of datetime_kind_params) {
             var datetime_kind_param = $self.convert_time_from_utc_str(url.searchParams.get(param),
@@ -176,7 +178,10 @@ $(function () {
             'einvoice__code39__exact',
             'id',
             'einvoice__track_no__icontains',
-            'einvoice__any_words__icontains'
+            'einvoice__any_words__icontains',
+            'identifier__icontains',
+            'seller__legal_entity__identifier__icontains',
+            'track__icontains'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);
