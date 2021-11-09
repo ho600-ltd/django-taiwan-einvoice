@@ -94,6 +94,62 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
+class EInvoiceSellerAPI(models.Model):
+    url = 'https://www-vc.einvoice.nat.gov.tw/BIZAPIVAN/biz'
+
+
+
+    AppId = models.CharField(max_length=18, unique=True)
+    APIKey = models.CharField(max_length=24, null=False)
+    proxy = models.CharField(max_length=64, null=True)
+
+
+
+    def post_data(self, data):
+        return ''
+
+
+    def getTxID(self):
+        return 'TxID'
+
+
+    def inquery(self, type, key):
+        TxID = self.getTxID
+        if '1' == type:
+            return self.inquery_barcode(type, key, TxID)
+
+    
+    def inquery_barcode(self, type, key):
+        data = {
+            "version": "1.0",
+            "action": "bcv",
+            "barCode": key,
+            "TxID": TxID,
+            "appId": self.AppId,
+        }
+        return self.post_data(data)
+
+
+
+class EInvoiceAPIResult(models.Model):
+    type_choices = (
+        ('1', 'mobile-barcode'),
+        ('2', 'donate-mark'),
+        ('3', 'seller-enable-einvoice'),
+        ('4', 'seller-identifier'),
+        ('5', 'seller-customer-carrier'),
+    )
+    type = models.CharField(max_length=1, choices=type_choices)
+    key = models.CharField(max_length=40)
+    value = models.TextField()
+
+
+
+    class Meta:
+        unique_together = (('type', 'key'), )
+
+
+
 class ESCPOSWeb(models.Model):
     name = models.CharField(max_length=32)
     slug = models.CharField(max_length=5, default='')
