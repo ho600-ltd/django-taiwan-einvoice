@@ -233,7 +233,6 @@ class EInvoiceAPIResult(models.Model):
         ('2', 'donate-mark'),
         ('3', 'seller-enable-einvoice'),
         ('4', 'seller-identifier'),
-        ('5', 'seller-customer-carrier'),
     )
     type_choices_dict = dict(type_choices)
     type_choices_reverse_dict = {v: k for k, v in type_choices_dict.items()}
