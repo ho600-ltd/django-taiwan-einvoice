@@ -1,4 +1,5 @@
-import pytz, datetime
+import pytz, datetime, hmac, requests, urllib3
+from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
 from Crypto.Cipher import AES
@@ -67,30 +68,95 @@ class EInvoiceSellerAPI(models.Model):
     proxy = models.CharField(max_length=64, null=True)
 
 
+    def __str__(self):
+        return "{} with {}".format(self.AppId, self.proxy)
+
+
+
+    def get_hmacsha256_sign(self, plain_text=None, **kwargs):
+        key = bytes(self.APIKey, 'utf-8')
+        if bytes == type(plain_text):
+            b_text = plain_text
+        else:
+            b_text = plain_text.encode('utf-8')
+        signed_hmac_sha256 = hmac.new(key, b_text, sha256)
+        return b64encode(signed_hmac_sha256.digest())
+
 
     def post_data(self, data):
-        return ''
+        data["timeStamp"] = int(datetime.datetime.now().timestamp()+180)
+        s = []
+        for key in sorted(data):
+            s.append("{}={}".format(key, data[key]))
+        _s = "&".join(s)
+        print(_s)
+        data['signature'] = self.get_hmacsha256_sign(_s)
+
+        requests.packages.urllib3.disable_warnings()
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+        try:
+            requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+        except AttributeError:
+            pass
+        for _proxy in self.proxy.split(';'):
+            client_kw = {}
+            if _proxy:
+                proxies = {'http': _proxy, 'https': _proxy}
+                client_kw['proxies'] = proxies
+            try:
+                result = requests.post(self.url,
+                                       data=data,
+                                       headers={'Content-Type':
+                                                'application/x-www-form-urlencoded'},
+                                       **client_kw)
+            except:
+                pass
+            else:
+                return result.json()
+        return {"code": "?"}
 
 
-    def getTxID(self):
-        return 'TxID'
+    def set_api_result(self, type, key):
+        create_new = False
+        try:
+            eiar = EInvoiceAPIResult.objects.get(type=type, key=key)
+        except EInvoiceAPIResult.DoesNotExist:
+            create_new = True
+        else:
+            if False == eiar.success:
+                eiar.delete()
+                create_new = True
+        if create_new:
+            eiar = EInvoiceAPIResult(type=type, key=key)
+            eiar.save()
+        return eiar
 
 
-    def inquery(self, type, key):
-        TxID = self.getTxID
-        if '1' == type:
-            return self.inquery_barcode(type, key, TxID)
-
-    
-    def inquery_barcode(self, type, key):
+    def inquery_mobile_barcode(self, type, key, api_result):
         data = {
             "version": "1.0",
             "action": "bcv",
             "barCode": key,
-            "TxID": TxID,
+            "TxID": api_result.id,
             "appId": self.AppId,
         }
-        return self.post_data(data)
+        result = self.post_data(data)
+        if 'Y' == result.get('isExist', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
+    def inquery(self, type_str, key):
+        type = EInvoiceAPIResult.type_choices_reverse_dict[type_str]
+        api_result = self.set_api_result(type, key)
+        if 'mobile-barcode' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_mobile_barcode(type, key, api_result)
 
 
 
@@ -102,8 +168,11 @@ class EInvoiceAPIResult(models.Model):
         ('4', 'seller-identifier'),
         ('5', 'seller-customer-carrier'),
     )
+    type_choices_dict = dict(type_choices)
+    type_choices_reverse_dict = {v: k for k, v in type_choices_dict.items()}
     type = models.CharField(max_length=1, choices=type_choices)
     key = models.CharField(max_length=40)
+    success = models.BooleanField(default=False)
     value = models.TextField()
 
 
