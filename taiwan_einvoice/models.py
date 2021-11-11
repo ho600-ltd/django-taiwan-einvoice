@@ -11,46 +11,9 @@ from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from simple_history.models import HistoricalRecords
 
-
-def customize_hex_from_integer(number, base='0123456789abcdef'):
-    """ convert integer to string in any base, example:
-        convert int(31) with binary-string(01) will be '11111'
-        convert int(31) with digit-string(0-9) will be '31'
-        convert int(31) with hex-string(0-9a-f) will be '1f'
-        convert int(31) with base-string(a-fg-v0-5) will be '5'
-        convert int(63) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ','
-        convert int(16777215) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ',,,,'
-        convert int(16777216) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be 'baaaa'
-    """
-    base_len = len(base)
-    if number < base_len:
-        return base[number]
-    else:
-        return customize_hex_from_integer(number//base_len, base) + base[number%base_len]
-
-
-def integer_from_customize_hex(string, base='0123456789abcdef'):
-    """ convert string to integer in any base, example:
-        convert '11111' with binary-string(01) will be int(31)
-        convert int(31) with digit-string(0-9) will be '31'
-        convert int(31) with hex-string(0-9a-f) will be '1f'
-        convert int(31) with base-string(a-fg-v0-5) will be 'bd'
-        convert int(27) with base-string(a-fg-v0-5) will be '5'
-        convert int(63) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ','
-        convert int(16777215) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ',,,,'
-        convert int(16777216) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be 'baaaa'
-    """
-    position_dict = {}
-    base_len = len(base)
-    for i, s in enumerate(base):
-        position_dict[s] = i
-    string_len = len(string)
-    number = 0
-    for i, s in enumerate(string):
-        _n = position_dict[s] * base_len ** (string_len - i - 1)
-        number += _n
-    return number
+from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
 
 
 def _pad(byte_array):
@@ -300,6 +263,8 @@ class TurnkeyWeb(models.Model):
     qrcode_seed = models.CharField(max_length=40)
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
+    epl_base_set = models.CharField(max_length=64, default='')
+    history = HistoricalRecords()
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0
@@ -324,6 +289,9 @@ class TurnkeyWeb(models.Model):
     @property
     def mask_download_seed(self):
         return self.download_seed[:4] + '************************' + self.download_seed[-4:]
+    @property
+    def mask_epl_base_set(self):
+        return self.epl_base_set[:4] + '*'*(len(self.epl_base_set)-8) + self.epl_base_set[-4:]
 
 
     note = models.TextField()
@@ -635,13 +603,19 @@ class EInvoicePrintLog(models.Model):
 
     base_set = 'GHIJKLMNOPQRSTUVWXYZ'
     @property
-    def customize_hax_from_id(self):
+    def customize_hex_from_id(self):
+        base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
+        if not base_set:
+            base_set = self.base_set
         return customize_hex_from_integer(self.id, base=self.base_set)
 
 
     @classmethod
-    def get_id_from_customize_hax(self, hex):
-        return integer_from_customize_hex(hex, base=self.base_set)
+    def get_obj_from_customize_hex(self, hex, base_set=''):
+        if not base_set:
+            base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
+        id = integer_from_customize_hex(hex, base=base_set)
+        return EInvoicePrintLog.objects.get(id=id)
 
 
     def __str__(self):

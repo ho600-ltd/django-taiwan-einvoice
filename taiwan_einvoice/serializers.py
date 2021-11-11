@@ -121,6 +121,7 @@ class TurnkeyWebSerializer(ModelSerializer):
     mask_qrcode_seed = CharField(read_only=True)
     mask_turnkey_seed = CharField(read_only=True)
     mask_download_seed = CharField(read_only=True)
+    mask_epl_base_set = CharField(read_only=True)
 
 
 
@@ -139,6 +140,11 @@ class TurnkeyWebSerializer(ModelSerializer):
             'mask_qrcode_seed',
             'mask_turnkey_seed',
             'mask_download_seed',
+            'mask_epl_base_set',
+            'qrcode_seed',
+            'turnkey_seed',
+            'download_seed',
+            'epl_base_set',
             'note',
             'seller'
         )
@@ -147,6 +153,7 @@ class TurnkeyWebSerializer(ModelSerializer):
             'qrcode_seed': {'write_only': True},
             'turnkey_seed': {'write_only': True},
             'download_seed': {'write_only': True},
+            'epl_base_set': {'write_only': True},
         }
 
 
