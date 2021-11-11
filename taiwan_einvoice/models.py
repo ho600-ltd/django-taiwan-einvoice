@@ -165,6 +165,24 @@ class EInvoiceSellerAPI(models.Model):
         return api_result.success
 
 
+    def inquery_seller_identifier(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "qryBanUnitTp",
+            "ban": key,
+            "serial": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        print(result)
+        if 'Y' == result.get('banUnitTpStatus', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
     def inquery(self, type_str, key):
         type = EInvoiceAPIResult.type_choices_reverse_dict[type_str]
         api_result = self.set_api_result(type, key)
@@ -178,6 +196,11 @@ class EInvoiceSellerAPI(models.Model):
                 return api_result.success
             else:
                 return self.inquery_donate_mark(type, key, api_result)
+        elif 'seller-identifier' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_seller_identifier(type, key, api_result)
 
 
 
