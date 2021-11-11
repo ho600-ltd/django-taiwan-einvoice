@@ -183,6 +183,24 @@ class EInvoiceSellerAPI(models.Model):
         return api_result.success
 
 
+    def inquery_seller_enable_einvoice(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "qryRecvRout",
+            "ban": key,
+            "serial": api_result.id,
+            "TxID": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        if 'Y' == result.get('recvRoutStatus', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
     def inquery(self, type_str, key):
         type = EInvoiceAPIResult.type_choices_reverse_dict[type_str]
         api_result = self.set_api_result(type, key)
@@ -201,6 +219,11 @@ class EInvoiceSellerAPI(models.Model):
                 return api_result.success
             else:
                 return self.inquery_seller_identifier(type, key, api_result)
+        elif 'seller-enable-einvoice' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_seller_enable_einvoice(type, key, api_result)
 
 
 
