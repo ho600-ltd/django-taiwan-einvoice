@@ -89,7 +89,6 @@ class EInvoiceSellerAPI(models.Model):
         for key in sorted(data):
             s.append("{}={}".format(key, data[key]))
         _s = "&".join(s)
-        print(_s)
         data['signature'] = self.get_hmacsha256_sign(_s)
 
         requests.packages.urllib3.disable_warnings()
@@ -149,6 +148,23 @@ class EInvoiceSellerAPI(models.Model):
         return api_result.success
 
 
+    def inquery_donate_mark(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "preserveCodeCheck",
+            "pCode": key,
+            "TxID": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        if 'Y' == result.get('isExist', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
     def inquery(self, type_str, key):
         type = EInvoiceAPIResult.type_choices_reverse_dict[type_str]
         api_result = self.set_api_result(type, key)
@@ -157,6 +173,11 @@ class EInvoiceSellerAPI(models.Model):
                 return api_result.success
             else:
                 return self.inquery_mobile_barcode(type, key, api_result)
+        elif 'donate-mark' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_donate_mark(type, key, api_result)
 
 
 
