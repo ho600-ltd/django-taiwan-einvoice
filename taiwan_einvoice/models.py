@@ -227,6 +227,26 @@ class EInvoiceSellerAPI(models.Model):
 
 
 
+class MobileBarcodeDoesNotExist(Exception):
+    pass
+
+
+
+class NPOBnDoesNotExist(Exception):
+    pass
+
+
+
+class SellerDoesNotEnableEInvoice(Exception):
+    pass
+
+
+
+class IdentifierDoesNotExist(Exception):
+    pass
+
+
+
 class EInvoiceAPIResult(models.Model):
     type_choices = (
         ('1', 'mobile-barcode'),
