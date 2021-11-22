@@ -227,6 +227,11 @@ class EInvoiceSellerAPI(models.Model):
 
 
 
+class EInvoiceFieldError(Exception):
+    pass
+
+
+
 class MobileBarcodeDoesNotExist(Exception):
     pass
 
@@ -364,6 +369,7 @@ class IdentifierRule(object):
 
 
 class LegalEntity(models.Model, IdentifierRule):
+    GENERAL_CONSUMER_IDENTIFIER = '0000000000'
     identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     name = models.CharField(max_length=60, default='', db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
@@ -576,6 +582,16 @@ class EInvoice(models.Model):
     @property
     def track_no_(self):
         return "{}-{}".format(self.track, self.no)
+    carrier_type_choices = (
+        ('3J0002', _('Mobile barcode')),
+    )
+    carrier_type = models.CharField(max_length=6, default='', choices=carrier_type_choices, db_index=True)
+    @property
+    def carrier_type__display(self):
+        return self.get_carrier_type_display()
+
+    carrier_id1 = models.CharField(max_length=64, default='', db_index=True)
+    carrier_id2 = models.CharField(max_length=64, default='', db_index=True)
     npoban = models.CharField(max_length=7, default='', db_index=True)
     @property
     def donate_mark(self):
