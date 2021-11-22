@@ -433,11 +433,17 @@ class ReceiptLog(models.Model):
         if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
             d['align'] = 'left'
         text = line['text']
-        if (self.receipt.meet_to_tw_einvoice_standard
-            and self.re_print_original_copy == False
-            and self.copy_order > 1
-            and TW_EINVOICE_TITLE_RE.search(text)
-            and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)):
+        if ((self.receipt.meet_to_tw_einvoice_standard
+                and self.re_print_original_copy == False
+                and self.copy_order > 1
+                and TW_EINVOICE_TITLE_RE.search(text)
+                and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)
+            ) or (self.receipt.meet_to_tw_einvoice_standard
+                and self.re_print_original_copy == False
+                and self.print_mark
+                and TW_EINVOICE_TITLE_RE.search(text)
+                and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)
+            )):
             text += '補印'
         printer_device.set(**d)
         printer_device.textln(text)

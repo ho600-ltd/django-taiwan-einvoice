@@ -14,7 +14,11 @@ except:
     REQUIREMENTS = []
 
 install_requires = [r for r in REQUIREMENTS.split('\n') if r
-                    and not re.match('^ *#.*', r) and not re.match('^.*git\+.*', r)]
+                    and not re.match('^ *#.*', r)
+                    and not re.match('^.*git\+.*', r)
+                    and not re.match('^.*ssh:.*', r)
+                    and not re.match('^.*https?:.*', r)
+                   ]
 
 setup(name='taiwan_einvoice',
       install_requires=install_requires,
