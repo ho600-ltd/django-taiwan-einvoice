@@ -655,7 +655,7 @@ $(function () {
                     var t = $('td[field=' + keys[i] + ']', $tr).text();
                     $('td[field=' + keys[i] + ']', $tr_tmpl).attr('value', t).text(t);
                 }
-                $tr_tmpl.show().appendTo($('tbody', $modal_table));
+                $('tbody', $modal_table).prepend($tr_tmpl.show());
                 no += 1;
             });
             $modal.modal('show');
