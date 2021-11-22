@@ -11,14 +11,22 @@ from django.utils.timezone import now
 class UsbZhHant(Usb):
     def __init__(self, *args, **kwargs):
         super(UsbZhHant, self).__init__(*args, **kwargs)
-        #self.charcode(code='CP1252')
-        self.charcode(code='ISO_8859-2')
+        self.default_encoding = kwargs.get('default_encoding', 'CP950').upper()
+        if 'CP950' == self.default_encoding:
+            self.charcode(code='CP1252')
+        elif 'GB18030' == self.default_encoding:
+            self.charcode(code='ISO_8859-2')
+        else:
+            self.default_encoding = 'CP950'
+            self.charcode(code='CP1252')
 
 
-    #def text(self, text, *args, to_encode='cp950', **kwargs):
-    def text(self, text, *args, to_encode='gb18030', **kwargs):
-        #return super(UsbZhHant, self).text(text.encode(to_encode).decode('latin1'), *args, **kwargs)
-        return super(UsbZhHant, self).text(text.encode(to_encode).decode('latin2'), *args, **kwargs)
+    def text(self, text, *args, **kwargs):
+        if 'CP950' == self.default_encoding:
+            return super(UsbZhHant, self).text(text.encode(self.default_encoding.lower()).decode('latin1'), *args, **kwargs)
+        elif 'GB18030' == self.default_encoding:
+            return super(UsbZhHant, self).text(text.encode(self.default_encoding.lower()).decode('latin2'), *args, **kwargs)
+
     
     def barcode(self, code, bc, height=64, width=3, pos="BELOW", font="A",
                 align_ct=True, function_type=None, check=True):
@@ -125,6 +133,10 @@ class Printer(models.Model):
         ('6', '58mm E-Invoice'),
         ('8', '80mm Receipt'),
     )
+    ENCODINGS = (
+        ('B', 'CP950'),
+        ('G', "GB18030"),
+    )
     PRINTERS = {}
     serial_number = models.CharField(max_length=128, unique=True)
     nickname = models.CharField(max_length=64, unique=True)
@@ -133,6 +145,7 @@ class Printer(models.Model):
     product_number = models.SmallIntegerField()
     profile = models.CharField(max_length=2, choices=SUPPORT_PRINTERS)
     receipt_type = models.CharField(max_length=1, choices=RECEIPT_TYPES, default='0')
+    default_encoding = models.CharField(max_length=1, choices=ENCODINGS, default='B')
 
 
     def __str__(self):
@@ -163,10 +176,11 @@ class Printer(models.Model):
                 printer.save()
                 if setup:
                     printer_device = UsbZhHant(printer.vendor_number,
-                                            printer.product_number,
-                                            usb_args={"address": dev.address, "bus": dev.bus},
-                                            profile=printer.get_profile_display(),
-                                            )
+                                               printer.product_number,
+                                               usb_args={"address": dev.address, "bus": dev.bus},
+                                               profile=printer.get_profile_display(),
+                                               default_encoding=self.get_default_encoding_display(),
+                                              )
                     cls.PRINTERS[serial_number] = {
                         'nickname': printer.nickname,
                         'receipt_type': printer.receipt_type,
@@ -190,8 +204,10 @@ class Printer(models.Model):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if setup:
                         usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
-                                            usb_args={"address": dev.address, "bus": dev.bus},
-                                            profile=self.get_profile_display())
+                                               usb_args={"address": dev.address, "bus": dev.bus},
+                                               profile=self.get_profile_display(),
+                                               default_encoding=self.get_default_encoding_display(),
+                                              )
                         Printer.PRINTERS[self.serial_number] = {
                             'nickname': self.nickname,
                             'receipt_type': self.receipt_type,
@@ -222,7 +238,9 @@ class Printer(models.Model):
                         if setup:
                             usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
                                                    usb_args={"address": dev.address, "bus": dev.bus },
-                                                   profile=self.get_profile_display())
+                                                   profile=self.get_profile_display(),
+                                                   default_encoding=self.get_default_encoding_display(),
+                                                  )
                             Printer.PRINTERS[self.serial_number] = {
                                 'nickname': self.nickname,
                                 'receipt_type': self.receipt_type,
