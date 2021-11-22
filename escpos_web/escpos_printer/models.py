@@ -11,11 +11,14 @@ from django.utils.timezone import now
 class UsbZhHant(Usb):
     def __init__(self, *args, **kwargs):
         super(UsbZhHant, self).__init__(*args, **kwargs)
-        self.charcode(code='CP1252')
-        
+        #self.charcode(code='CP1252')
+        self.charcode(code='ISO_8859-2')
 
-    def text(self, text, *args, to_encode='cp950', **kwargs):
-        return super(UsbZhHant, self).text(text.encode(to_encode).decode('latin1'), *args, **kwargs)
+
+    #def text(self, text, *args, to_encode='cp950', **kwargs):
+    def text(self, text, *args, to_encode='gb18030', **kwargs):
+        #return super(UsbZhHant, self).text(text.encode(to_encode).decode('latin1'), *args, **kwargs)
+        return super(UsbZhHant, self).text(text.encode(to_encode).decode('latin2'), *args, **kwargs)
     
     def barcode(self, code, bc, height=64, width=3, pos="BELOW", font="A",
                 align_ct=True, function_type=None, check=True):

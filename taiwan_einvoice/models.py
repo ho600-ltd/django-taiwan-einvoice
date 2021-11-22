@@ -1,4 +1,5 @@
-import pytz, datetime
+import pytz, datetime, hmac, requests, urllib3
+from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
 from Crypto.Cipher import AES
@@ -11,46 +12,9 @@ from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from simple_history.models import HistoricalRecords
 
-
-def customize_hex_from_integer(number, base='0123456789abcdef'):
-    """ convert integer to string in any base, example:
-        convert int(31) with binary-string(01) will be '11111'
-        convert int(31) with digit-string(0-9) will be '31'
-        convert int(31) with hex-string(0-9a-f) will be '1f'
-        convert int(31) with base-string(a-fg-v0-5) will be '5'
-        convert int(63) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ','
-        convert int(16777215) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ',,,,'
-        convert int(16777216) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be 'baaaa'
-    """
-    base_len = len(base)
-    if number < base_len:
-        return base[number]
-    else:
-        return customize_hex_from_integer(number//base_len, base) + base[number%base_len]
-
-
-def integer_from_customize_hex(string, base='0123456789abcdef'):
-    """ convert string to integer in any base, example:
-        convert '11111' with binary-string(01) will be int(31)
-        convert int(31) with digit-string(0-9) will be '31'
-        convert int(31) with hex-string(0-9a-f) will be '1f'
-        convert int(31) with base-string(a-fg-v0-5) will be 'bd'
-        convert int(27) with base-string(a-fg-v0-5) will be '5'
-        convert int(63) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ','
-        convert int(16777215) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be ',,,,'
-        convert int(16777216) with base-string(abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,) will be 'baaaa'
-    """
-    position_dict = {}
-    base_len = len(base)
-    for i, s in enumerate(base):
-        position_dict[s] = i
-    string_len = len(string)
-    number = 0
-    for i, s in enumerate(string):
-        _n = position_dict[s] * base_len ** (string_len - i - 1)
-        number += _n
-    return number
+from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
 
 
 def _pad(byte_array):
@@ -91,6 +55,216 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
+
+
+
+class EInvoiceSellerAPI(models.Model):
+    url = 'https://www-vc.einvoice.nat.gov.tw/BIZAPIVAN/biz'
+
+
+
+    AppId = models.CharField(max_length=18, unique=True)
+    APIKey = models.CharField(max_length=24, null=False)
+    proxy = models.CharField(max_length=64, null=True)
+
+
+    def __str__(self):
+        return "{} with {}".format(self.AppId, self.proxy)
+
+
+
+    def get_hmacsha256_sign(self, plain_text=None, **kwargs):
+        key = bytes(self.APIKey, 'utf-8')
+        if bytes == type(plain_text):
+            b_text = plain_text
+        else:
+            b_text = plain_text.encode('utf-8')
+        signed_hmac_sha256 = hmac.new(key, b_text, sha256)
+        return b64encode(signed_hmac_sha256.digest())
+
+
+    def post_data(self, data):
+        data["timeStamp"] = int(datetime.datetime.now().timestamp()+180)
+        s = []
+        for key in sorted(data):
+            s.append("{}={}".format(key, data[key]))
+        _s = "&".join(s)
+        data['signature'] = self.get_hmacsha256_sign(_s)
+
+        requests.packages.urllib3.disable_warnings()
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+        try:
+            requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+        except AttributeError:
+            pass
+        for _proxy in self.proxy.split(';'):
+            client_kw = {}
+            if _proxy:
+                proxies = {'http': _proxy, 'https': _proxy}
+                client_kw['proxies'] = proxies
+            try:
+                result = requests.post(self.url,
+                                       data=data,
+                                       headers={'Content-Type':
+                                                'application/x-www-form-urlencoded'},
+                                       **client_kw)
+            except:
+                pass
+            else:
+                return result.json()
+        return {"code": "?"}
+
+
+    def set_api_result(self, type, key):
+        create_new = False
+        try:
+            eiar = EInvoiceAPIResult.objects.get(type=type, key=key)
+        except EInvoiceAPIResult.DoesNotExist:
+            create_new = True
+        else:
+            if False == eiar.success:
+                eiar.delete()
+                create_new = True
+        if create_new:
+            eiar = EInvoiceAPIResult(type=type, key=key)
+            eiar.save()
+        return eiar
+
+
+    def inquery_mobile_barcode(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "bcv",
+            "barCode": key,
+            "TxID": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        if 'Y' == result.get('isExist', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
+    def inquery_donate_mark(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "preserveCodeCheck",
+            "pCode": key,
+            "TxID": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        if 'Y' == result.get('isExist', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
+    def inquery_seller_identifier(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "qryBanUnitTp",
+            "ban": key,
+            "serial": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        print(result)
+        if 'Y' == result.get('banUnitTpStatus', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
+    def inquery_seller_enable_einvoice(self, type, key, api_result):
+        data = {
+            "version": "1.0",
+            "action": "qryRecvRout",
+            "ban": key,
+            "serial": api_result.id,
+            "TxID": api_result.id,
+            "appId": self.AppId,
+        }
+        result = self.post_data(data)
+        if 'Y' == result.get('recvRoutStatus', 'N') and '200' == str(result.get('code', '')):
+            api_result.success = True
+        else:
+            api_result.value = result
+        api_result.save()
+        return api_result.success
+
+
+    def inquery(self, type_str, key):
+        type = EInvoiceAPIResult.type_choices_reverse_dict[type_str]
+        api_result = self.set_api_result(type, key)
+        if 'mobile-barcode' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_mobile_barcode(type, key, api_result)
+        elif 'donate-mark' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_donate_mark(type, key, api_result)
+        elif 'seller-identifier' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_seller_identifier(type, key, api_result)
+        elif 'seller-enable-einvoice' == type_str:
+            if api_result.success:
+                return api_result.success
+            else:
+                return self.inquery_seller_enable_einvoice(type, key, api_result)
+
+
+
+class MobileBarcodeDoesNotExist(Exception):
+    pass
+
+
+
+class NPOBnDoesNotExist(Exception):
+    pass
+
+
+
+class SellerDoesNotEnableEInvoice(Exception):
+    pass
+
+
+
+class IdentifierDoesNotExist(Exception):
+    pass
+
+
+
+class EInvoiceAPIResult(models.Model):
+    type_choices = (
+        ('1', 'mobile-barcode'),
+        ('2', 'donate-mark'),
+        ('3', 'seller-enable-einvoice'),
+        ('4', 'seller-identifier'),
+    )
+    type_choices_dict = dict(type_choices)
+    type_choices_reverse_dict = {v: k for k, v in type_choices_dict.items()}
+    type = models.CharField(max_length=1, choices=type_choices)
+    key = models.CharField(max_length=40)
+    success = models.BooleanField(default=False)
+    value = models.TextField()
+
+
+
+    class Meta:
+        unique_together = (('type', 'key'), )
 
 
 
@@ -244,6 +418,8 @@ class TurnkeyWeb(models.Model):
     qrcode_seed = models.CharField(max_length=40)
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
+    epl_base_set = models.CharField(max_length=64, default='')
+    history = HistoricalRecords()
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0
@@ -268,6 +444,9 @@ class TurnkeyWeb(models.Model):
     @property
     def mask_download_seed(self):
         return self.download_seed[:4] + '************************' + self.download_seed[-4:]
+    @property
+    def mask_epl_base_set(self):
+        return self.epl_base_set[:4] + '*'*(len(self.epl_base_set)-8) + self.epl_base_set[-4:]
 
 
     note = models.TextField()
@@ -579,13 +758,19 @@ class EInvoicePrintLog(models.Model):
 
     base_set = 'GHIJKLMNOPQRSTUVWXYZ'
     @property
-    def customize_hax_from_id(self):
+    def customize_hex_from_id(self):
+        base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
+        if not base_set:
+            base_set = self.base_set
         return customize_hex_from_integer(self.id, base=self.base_set)
 
 
     @classmethod
-    def get_id_from_customize_hax(self, hex):
-        return integer_from_customize_hex(hex, base=self.base_set)
+    def get_obj_from_customize_hex(self, hex, base_set=''):
+        if not base_set:
+            base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
+        id = integer_from_customize_hex(hex, base=base_set)
+        return EInvoicePrintLog.objects.get(id=id)
 
 
     def __str__(self):

@@ -211,7 +211,15 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
         serializer = self.get_serializer(data=datas, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            er = {
+                "error_title": "Valid Error",
+                "error_message": """When a serializer is passed a `data` keyword argument you must call `.is_valid()` before attempting to access the serialized `.data` representation.
+You should either call `.is_valid()` first, or access `.initial_data` instead.""",
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
 
 
     def get_queryset(self):
