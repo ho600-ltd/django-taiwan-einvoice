@@ -704,6 +704,7 @@ class EInvoice(models.Model):
     def escpos_print_scripts(self):
         _d = {
             "meet_to_tw_einvoice_standard": True,
+            "print_mark": self.print_mark,
             "id": self.id,
             "track_no": self.track_no,
             "generate_time": self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
