@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-05 18:02+0800\n"
+"POT-Creation-Date: 2021-11-22 17:54+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,6 +35,9 @@ msgstr "一般稅額"
 
 msgid "Special"
 msgstr "特種稅額"
+
+msgid "Mobile barcode"
+msgstr "手機條碼載具"
 
 msgid "No details"
 msgstr "無明細"
@@ -219,6 +222,18 @@ msgstr "賣方統編"
 msgid "Buyer identifier"
 msgstr "買方統編"
 
+msgid "Donate Mark"
+msgstr "捐贈註記"
+
+msgid "NPO Ban"
+msgstr "捐贈碼"
+
+msgid "Carrier Type"
+msgstr "載具類別"
+
+msgid "Carrier ID"
+msgstr "載具ID"
+
 msgctxt "E-Invoice"
 msgid "Is Cancel?"
 msgstr "是否作廢?"
@@ -308,6 +323,10 @@ msgstr "開立時間"
 msgctxt "taiwan_einvoice_print_mark"
 msgid "Yes"
 msgstr "已印出"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Yes"
+msgstr "已捐贈"
 
 msgctxt "taiwan_einvoice"
 msgid "Print ID"

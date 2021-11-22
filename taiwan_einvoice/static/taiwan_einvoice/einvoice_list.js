@@ -255,11 +255,24 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                         var value = $('td[field="'+field+'"]', $tr).text();
                     }
                     if (field == 'print_mark') {
-                        value = json[field];
                         if (value) {
+                            value = pgettext('taiwan_einvoice_print_mark', 'Yes');
                             $('.re_print_einvoice_modal', $modal).show();
                         } else {
+                            value = '';
                             $('.re_print_einvoice_modal', $modal).hide();
+                        }
+                    } else if (field == 'donate_mark') {
+                        if ('1' == json[field]) {
+                            value = pgettext('taiwan_einvoice_donate_mark', 'Yes');
+                        } else {
+                            value = '';
+                        }
+                    } else if (field == 'carrier_id2') {
+                        if (json['carrier_id1'] == json[field]) {
+                            value = '';
+                        } else {
+                            value = json[field];
                         }
                     } else if (!value && json[field]) {
                         value = json[field];

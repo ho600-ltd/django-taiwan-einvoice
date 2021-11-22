@@ -217,6 +217,8 @@ class EInvoiceSerializer(ModelSerializer):
     seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
     track_no = CharField(read_only=True)
     track_no_ = CharField(read_only=True)
+    donate_mark = CharField(read_only=True)
+    carrier_type__display = CharField(read_only=True)
     details_content = DetailsContentField()
 
     class Meta:

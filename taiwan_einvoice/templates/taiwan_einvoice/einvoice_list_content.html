@@ -41,6 +41,7 @@
             <th width="10%">{% trans "Creator" context "taiwan_einvoice" %}</th>
             <th width="30%">{% trans "Generate Time" %}</th>
             <th width="5%">{% trans "Print Mark" %}</th>
+            <th width="5%">{% trans "Donate Mark" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -63,6 +64,7 @@
                     <td field="creator_first_name_id">{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
                     <td class="datetime" field="generate_time" value="{{ einvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
                     <td field="print_mark" value="{{ einvoice.print_mark }}">{% if einvoice.print_mark %}{% trans "Yes" context "taiwan_einvoice_print_mark" %}{% endif %}</td>
+                    <td field="donate_mark" value="{{ einvoice.donate_mark }}">{% ifequal "1" einvoice.donate_mark %}{% trans "Yes" context "taiwan_einvoice_donate_mark" %}{% endifequal %}</td>
                 </tr>
             {% endwith %}
         {% endfor %}
