@@ -335,10 +335,11 @@ class Receipt(models.Model):
         return obj
 
 
-    def print(self, printer, re_print_original_copy=False):
+    def print(self, printer, print_mark=False, re_print_original_copy=False):
         copy_order = ReceiptLog.objects.filter(printer=printer, receipt=self).count() + 1
         rl = ReceiptLog(printer=printer,
                         receipt=self,
+                        print_mark=print_mark,
                         re_print_original_copy=re_print_original_copy,
                         copy_order=copy_order,
                         )
@@ -358,6 +359,7 @@ TW_EINVOICE_2_COPY_TITLE_RE = re.compile('補[ 　]*印[ 　]*$')
 class ReceiptLog(models.Model):
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     receipt = models.ForeignKey(Receipt, on_delete=models.DO_NOTHING)
+    print_mark = models.BooleanField(default=False)
     re_print_original_copy = models.BooleanField(default=False)
     copy_order = models.SmallIntegerField(default=0)
     print_time = models.DateTimeField(null=True)
@@ -415,11 +417,17 @@ class ReceiptLog(models.Model):
         if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
             d['align'] = 'left'
         text = line['text']
-        if (self.receipt.meet_to_tw_einvoice_standard
-            and self.re_print_original_copy == False
-            and self.copy_order > 1
-            and TW_EINVOICE_TITLE_RE.search(text)
-            and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)):
+        if ((self.receipt.meet_to_tw_einvoice_standard
+                and self.re_print_original_copy == False
+                and self.copy_order > 1
+                and TW_EINVOICE_TITLE_RE.search(text)
+                and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)
+            ) or (self.receipt.meet_to_tw_einvoice_standard
+                and self.re_print_original_copy == False
+                and self.print_mark
+                and TW_EINVOICE_TITLE_RE.search(text)
+                and not TW_EINVOICE_2_COPY_TITLE_RE.search(text)
+            )):
             text += '補印'
         printer_device.set(**d)
         printer_device.textln(text)
