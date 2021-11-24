@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-22 17:54+0800\n"
+"POT-Creation-Date: 2021-11-24 12:05+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,7 +37,15 @@ msgid "Special"
 msgstr "特種稅額"
 
 msgid "Mobile barcode"
-msgstr "手機條碼載具"
+msgstr "手機條碼"
+
+#, python-brace-format
+msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
+msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
+
+#, python-brace-format
+msgid "Donate to NPO( {npoban} )"
+msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
 msgid "No details"
 msgstr "無明細"
@@ -162,8 +170,8 @@ msgstr "5秒"
 msgid "3 seconds"
 msgstr "3秒"
 
-msgid "1 seconds"
-msgstr "1秒"
+msgid "2 seconds"
+msgstr "2秒"
 
 msgid "30 seconds"
 msgstr "30秒"
@@ -320,13 +328,13 @@ msgstr "勾選"
 msgid "Generate Time"
 msgstr "開立時間"
 
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Donated"
+msgstr "已捐贈"
+
 msgctxt "taiwan_einvoice_print_mark"
 msgid "Yes"
 msgstr "已印出"
-
-msgctxt "taiwan_einvoice_donate_mark"
-msgid "Yes"
-msgstr "已捐贈"
 
 msgctxt "taiwan_einvoice"
 msgid "Print ID"

@@ -41,13 +41,13 @@
             <th width="10%">{% trans "Creator" context "taiwan_einvoice" %}</th>
             <th width="30%">{% trans "Generate Time" %}</th>
             <th width="5%">{% trans "Print Mark" %}</th>
-            <th width="5%">{% trans "Donate Mark" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for einvoice in data.results %}
             {% with einvoice.id as einvoice_id %}
-                <tr einvoice_id="{{ einvoice.id }}">
+                <tr einvoice_id="{{ einvoice.id }}" carrier_type__display="{{ einvoice.carrier_type__display }}"
+                    donate_mark__display='{% ifequal "1" einvoice.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
                     {% if perms.turnkeyweb.print_einvoice %}
                         <td field="check" class="print_einvoice">
                             <input type="checkbox" name="print_einvoice" />
@@ -63,8 +63,15 @@
                     <td field="generate_batch_no">{{ einvoice.generate_batch_no }}</td>
                     <td field="creator_first_name_id">{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
                     <td class="datetime" field="generate_time" value="{{ einvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
-                    <td field="print_mark" value="{{ einvoice.print_mark }}">{% if einvoice.print_mark %}{% trans "Yes" context "taiwan_einvoice_print_mark" %}{% endif %}</td>
-                    <td field="donate_mark" value="{{ einvoice.donate_mark }}">{% ifequal "1" einvoice.donate_mark %}{% trans "Yes" context "taiwan_einvoice_donate_mark" %}{% endifequal %}</td>
+                    <td field="print_mark" value="{{ einvoice.print_mark }}">{% spaceless %}
+                        {% if einvoice.print_mark %}
+                            {% trans "Yes" context "taiwan_einvoice_print_mark" %}
+                        {% else %}{% if einvoice.carrier_type %}
+                            {{ einvoice.carrier_type__display }}
+                        {% else %}{% if einvoice.npoban %}
+                            {% trans "Donated" context "taiwan_einvoice_donate_mark" %}
+                        {% endif %}{% endif %}{% endif %}
+                    {% endspaceless %}</td>
                 </tr>
             {% endwith %}
         {% endfor %}

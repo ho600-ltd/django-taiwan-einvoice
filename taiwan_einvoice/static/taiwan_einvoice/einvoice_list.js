@@ -167,13 +167,30 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             return false;
         }
         if (status) {
+            var prev_print_mark_str = pgettext('print_mark', 'Yes');
             var $prev_tr = $tr.prev('tr.data');
+            var $prev_tr_in_search_table = $('table.search_result tr[einvoice_id=' + $prev_tr.attr('einvoice_id') + ']');
+            if ("" != $prev_tr_in_search_table.attr('carrier_type__display')) {
+                prev_print_mark_str = $prev_tr_in_search_table.attr('carrier_type__display');
+            } else if("" != $prev_tr_in_search_table.attr('donate_mark__display')) {
+                prev_print_mark_str = $prev_tr_in_search_table.attr('donate_mark__display');
+            }
             if (0 < $prev_tr.length) {
-                $('td[field=print_mark]', $prev_tr).text(pgettext('print_mark', 'Yes'));
+                $('td[field=print_mark]', $prev_tr).text(prev_print_mark_str);
             }
             $('td[field=status]', $tr).empty().append($('<i class="far fa-check-circle"></i>'));
-            $('td[field=print_mark]', $prev_tr).text(pgettext('print_mark', 'Yes'));
-            $('table.search_result tr[einvoice_id=' + einvoice_id + '] td[field=print_mark]').attr('value', 'True').text(pgettext('taiwan_einvoice_print_mark', 'Yes'));
+
+            var print_mark_str = pgettext('print_mark', 'Yes');
+            var print_mark_value = 'True';
+            var $tr_in_search_table = $('table.search_result tr[einvoice_id=' + einvoice_id + ']');
+            if ("" != $tr_in_search_table.attr('carrier_type__display')) {
+                print_mark_value = '';
+                print_mark_str = $tr_in_search_table.attr('carrier_type__display');
+            } else if("" != $tr_in_search_table.attr('donate_mark__display')) {
+                print_mark_value = '';
+                print_mark_str = $tr_in_search_table.attr('donate_mark__display');
+            }
+            $('td[field=print_mark]', $tr_in_search_table).attr('value', print_mark_value).text(print_mark_str);
         } else {
             const status_message = data.status_message;
             var fmts = ngettext('<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
@@ -235,6 +252,7 @@ function show_einvoice_modal(taiwan_einvoice_site) {
         var track_no_ = $btn.text();
         var einvoice_id = $tr.attr('einvoice_id');
         var $modal = $('#show_einvoice_modal');
+        $('[field=details_content]', $modal).text('');
         var resource_uri = $modal.attr('resource_uri_tmpl').replace('{id}', einvoice_id);
         var fmts = ngettext('E-Invoice: %(track_no_)s', 'E-Invoice: %(track_no_)s', 1);
         var message = interpolate(fmts, { track_no_: track_no_ }, true);
@@ -255,7 +273,7 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                         var value = $('td[field="'+field+'"]', $tr).text();
                     }
                     if (field == 'print_mark') {
-                        if (value) {
+                        if (json[field]) {
                             value = pgettext('taiwan_einvoice_print_mark', 'Yes');
                             $('.re_print_einvoice_modal', $modal).show();
                         } else {
@@ -264,7 +282,7 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                         }
                     } else if (field == 'donate_mark') {
                         if ('1' == json[field]) {
-                            value = pgettext('taiwan_einvoice_donate_mark', 'Yes');
+                            value = pgettext('taiwan_einvoice_donate_mark', 'Donated');
                         } else {
                             value = '';
                         }
@@ -446,8 +464,15 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
         return false;
     } else {
         if (0 < $prev_tr.length) {
+            var prev_print_mark_str = pgettext('print_mark', 'Yes');
+            var $prev_tr_in_search_table = $('table.search_result tr[einvoice_id=' + $prev_tr.attr('einvoice_id') + ']');
+            if ("" != $prev_tr_in_search_table.attr('carrier_type__display')) {
+                prev_print_mark_str = $prev_tr_in_search_table.attr('carrier_type__display');
+            } else if("" != $prev_tr_in_search_table.attr('donate_mark__display')) {
+                prev_print_mark_str = $prev_tr_in_search_table.attr('donate_mark__display');
+            }
             if (0 < $('i.fa-check-circle', $prev_tr).length) {
-                $('td[field=print_mark]', $prev_tr).text(pgettext('print_mark', 'Yes'));
+                $('td[field=print_mark]', $prev_tr).text(prev_print_mark_str);
             } else {
                 $('td[field=print_mark]', $prev_tr).empty();
             }
