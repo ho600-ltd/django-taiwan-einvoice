@@ -36,6 +36,26 @@ ESC/POS 印表機設定
         # 04b8, 0202 是 TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
 
+Set up EPW Service
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: sh
+
+    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
+    $ sudo apt install aptitude python3-virtualenv sqlite3
+    $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
+    $ virtualenv -p python3 django-taiwan-einvoice.py3env
+    $ source django-taiwan-einvoice.py3env/bin/activate
+    $ pip install -r django-taiwan-einvoice/requirements.txt
+    $ pip install -r django-taiwan-einvoice/escpos_web/requirements.txt
+    $ pip install ipython
+    $ cd django-taiwan-einvoice/escpos_web/
+    $ ./manage.py migrate
+    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TE service
+    $ cp -rf django-taiwan-einvoice/escpos_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ sudo supervisor reread
+    $ sudo supervisor start all
+
 TE supports ASGI with daphne, supervisor and nginx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -127,12 +147,12 @@ TE supports ASGI with daphne, supervisor and nginx
 
     $ sudo su -
     $ cat << 'EOF' > /etc/rc.local
-#!/bin/sh -e
+    #!/bin/sh -e
 
-date "+%Y%m%d%H%M%S.%N Whatever words" | md5sum > /var/run/boot_random_seed
+    date "+%Y%m%d%H%M%S.%N Whatever words" | md5sum > /var/run/boot_random_seed
 
-exit 0
+    exit 0
 
-EOF
+    EOF
     $ exit
     $ chmod a+x /etc/rc.local
