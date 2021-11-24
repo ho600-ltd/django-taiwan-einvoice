@@ -662,47 +662,78 @@ class EInvoice(models.Model):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
             return '0' * (8 - len(a)) + a
-        details = self.details
-        amounts = self.amounts
-        chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
-        begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
-        end_month = begin_month + 1
-        generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
-        sales_amount_str = _hex_amount(amounts['SalesAmount'])
-        total_amount_str = _hex_amount(amounts['TotalAmount'])
-        return [
-                {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+        if '' != self.carrier_type:
+            carrier_id1 = self.carrier_id1
+            if carrier_id1 == self.carrier_id2:
+                carrier_id2 = ''
+            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
+                carrier_type=self.get_carrier_type_display(),
+                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
+            )
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'))},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
-                    "text": " 賣方 {} {}".format(self.seller_identifier,
-                                                      "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
+        elif '' != self.npoban:
+            message = _("Donate to NPO( {npoban} )").format(
+                npoban=self.npoban,
+            )
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "qrcode_pair", "center": False,
-                    "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
-                        track_no=self.track_no,
-                        year_m_d="{}{}".format(chmk_year, generate_time.strftime('%m%d')),
-                        random_number=self.random_number,
-                        sales_amount=sales_amount_str,
-                        total_amount=total_amount_str,
-                        buyer_identifier="00000000" if '0000000000' == self.buyer_identifier else self.buyer_identifier,
-                        seller_identifier=self.seller_identifier,
-                        generate_batch_no_sha1=self.generate_batch_no_sha1,
-                        qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
-                        product_in_einvoice_count=len(details[:5]),
-                        product_in_order_count=len(details),
-                        codepage='1' if 'utf-8' else '0',
-                    ),
-                    "qr2_str": "**" + ":".join(
-                        ["{}:{}:{}".format(_p['Description'].replace(":", "-"), _p['Quantity'], _p['UnitPrice'])
-                            for _p in details[:5]]),
-                },
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
             ]
+        else:
+            details = self.details
+            amounts = self.amounts
+            chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+            begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
+            end_month = begin_month + 1
+            generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
+            sales_amount_str = _hex_amount(amounts['SalesAmount'])
+            total_amount_str = _hex_amount(amounts['TotalAmount'])
+            return [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                    {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'))},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
+                        "text": " 賣方 {} {}".format(self.seller_identifier,
+                                                        "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                    {"type": "qrcode_pair", "center": False,
+                        "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
+                            track_no=self.track_no,
+                            year_m_d="{}{}".format(chmk_year, generate_time.strftime('%m%d')),
+                            random_number=self.random_number,
+                            sales_amount=sales_amount_str,
+                            total_amount=total_amount_str,
+                            buyer_identifier="00000000" if '0000000000' == self.buyer_identifier else self.buyer_identifier,
+                            seller_identifier=self.seller_identifier,
+                            generate_batch_no_sha1=self.generate_batch_no_sha1,
+                            qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
+                            product_in_einvoice_count=len(details[:5]),
+                            product_in_order_count=len(details),
+                            codepage='1' if 'utf-8' else '0',
+                        ),
+                        "qr2_str": "**" + ":".join(
+                            ["{}:{}:{}".format(_p['Description'].replace(":", "-"), _p['Quantity'], _p['UnitPrice'])
+                                for _p in details[:5]]),
+                    },
+                ]
 
 
     @property
@@ -732,7 +763,9 @@ class EInvoice(models.Model):
 
 
     def set_print_mark_true(self):
-        if False == self.print_mark and 'print_mark' in self.only_fields_can_update:
+        if '' != self.carrier_type or '' != self.npoban:
+            pass
+        elif False == self.print_mark and 'print_mark' in self.only_fields_can_update:
             EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
 
