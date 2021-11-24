@@ -252,6 +252,7 @@ function show_einvoice_modal(taiwan_einvoice_site) {
         var track_no_ = $btn.text();
         var einvoice_id = $tr.attr('einvoice_id');
         var $modal = $('#show_einvoice_modal');
+        $('[field=details_content]', $modal).text('');
         var resource_uri = $modal.attr('resource_uri_tmpl').replace('{id}', einvoice_id);
         var fmts = ngettext('E-Invoice: %(track_no_)s', 'E-Invoice: %(track_no_)s', 1);
         var message = interpolate(fmts, { track_no_: track_no_ }, true);
