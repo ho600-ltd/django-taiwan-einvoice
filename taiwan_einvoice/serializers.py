@@ -7,7 +7,7 @@ from django.contrib.auth.models import User, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from rest_framework.serializers import CharField, IntegerField
+from rest_framework.serializers import CharField, IntegerField, BooleanField
 from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField, ChoiceField
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
@@ -220,6 +220,7 @@ class EInvoiceSerializer(ModelSerializer):
     donate_mark = CharField(read_only=True)
     carrier_type__display = CharField(read_only=True)
     details_content = DetailsContentField()
+    amount_is_warning = BooleanField(read_only=True)
 
     class Meta:
         model = EInvoice

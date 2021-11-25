@@ -413,6 +413,11 @@ class Seller(models.Model):
 
 
 
+class ForbiddenAboveAmountError(Exception):
+    pass
+
+
+
 class TurnkeyWeb(models.Model):
     on_working = models.BooleanField(default=True)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
@@ -425,6 +430,8 @@ class TurnkeyWeb(models.Model):
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
     epl_base_set = models.CharField(max_length=64, default='')
+    warning_above_amount = models.IntegerField(default=10000)
+    forbidden_above_amount = models.IntegerField(default=20000)
     history = HistoricalRecords()
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
@@ -630,6 +637,12 @@ class EInvoice(models.Model):
     buyer_role_remark = models.CharField(max_length=40, default='', db_index=True)
     details = models.JSONField(null=False)
     amounts = models.JSONField(null=False)
+    @property
+    def amount_is_warning(self):
+        if float(self.amounts['TotalAmount']) > self.seller_invoice_track_no.turnkey_web.warning_above_amount:
+            return True
+        else:
+            return False
 
 
 
@@ -779,6 +792,12 @@ class EInvoice(models.Model):
             super().save(*args, **kwargs)
         elif not self.pk:
             turnkey_web = self.seller_invoice_track_no.turnkey_web
+            if float(self.amounts['TotalAmount']) > turnkey_web.forbidden_above_amount:
+                raise ForbiddenAboveAmountError(_("{} is bigger than {}").format(self.amounts['TotalAmount'], turnkey_web.forbidden_above_amount))
+            elif float(self.amounts['TotalAmount']) > turnkey_web.warning_above_amount:
+                #TODO: grab staff group, and send notice mail to them.
+                pass
+
             while True:
                 random_number = '{:04d}'.format(randint(0, 10000))
                 objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]

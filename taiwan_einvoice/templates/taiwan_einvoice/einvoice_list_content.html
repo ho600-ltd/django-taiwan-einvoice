@@ -59,7 +59,7 @@
                     <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
                     <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
                     <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
-                    <td field="TotalAmount">{{ einvoice.amounts.TotalAmount }}</td>
+                    <td field="TotalAmount" {% if einvoice.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ einvoice.amounts.TotalAmount }}</td>
                     <td field="generate_batch_no">{{ einvoice.generate_batch_no }}</td>
                     <td field="creator_first_name_id">{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
                     <td class="datetime" field="generate_time" value="{{ einvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
