@@ -337,8 +337,8 @@ msgid "Yes"
 msgstr "已印出"
 
 msgctxt "taiwan_einvoice"
-msgid "Print ID"
-msgstr "列印序號"
+msgid "Print ID or Hex"
+msgstr "列印序號或編碼"
 
 msgid "Print time later than"
 msgstr "列印時間晚於"

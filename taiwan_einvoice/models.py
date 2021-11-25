@@ -812,15 +812,28 @@ class EInvoicePrintLog(models.Model):
         base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
         if not base_set:
             base_set = self.base_set
-        return customize_hex_from_integer(self.id, base=self.base_set)
+        return customize_hex_from_integer(self.id, base=base_set)
 
 
     @classmethod
-    def get_obj_from_customize_hex(self, hex, base_set=''):
-        if not base_set:
-            base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
-        id = integer_from_customize_hex(hex, base=base_set)
-        return EInvoicePrintLog.objects.get(id=id)
+    def get_objs_from_customize_hex(cls, hex, base_set=''):
+        ids = []
+        if base_set:
+            try:
+                id = integer_from_customize_hex(hex, base=base_set)
+            except:
+                pass
+            else:
+                ids.append(id)
+        else:
+            for tw in TurnkeyWeb.objects.all():
+                try:
+                    id = integer_from_customize_hex(hex, base=tw.epl_base_set)
+                except:
+                    pass
+                else:
+                    ids.append(id)
+        return EInvoicePrintLog.objects.filter(id__in=ids)
 
 
     def __str__(self):

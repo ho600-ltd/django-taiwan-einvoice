@@ -232,6 +232,7 @@ class EInvoiceFilter(filters.FilterSet):
 
 class EInvoicePrintLogFilter(filters.FilterSet):
     einvoice = filters.RelatedFilter(EInvoiceFilter, field_name='einvoice', queryset=EInvoice.objects.all())
+    id_or_hex = filters.CharFilter(method='filter_id_or_hex')
 
 
 
@@ -242,3 +243,19 @@ class EInvoicePrintLogFilter(filters.FilterSet):
             'is_original_copy': ('exact', ),
             'print_time': ('gte', 'lt', ),
         }
+
+
+
+    def filter_id_or_hex(self, queryset, name, value):
+        try:
+            id = int(value)
+        except ValueError:
+            try:
+                objs = EInvoicePrintLog.get_objs_from_customize_hex(value)
+            except EInvoicePrintLog.DoesNotExist:
+                return queryset.none()
+            else:
+                ids = [obj.id for obj in objs]
+        else:
+            ids = [id]
+        return queryset.filter(id__in=ids)
