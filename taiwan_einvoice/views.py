@@ -20,6 +20,7 @@ from taiwan_einvoice.renderers import (
     SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
+    CancelEInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -268,5 +269,5 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (CancelEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )

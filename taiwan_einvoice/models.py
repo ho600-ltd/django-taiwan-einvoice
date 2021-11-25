@@ -486,6 +486,7 @@ class TurnkeyWeb(models.Model):
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
             ("view_te_einvoice", "View E-Invoice"),
             ("print_te_einvoice", "Print E-Invoice"),
+            ("cancel_te_einvoice", "Cancel E-Invoice"),
         )
     
 
@@ -793,7 +794,8 @@ class EInvoice(models.Model):
         elif not self.pk:
             turnkey_web = self.seller_invoice_track_no.turnkey_web
             if float(self.amounts['TotalAmount']) > turnkey_web.forbidden_above_amount:
-                raise ForbiddenAboveAmountError(_("{} is bigger than {}").format(self.amounts['TotalAmount'], turnkey_web.forbidden_above_amount))
+                raise ForbiddenAboveAmountError(_("{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})").format(
+                    total_amount=self.amounts['TotalAmount'], forbidden_above_amount=turnkey_web.forbidden_above_amount))
             elif float(self.amounts['TotalAmount']) > turnkey_web.warning_above_amount:
                 #TODO: grab staff group, and send notice mail to them.
                 pass
@@ -866,12 +868,24 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    invoice_date = models.DateField()
+    new_einvoice = models.ForeignKey(EInvoice,
+        related_name="new_einvoice_cancel_einvoice_set",
+        null=True,
+        on_delete=models.DO_NOTHING)
+    @property
+    def invoice_date(self):
+        return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    cancel_date = models.DateField()
-    cancel_time = models.DateTimeField()
+    generate_time = models.DateTimeField()
+    @property
+    def cancel_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def cancel_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     readon = models.CharField(max_length=20)
     return_tax_document_number = models.CharField(max_length=60)
     remark = models.CharField(max_length=200)

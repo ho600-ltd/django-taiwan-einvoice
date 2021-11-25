@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-25 08:02+0800\n"
+"POT-Creation-Date: 2021-11-25 09:22+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,6 +49,10 @@ msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
 msgid "No details"
 msgstr "無明細"
+
+#, python-brace-format
+msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
+msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
 
 msgid "Already Logout"
 msgstr "已經登出"
@@ -126,6 +130,64 @@ msgid "System Build Version"
 msgstr "系統編譯版面"
 
 msgctxt "taiwan_einvoice"
+msgid "One-dimensional Barcode from the Canceled E-Invoice"
+msgstr "被作廢發票的一維條碼"
+
+msgid "Track No. from the Canceled E-Invoice contains"
+msgstr "被作廢發票的字軌號碼包含"
+
+msgid "Cancel time later than"
+msgstr "作廢時間晚於"
+
+msgid "Cancel time earlier than"
+msgstr "作廢時間早於"
+
+msgid "Search"
+msgstr "搜尋"
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr "共 %(total_count)s 筆"
+
+msgid "Cancel and Re-Create E-Invoice"
+msgstr "作廢並另開發票"
+
+msgid "No."
+msgstr "No."
+
+msgctxt "taiwan_einvoice"
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Canceled Track No."
+msgstr "作廢發票的字軌號碼"
+
+msgid "Tax Type"
+msgstr "稅額類別"
+
+msgid "Sales Amount"
+msgstr "銷售額"
+
+msgid "Tax Amount"
+msgstr "稅額"
+
+msgid "Total Amount"
+msgstr "總金額"
+
+msgid "Footprint No."
+msgstr "追蹤編號"
+
+msgctxt "taiwan_einvoice"
+msgid "Canceler"
+msgstr "作廢者"
+
+msgid "Cancel Time"
+msgstr "作廢時間"
+
+msgid "New E-Invoice Track No."
+msgstr "另開發票字軌"
+
+msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode"
 msgstr "一維條碼"
 
@@ -145,9 +207,6 @@ msgstr "開立時間晚於"
 
 msgid "Generate time earlier than"
 msgstr "開立時間早於"
-
-msgid "Search"
-msgstr "搜尋"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -176,25 +235,6 @@ msgstr "2秒"
 msgid "30 seconds"
 msgstr "30秒"
 
-msgid "No."
-msgstr "No."
-
-msgctxt "taiwan_einvoice"
-msgid "Year Month Range"
-msgstr "期別"
-
-msgid "Sales Amount"
-msgstr "銷售額"
-
-msgid "Tax Amount"
-msgstr "稅額"
-
-msgid "Total Amount"
-msgstr "總金額"
-
-msgid "Footprint No."
-msgstr "追蹤編號"
-
 msgid "Print Mark"
 msgstr "正本已列印"
 
@@ -220,9 +260,6 @@ msgstr "開立時間"
 
 msgid "Year Month Range"
 msgstr "期別"
-
-msgid "Tax Type"
-msgstr "稅額類別"
 
 msgid "Seller identifier"
 msgstr "賣方統編"
@@ -314,10 +351,6 @@ msgstr "重印"
 
 msgid "Print Duplication"
 msgstr "列印副本"
-
-#, python-format
-msgid "%(total_count)s records"
-msgstr "共 %(total_count)s 筆"
 
 msgid "Print E-Invoice with \"<span id=\"default_escpos_print_name\"></span>\""
 msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電子發票"
