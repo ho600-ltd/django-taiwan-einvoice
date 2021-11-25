@@ -337,8 +337,7 @@ class Receipt(models.Model):
         J = json.loads(message)
         try:
             obj = cls.objects.get(meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
-                                  track_no=J['track_no'] if J['meet_to_tw_einvoice_standard']
-                                    else "{}+create_new_obj_if_meet_to_tw_einvoice_standard_is_False".format(J['track_no']))
+                                  track_no=J['track_no'])
         except cls.DoesNotExist:
             obj = cls(te_web=te_web,
                       meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
@@ -348,7 +347,7 @@ class Receipt(models.Model):
                       content=J["content"])
             obj.save()
         else:
-            if re_print_original_copy:
+            if re_print_original_copy or False == J['meet_to_tw_einvoice_standard']:
                 obj.content = J["content"]
                 obj.save()
         return obj
