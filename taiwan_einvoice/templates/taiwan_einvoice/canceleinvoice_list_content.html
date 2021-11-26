@@ -1,16 +1,24 @@
 {% load i18n %}{% load tz %}
 
-<div class="total_count_row">
+{% if perms.turnkeyweb.canceleinvoice %}
+    <form class="form-inline" onsubmit="javascript: return false;">
+        <div class="form-group">
+            <label for="one_dimensional_barcode_for_canceling">
+                {% trans "Please input the one-dimensional barcode for canceling: " %}
+            </label>
+            <input type="text" class="form-control" name="one_dimensional_barcode_for_canceling" id="one_dimensional_barcode_for_canceling" />
+        </div>
 
+        <button type="submit" id="show_canceleinvoice_modal_button_0" class="btn btn-success show_canceleinvoice_modal">
+            {% blocktrans %}Cancel E-Invoice{% endblocktrans %}
+        </button>
+    </form>
+{% endif %}
+
+<div class="total_count_row">
     {% with data.count as total_count %}
         {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
     {% endwith %}
-
-    {% if perms.turnkeyweb.canceleinvoice %}
-        <button id="canceleinvoice_modal_button_0" class="btn btn-success canceleinvoice_modal" data-toggle="modal">
-            {% blocktrans %}Cancel and Re-Create E-Invoice{% endblocktrans %}
-        </button>
-    {% endif %}
 </div>
 
 <table class="table search_result">

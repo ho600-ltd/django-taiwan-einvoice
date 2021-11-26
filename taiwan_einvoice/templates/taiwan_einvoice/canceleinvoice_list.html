@@ -92,4 +92,79 @@
 
 {% block modals %}
 
+<div class="modal fade" id="show_canceleinvoice_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_canceling}"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}"
+    aria-labelledby="show_canceleinvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_canceleinvoice_modal_label">{% trans "Cancel E-Invoice" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4 style="color: red;">{% trans "Note: Cancel E-Invoice could not be rollback." %}</h4>
+                <h4>{% trans "Cancel Reason Example" %}:</h4>
+                <ol>
+                    <li>{% trans "Lost original copy" context "cancel_einvoice" %}</li>
+                    <li>{% trans "Got the return tax document number from IRS" context "cancel_einvoice" %}</li>
+                </ol>
+                <div class="form-group row">
+                    <label for="reason" class="col-4 col-form-label"><span class="text-danger">*</span> {% trans "Reason(Required)" %}</label>
+                    <div class="col-8">
+                        <input type="text" class="form-control" name="reason" id="reason" placeholder="{% trans 'Limit from 4 to 20 words' %}" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="return_tax_document_number" class="col-4 col-form-label">{% trans "Return Tax Document Number(Optional)" %}</label>
+                    <div class="col-8">
+                        <input type="text" class="form-control" name="return_tax_document_number" id="return_tax_document_number" placeholder="{% trans 'Limit to 60 words' %}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="remark" class="col-4 col-form-label">{% trans "Remark(Optional)" %}</label>
+                    <div class="col-8">
+                        <textarea class="form-control" name="remark" id="remark" rows="3" placeholder="{% trans 'Limit to 200 words' %}"></textarea>
+                    </div>
+                </div>
+                <table class="table table-hover table-striped">
+                    <thead>
+                            <tr>
+                                <th field="no">{% trans "No." %}</th>
+                                <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                                <th field="track_no_">{% trans "Track No." %}</th>
+                                <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                <th field="TotalAmount">{% trans "Total Amount" %}</th>
+                                <th field="generate_batch_no">{% trans "Footprint No." %}</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tr_tmpl" style="display: none;">
+                            <td field="no"></td>
+                            <td field="year_month_range"></td>
+                            <td field="track_no_"></td>
+                            <td field="SalesAmount"></td>
+                            <td field="TaxAmount"></td>
+                            <td field="TotalAmount"></td>
+                            <td field="generate_batch_no"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="re_create_einvoice" name="re_create_einvoice" />
+                    <label class="form-check-label" for="re_create_einvoice">{% trans "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no.)" %}</label>
+                </div>
+                <button id="cancel_einvoice_button_1" type="button" class="cancel_einvoice btn btn-secondary">{% trans "Cancel E-Invoice" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
