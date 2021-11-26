@@ -12,6 +12,7 @@ from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import pgettext
 from simple_history.models import HistoricalRecords
 
 from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
@@ -224,6 +225,11 @@ class EInvoiceSellerAPI(models.Model):
                 return api_result.success
             else:
                 return self.inquery_seller_enable_einvoice(type, key, api_result)
+
+
+
+class NotEnoughNumberError(Exception):
+    pass
 
 
 
@@ -560,17 +566,22 @@ class SellerInvoiceTrackNo(models.Model):
         return ''
     
 
+    def get_new_no(self):
+        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        if not max_no:
+            new_no = self.begin_no
+        elif max_no >= self.end_no:
+            raise NotEnoughNumberError('Not enough numbers')
+        else:
+            new_no = max_no + 1
+        return new_no
+
+
     def create_einvoice(self, data):
         data['seller_invoice_track_no'] = self
         data['type'] = self.type
         data['track'] = self.track
-        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
-        if not max_no:
-            data['no'] = self.begin_no
-        elif max_no >= self.end_no:
-            raise Exception('Not enough numbers')
-        else:
-            data['no'] = max_no + 1
+        data['no'] = self.get_new_no()
         ei = EInvoice(**data)
         ei.save()
         return ei
@@ -644,6 +655,9 @@ class EInvoice(models.Model):
             return True
         else:
             return False
+    @property
+    def is_canceled(self):
+        return self.canceleinvoice_set.exists()
 
 
 
@@ -705,6 +719,16 @@ class EInvoice(models.Model):
                 {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
+        elif self.is_canceled:
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "left", "text": pgettext("canceleinvoice", "Canceled")},
             ]
         else:
             details = self.details
@@ -886,8 +910,8 @@ class CancelEInvoice(models.Model):
     @property
     def cancel_time(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
-    readon = models.CharField(max_length=20)
-    return_tax_document_number = models.CharField(max_length=60)
-    remark = models.CharField(max_length=200)
+    reason = models.CharField(max_length=20, null=False)
+    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True)
+    remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 

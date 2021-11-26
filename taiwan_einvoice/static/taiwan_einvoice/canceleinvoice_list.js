@@ -14,8 +14,32 @@ function show_canceleinvoice_modal(taiwan_einvoice_site) {
             success: function (json) {
                 var $modal_table = $('table', $modal);
                 $('tr.data', $modal_table).remove();
+                if (0 >= json['results'].length) {
+                    var fmts = ngettext("%(one_dimensional_barcode_for_canceling)s does not exist!",
+                        "%(one_dimensional_barcode_for_canceling)s does not exist!",
+                        1);
+                    var message = interpolate(fmts, { one_dimensional_barcode_for_canceling: one_dimensional_barcode_for_canceling }, true);
+                    taiwan_einvoice_site.show_modal(
+                        taiwan_einvoice_site.$WARNING_MODAL,
+                        gettext('E-Invoice Error'),
+                        message
+                    );
+                    return false;
+                }
                 for (var i=0; i<json['results'].length; i++) {
                     var einvoice = json['results'][i];
+                    if (einvoice['is_canceled']) {
+                        var fmts = ngettext("E-Invoice(%(track_no_)s) was already canceled!",
+                            "E-Invoice(%(track_no_)s) was already canceled!",
+                            1);
+                        var message = interpolate(fmts, { track_no_: einvoice['track_no_'] }, true);
+                        taiwan_einvoice_site.show_modal(
+                            taiwan_einvoice_site.$WARNING_MODAL,
+                            gettext('E-Invoice Error'),
+                            message
+                        );
+                        return false;
+                    }
                     var kv = {
                         "year_month_range": einvoice['seller_invoice_track_no_dict']['year_month_range'],
                         "track_no_": einvoice['track_no_'],
@@ -28,10 +52,12 @@ function show_canceleinvoice_modal(taiwan_einvoice_site) {
                     $tr_tmpl.attr('einvoice_id', einvoice['id']);
                     $('td[field=no]', $tr_tmpl).text(i+1);
                     for (var k in kv) {
-                        $('td[field="'+k+'"]', $tr_tmpl).attr('value', kv[k]).text(kv[k]);
+                        var v = kv[k];
+                        $('td[field="'+k+'"]', $tr_tmpl).attr('value', v).text(v);
                     }
                     $tr_tmpl.show().appendTo($('tbody', $modal_table));
                 }
+                $('[name=one_dimensional_barcode_for_canceling]', $form).val("");
                 $modal.modal('show');
             }
         });
@@ -83,15 +109,60 @@ function cancel_einvoice(taiwan_einvoice_site) {
         $.ajax({
             url: resource_uri,
             type: "POST",
-            data: {"einvoice_id": einvoice_id,
+            data: JSON.stringify({"einvoice_id": einvoice_id,
                    "reason": reason,
                    "return_tax_document_number": return_tax_document_number,
                    "remark": remark,
                    "re_create_einvoice": re_create_einvoice
-                  },
+                  }),
             dataType: 'json',
             contentType: 'application/json',
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
+            },
             success: function (json) {
+                $modal.modal('hide');
+                if (re_create_einvoice) {
+                    var message = gettext("Canceled and re-create: ")+json['new_einvoice_dict']['track_no_'];
+                } else {
+                    var message = gettext("Canceled");
+                }
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$SUCCESS_MODAL,
+                    gettext("Success"),
+                    message
+                );
+                var kv = {
+                    "no": gettext('NEW Record'),
+                    "year_month_range": json['einvoice_dict']['seller_invoice_track_no_dict']['year_month_range'],
+                    "track_no_": json['einvoice_dict']['track_no_'],
+                    "type__display": json['einvoice_dict']['seller_invoice_track_no_dict']['type__display'],
+                    "SalesAmount": json['einvoice_dict']['amounts']['SalesAmount'],
+                    "TaxAmount": json['einvoice_dict']['amounts']['TaxAmount'],
+                    "TotalAmount": json['einvoice_dict']['amounts']['TotalAmount'],
+                    "generate_batch_no": json['einvoice_dict']['generate_batch_no'],
+                    "creator_first_name_id": json['creator_dict']['first_name']+':'+json['creator_dict']['id'],
+                    "generate_time": json['generate_time'],
+                    "new_einvoice__track_no_": json['new_einvoice_dict'] ? json['new_einvoice_dict']['track_no_'] : ''
+                };
+                var $table = $('table.search_result');
+                var s = '<tr>';
+                $('thead tr th', $table).each(function(){
+                    var $th = $(this);
+                    var k = $th.attr('field');
+                    if (k == "generate_time") {
+                        s += '<td class="datetime" field="'+k+'" value="'+kv[k]+'" format="'+$th.attr('format')+'"></td>';
+                    } else {
+                        s += '<td field="'+k+'" value="'+kv[k]+'">'+kv[k]+'</td>';
+                    }
+                });
+                s += '</tr>';
+                $('tbody', $table).prepend($(s));
+                $('.datetime', $table).each(taiwan_einvoice_site.convert_class_datetime(taiwan_einvoice_site));
             }
         });
     };

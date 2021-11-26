@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-26 17:01+0800\n"
+"POT-Creation-Date: 2021-11-27 00:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,6 +47,10 @@ msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
 msgid "Donate to NPO( {npoban} )"
 msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
+msgctxt "canceleinvoice"
+msgid "Canceled"
+msgstr "已作廢"
+
 msgid "No details"
 msgstr "無明細"
 
@@ -78,11 +82,11 @@ msgstr "字軌號碼"
 msgid "E-Invoice"
 msgstr "電子發票"
 
-msgid "Cancel EI."
-msgstr "作廢發票"
-
 msgid "Else"
 msgstr "其他"
+
+msgid "Cancel EI."
+msgstr "作廢發票"
 
 msgid "Accounter Audit"
 msgstr "會計查驗"
@@ -148,8 +152,8 @@ msgstr "搜尋"
 msgid "Cancel E-Invoice"
 msgstr "作廢電子發票"
 
-msgid "Note: Cancel E-Invoice could not be rollback."
-msgstr "注意: 作廢電子發票後，是無法回復。"
+msgid "Note: Cancel E-Invoice could not be rollback. The track no. will be deprecated."
+msgstr "注意: 作廢電子發票後，是無法回復，該發票的字軌號碼將會被棄用。"
 
 msgid "Cancel Reason Example"
 msgstr "作廢原因範例"
@@ -635,3 +639,9 @@ msgstr "電子發票錯誤"
 
 msgid "{} does not exist"
 msgstr "{} 不存在"
+
+msgid "E-Invoice(id: {}) does not exist!"
+msgstr "電子發票(id: {})不存在!"
+
+msgid "E-Invoice({}) was already canceled!"
+msgstr "電子發票({})已被作廢!"
