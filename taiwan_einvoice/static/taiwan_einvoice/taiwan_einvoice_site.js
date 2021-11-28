@@ -177,6 +177,7 @@ $(function () {
             'any_words__icontains',
             'einvoice__code39__exact',
             'id',
+            'id_or_hex',
             'einvoice__track_no__icontains',
             'einvoice__any_words__icontains',
             'identifier__icontains',

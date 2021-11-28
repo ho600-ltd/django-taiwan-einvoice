@@ -12,6 +12,7 @@ from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import pgettext
 from simple_history.models import HistoricalRecords
 
 from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
@@ -227,6 +228,11 @@ class EInvoiceSellerAPI(models.Model):
 
 
 
+class NotEnoughNumberError(Exception):
+    pass
+
+
+
 class EInvoiceFieldError(Exception):
     pass
 
@@ -413,6 +419,11 @@ class Seller(models.Model):
 
 
 
+class ForbiddenAboveAmountError(Exception):
+    pass
+
+
+
 class TurnkeyWeb(models.Model):
     on_working = models.BooleanField(default=True)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
@@ -425,6 +436,8 @@ class TurnkeyWeb(models.Model):
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
     epl_base_set = models.CharField(max_length=64, default='')
+    warning_above_amount = models.IntegerField(default=10000)
+    forbidden_above_amount = models.IntegerField(default=20000)
     history = HistoricalRecords()
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
@@ -479,6 +492,7 @@ class TurnkeyWeb(models.Model):
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
             ("view_te_einvoice", "View E-Invoice"),
             ("print_te_einvoice", "Print E-Invoice"),
+            ("cancel_te_einvoice", "Cancel E-Invoice"),
         )
     
 
@@ -552,17 +566,22 @@ class SellerInvoiceTrackNo(models.Model):
         return ''
     
 
+    def get_new_no(self):
+        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        if not max_no:
+            new_no = self.begin_no
+        elif max_no >= self.end_no:
+            raise NotEnoughNumberError('Not enough numbers')
+        else:
+            new_no = max_no + 1
+        return new_no
+
+
     def create_einvoice(self, data):
         data['seller_invoice_track_no'] = self
         data['type'] = self.type
         data['track'] = self.track
-        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
-        if not max_no:
-            data['no'] = self.begin_no
-        elif max_no >= self.end_no:
-            raise Exception('Not enough numbers')
-        else:
-            data['no'] = max_no + 1
+        data['no'] = self.get_new_no()
         ei = EInvoice(**data)
         ei.save()
         return ei
@@ -630,6 +649,15 @@ class EInvoice(models.Model):
     buyer_role_remark = models.CharField(max_length=40, default='', db_index=True)
     details = models.JSONField(null=False)
     amounts = models.JSONField(null=False)
+    @property
+    def amount_is_warning(self):
+        if float(self.amounts['TotalAmount']) > self.seller_invoice_track_no.turnkey_web.warning_above_amount:
+            return True
+        else:
+            return False
+    @property
+    def is_canceled(self):
+        return self.canceleinvoice_set.exists()
 
 
 
@@ -691,6 +719,16 @@ class EInvoice(models.Model):
                 {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
+        elif self.is_canceled:
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "left", "text": pgettext("canceleinvoice", "Canceled")},
             ]
         else:
             details = self.details
@@ -779,6 +817,13 @@ class EInvoice(models.Model):
             super().save(*args, **kwargs)
         elif not self.pk:
             turnkey_web = self.seller_invoice_track_no.turnkey_web
+            if float(self.amounts['TotalAmount']) > turnkey_web.forbidden_above_amount:
+                raise ForbiddenAboveAmountError(_("{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})").format(
+                    total_amount=self.amounts['TotalAmount'], forbidden_above_amount=turnkey_web.forbidden_above_amount))
+            elif float(self.amounts['TotalAmount']) > turnkey_web.warning_above_amount:
+                #TODO: grab staff group, and send notice mail to them.
+                pass
+
             while True:
                 random_number = '{:04d}'.format(randint(0, 10000))
                 objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
@@ -812,15 +857,28 @@ class EInvoicePrintLog(models.Model):
         base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
         if not base_set:
             base_set = self.base_set
-        return customize_hex_from_integer(self.id, base=self.base_set)
+        return customize_hex_from_integer(self.id, base=base_set)
 
 
     @classmethod
-    def get_obj_from_customize_hex(self, hex, base_set=''):
-        if not base_set:
-            base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
-        id = integer_from_customize_hex(hex, base=base_set)
-        return EInvoicePrintLog.objects.get(id=id)
+    def get_objs_from_customize_hex(cls, hex, base_set=''):
+        ids = []
+        if base_set:
+            try:
+                id = integer_from_customize_hex(hex, base=base_set)
+            except:
+                pass
+            else:
+                ids.append(id)
+        else:
+            for tw in TurnkeyWeb.objects.all():
+                try:
+                    id = integer_from_customize_hex(hex, base=tw.epl_base_set)
+                except:
+                    pass
+                else:
+                    ids.append(id)
+        return EInvoicePrintLog.objects.filter(id__in=ids)
 
 
     def __str__(self):
@@ -834,14 +892,26 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    invoice_date = models.DateField()
+    new_einvoice = models.ForeignKey(EInvoice,
+        related_name="new_einvoice_cancel_einvoice_set",
+        null=True,
+        on_delete=models.DO_NOTHING)
+    @property
+    def invoice_date(self):
+        return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    cancel_date = models.DateField()
-    cancel_time = models.DateTimeField()
-    readon = models.CharField(max_length=20)
-    return_tax_document_number = models.CharField(max_length=60)
-    remark = models.CharField(max_length=200)
+    generate_time = models.DateTimeField()
+    @property
+    def cancel_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def cancel_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
+    reason = models.CharField(max_length=20, null=False)
+    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True)
+    remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 

@@ -80,15 +80,13 @@
                         <li class="nav-item nav_einvoice" role="presentation">
                             <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?format=html">{% trans "E-Invoice" %}</a>
                         </li>
-                        <li class="nav-item nav_canceleinvoice" role="presentation">
-                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}?format=html">{% trans "Cancel EI." %}</a>
-                        </li>
                         <li class="dropdown nav-item nav_else">
                             <a data-toggle="dropdown"
                                 aria-expanded="false"
                                 class="dropdown-toggle nav-link"
                                 href="#">{% trans "Else" %}</a>
                             <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_accounter_audit" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}?format=html">{% trans "Cancel EI." %}</a>
                                 <a role="presentation" class="dropdown-item nav_accounter_audit" href="#">{% trans "Accounter Audit" %}</a>
                                 <a role="presentation" class="dropdown-item nav_einvoiceprintlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-list' %}?format=html">{% trans "Print Log" %}</a>
                                 <a role="presentation" class="dropdown-item nav_legalentity" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:legalentity-list' %}?format=html">{% trans "Legal Entity" %}</a>

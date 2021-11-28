@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-22 17:54+0800\n"
+"POT-Creation-Date: 2021-11-27 00:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,47 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "%(one_dimensional_barcode_for_canceling)s does not exist!"
+msgid_plural "%(one_dimensional_barcode_for_canceling)s does not exist!"
+msgstr[0] "%(one_dimensional_barcode_for_canceling)s 不存在!"
+
+msgid "E-Invoice Error"
+msgstr "電子發票錯誤"
+
+msgid "E-Invoice(%(track_no_)s) was already canceled!"
+msgid_plural "E-Invoice(%(track_no_)s) was already canceled!"
+msgstr[0] "電子發票(%(track_no_)s)已被作廢"
+
+msgid "Reason Error"
+msgstr "原因錯誤"
+
+msgid "Limit from 4 to 20 words"
+msgstr "字數限為 4 ~ 20 個字"
+
+msgid "Return Tax Document Number Error"
+msgstr "專案作廢核准文號錯誤"
+
+msgid "Limit to 60 words"
+msgstr "上限60個字"
+
+msgid "Remark Error"
+msgstr "備註錯誤"
+
+msgid "Limit to 200 words"
+msgstr "上限200個字"
+
+msgid "Canceled and re-create: "
+msgstr "作廢並另開: "
+
+msgid "Canceled"
+msgstr "作廢"
+
+msgid "Success"
+msgstr "成功"
+
+msgid "NEW Record"
+msgstr "新紀錄"
 
 msgctxt "taiwan_einvoice"
 msgid "WebSocket Connection Error"
@@ -33,10 +74,6 @@ msgctxt "print_mark"
 msgid "Yes"
 msgstr "已印"
 
-msgctxt "taiwan_einvoice_print_mark"
-msgid "Yes"
-msgstr "已印出"
-
 msgid "<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>"
 msgid_plural "<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>"
 msgstr[0] "<p>無法列印電子發票，請將發票機伺服器重開機後，再試。</p><p>詳細問題說明: %(status_message)s</p>"
@@ -49,9 +86,17 @@ msgid "E-Invoice: %(track_no_)s"
 msgid_plural "E-Invoice: %(track_no_)s"
 msgstr[0] "電子發票: %(track_no_)s"
 
-msgctxt "taiwan_einvoice_donate_mark"
+msgctxt "taiwan_einvoice_print_mark"
 msgid "Yes"
+msgstr "已印出"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Donated"
 msgstr "已捐贈"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Canceled"
+msgstr "已作廢"
 
 msgctxt "taiwan_einvoice"
 msgid "Error"
@@ -100,9 +145,6 @@ msgstr[0] "匯入 %(count)s 筆"
 
 msgid "Importing Successfully"
 msgstr "成功匯入"
-
-msgid "NEW Record"
-msgstr "新紀錄"
 
 msgid "Sun"
 msgstr "日"

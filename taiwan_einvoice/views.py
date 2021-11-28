@@ -20,6 +20,7 @@ from taiwan_einvoice.renderers import (
     SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
+    CancelEInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -146,7 +147,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     end_year = int(end_chmk_year) + 1911
                     end_month = int(end_month)
                     begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(begin_year, begin_month, 1, 0, 0, 0))
-                    end_time_0 = TAIPEI_TIMEZONE.localize(datetime.datetime(end_year, end_month, 1, 0, 0, 0)) + datetime.timedelta(days=35)
+                    end_time_0 = TAIPEI_TIMEZONE.localize(datetime.datetime(end_year, end_month, 1, 0, 0, 0)) + datetime.timedelta(days=70)
                     end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
                 except Exception as e:
                     er = {
@@ -173,7 +174,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
                 data = {
                     "turnkey_web": turnkey_web.id,
-                    "type": cols[1],
+                    "type": '{:02d}'.format(int(cols[1])),
                     "begin_time": begin_time,
                     "end_time": end_time,
                     "track": cols[4],
@@ -193,6 +194,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                         "error_message": error_message,
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
+        output_datas = []
         for data in datas:
             if SellerInvoiceTrackNo.objects.filter(type=data['type'],
                                                    begin_time=data['begin_time'],
@@ -210,16 +212,8 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             serializer = self.get_serializer(data=data, many=False)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
-        serializer = self.get_serializer(data=datas, many=True)
-        if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            er = {
-                "error_title": "Valid Error",
-                "error_message": """When a serializer is passed a `data` keyword argument you must call `.is_valid()` before attempting to access the serialized `.data` representation.
-You should either call `.is_valid()` first, or access `.initial_data` instead.""",
-            }
-            return Response(er, status=status.HTTP_403_FORBIDDEN)
+            output_datas.append(serializer.data)
+        return Response(output_datas, status=status.HTTP_201_CREATED)
 
 
     def get_queryset(self):
@@ -268,5 +262,64 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (CancelEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )
+    
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        einvoice_id = data['einvoice_id']
+        try:
+            einvoice = EInvoice.objects.get(id=einvoice_id)
+        except EInvoice.DoesNotExist:
+            er = {
+                "error_title": "E-Invoice Error",
+                "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        else:
+            if einvoice.canceleinvoice_set.exists():
+                er = {
+                    "error_title": "E-Invoice Error",
+                    "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+        data['creator'] = request.user.id
+        data['einvoice'] = einvoice.id
+        data['seller_identifier'] = einvoice.seller_identifier
+        data['buyer_identifier'] = einvoice.buyer_identifier
+        data['generate_time'] = now()
+        re_create_einvoice = data['re_create_einvoice']
+        del data['re_create_einvoice']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        if re_create_einvoice:
+            _d = {f.name: getattr(einvoice, f.name)
+                for f in EInvoice._meta.fields
+            }
+            for seller_invoice_track_no in SellerInvoiceTrackNo.filter_now_use_sitns(
+                                                    turnkey_web=einvoice.seller_invoice_track_no.turnkey_web,
+                                                    type=einvoice.seller_invoice_track_no.type
+                                           ).order_by('-begin_no'):
+                try:
+                    _d['no'] = seller_invoice_track_no.get_new_no()
+                except NotEnoughNumberError:
+                    continue
+                else:
+                    _d['track'] = seller_invoice_track_no.track
+                    _d['seller_invoice_track_no'] = seller_invoice_track_no
+                    break
+                return cei
+            del _d['id']
+            del _d['random_number']
+            del _d['generate_time']
+            _d['creator'] = request.user
+            _d['print_mark'] = False
+            new_einvoice = EInvoice(**_d)
+            new_einvoice.save()
+            serializer.instance.new_einvoice = new_einvoice
+            serializer.instance.save()
+        serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

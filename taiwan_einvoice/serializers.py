@@ -5,12 +5,15 @@ import pytz
 from django.conf import settings
 from django.contrib.auth.models import User, Permission, AnonymousUser 
 from django.contrib.contenttypes.models import ContentType
+from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from rest_framework.serializers import CharField, IntegerField
+from rest_framework.serializers import CharField, IntegerField, BooleanField
 from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField, ChoiceField
+from rest_framework.serializers import ValidationError
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
+    NotEnoughNumberError,
     ESCPOSWeb,
     Printer,
     LegalEntity,
@@ -220,6 +223,8 @@ class EInvoiceSerializer(ModelSerializer):
     donate_mark = CharField(read_only=True)
     carrier_type__display = CharField(read_only=True)
     details_content = DetailsContentField()
+    amount_is_warning = BooleanField(read_only=True)
+    is_canceled = BooleanField(read_only=True)
 
     class Meta:
         model = EInvoice
@@ -261,6 +266,11 @@ class EInvoicePrintLogSerializer(ModelSerializer):
 class CancelEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-detail", lookup_field='pk')
+    creator_dict = UserSerializer(source='creator', read_only=True)
+    einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
+    new_einvoice_dict = EInvoiceSerializer(source='new_einvoice', read_only=True)
+
+
 
     class Meta:
         model = CancelEInvoice

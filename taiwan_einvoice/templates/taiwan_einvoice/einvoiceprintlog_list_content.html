@@ -18,6 +18,8 @@
             <th width="10%">{% trans "Footprint No." %}</th>
             <th width="10%">{% trans "Total Amount" %}</th>
             <th width="10%">{% trans "Print Time" %}</th>
+            <th width="5%">{% trans "Carrier Type" %}</th>
+            <th width="5%">{% trans "Donate mark" %}</th>
             <th width="5%">{% trans "Original Copy?" %}</th>
             <th width="5%">{% trans "Done Status" context "taiwan_einvoice_einvoiceprintlog" %}</th>
             <th width="5%">{% trans "Creator" context "taiwan_einvoice" %}</th>
@@ -35,7 +37,10 @@
                     <td field="generate_batch_no">{{ einvoiceprintlog.einvoice_dict.generate_batch_no }}</td>
                     <td field="TotalAmount">{{ einvoiceprintlog.einvoice_dict.amounts.TotalAmount }}</td>
                     <td class="datetime" field="print_time" value="{{ einvoiceprintlog.print_time }}" format="Y-m-d AH:i:s"></td>
-                    <td field="is_original_copy">{% if einvoiceprintlog.is_original_copy %}{% trans "Yes" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}{% endif %}</td>
+                    <td field="carrier_type">{{ einvoiceprintlog.einvoice_dict.carrier_type__display }}</td>
+                    <td field="donate_mark">{% ifequal "1" einvoiceprintlog.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}</td>
+                    <td field="is_original_copy">{% if einvoiceprintlog.is_original_copy %}{% trans "Yes" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}
+                        {% else %}{% trans "No" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}{% endif %}</td>
                     <td field="done_status">{% if einvoiceprintlog.done_status %}
                         {% trans "Done" context "taiwan_einvoice_einvoiceprintlog_done_status" %}
                     {% endif %}</td>

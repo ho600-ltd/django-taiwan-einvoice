@@ -20,7 +20,10 @@ def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
                                       serial_number=data['serial_number'])
     except Printer.DoesNotExist:
         return
-    is_original_copy = not einvoice.einvoiceprintlog_set.exists()
+    if "" != einvoice.carrier_type or "" != einvoice.npoban:
+        is_original_copy = False
+    else:
+        is_original_copy = not einvoice.einvoiceprintlog_set.exists()
     epl = EInvoicePrintLog(user=user,
         printer=printer,
         einvoice=einvoice,

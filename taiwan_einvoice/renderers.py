@@ -76,3 +76,11 @@ class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
 class EInvoicePrintLogHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('einvoiceprintlog_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('einvoiceprintlog_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
+class CancelEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('canceleinvoice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('canceleinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+

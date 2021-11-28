@@ -286,6 +286,13 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                         } else {
                             value = '';
                         }
+                    } else if (field == 'is_canceled') {
+                        if (json[field]) {
+                            value = pgettext('taiwan_einvoice_donate_mark', 'Canceled');
+                            $('.re_print_einvoice_modal', $modal).hide();
+                        } else {
+                            value = '';
+                        }
                     } else if (field == 'carrier_id2') {
                         if (json['carrier_id1'] == json[field]) {
                             value = '';

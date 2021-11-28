@@ -347,7 +347,7 @@ class Receipt(models.Model):
                       content=J["content"])
             obj.save()
         else:
-            if re_print_original_copy:
+            if re_print_original_copy or False == J['meet_to_tw_einvoice_standard']:
                 obj.content = J["content"]
                 obj.save()
         return obj
