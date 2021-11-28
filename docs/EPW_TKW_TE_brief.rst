@@ -42,7 +42,7 @@ Set up EPW Service
 .. code-block:: sh
 
     $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
-    $ sudo apt install aptitude python3-virtualenv sqlite3
+    $ sudo apt install aptitude python-virtualenv python3-virtualenv sqlite3
     $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
     $ virtualenv -p python3 django-taiwan-einvoice.py3env
     $ source django-taiwan-einvoice.py3env/bin/activate
@@ -53,6 +53,7 @@ Set up EPW Service
     $ ./manage.py migrate
     $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TE service
     $ cp -rf django-taiwan-einvoice/escpos_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ sudo apt install supervisor
     $ sudo supervisor reread
     $ sudo supervisor start all
 
