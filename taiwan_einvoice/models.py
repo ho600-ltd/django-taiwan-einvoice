@@ -7,7 +7,7 @@ from hashlib import sha1
 from random import random, randint
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, IntegrityError
 from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -175,7 +175,6 @@ class EInvoiceSellerAPI(models.Model):
             "appId": self.AppId,
         }
         result = self.post_data(data)
-        print(result)
         if 'Y' == result.get('banUnitTpStatus', 'N') and '200' == str(result.get('code', '')):
             api_result.success = True
         else:
@@ -229,6 +228,11 @@ class EInvoiceSellerAPI(models.Model):
 
 
 class NotEnoughNumberError(Exception):
+    pass
+
+
+
+class GenerateTimeNotFollowNoOrderError(Exception):
     pass
 
 
@@ -527,7 +531,7 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def __str__(self):
-        return "{}{}({}~{}: {}{}-{})".format(self.turnkey_web,
+        return "{}{}({}~{}: {}{:08d}-{:08d})".format(self.turnkey_web,
                                              self.type,
                                              self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
                                              (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
@@ -574,6 +578,7 @@ class SellerInvoiceTrackNo(models.Model):
             raise NotEnoughNumberError('Not enough numbers')
         else:
             new_no = max_no + 1
+        new_no = '{:08d}'.format(new_no)
         return new_no
 
 
@@ -583,7 +588,10 @@ class SellerInvoiceTrackNo(models.Model):
         data['track'] = self.track
         data['no'] = self.get_new_no()
         ei = EInvoice(**data)
-        ei.save()
+        try:
+            ei.save()
+        except IntegrityError:
+            raise GenerateTimeNotFollowNoOrderError("Duplicated no: {}".format(data['no']))
         return ei
 
 
@@ -594,7 +602,7 @@ class EInvoice(models.Model):
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.IntegerField(db_index=True)
+    no = models.CharField(max_length=8)
     @property
     def track_no(self):
         return "{}{}".format(self.track, self.no)
@@ -621,8 +629,9 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    generate_batch_no = models.CharField(max_length=40, default='')
-    generate_batch_no_sha1 = models.CharField(max_length=10, default='')
+    generate_no = models.CharField(max_length=40, default='')
+    generate_no_sha1 = models.CharField(max_length=10, default='')
+    batch_id = models.SmallIntegerField(default=0)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
@@ -753,7 +762,7 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                     {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                     {"type": "qrcode_pair", "center": False,
-                        "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_batch_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
+                        "qr1_str": "{track_no}{year_m_d}{random_number}{sales_amount}{total_amount}{buyer_identifier}{seller_identifier}{qrcode_aes_encrypt_str}:{generate_no_sha1}:{product_in_einvoice_count}:{product_in_order_count}:{codepage}:".format(
                             track_no=self.track_no,
                             year_m_d="{}{}".format(chmk_year, generate_time.strftime('%m%d')),
                             random_number=self.random_number,
@@ -761,7 +770,7 @@ class EInvoice(models.Model):
                             total_amount=total_amount_str,
                             buyer_identifier="00000000" if '0000000000' == self.buyer_identifier else self.buyer_identifier,
                             seller_identifier=self.seller_identifier,
-                            generate_batch_no_sha1=self.generate_batch_no_sha1,
+                            generate_no_sha1=self.generate_no_sha1,
                             qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
                             product_in_einvoice_count=len(details[:5]),
                             product_in_order_count=len(details),
@@ -836,7 +845,7 @@ class EInvoice(models.Model):
                                                            random_number=random_number).exists():
                         break
             self.random_number = random_number
-            self.generate_batch_no_sha1 = sha1(self.generate_batch_no.encode('utf-8')).hexdigest()[:10]
+            self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
             super().save(*args, **kwargs)
         
 
