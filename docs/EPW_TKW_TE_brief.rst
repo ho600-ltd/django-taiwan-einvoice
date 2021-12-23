@@ -21,6 +21,8 @@ TE 以 WebSocket 模式傳送要上傳的發票 JSON 給 TKW ， TKW 會將發�
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，而有實機測試過的機型僅有 TM-T88IV 及 TM-T88V 。
 
+安裝 raspberry OS 時，須將時區設為 Asia/Taipei
+
 ESC/POS 印表機設定
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -42,7 +44,7 @@ Set up EPW Service
 .. code-block:: sh
 
     $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
-    $ sudo apt install aptitude python-virtualenv python3-virtualenv sqlite3
+    $ sudo apt install aptitude python-virtualenv python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate
     $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
     $ virtualenv -p python3 django-taiwan-einvoice.py3env
     $ source django-taiwan-einvoice.py3env/bin/activate
@@ -56,6 +58,70 @@ Set up EPW Service
     $ sudo apt install supervisor
     $ sudo supervisor reread
     $ sudo supervisor start all
+
+Display with waveshare LCD(Optional)
+...............................................................................
+
+設定 SPI 介面:
+
+.. code-block:: sh
+
+    $ sudo aptitude upgrade -y
+    $ sudo apt-get install libatlas-base-dev
+    $ sudo raspi-config
+    Choose Interfacing Options -> SPI -> Yes  to enable SPI interface
+
+.. figure:: EPW_TKW_TE_brief/PI_interfaces.png
+    :width: 600px
+
+    選擇介面選項
+
+.. figure:: EPW_TKW_TE_brief/SPI.png
+    :width: 600px
+
+    選擇 SPI
+
+.. figure:: EPW_TKW_TE_brief/Enable_SPI.png
+    :width: 600px
+
+    啟用 SPI
+
+重開機，以啟用 SPI:
+
+.. code-block:: sh
+
+    $ sudo reboot
+
+安裝 BCM2835 函式庫( http://www.airspayce.com/mikem/bcm2835/bcm2835-1.71.tar.gz )
+
+.. code-block:: sh
+
+    $ wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.71.tar.gz
+    $ tar -zxf bcm2835-1.71.tar.gz
+    $ cd bcm2835-1.71
+    $ ./configure && make && sudo make check && sudo make install
+
+啟用 lcd_control service:
+
+.. code-block:: sh
+
+    $ sudo cp -rf ~/django-taiwan-einvoice/escpos_web/lcd_control.conf /etc/supervisor/conf.d/
+    $ sudo supervisorctl reread
+    $ sudo supervisorctl restart all
+    lcd_control:asgi0: stopped
+    print_receipt:asgi0: stopped
+    check_printer_status:asgi0: stopped
+    lcd_control:asgi0: started
+    print_receipt:asgi0: started
+    check_printer_status:asgi0: started
+
+LCD 顯示成果:
+
+.. figure:: EPW_TKW_TE_brief/Result.jpeg
+    :width: 600px
+
+    IP: 4.5.6.7 為出口 IP
+
 
 TE supports ASGI with daphne, supervisor and nginx
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
