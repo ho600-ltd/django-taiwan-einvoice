@@ -46,7 +46,7 @@ function show_canceleinvoice_modal(taiwan_einvoice_site) {
                         "SalesAmount": einvoice['amounts']['SalesAmount'],
                         "TaxAmount": einvoice['amounts']['TaxAmount'],
                         "TotalAmount": einvoice['amounts']['TotalAmount'],
-                        "generate_batch_no": einvoice['generate_batch_no']
+                        "generate_no": einvoice['generate_no']
                     }
                     var $tr_tmpl = $('tr.tr_tmpl', $modal_table).clone().removeClass('tr_tmpl').addClass('data');
                     $tr_tmpl.attr('einvoice_id', einvoice['id']);
@@ -144,7 +144,7 @@ function cancel_einvoice(taiwan_einvoice_site) {
                     "SalesAmount": json['einvoice_dict']['amounts']['SalesAmount'],
                     "TaxAmount": json['einvoice_dict']['amounts']['TaxAmount'],
                     "TotalAmount": json['einvoice_dict']['amounts']['TotalAmount'],
-                    "generate_batch_no": json['einvoice_dict']['generate_batch_no'],
+                    "generate_no": json['einvoice_dict']['generate_no'],
                     "creator_first_name_id": json['creator_dict']['first_name']+':'+json['creator_dict']['id'],
                     "generate_time": json['generate_time'],
                     "new_einvoice__track_no_": json['new_einvoice_dict'] ? json['new_einvoice_dict']['track_no_'] : ''

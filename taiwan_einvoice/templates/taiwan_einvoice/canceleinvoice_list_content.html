@@ -31,7 +31,7 @@
             <th field="SalesAmount" width="10%">{% trans "Sales Amount" %}</th>
             <th field="TaxAmount" width="10%">{% trans "Tax Amount" %}</th>
             <th field="TotalAmount" width="10%">{% trans "Total Amount" %}</th>
-            <th field="generate_batch_no" width="10%">{% trans "Footprint No." %}</th>
+            <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
             <th field="creator_first_name_id" width="10%">{% trans "Canceler" context "taiwan_einvoice" %}</th>
             <th field="generate_time" format="Y-m-d AH:i:s" width="30%">{% trans "Cancel Time" %}</th>
             <th field="new_einvoice__track_no_" width="5%">{% trans "New E-Invoice Track No." %}</th>
@@ -48,7 +48,7 @@
                     <td field="SalesAmount">{{ canceleinvoice.einvoice_dict.amounts.SalesAmount }}</td>
                     <td field="TaxAmount">{{ canceleinvoice.einvoice_dict.amounts.TaxAmount }}</td>
                     <td field="TotalAmount" {% if canceleinvoice.einvoice_dict.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ canceleinvoice.einvoice_dict.amounts.TotalAmount }}</td>
-                    <td field="generate_batch_no">{{ canceleinvoice.einvoice_dict.generate_batch_no }}</td>
+                    <td field="generate_no">{{ canceleinvoice.einvoice_dict.generate_no }}</td>
                     <td field="creator_first_name_id">{{ canceleinvoice.creator_dict.first_name }}:{{ canceleinvoice.creator_dict.id }}</td>
                     <td class="datetime" field="generate_time" value="{{ canceleinvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
                     <td field="new_einvoice__track_no_">{{ canceleinvoice.new_einvoice_dict.track_no_ }}</td>
