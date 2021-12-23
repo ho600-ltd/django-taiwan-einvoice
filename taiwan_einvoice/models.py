@@ -7,7 +7,7 @@ from hashlib import sha1
 from random import random, randint
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import models, IntegrityError
 from django.db.models import Max
 from django.contrib.auth.models import User
 from django.utils.timezone import now
@@ -228,6 +228,11 @@ class EInvoiceSellerAPI(models.Model):
 
 
 class NotEnoughNumberError(Exception):
+    pass
+
+
+
+class GenerateTimeNotFollowNoOrderError(Exception):
     pass
 
 
@@ -526,7 +531,7 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def __str__(self):
-        return "{}{}({}~{}: {}{}-{})".format(self.turnkey_web,
+        return "{}{}({}~{}: {}{:08d}-{:08d})".format(self.turnkey_web,
                                              self.type,
                                              self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
                                              (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
@@ -573,6 +578,7 @@ class SellerInvoiceTrackNo(models.Model):
             raise NotEnoughNumberError('Not enough numbers')
         else:
             new_no = max_no + 1
+        new_no = '{:08d}'.format(new_no)
         return new_no
 
 
@@ -581,9 +587,11 @@ class SellerInvoiceTrackNo(models.Model):
         data['type'] = self.type
         data['track'] = self.track
         data['no'] = self.get_new_no()
-        print("batch_id: {}".format(data['batch_id']))
         ei = EInvoice(**data)
-        ei.save()
+        try:
+            ei.save()
+        except IntegrityError:
+            raise GenerateTimeNotFollowNoOrderError("Duplicated no: {}".format(data['no']))
         return ei
 
 
@@ -594,7 +602,7 @@ class EInvoice(models.Model):
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.IntegerField(db_index=True)
+    no = models.CharField(max_length=8)
     @property
     def track_no(self):
         return "{}{}".format(self.track, self.no)
