@@ -175,7 +175,6 @@ class EInvoiceSellerAPI(models.Model):
             "appId": self.AppId,
         }
         result = self.post_data(data)
-        print(result)
         if 'Y' == result.get('banUnitTpStatus', 'N') and '200' == str(result.get('code', '')):
             api_result.success = True
         else:
@@ -582,6 +581,7 @@ class SellerInvoiceTrackNo(models.Model):
         data['type'] = self.type
         data['track'] = self.track
         data['no'] = self.get_new_no()
+        print("batch_id: {}".format(data['batch_id']))
         ei = EInvoice(**data)
         ei.save()
         return ei
@@ -623,6 +623,7 @@ class EInvoice(models.Model):
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
     generate_no = models.CharField(max_length=40, default='')
     generate_no_sha1 = models.CharField(max_length=10, default='')
+    batch_id = models.SmallIntegerField(default=0)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
