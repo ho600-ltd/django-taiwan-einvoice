@@ -1,6 +1,8 @@
 # Only for escpos_web
 Django>=3.2,<3.3
+cryptography>=3.4,<3.5
 channels>=3.0,<3.1
+netifaces>=0.11,<0.12
 python-escpos==v3.0a8
 websockets>=9.1,<9.2
 numpy>=1.16,<1.17
