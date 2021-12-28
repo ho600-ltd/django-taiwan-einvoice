@@ -10,10 +10,18 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor
 
 
 def get_public_ip():
-    try:
-        external_ip = urllib.request.urlopen('https://ipv4.icanhazip.com').read().strip().decode('utf-8')
-    except:
-        external_ip = '?.?.?.?'
+    no_ip = '?.?.?.?'
+    i = 0
+    while i < 10:
+        try:
+            external_ip = urllib.request.urlopen('https://ipv4.icanhazip.com').read().strip().decode('utf-8')
+        except:
+            external_ip = no_ip
+        if no_ip == external_ip:
+            i += 1
+            time.sleep(3)
+        else:
+            break
     return external_ip
 
 
