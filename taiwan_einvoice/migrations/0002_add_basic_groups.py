@@ -5,7 +5,7 @@ from django.db import migrations
 
 NAMES = [
     'TaiwanEInvoiceWorkerGroup',
-    'TaiwanEInvoicePrinterGroup',
+    'TaiwanEInvoicePrinterAdminGroup',
     'TaiwanEInvoiceManagerGroup',
 ]
 
