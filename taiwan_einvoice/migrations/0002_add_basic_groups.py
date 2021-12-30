@@ -4,23 +4,33 @@ from django.db import migrations
 
 
 NAMES = [
-    'TaiwanEInvoiceWorkerGroup',
-    'TaiwanEInvoicePrinterAdminGroup',
-    'TaiwanEInvoiceManagerGroup',
+    {"group_name": 'TaiwanEInvoiceWorkerGroup',
+        "permissions": [
+        ]},
+    {"group_name": 'TaiwanEInvoicePrinterAdminGroup',
+        "permissions": [
+
+        ]},
+    {"group_name": 'TaiwanEInvoiceManagerGroup',
+        "permissions": [
+            "taiwan_einvoice.view_staffprofile",
+            "taiwan_einvoice.add_staffprofile",
+            "taiwan_einvoice.change_staffprofile",
+        ]},
 ]
 
 
 def add_three_basic_groups(apps, schema_editor):
     Group = apps.get_model('auth', 'Group')
-    for name in NAMES:
-        g = Group(name=name)
+    for d in NAMES:
+        g = Group(name=d['group_name'])
         g.save()
 
 
 def remove_three_basic_groups(apps, schema_editor):
     Group = apps.get_model('auth', 'Group')
-    for name in NAMES:
-        g = Group.objects.get(name=name)
+    for d in NAMES:
+        g = Group.objects.get(name=d['group_name'])
         g.delete()
 
 
