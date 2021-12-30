@@ -140,6 +140,7 @@ class TurnkeyWebSerializer(ModelSerializer):
             'count_now_use_08_sellerinvoicetrackno_blank_no',
             'on_working',
             'name',
+            'hash_key',
             'mask_hash_key',
             'transport_id',
             'party_id',
