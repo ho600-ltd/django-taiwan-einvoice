@@ -59,6 +59,15 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
+class StaffProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
+    nickname = models.CharField(max_length=255, default='')
+    is_active = models.BooleanField(default=True)
+
+
+    def __str__(self):
+        return "{}({} {})".format(self.nickname, self.user.username, self.is_active)
+
 class EInvoiceSellerAPI(models.Model):
     url = 'https://www-vc.einvoice.nat.gov.tw/BIZAPIVAN/biz'
 

@@ -35,7 +35,8 @@ from taiwan_einvoice.models import (
 )
 from taiwan_einvoice.serializers import (
     ESCPOSWebSerializer,
-    LegalEntitySerializer,
+    LegalEntitySerializerForUser,
+    LegalEntitySerializerForSuperUser,
     SellerSerializer,
     TurnkeyWebSerializer,
     SellerInvoiceTrackNoSerializer,
@@ -84,10 +85,15 @@ class ESCPOSWebModelViewSet(ModelViewSet):
 class LegalEntityModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
     queryset = LegalEntity.objects.all().order_by('-id')
-    serializer_class = LegalEntitySerializer
+    serializer_class = None
     filter_class = LegalEntityFilter
     renderer_classes = (LegalEntityHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
+
+    def get_serializer_class(self):
+        if self.request.user.is_superuser:
+            return LegalEntitySerializerForSuperUser
+        return LegalEntitySerializerForUser
 
 
 
