@@ -3,7 +3,7 @@ import logging
 import pytz
 
 from django.conf import settings
-from django.contrib.auth.models import User, Permission, AnonymousUser 
+from django.contrib.auth.models import User, Group, Permission, AnonymousUser 
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
@@ -11,6 +11,7 @@ from django.utils.translation import pgettext_lazy
 from rest_framework.serializers import CharField, IntegerField, BooleanField
 from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField, ChoiceField
 from rest_framework.serializers import ValidationError
+from rest_framework.exceptions import PermissionDenied
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     NotEnoughNumberError,
@@ -40,12 +41,32 @@ class StaffProfileSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail", lookup_field='pk')
     user_dict = UserSerializer(source='user', read_only=True)
+    in_printer_admin_group = BooleanField()
+    in_manager_group = BooleanField()
 
 
     class Meta:
         model = StaffProfile
         fields = '__all__'
 
+
+
+    def update(self, instance, validated_data):
+        if self.context['request'].user == instance.user:
+            raise PermissionDenied(detail=_("You can not edit yourself"))
+        group_dict = {
+            "in_printer_admin_group": Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup'),
+            "in_manager_group": Group.objects.get(name='TaiwanEInvoiceManagerGroup')
+        }
+        for key in ['in_printer_admin_group', 'in_manager_group']:
+            if key in validated_data:
+                print("{}: {}".format(key, validated_data[key]))
+                if validated_data[key]:
+                    instance.user.groups.add(group_dict[key])
+                else:
+                    instance.user.groups.remove(group_dict[key])
+                del validated_data[key]
+        return super().update(instance, validated_data)
 
 
 class ESCPOSWebSerializer(ModelSerializer):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-27 00:34+0800\n"
+"POT-Creation-Date: 2021-12-30 17:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,6 +58,9 @@ msgstr "無明細"
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
 msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
 
+msgid "You can not edit yourself"
+msgstr "您無法編輯個人資料"
+
 msgid "Already Logout"
 msgstr "已經登出"
 
@@ -72,6 +75,9 @@ msgstr "導引切換"
 
 msgid "Permissions"
 msgstr "權限"
+
+msgid "Staff"
+msgstr "工作人員"
 
 msgid "ESC/POS Printer"
 msgstr "發票機"
@@ -545,6 +551,59 @@ msgstr "選擇 .csv"
 
 msgid "Create"
 msgstr "新增"
+
+msgid "Nickname contains"
+msgstr "暱稱包含"
+
+msgid "Username contains"
+msgstr "帳號包含"
+
+msgid "Staff Profile"
+msgstr "工作人員資料"
+
+msgid "Username"
+msgstr "帳號"
+
+msgid "Nickname"
+msgstr "暱稱"
+
+msgid "Is Active?"
+msgstr "是否啟用?"
+
+msgid "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)"
+msgstr "已啟用的工作人員才能進入「臺灣電子發票管理系統(本系統)」"
+
+msgid "Add to the Printer Admin Group"
+msgstr "加入發票機管理員群組"
+
+msgid "The user belongs this group can use ESCPOS Web"
+msgstr "屬於此群組的工作人員才能使用「發票機伺服器」"
+
+msgid "Add to the Manager Group"
+msgstr "加入權限管理者群組"
+
+msgid "The user belongs this group can edit staffs in this page"
+msgstr "屬於此群組的工作人員才能編輯本頁面的工作人員紀錄"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Printer Admin"
+msgstr "發票機管理員"
+
+msgid "Permission Manager"
+msgstr "權限管理者"
+
+msgid "Actived"
+msgstr "啟用"
+
+msgctxt "in_printer_admin_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "in_manager_group"
+msgid "Yes"
+msgstr "是"
 
 msgid "Is on working?"
 msgstr "是否使用中?"

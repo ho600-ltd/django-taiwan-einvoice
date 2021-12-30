@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-27 00:31+0800\n"
+"POT-Creation-Date: 2021-12-30 17:52+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -145,6 +145,17 @@ msgstr[0] "匯入 %(count)s 筆"
 
 msgid "Importing Successfully"
 msgstr "成功匯入"
+
+msgid "Actived"
+msgstr "啟用"
+
+msgctxt "in_printer_admin_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "in_manager_group"
+msgid "Yes"
+msgstr "是"
 
 msgid "Sun"
 msgstr "日"

@@ -65,4 +65,141 @@
 {% endblock %}
 
 {% block modals %}
+
+<div class="modal fade" id="create_staffprofile_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}">
+    aria-labelledby="create_staffprofile_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="create_staffprofile_modal_label">
+                    {% trans "Create Staff" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="Username" class="col-sm-2 col-form-label">{% trans "Username" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="Username" name="user.username" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputNickname" class="col-sm-2 col-form-label">{% trans "Nickname" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputNickname" name="nickname" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="is_active" name="is_active" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Is Active?" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_printer_admin_group" name="in_printer_admin_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Printer Admin Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_manager_group" name="in_manager_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Manager Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="create_staffprofile_button" type="button" class="create_staffprofile btn btn-secondary">{% trans "Create" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="update_staffprofile_modal" tabindex="-1" role="dialog"
+    aria-labelledby="update_staffprofile_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="update_staffprofile_modal_label">
+                    {% trans "Staff Profile" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="Username" class="col-sm-2 col-form-label">{% trans "Username" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" id="Username" name="user.username" value="">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputNickname" class="col-sm-2 col-form-label">{% trans "Nickname" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputNickname" name="nickname">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="is_active" name="is_active" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Is Active?" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_printer_admin_group" name="in_printer_admin_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Printer Admin Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_manager_group" name="in_manager_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Manager Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="update_staffprofile_button" type="button" class="update_staffprofile btn btn-secondary">{% trans "Update" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

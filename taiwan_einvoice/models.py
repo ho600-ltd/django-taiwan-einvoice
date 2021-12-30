@@ -9,7 +9,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
 from django.db.models import Max
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext
@@ -63,6 +63,12 @@ class StaffProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
     nickname = models.CharField(max_length=255, default='')
     is_active = models.BooleanField(default=True)
+    @property
+    def in_printer_admin_group(self):
+        return self.user.groups.filter(name="TaiwanEInvoicePrinterAdminGroup").exists()
+    @property
+    def in_manager_group(self):
+        return self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
 
 
     def __str__(self):
