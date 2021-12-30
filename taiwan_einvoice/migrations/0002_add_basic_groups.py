@@ -24,6 +24,17 @@ def remove_three_basic_groups(apps, schema_editor):
         g.delete()
 
 
+def add_default_legalentity(apps, schema_editor):
+    LegalEntity = apps.get_model('taiwan_einvoice', 'LegalEntity')
+    le, is_created = LegalEntity.objects.get_or_create(identifier='0000000000')
+    le.name = '0000000000'
+    le.save()
+
+
+def remove_default_legalentity(apps, schema_editor):
+    LegalEntity = apps.get_model('taiwan_einvoice', 'LegalEntity')
+    le = LegalEntity.objects.get(identifier='0000000000', name='0000000000')
+    le.delete()
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -31,5 +42,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(add_three_basic_groups, remove_three_basic_groups)
+        migrations.RunPython(add_three_basic_groups, remove_three_basic_groups),
+        migrations.RunPython(add_default_legalentity, remove_default_legalentity),
     ]
