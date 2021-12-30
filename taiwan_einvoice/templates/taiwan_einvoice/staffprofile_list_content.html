@@ -1,0 +1,32 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="15%">{% trans "Nickname" %}</th>
+            <th width="15%">{% trans "Username" %}</th>
+            <th width="25%">{% trans "Is Active" %}</th>
+            <th width="15%">{% trans "Printer Admin" %}</th>
+            <th width="10%">{% trans "Permission Manager" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for staffprofile in data.results %}
+            <tr staffprofile_id="{{ staffprofile.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="nickname">{{ staffprofile.nickname }}</td>
+                <td field="user.username">{{ staffprofile.user_dict.username }}</td>
+                <td field="is_active"><input type="checkbox" name="is_active" {% if staffprofile.is_active %}checked{% endif %} /></td>
+                <td field="in_printer_admin_group"><input type="checkbox" name="is_printer_admin" /></td>
+                <td field="is_manager_group"><input type="checkbox" name="is_manager" /></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

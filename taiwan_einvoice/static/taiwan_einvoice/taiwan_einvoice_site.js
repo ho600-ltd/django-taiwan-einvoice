@@ -170,6 +170,8 @@ $(function () {
 
         var string_kind_params = [
             'name__icontains',
+            'nickname__icontains',
+            'user__username__icontains',
             'slug__icontains',
             'track_no__icontains',
             'details__description__icontains',

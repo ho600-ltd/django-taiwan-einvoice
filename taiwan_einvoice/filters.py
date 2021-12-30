@@ -2,11 +2,33 @@ import re, datetime
 import rest_framework_filters as filters
 
 from django.db.models import Q
+from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIPEI_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = User
+        fields = {
+            'username': ('icontains', ),
+        }
+
+
+
+class StaffProfileFilter(filters.FilterSet):
+    user = filters.RelatedFilter(UserFilter, field_name='user', queryset=User.objects.filter(staffprofile__isnull=False))
+
+
+
+    class Meta:
+        model = StaffProfile
+        fields = {
+            'nickname': ('icontains', ),
+            'is_active': ('exact', ),
+        }
 
 class ESCPOSWebFilter(filters.FilterSet):
     class Meta:

@@ -14,6 +14,7 @@ from rest_framework.serializers import ValidationError
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     NotEnoughNumberError,
+    StaffProfile,
     ESCPOSWeb,
     Printer,
     LegalEntity,
@@ -32,6 +33,18 @@ class UserSerializer(ModelSerializer):
         fields = (
             'id', 'last_name', 'first_name', 'email', 'username',
         )
+
+
+
+class StaffProfileSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail", lookup_field='pk')
+    user_dict = UserSerializer(source='user', read_only=True)
+
+
+    class Meta:
+        model = StaffProfile
+        fields = '__all__'
 
 
 

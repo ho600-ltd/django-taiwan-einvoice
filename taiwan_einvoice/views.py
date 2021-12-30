@@ -11,9 +11,12 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from taiwan_einvoice.permissions import IsSuperUser
+from ho600_lib.permissions import Or
+
+from taiwan_einvoice.permissions import IsSuperUser, CanOperateStaffProfile
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
+    StaffProfileHtmlRenderer,
     ESCPOSWebHtmlRenderer,
     TurnkeyWebHtmlRenderer,
     LegalEntityHtmlRenderer,
@@ -24,6 +27,7 @@ from taiwan_einvoice.renderers import (
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
+    StaffProfile,
     ESCPOSWeb,
     LegalEntity,
     Seller,
@@ -34,6 +38,7 @@ from taiwan_einvoice.models import (
     CancelEInvoice,
 )
 from taiwan_einvoice.serializers import (
+    StaffProfileSerializer,
     ESCPOSWebSerializer,
     LegalEntitySerializerForUser,
     LegalEntitySerializerForSuperUser,
@@ -45,6 +50,7 @@ from taiwan_einvoice.serializers import (
     CancelEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
+    StaffProfileFilter,
     ESCPOSWebFilter,
     LegalEntityFilter,
     TurnkeyWebFilter,
@@ -69,6 +75,16 @@ def escpos_web_demo(request, escpos_web_id):
     return render(request,
                   'taiwan_einvoice/escpos_web_demo.html',
                   {"escpos_web": escpos_web})
+
+
+
+class StaffProfileModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanOperateStaffProfile), )
+    queryset = StaffProfile.objects.all().order_by('-id')
+    serializer_class = StaffProfileSerializer
+    filter_class = StaffProfileFilter
+    renderer_classes = (StaffProfileHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('post', 'get', 'patch')
 
 
 

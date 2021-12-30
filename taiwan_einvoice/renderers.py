@@ -37,6 +37,12 @@ class ESCPOSWebHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
+class StaffProfileHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('staffprofile_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('staffprofile_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
 class LegalEntityHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('legalentity_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('legalentity_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)

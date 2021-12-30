@@ -68,8 +68,14 @@
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
-                        <li class="nav-item nav_permission" role="presentation">
-                            <a class="nav-link" href="#">{% trans "Permissions" %}</a>
+                        <li class="dropdown nav-item nav_permission">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{% trans "Permissions" %}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_staffprofile" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">{% trans "Staff" %}</a>
+                            </div>
                         </li>
                         <li class="nav-item nav_escposweb" role="presentation">
                             <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
