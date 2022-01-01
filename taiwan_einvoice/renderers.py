@@ -24,6 +24,12 @@ class TEOriginHTMLRenderer(TEBrowsableAPIRenderer):
     format = 'html'
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['data'] = data
+        return  res
+
+
     def get_content(self, renderer, data, accepted_media_type, renderer_context):
         request = renderer_context['request']
         t = get_template(self.content_template)

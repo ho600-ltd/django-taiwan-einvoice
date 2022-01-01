@@ -1,15 +1,17 @@
 {% load i18n %}
 
 <div class="total_count_row">
-    {% with data.count as total_count %}
-        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
-    {% endwith %}
-
-    {% if 'add_staffprofile' in perms %}
-        <button id="create_staffprofile_button"
-            class="btn btn-success create_staffprofile_modal" data-toggle="modal">
-            {% trans "Create Staff" %}
-        </button>
+    {% if data.id > 0 %}
+    {% else %}
+        {% with data.count as total_count %}
+            {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+        {% endwith %}
+        {% if 'add_staffprofile' in perms %}
+            <button id="create_staffprofile_button"
+                class="btn btn-success create_staffprofile_modal" data-toggle="modal">
+                {% trans "Create Staff" %}
+            </button>
+        {% endif %}
     {% endif %}
 </div>
 
@@ -37,7 +39,18 @@
         </tr>
     </thead>
     <tbody>
-        {% for staffprofile in data.results %}
+        {% if data.id > 0 %}{% with data as staffprofile %}
+            <tr staffprofile_id="{{ staffprofile.id }}">
+                <td>1.</td>
+                <td field="user.username">
+                    {{ staffprofile.user_dict.username }}
+                </td>
+                <td field="nickname">{{ staffprofile.nickname }}</td>
+                <td field="is_active">{% if staffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
+                <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
+                <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
+            </tr>
+        {% endwith %}{% else %}{% for staffprofile in data.results %}
             <tr staffprofile_id="{{ staffprofile.id }}"
                 resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=staffprofile.id %}">
                 <td>{{ forloop.counter }}.</td>
@@ -51,6 +64,6 @@
                 <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
                 <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
             </tr>
-        {% endfor %}
+        {% endfor %}{% endif %}
     </tbody>
 </table>

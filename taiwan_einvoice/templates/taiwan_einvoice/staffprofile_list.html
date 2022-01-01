@@ -12,6 +12,7 @@
 
 {% block body %}
 
+{% if data.id > 0 %}{% else %}
 <div class="form_container" id="id_search_options">
     <form method="GET" action="./" onsubmit="return false;">
         <input type='hidden' name='format' value='html' />
@@ -40,6 +41,7 @@
         </div>
     </form>
 </div>
+{% endif %}
 
 <div class="pagination_row">
     <nav>

@@ -13,7 +13,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from ho600_lib.permissions import Or
 
-from taiwan_einvoice.permissions import IsSuperUser, CanOperateStaffProfile
+from taiwan_einvoice.permissions import IsSuperUser, CanOperateStaffProfile, CanViewSelfStaffProfile
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     StaffProfileHtmlRenderer,
@@ -79,7 +79,7 @@ def escpos_web_demo(request, escpos_web_id):
 
 
 class StaffProfileModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanOperateStaffProfile), )
+    permission_classes = (Or(IsSuperUser, CanOperateStaffProfile, CanViewSelfStaffProfile), )
     queryset = StaffProfile.objects.all().order_by('-id')
     serializer_class = StaffProfileSerializer
     filter_class = StaffProfileFilter

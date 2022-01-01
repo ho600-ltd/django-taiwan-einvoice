@@ -144,9 +144,29 @@ function update_staffprofile (taiwan_einvoice_site) {
 
 
 $(function () {
-    $(".nav_permission").addClass("nav_active");
+    var $url = new URL(window.location.href);
+    var ps = $url.pathname.split('/');
+    var self_staffprofile = false;
+    for (var i=0; i<ps.length; i++) {
+        var name = ps[i+1];
+        if (name.indexOf('.') >= 0) {
+            var id = name.split('.')[0];
+        } else {
+            var id = name;
+        }
+        if (ps[i] == 'staffprofile' && parseInt(id) > 0) {
+            self_staffprofile = true;
+            break;
+        }
+    }
     $('.dropdown-menu a').removeClass('active');
-    $(".nav_staffprofile").addClass("active");
+    if (self_staffprofile) {
+        $(".nav_self").addClass("nav_active");
+        $(".nav_selfstaffprofile").addClass("active");
+    } else {
+        $(".nav_permission").addClass("nav_active");
+        $(".nav_staffprofile").addClass("active");
+    }
 
     taiwan_einvoice_site = new TAIWAN_EINVOICE_SITE('taiwan_einvoice_site', {
         $SUCCESS_MODAL: $('#success_modal'),
