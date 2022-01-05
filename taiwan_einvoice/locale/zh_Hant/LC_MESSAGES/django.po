@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-30 17:50+0800\n"
+"POT-Creation-Date: 2022-01-05 16:12+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -558,8 +558,8 @@ msgstr "暱稱包含"
 msgid "Username contains"
 msgstr "帳號包含"
 
-msgid "Staff Profile"
-msgstr "工作人員資料"
+msgid "Create Staff"
+msgstr "新增工作人員"
 
 msgid "Username"
 msgstr "帳號"
@@ -584,6 +584,9 @@ msgstr "加入權限管理者群組"
 
 msgid "The user belongs this group can edit staffs in this page"
 msgstr "屬於此群組的工作人員才能編輯本頁面的工作人員紀錄"
+
+msgid "Staff Profile"
+msgstr "工作人員資料"
 
 msgid "Update"
 msgstr "更新"
@@ -642,6 +645,15 @@ msgstr "特種稅額"
 
 msgid "On Working"
 msgstr "使用中"
+
+msgid "Staff exist"
+msgstr "工作人員已存在"
+
+msgid "Username does not exist"
+msgstr "{} 帳號不存在"
+
+msgid "Please check the username, this field is case-sensitive"
+msgstr "請檢查帳號，此欄位有大小寫之分"
 
 msgid "TurnkeyWeb(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"

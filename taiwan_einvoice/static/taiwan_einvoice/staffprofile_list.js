@@ -10,8 +10,9 @@ function create_staffprofile (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
-        var resource_uri = $modal.data('resource_uri');
+        var resource_uri = $modal.attr('resource_uri');
         var data = {
+            "user.username": $('input[name="user.username"]', $modal).val(),
             "nickname": $('input[name="nickname"]', $modal).val(),
             "is_active": $('input[name="is_active"]', $modal).prop('checked'),
             "in_printer_admin_group": $('input[name="in_printer_admin_group"]', $modal).prop('checked'),
@@ -19,36 +20,55 @@ function create_staffprofile (taiwan_einvoice_site) {
         };
         $.ajax({
             url: resource_uri,
-            type: "PATCH",
+            type: "POST",
             dataType: 'json',
             data: JSON.stringify(data),
             contentType: 'application/json',
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
+            },
             success: function (json) {
-                var $tr = $('tr[resource_uri="'+resource_uri+'"]');
-                for (var key in data) {
-                    var v = data[key];
-                    if ('is_active' == key) {
-                        if (v) {
-                            v = gettext('Actived');
-                        } else {
-                            v = '';
-                        }
-                    } else if ('in_printer_admin_group' == key) {
-                        if (v) {
-                            v = pgettext('in_printer_admin_group', 'Yes');
-                        } else {
-                            v = '';
-                        }
-                    } else if ('in_manager_group' == key) {
-                        if (v) {
-                            v = pgettext('in_manager_group', 'Yes');
-                        } else {
-                            v = '';
-                        }
-                    }
-                    $('td[field="'+key+'"]', $tr).text(v);
-                }
+                $('input', $modal).val('');
                 $modal.modal('hide');
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$SUCCESS_MODAL,
+                    gettext("Success"),
+                    gettext("Created")
+                );
+                var kv = {
+                    "no": gettext('NEW Record'),
+                    "user.username": json['user_dict']['username'],
+                    "nickname": json['nickname'],
+                    "is_active": json['is_active'],
+                    "in_printer_admin_group": json['in_printer_admin_group'],
+                    "in_manager_group": json['in_manager_group']
+                };
+                var $table = $('table.table');
+                var s = '<tr>';
+                $('thead tr th', $table).each(function(){
+                    var $th = $(this);
+                    var k = $th.attr('field');
+                    if ('boolean' == typeof(kv[k])) {
+                        if (kv[k]) {
+                            var value = pgettext(k, 'Yes');
+                        } else {
+                            var value = '';
+                        }
+                        s += '<td field="'+k+'">'+value+'</td>';
+                    } else if ('user.username' == k) {
+                        s += '<td field="'+k+'" value="'+kv[k]+'"><button class="btn btn-primary update_staffprofile_modal">'+kv[k]+'</button></td>';
+                    } else {
+                        s += '<td field="'+k+'" value="'+kv[k]+'">'+kv[k]+'</td>';
+                    }
+                });
+                s += '</tr>';
+                var $s = $(s);
+                $('.update_staffprofile_modal', $s).click(update_staffprofile_modal(taiwan_einvoice_site));
+                $('tbody', $table).prepend($s);
             }
         });
     }
@@ -183,4 +203,7 @@ $(function () {
     $('button.create_staffprofile').click(create_staffprofile(taiwan_einvoice_site));
     $('button.update_staffprofile_modal').click(update_staffprofile_modal(taiwan_einvoice_site));
     $('button.update_staffprofile').click(update_staffprofile(taiwan_einvoice_site));
+    var dev_null = [
+        pgettext('is_active', 'Yes')
+    ]
 });

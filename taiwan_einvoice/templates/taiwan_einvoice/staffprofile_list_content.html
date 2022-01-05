@@ -18,20 +18,20 @@
 <table class="table">
     <thead>
         <tr>
-            <th width="5%">{% trans "No." %}</th>
-            <th width="30%">{% trans "Username" %}</th>
-            <th width="10%">{% trans "Nickname" %}</th>
-            <th width="15%">{% trans "Is Active?" %}
+            <th width="5%" field="no">{% trans "No." %}</th>
+            <th width="30%" field="user.username">{% trans "Username" %}</th>
+            <th width="10%" field="nickname">{% trans "Nickname" %}</th>
+            <th width="15%" field="is_active">{% trans "Is Active?" %}
                 <i class="fa fa-info-circle" data-toggle="tooltip"
                     data-html="true" data-placement="left"
                     title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
             </th>
-            <th width="20%">{% trans "Printer Admin" %}
+            <th width="20%" field="in_printer_admin_group">{% trans "Printer Admin" %}
                 <i class="fa fa-info-circle" data-toggle="tooltip"
                     data-html="true" data-placement="left"
                     title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
             </th>
-            <th width="20%">{% trans "Permission Manager" %}
+            <th width="20%" field="in_manager_group">{% trans "Permission Manager" %}
                 <i class="fa fa-info-circle" data-toggle="tooltip"
                     data-html="true" data-placement="left"
                     title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>

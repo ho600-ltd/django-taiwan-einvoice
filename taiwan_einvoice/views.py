@@ -2,6 +2,7 @@ import json, datetime
 from django.http import Http404
 from django.shortcuts import render
 from django.db.models import Q
+from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
@@ -85,6 +86,32 @@ class StaffProfileModelViewSet(ModelViewSet):
     filter_class = StaffProfileFilter
     renderer_classes = (StaffProfileHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', 'patch')
+
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        if StaffProfile.objects.filter(user__username=data['user.username']).exists():
+            er = {
+                "error_title": _("Staff exist"),
+                "error_message": _("Staff exist"),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        try:
+            data['user'] = User.objects.get(username=data['user.username']).id
+        except User.DoesNotExist:
+            er = {
+                "error_title": _("Username does not exist"),
+                "error_message": _("Please check the username, this field is case-sensitive"),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        else:
+            del data['user.username']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        instance = serializer.instance
+        serializer = StaffProfileSerializer(serializer.instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 

@@ -60,13 +60,31 @@ class StaffProfileSerializer(ModelSerializer):
         }
         for key in ['in_printer_admin_group', 'in_manager_group']:
             if key in validated_data:
-                print("{}: {}".format(key, validated_data[key]))
                 if validated_data[key]:
                     instance.user.groups.add(group_dict[key])
                 else:
                     instance.user.groups.remove(group_dict[key])
                 del validated_data[key]
         return super().update(instance, validated_data)
+
+
+    def create(self, validated_data):
+        data = {
+            "in_printer_admin_group": validated_data['in_printer_admin_group'],
+            "in_manager_group": validated_data['in_manager_group'],
+        }
+        for key in ['in_printer_admin_group', 'in_manager_group']:
+            del validated_data[key]
+        instance = super().create(validated_data)
+        for key, group in {"in_printer_admin_group": Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup'),
+                           "in_manager_group": Group.objects.get(name='TaiwanEInvoiceManagerGroup')}.items():
+            if key in data:
+                if data[key]:
+                    instance.user.groups.add(group)
+                else:
+                    instance.user.groups.remove(group)
+        return instance
+
 
 
 class ESCPOSWebSerializer(ModelSerializer):
