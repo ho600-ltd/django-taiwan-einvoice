@@ -65,10 +65,10 @@ class StaffProfile(models.Model):
     is_active = models.BooleanField(default=True)
     @property
     def in_printer_admin_group(self):
-        return self.user.groups.filter(name="TaiwanEInvoicePrinterAdminGroup").exists()
+        return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoicePrinterAdminGroup").exists()
     @property
     def in_manager_group(self):
-        return self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
+        return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
 
 
     def __str__(self):
