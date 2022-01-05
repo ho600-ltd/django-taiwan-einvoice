@@ -147,7 +147,7 @@ $(function () {
     var $url = new URL(window.location.href);
     var ps = $url.pathname.split('/');
     var self_staffprofile = false;
-    for (var i=0; i<ps.length; i++) {
+    for (var i=0; i<ps.length-1; i++) {
         var name = ps[i+1];
         if (name.indexOf('.') >= 0) {
             var id = name.split('.')[0];
