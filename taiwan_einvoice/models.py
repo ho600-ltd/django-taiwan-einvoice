@@ -305,6 +305,13 @@ class ESCPOSWeb(models.Model):
 
 
 
+    class Meta:
+        permissions = (
+            ("operate_te_escposweb", "Operate ESCPOSWeb"),
+        )
+
+
+
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]

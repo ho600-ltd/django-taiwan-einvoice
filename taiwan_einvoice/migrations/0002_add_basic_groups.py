@@ -8,7 +8,8 @@ NAMES = [
         ]},
     {"group_name": 'TaiwanEInvoicePrinterAdminGroup',
         "permissions": [
-
+            "taiwan_einvoice.view_escposweb",
+            "taiwan_einvoice.view_staffprofile",
         ]},
     {"group_name": 'TaiwanEInvoiceManagerGroup',
         "permissions": [

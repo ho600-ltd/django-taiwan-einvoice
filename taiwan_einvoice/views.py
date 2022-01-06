@@ -6,6 +6,8 @@ from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from guardian.shortcuts import get_objects_for_user, get_perms
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.renderers import JSONRenderer
@@ -14,7 +16,12 @@ from rest_framework.viewsets import ModelViewSet
 
 from ho600_lib.permissions import Or
 
-from taiwan_einvoice.permissions import IsSuperUser, CanOperateStaffProfile, CanViewSelfStaffProfile
+from taiwan_einvoice.permissions import (
+    IsSuperUser,
+    CanOperateStaffProfile,
+    CanViewSelfStaffProfile,
+    CanViewESCPOSWeb,
+)
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     StaffProfileHtmlRenderer,
@@ -116,12 +123,29 @@ class StaffProfileModelViewSet(ModelViewSet):
 
 
 class ESCPOSWebModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanViewESCPOSWeb), )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super().get_queryset()
+        res = False
+        for _p in CanViewESCPOSWeb.METHOD_PERMISSION_MAPPING[request.method]:
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        if res:
+            return queryset
+        else:
+            objs = get_objects_for_user(request.user,
+                                        CanViewESCPOSWeb.METHOD_PERMISSION_MAPPING[request.method],
+                                        any_perm=True)
+            return objs
 
 
 

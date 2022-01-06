@@ -55,9 +55,13 @@
                 resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=staffprofile.id %}">
                 <td>{{ forloop.counter }}.</td>
                 <td field="user.username">
-                    <button class="btn btn-primary update_staffprofile_modal">
+                    {% if perms.taiwan_einvoice.change_staffprofile %}
+                        <button class="btn btn-primary update_staffprofile_modal">
+                            {{ staffprofile.user_dict.username }}
+                        </button>
+                    {% else %}
                         {{ staffprofile.user_dict.username }}
-                    </button>
+                    {% endif %}
                 </td>
                 <td field="nickname">{{ staffprofile.nickname }}</td>
                 <td field="is_active">{% if staffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>

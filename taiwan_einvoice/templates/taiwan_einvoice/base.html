@@ -68,15 +68,22 @@
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
-                        <li class="dropdown nav-item nav_permission">
-                            <a data-toggle="dropdown"
-                                aria-expanded="false"
-                                class="dropdown-toggle nav-link"
-                                href="#">{% trans "Permissions" %}</a>
-                            <div role="menu" class="dropdown-menu">
-                                <a role="presentation" class="dropdown-item nav_staffprofile" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">{% trans "Staff" %}</a>
-                            </div>
-                        </li>
+                        {% if perms.taiwan_einvoice.view_staffprofile or perms.taiwan_einvoice.view_escposweb %}
+                            <li class="dropdown nav-item nav_permission">
+                                <a data-toggle="dropdown"
+                                    aria-expanded="false"
+                                    class="dropdown-toggle nav-link"
+                                    href="#">{% trans "Permissions" %}</a>
+                                <div role="menu" class="dropdown-menu">
+                                    {% if perms.taiwan_einvoice.view_staffprofile %}
+                                        <a role="presentation" class="dropdown-item nav_staffprofile" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">{% trans "Staff" %}</a>
+                                    {% endif %}
+                                    {% if perms.taiwan_einvoice.view_escposweb %}
+                                        <a role="presentation" class="dropdown-item nav_escposweb_operator" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "Printer Operator" %}</a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endif %}
                         <li class="nav-item nav_escposweb" role="presentation">
                             <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
                         </li>
