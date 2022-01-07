@@ -1,0 +1,31 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="15%">{% trans "Name" %}</th>
+            <th width="15%">{% trans "Slug" %}</th>
+            <th width="15%">{% trans "Admins" %}</th>
+            <th width="50%" colspan="2">{% trans "Opertors" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for escposweb in data.results %}
+            <tr escposweb_id="{{ escposweb.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="name">{{ escposweb.name }}</td>
+                <td>{{ escposweb.slug }}</td>
+                <td></td>
+                <td width="40%"></td>
+                <td width="10%"><button class="btn btn-primary">{% trans "Edit" %}</button></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

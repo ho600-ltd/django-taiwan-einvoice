@@ -105,12 +105,17 @@ class ESCPOSWebSerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return ESCPOSWeb.objects.all().order_by('-id')
-        else:
-            return ESCPOSWeb.objects.none()
+class ESCPOSWebOperatorSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-detail", lookup_field='pk')
+
+
+
+    class Meta:
+        model = ESCPOSWeb
+        fields = (
+            'id', 'resource_uri', 'name', 'slug',
+        )
 
 
 
@@ -136,15 +141,6 @@ class LegalEntitySerializerForUser(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return LegalEntity.objects.all().order_by('-id')
-        else:
-            return LegalEntity.objects.none()
-
-
-
 class LegalEntitySerializerForSuperUser(LegalEntitySerializerForUser):
     identifier = CharField()
 
@@ -158,15 +154,6 @@ class SellerSerializer(ModelSerializer):
     class Meta:
         model = Seller
         fields = '__all__'
-
-
-
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return Seller.objects.all().order_by('-id')
-        else:
-            return Seller.objects.none()
 
 
 
@@ -217,14 +204,6 @@ class TurnkeyWebSerializer(ModelSerializer):
         }
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return TurnkeyWeb.objects.all().order_by('-id')
-        else:
-            return TurnkeyWeb.objects.none()
-
-
 
 class TurnkeyWebRelatedField(PrimaryKeyRelatedField):
     def get_queryset(self):
@@ -255,14 +234,6 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return SellerInvoiceTrackNo.objects.all().order_by('-id')
-        else:
-            return SellerInvoiceTrackNo.objects.none()
-
-
 class DetailsContentField(ReadOnlyField):
     def get_attribute(self, instance):
         request = self.context['request']
@@ -290,15 +261,6 @@ class EInvoiceSerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return EInvoice.objects.all().order_by('-id')
-        else:
-            return EInvoice.objects.none()
-
-
-
 class EInvoicePrintLogSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-detail", lookup_field='pk')
@@ -309,15 +271,6 @@ class EInvoicePrintLogSerializer(ModelSerializer):
     class Meta:
         model = EInvoicePrintLog
         fields = '__all__'
-
-
-
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return EInvoicePrintLog.objects.all().order_by('-id')
-        else:
-            return EInvoicePrintlog.objects.none()
 
 
 
@@ -333,12 +286,3 @@ class CancelEInvoiceSerializer(ModelSerializer):
     class Meta:
         model = CancelEInvoice
         fields = '__all__'
-
-
-
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return CancelEInvoice.objects.all().order_by('-id')
-        else:
-            return CancelEInvoice.objects.none()

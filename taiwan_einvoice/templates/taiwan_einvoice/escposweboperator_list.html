@@ -1,0 +1,38 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/escposweboperator_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% block content %}
+        {% if content %}{{ content|safe }}{% endif %}
+    {% endblock %}
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+{% endblock %}
+
+{% block modals %}
+{% endblock %}

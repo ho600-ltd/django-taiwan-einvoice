@@ -79,7 +79,7 @@
                                         <a role="presentation" class="dropdown-item nav_staffprofile" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">{% trans "Staff" %}</a>
                                     {% endif %}
                                     {% if perms.taiwan_einvoice.view_escposweb %}
-                                        <a role="presentation" class="dropdown-item nav_escposweb_operator" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "Printer Operator" %}</a>
+                                        <a role="presentation" class="dropdown-item nav_escposweboperator" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-list' %}?format=html">{% trans "ESC/POS Web Operator" %}</a>
                                     {% endif %}
                                 </div>
                             </li>

@@ -43,6 +43,12 @@ class ESCPOSWebHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
+class ESCPOSWebOperatorHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('escposweboperator_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('escposweboperator_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
 class StaffProfileHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('staffprofile_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('staffprofile_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)

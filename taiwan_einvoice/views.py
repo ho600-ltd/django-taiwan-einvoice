@@ -18,14 +18,15 @@ from ho600_lib.permissions import Or
 
 from taiwan_einvoice.permissions import (
     IsSuperUser,
-    CanOperateStaffProfile,
+    CanEditStaffProfile,
     CanViewSelfStaffProfile,
-    CanViewESCPOSWeb,
+    CanEditESCPOSWebOperator,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     StaffProfileHtmlRenderer,
     ESCPOSWebHtmlRenderer,
+    ESCPOSWebOperatorHtmlRenderer,
     TurnkeyWebHtmlRenderer,
     LegalEntityHtmlRenderer,
     SellerInvoiceTrackNoHtmlRenderer,
@@ -48,6 +49,7 @@ from taiwan_einvoice.models import (
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
     ESCPOSWebSerializer,
+    ESCPOSWebOperatorSerializer,
     LegalEntitySerializerForUser,
     LegalEntitySerializerForSuperUser,
     SellerSerializer,
@@ -87,7 +89,7 @@ def escpos_web_demo(request, escpos_web_id):
 
 
 class StaffProfileModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanOperateStaffProfile, CanViewSelfStaffProfile), )
+    permission_classes = (Or(IsSuperUser, CanEditStaffProfile, CanViewSelfStaffProfile), )
     queryset = StaffProfile.objects.all().order_by('-id')
     serializer_class = StaffProfileSerializer
     filter_class = StaffProfileFilter
@@ -123,7 +125,7 @@ class StaffProfileModelViewSet(ModelViewSet):
 
 
 class ESCPOSWebModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewESCPOSWeb), )
+    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
@@ -135,7 +137,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
         request = self.request
         queryset = super().get_queryset()
         res = False
-        for _p in CanViewESCPOSWeb.METHOD_PERMISSION_MAPPING[request.method]:
+        for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
             res = request.user.has_perm(_p)
             if res:
                 break
@@ -143,7 +145,33 @@ class ESCPOSWebModelViewSet(ModelViewSet):
             return queryset
         else:
             objs = get_objects_for_user(request.user,
-                                        CanViewESCPOSWeb.METHOD_PERMISSION_MAPPING[request.method],
+                                        CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                        any_perm=True)
+            return objs
+
+
+
+class ESCPOSWebOperatorModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
+    queryset = ESCPOSWeb.objects.all().order_by('-id')
+    serializer_class = ESCPOSWebOperatorSerializer
+    renderer_classes = (ESCPOSWebOperatorHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', 'patch', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super().get_queryset()
+        res = False
+        for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        if res:
+            return queryset
+        else:
+            objs = get_objects_for_user(request.user,
+                                        CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
                                         any_perm=True)
             return objs
 

@@ -12,7 +12,7 @@ class IsSuperUser(IsAdminUser):
         return bool(request.user and request.user.is_superuser)
 
 
-class CanOperateStaffProfile(BasePermission):
+class CanEditStaffProfile(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.view_staffprofile",
@@ -34,7 +34,7 @@ class CanOperateStaffProfile(BasePermission):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanOperateStaffProfile.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditStaffProfile.has_permission with {}: {}".format(request.method, res))
         return res
         
 
@@ -46,7 +46,7 @@ class CanOperateStaffProfile(BasePermission):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanOperateStaffProfile.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditStaffProfile.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
@@ -84,11 +84,10 @@ class CanViewSelfStaffProfile(BasePermission):
         lg.debug("CanViewSelfStaffProfile.has_object_permission with {}: {}".format(request.method, res))
         return res
 
-class CanViewESCPOSWeb(BasePermission):
+class CanEditESCPOSWebOperator(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.view_escposweb",
-            "taiwan_einvoice.operate_te_escposweb",
         ),
     }
 
@@ -110,7 +109,7 @@ class CanViewESCPOSWeb(BasePermission):
                                             any_perm=True)
                 if objs:
                     res = True
-        lg.debug("CanViewESCPOSWeb.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
         return res
         
 
