@@ -30,7 +30,7 @@ class CanOperateStaffProfile(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.staffprofile and request.user.staffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING[request.method]:
+            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
@@ -42,7 +42,7 @@ class CanOperateStaffProfile(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.staffprofile and request.user.staffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING[request.method]:
+            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
@@ -63,7 +63,7 @@ class CanViewSelfStaffProfile(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.staffprofile:
-            for app_codename in self.METHOD_PERMISSION_MAPPING[request.method]:
+            for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = app_codename.split('.')
                 if codename in get_perms(request.user, request.user.staffprofile):
                     res = True
@@ -76,7 +76,7 @@ class CanViewSelfStaffProfile(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.staffprofile:
-            for app_codename in self.METHOD_PERMISSION_MAPPING[request.method]:
+            for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = app_codename.split('.')
                 if codename in get_perms(request.user, request.user.staffprofile):
                     res = True
@@ -96,16 +96,20 @@ class CanViewESCPOSWeb(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        for _p in self.METHOD_PERMISSION_MAPPING[request.method]:
+        for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
             res = request.user.has_perm(_p)
             if res:
                 break
         if not res:
-            objs = get_objects_for_user(request.user,
-                                        self.METHOD_PERMISSION_MAPPING[request.method],
-                                        any_perm=True)
-            if objs:
-                res = True
+            method_permission_mapping = self.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if not method_permission_mapping:
+                pass
+            else:
+                objs = get_objects_for_user(request.user,
+                                            method_permission_mapping,
+                                            any_perm=True)
+                if objs:
+                    res = True
         lg.debug("CanViewESCPOSWeb.has_permission with {}: {}".format(request.method, res))
         return res
         
@@ -113,13 +117,13 @@ class CanViewESCPOSWeb(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for _p in self.METHOD_PERMISSION_MAPPING[request.method]:
+        for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
             res = request.user.has_perm(_p)
             if res:
                 break
         if not res:
             for p in get_perms(request.user, obj):
-                if p in self.METHOD_PERMISSION_MAPPING[request.method]:
+                if p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                     res = True
                     break
         lg.debug("CanViewSelfStaffProfile.has_object_permission with {}: {}".format(request.method, res))
