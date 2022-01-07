@@ -3,9 +3,6 @@
 from django.db import migrations
 
 NAMES = [
-    {"group_name": 'TaiwanEInvoiceWorkerGroup',
-        "permissions": [
-        ]},
     {"group_name": 'TaiwanEInvoicePrinterAdminGroup',
         "permissions": [
             "taiwan_einvoice.view_escposweb",
