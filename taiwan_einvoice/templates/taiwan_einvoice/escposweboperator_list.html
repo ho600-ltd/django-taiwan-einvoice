@@ -65,12 +65,12 @@
 
 {% block modals %}
 
-<div class="modal fade" id="remove_escposweboperator_modal" tabindex="-1" role="dialog"
-    aria-labelledby="remove_escposweboperator_modal_label" aria-hidden="true">
+<div class="modal fade" id="remove_operator_from_escposweb_modal" tabindex="-1" role="dialog"
+    aria-labelledby="remove_operator_from_escposweb_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="remove_escposweboperator_modal_label">{% trans "Remove Operator" %}</h4>
+                <h4 class="modal-title" id="remove_operator_from_escposweb_modal_label">{% trans "Remove Operator" %}</h4>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only">Close</span>
@@ -82,29 +82,124 @@
                 {% endblocktrans %}</h4>
             </div>
             <div class="modal-footer">
-                <button id="remove_operator_button_1" type="button" class="remove_escposweboperator btn btn-danger">{% trans "Remove" %}</button>
+                <button id="remove_operator_button_1" type="button" class="remove_operator_from_escposweb btn btn-danger">{% trans "Remove" %}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="show_escposweboperator_modal" tabindex="-1" role="dialog"
-    aria-labelledby="show_escposweboperator_modal_label" aria-hidden="true">
+
+<div class="modal fade" id="add_operators_to_escposweb_modal" tabindex="-1" role="dialog"
+    aria-labelledby="add_operators_to_escposweb_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="show_escposweboperator_modal_label">{% trans "Add Operators" %}</h4>
+                <h4 class="modal-title" id="add_operators_to_escposweb_modal_label">{% trans "Add Operators" %}</h4>
                 <button type="button" class="close" data-dismiss="modal">
                     <span aria-hidden="true">&times;</span>
                     <span class="sr-only">Close</span>
                 </button>
             </div>
             <div class="modal-body">
-                <h4>{% trans "ESC/POS Web" %}: <span field="name"></span>(<span field="slug"></span>)</h4>
+                <h4>{% blocktrans %}
+                    Add operators to ESC/POS Web: <span field="name"></span>(<span field="slug"></span>)
+                {% endblocktrans %}</h4>
+
+                <div class="form_container" id="id_search_options">
+                    <form method="GET" action="./" onsubmit="return false;">
+                        <input type='hidden' name='format' value='json' />
+
+                        <div class="row">
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                    <label for="name__icontains">{% trans "Nickname contains" %}</label>
+                                    <div class="input-group" id="nickname__icontains" data-target-input="nearest">
+                                        <input type="text" class="form-control" name="nickname__icontains" id="id_nickname__icontains" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                    <label for="user__username__icontains">{% trans "Username contains" %}</label>
+                                    <div class="input-group" id="user__username__icontains" data-target-input="nearest">
+                                        <input type="text" class="form-control" name="user__username__icontains" id="user__username__icontains" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-4">
+                                <div class="form-group">
+                                    <label for="is_active">{% trans "Is Active?" %}</label>
+                                    <div class="input-group" id="is_active" data-target-input="nearest">
+                                        <select name="is_active" class="form-control">
+                                            <option value=""></option>
+                                            <option value="true">{% trans "Actived" %}</option>
+                                            <option value="false">{% trans "Disabled" %}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="search_button_row">
+                            <button page="1" class="btn btn-primary add_operators_to_escposweb_modal" type="submit">{% trans "Search Staff" %}</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="total_count_row">
+                    {% blocktrans %}<span field="total_count"></span> records{% endblocktrans %}
+                </div>
+
+                <table class="modal_table" resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}">
+                    <thead>
+                        <tr>
+                            <th width="5%" field="no">{% trans "No." %}</th>
+                            <th width="5%" field="checkbox">{% trans "Check" %}</th>
+                            <th width="25%" field="user.username">{% trans "Username" %}</th>
+                            <th width="10%" field="nickname">{% trans "Nickname" %}</th>
+                            <th width="15%" field="is_active">{% trans "Is Active?" %}
+                                <i class="fa fa-info-circle" data-toggle="tooltip"
+                                    data-html="true" data-placement="left"
+                                    title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+                            </th>
+                            <th width="20%" field="in_printer_admin_group">{% trans "Printer Admin" %}
+                                <i class="fa fa-info-circle" data-toggle="tooltip"
+                                    data-html="true" data-placement="left"
+                                    title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+                            </th>
+                            <th width="20%" field="in_manager_group">{% trans "Permission Manager" %}
+                                <i class="fa fa-info-circle" data-toggle="tooltip"
+                                    data-html="true" data-placement="left"
+                                    title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+
+                {% comment %}
+                <div class="pagination_row">
+                    <nav>
+                        <ul class="pagination" style="margin: 5px 0 10px 0">
+                            <li class="active page-item">
+                                <a page="1" href="#" class="page-link add_operators_to_escposweb_modal">1</a>
+                            </li>
+                            <li class="page-item">
+                                <a page="2" href="#" class="page-link add_operators_to_escposweb_modal">2</a>
+                            </li>
+                            <li class="page-item">
+                                <a page="3" href="#" class="page-link add_operators_to_escposweb_modal">3</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endcomment %}
+
             </div>
             <div class="modal-footer">
-                <button id="add_operators_button_1" type="button" class="add_operators btn btn-secondary">{% trans "Add" %}</button>
+                <button id="add_operators_button_1" type="button" class="add_operators_to_escposweb btn btn-secondary">{% trans "Add" %}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>

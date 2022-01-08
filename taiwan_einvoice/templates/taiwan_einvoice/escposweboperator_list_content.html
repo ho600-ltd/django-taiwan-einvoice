@@ -26,7 +26,7 @@
                 {% if forloop.first %}
                     <td field="admins" rowspan="{{ data.results|length }}" style="vertical-align: middle;">
                         {% for admin in escposweb.admins %}
-                            <h4><span class="badge badge-pill badge-primary">
+                            <h4 title="{{ admin.user_dict.username }}"><span class="badge badge-pill badge-primary">
                                 {{ admin.nickname }}
                             </span></h4>
                         {% endfor %}
@@ -35,15 +35,17 @@
                 {% endif %}
                 <td field="operators" width="35%">
                     {% for operator in escposweb.operators %}
-                        <h4><span class="badge badge-pill badge-success" staffprofile_id="{{ operator.id }}">
+                        <h4 title="{{ operator.user_dict.username }}"><span class="badge badge-pill badge-success" staffprofile_id="{{ operator.id }}">
                             {{ operator.nickname }}
-                            <a href="#" class="remove_escposweboperator_modal">
+                            <a href="#" class="remove_operator_from_escposweb_modal">
                                 <i class="fas fa-user-times" style="color: red;"></i>
                             </a>
                         </span></h4>
                     {% endfor %}
                 </td>
-                <td width="20%"><button class="btn btn-success">{% trans "Add Operators" %}</button></td>
+                <td width="20%">
+                    <button page="1" class="add_operators_to_escposweb_modal btn btn-success">{% trans "Add Operators" %}</button>
+                </td>
             </tr>
         {% endfor %}
     </tbody>

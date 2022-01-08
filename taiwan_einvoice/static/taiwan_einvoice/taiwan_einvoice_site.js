@@ -214,7 +214,10 @@ $(function () {
 
         $("button.search").click(function () {
             var url_parts = window.location.href.split('?');
-            var $form = $('form:not(".language_form")');
+            var $form = $(this).parents('form');
+            if ($form.length <= 0) {
+                var $form = $('form:not(".language_form")');
+            }
             var params = new URLSearchParams($form.serialize());
             var second_offset = $self.get_second_offset_by_timezone_id_value();
             for (var k of params.keys()) {
