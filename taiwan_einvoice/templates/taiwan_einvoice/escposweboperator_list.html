@@ -12,6 +12,35 @@
 
 {% block body %}
 
+    <div class="form_container" id="id_search_options">
+        <form method="GET" action="./" onsubmit="return false;">
+            <input type='hidden' name='format' value='html' />
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="name__icontains">{% trans "Name contains" %}</label>
+                        <div class="input-group" id="name__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="name__icontains" id="id_name__icontains" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="slug__icontains">{% trans "Slug contains" %}</label>
+                        <div class="input-group" id="slug__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search_button_row">
+                <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+            </div>
+        </form>
+    </div>
+
     <div class="pagination_row">
         <nav>
             {% if paginator %}
@@ -35,4 +64,51 @@
 {% endblock %}
 
 {% block modals %}
+
+<div class="modal fade" id="remove_escposweboperator_modal" tabindex="-1" role="dialog"
+    aria-labelledby="remove_escposweboperator_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="remove_escposweboperator_modal_label">{% trans "Remove Operator" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>{% blocktrans %}
+                    Remove operator(<span field="operator"></span>) from ESC/POS Web: <span field="name"></span>(<span field="slug"></span>) ?
+                {% endblocktrans %}</h4>
+            </div>
+            <div class="modal-footer">
+                <button id="remove_operator_button_1" type="button" class="remove_escposweboperator btn btn-danger">{% trans "Remove" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="show_escposweboperator_modal" tabindex="-1" role="dialog"
+    aria-labelledby="show_escposweboperator_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_escposweboperator_modal_label">{% trans "Add Operators" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>{% trans "ESC/POS Web" %}: <span field="name"></span>(<span field="slug"></span>)</h4>
+            </div>
+            <div class="modal-footer">
+                <button id="add_operators_button_1" type="button" class="add_operators btn btn-secondary">{% trans "Add" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

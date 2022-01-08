@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-08 12:18+0800\n"
+"POT-Creation-Date: 2022-01-08 15:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -502,14 +502,35 @@ msgstr "按鈕"
 msgid "Set default"
 msgstr "設為預設值"
 
+msgid "Remove Operator"
+msgstr "移除操作員"
+
+msgid ""
+"\n"
+"                    Remove operator(<span field=\"operator\"></span>) from ESC/POS Web: <span field=\"name\"></span>(<span field=\"slug\"></span>) ?\n"
+"                "
+msgstr ""
+"\n"
+" 從發票機： <span field=\"name\"></span>(<span field=\"slug\"></span>)，移除操作員(<span field=\"operator\"></span>)?\n"
+"                "
+
+msgid "Remove"
+msgstr "移除"
+
+msgid "Add Operators"
+msgstr "增加操作員"
+
+msgid "ESC/POS Web"
+msgstr "發票機"
+
+msgid "Add"
+msgstr "加入"
+
 msgid "Admins"
 msgstr "管理員"
 
 msgid "Opertors"
 msgstr "操作員"
-
-msgid "Add Operators"
-msgstr "增加操作員"
 
 msgid "Identifier contains"
 msgstr "統編包含"
@@ -588,9 +609,6 @@ msgstr "帳號"
 msgid "Nickname"
 msgstr "暱稱"
 
-msgid "Is Active?"
-msgstr "是否啟用?"
-
 msgid "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)"
 msgstr "已啟用的工作人員才能進入「臺灣電子發票管理系統(本系統)」"
 
@@ -617,9 +635,6 @@ msgstr "發票機管理員"
 
 msgid "Permission Manager"
 msgstr "權限管理者"
-
-msgid "Actived"
-msgstr "啟用"
 
 msgctxt "in_printer_admin_group"
 msgid "Yes"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-05 16:12+0800\n"
+"POT-Creation-Date: 2022-01-08 14:48+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,6 +132,9 @@ msgstr "請先設定預設的發票機"
 
 msgid "Default ESC/POS Printer"
 msgstr "預設發票機"
+
+msgid "Removed"
+msgstr "已移除"
 
 msgid "File Error"
 msgstr "檔案錯誤"

@@ -1,12 +1,13 @@
-import json, datetime
+import json, datetime, logging
 from django.http import Http404
 from django.shortcuts import render
 from django.db.models import Q
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Permission, User, Group
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
+from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms, remove_perm, assign_perm
 
 from rest_framework import status
 from rest_framework.decorators import action
@@ -155,6 +156,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebOperatorSerializer
+    filter_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebOperatorHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', 'patch', )
 
@@ -174,6 +176,34 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
                                         CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
                                         any_perm=True)
             return objs
+    
+
+    def update(self, request, *args, **kwargs):
+        lg = logging.getLogger('info')
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
+        escposweb = self.get_object()
+        if 'remove' == data['type']:
+            try:
+                sp = StaffProfile.objects.get(id=data['staffprofile_id'])
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                ct = ContentType.objects.get(app_label='taiwan_einvoice', model='escposweb')
+                p = Permission.objects.get(content_type=ct, codename='operate_te_escposweb')
+                remove_perm(p, sp.user, escposweb)
+        elif 'add' == data['type']:
+            ct = ContentType.objects.get(app_label='taiwan_einvoice', model='escposweb')
+            p = Permission.objects.get(content_type=ct, codename='operate_te_escposweb')
+            for staffprofile_id in data['staffprofile_ids']:
+                try:
+                    sp = StaffProfile.objects.get(id=staffprofile_id)
+                except StaffProfile.DoesNotExist:
+                    continue
+                else:
+                    assign_perm(p, sp.user, escposweb)
+        serializer = ESCPOSWebOperatorSerializer(self.get_object(), context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 

@@ -89,6 +89,9 @@ class CanEditESCPOSWebOperator(BasePermission):
         "GET": (
             "taiwan_einvoice.view_escposweb",
         ),
+        "PATCH": (
+            "taiwan_einvoice.view_escposweb",
+        ),
     }
 
 

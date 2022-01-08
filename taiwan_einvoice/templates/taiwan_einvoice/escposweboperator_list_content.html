@@ -18,12 +18,13 @@
     </thead>
     <tbody>
         {% for escposweb in data.results %}
-            <tr escposweb_id="{{ escposweb.id }}">
+            <tr escposweb_id="{{ escposweb.id }}"
+                resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-detail' pk=escposweb.id %}">
                 <td>{{ forloop.counter }}.</td>
                 <td field="name">{{ escposweb.name }}</td>
-                <td>{{ escposweb.slug }}</td>
+                <td field="slug">{{ escposweb.slug }}</td>
                 {% if forloop.first %}
-                    <td rowspan="{{ data.results|length }}" style="vertical-align: middle;">
+                    <td field="admins" rowspan="{{ data.results|length }}" style="vertical-align: middle;">
                         {% for admin in escposweb.admins %}
                             <h4><span class="badge badge-pill badge-primary">
                                 {{ admin.nickname }}
@@ -32,11 +33,13 @@
                     </td>
                 {% else %}
                 {% endif %}
-                <td width="35%">
+                <td field="operators" width="35%">
                     {% for operator in escposweb.operators %}
-                        <h4><span class="badge badge-pill badge-success">
+                        <h4><span class="badge badge-pill badge-success" staffprofile_id="{{ operator.id }}">
                             {{ operator.nickname }}
-                            <i class="fas fa-user-times" style="color: red;"></i>
+                            <a href="#" class="remove_escposweboperator_modal">
+                                <i class="fas fa-user-times" style="color: red;"></i>
+                            </a>
                         </span></h4>
                     {% endfor %}
                 </td>
