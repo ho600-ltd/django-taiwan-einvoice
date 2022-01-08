@@ -11,6 +11,7 @@ from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_p
 
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -71,6 +72,12 @@ from taiwan_einvoice.filters import (
 )
 
 
+class TenTo1000PerPagePagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    page_size = 10
+    max_page_size = 1000
+
+
 def index(request):
     escpos_webs = ESCPOSWeb.objects.all().order_by('id')
     return render(request, 'taiwan_einvoice/index.html', {
@@ -91,6 +98,7 @@ def escpos_web_demo(request, escpos_web_id):
 
 class StaffProfileModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditStaffProfile, CanViewSelfStaffProfile), )
+    pagination_class = TenTo1000PerPagePagination
     queryset = StaffProfile.objects.all().order_by('-id')
     serializer_class = StaffProfileSerializer
     filter_class = StaffProfileFilter

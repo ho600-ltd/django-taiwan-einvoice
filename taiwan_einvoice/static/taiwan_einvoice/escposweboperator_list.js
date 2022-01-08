@@ -9,15 +9,24 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
         $modal.modal('hide');
         var staffprofile_resource_uri = $('table.modal_table', $modal).attr('resource_uri');
         if ($tr && $tr.length > 0) {
+            var existed_staffprofile_ids = [];
+            $('.badge', $tr).each(function(){
+                var staffprofile_id = $(this).attr('staffprofile_id');
+                if (staffprofile_id) {
+                    existed_staffprofile_ids.push(staffprofile_id);
+                }
+            });
             var escposweboperator_resource_uri = $tr.attr('resource_uri');
             $modal.data("resource_uri", escposweboperator_resource_uri);
             $modal.data("name", name);
             $modal.data("slug", slug);
+            $modal.data("existed_staffprofile_ids", existed_staffprofile_ids);
         }
         $('[field=name]', $modal).text($modal.data("name"));
         $('[field=slug]', $modal).text($modal.data("slug"));
         var data = {
-            page: page
+            page: page,
+            page_size: 1000
         };
         if ('submit' == $btn.attr('type')) {
             var $form = $('form', $modal);
@@ -47,9 +56,16 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
                 $('tbody tr', $table).remove();
                 for (var i=0; i<json['results'].length; i++) {
                     var result = json['results'][i];
+                    if (result['in_printer_admin_group']) {
+                        var checkbox = gettext("Admin");
+                    } else if (0 <= $modal.data("existed_staffprofile_ids").indexOf(String(result['id']))) {
+                        var checkbox = gettext("Added");
+                    } else {
+                        var checkbox = '<input type="checkbox" />';
+                    }
                     var kv = {
                         "no": i+1,
-                        "checkbox": result['in_printer_admin_group'] ? gettext("Admin") : '<input type="checkbox" />',
+                        "checkbox": checkbox,
                         "user.username": result['user_dict']['username'],
                         "nickname": result['nickname'],
                         "is_active": result['is_active'],
