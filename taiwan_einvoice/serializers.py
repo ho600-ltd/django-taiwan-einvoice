@@ -9,7 +9,15 @@ from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
 from rest_framework.serializers import CharField, IntegerField, BooleanField
-from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField, ChoiceField
+from rest_framework.serializers import (
+    PrimaryKeyRelatedField,
+    HyperlinkedIdentityField,
+    ModelSerializer,
+    Serializer,
+    ReadOnlyField,
+    ChoiceField,
+    RelatedField,
+)
 from rest_framework.serializers import ValidationError
 from rest_framework.exceptions import PermissionDenied
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
@@ -108,13 +116,15 @@ class ESCPOSWebSerializer(ModelSerializer):
 class ESCPOSWebOperatorSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-detail", lookup_field='pk')
+    admins = StaffProfileSerializer(read_only=True, many=True)
+    operators = StaffProfileSerializer(read_only=True, many=True)
 
 
 
     class Meta:
         model = ESCPOSWeb
         fields = (
-            'id', 'resource_uri', 'name', 'slug',
+            'id', 'resource_uri', 'name', 'slug', 'admins', 'operators',
         )
 
 

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from guardian.shortcuts import get_objects_for_user, get_perms
+from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
 from rest_framework import status
 from rest_framework.decorators import action

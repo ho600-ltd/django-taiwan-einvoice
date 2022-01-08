@@ -14,6 +14,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext
 from simple_history.models import HistoricalRecords
+from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
 from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
 
@@ -310,6 +311,30 @@ class ESCPOSWeb(models.Model):
             ("operate_te_escposweb", "Operate ESCPOSWeb"),
         )
 
+
+
+    @property
+    def admins(self):
+        try:
+            g = Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup')
+        except Group.DoesNotExist:
+            return StaffProfile.objects.none()
+        else:
+            return StaffProfile.objects.filter(user__in=g.user_set.all()).order_by('nickname')
+
+
+    @property
+    def operators(self):
+        try:
+            g = Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup')
+        except Group.DoesNotExist:
+            admin_users = []
+        else:
+            admin_users = g.user_set.all()
+        users = get_users_with_perms(self, only_with_perms_in=['operate_te_escposweb'])
+        return StaffProfile.objects.filter(user__is_superuser=False,
+                                           user__in=users
+                                          ).exclude(user__in=admin_users).order_by('nickname')
 
 
     @property

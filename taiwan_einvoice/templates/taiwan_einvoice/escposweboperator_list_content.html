@@ -22,9 +22,25 @@
                 <td>{{ forloop.counter }}.</td>
                 <td field="name">{{ escposweb.name }}</td>
                 <td>{{ escposweb.slug }}</td>
-                <td></td>
-                <td width="40%"></td>
-                <td width="10%"><button class="btn btn-primary">{% trans "Edit" %}</button></td>
+                {% if forloop.first %}
+                    <td rowspan="{{ data.results|length }}" style="vertical-align: middle;">
+                        {% for admin in escposweb.admins %}
+                            <h4><span class="badge badge-pill badge-primary">
+                                {{ admin.nickname }}
+                            </span></h4>
+                        {% endfor %}
+                    </td>
+                {% else %}
+                {% endif %}
+                <td width="35%">
+                    {% for operator in escposweb.operators %}
+                        <h4><span class="badge badge-pill badge-success">
+                            {{ operator.nickname }}
+                            <i class="fas fa-user-times" style="color: red;"></i>
+                        </span></h4>
+                    {% endfor %}
+                </td>
+                <td width="20%"><button class="btn btn-success">{% trans "Add Operators" %}</button></td>
             </tr>
         {% endfor %}
     </tbody>
