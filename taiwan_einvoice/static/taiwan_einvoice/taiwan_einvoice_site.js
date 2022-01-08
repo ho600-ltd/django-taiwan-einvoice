@@ -194,6 +194,7 @@ $(function () {
         }
         var select_kind_params = [
             'is_original_copy',
+            'is_active',
         ]
         for (var param of select_kind_params) {
             var select_kind_param = url.searchParams.get(param);

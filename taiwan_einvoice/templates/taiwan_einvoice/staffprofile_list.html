@@ -18,7 +18,7 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
                     <label for="name__icontains">{% trans "Nickname contains" %}</label>
                     <div class="input-group" id="nickname__icontains" data-target-input="nearest">
@@ -26,11 +26,23 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
                     <label for="user__username__icontains">{% trans "Username contains" %}</label>
                     <div class="input-group" id="user__username__icontains" data-target-input="nearest">
                         <input type="text" class="form-control" name="user__username__icontains" id="user__username__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="is_active">{% trans "Is Active?" %}</label>
+                    <div class="input-group" id="is_active" data-target-input="nearest">
+                        <select name="is_active" class="form-control">
+                            <option value=""></option>
+                            <option value="true">{% trans "Actived" %}</option>
+                            <option value="false">{% trans "Disabled" %}</option>
+                        </select>
                     </div>
                 </div>
             </div>
