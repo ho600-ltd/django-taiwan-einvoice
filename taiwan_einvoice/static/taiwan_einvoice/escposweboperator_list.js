@@ -6,7 +6,6 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
         var name = $('td[field=name]', $tr).text();
         var slug = $('td[field=slug]', $tr).text();
         var $modal = $('#add_operators_to_escposweb_modal');
-        $modal.modal('hide');
         var staffprofile_resource_uri = $('table.modal_table', $modal).attr('resource_uri');
         if ($tr && $tr.length > 0) {
             var existed_staffprofile_ids = [];
