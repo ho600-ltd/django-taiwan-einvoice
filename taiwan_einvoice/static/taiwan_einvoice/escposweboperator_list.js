@@ -8,6 +8,7 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
         var $modal = $('#add_operators_to_escposweb_modal');
         var staffprofile_resource_uri = $('table.modal_table', $modal).attr('resource_uri');
         if ($tr && $tr.length > 0) {
+            var escposweboperator_resource_uri = $tr.attr('resource_uri');
             var existed_staffprofile_ids = [];
             $('.badge', $tr).each(function(){
                 var staffprofile_id = $(this).attr('staffprofile_id');
@@ -15,7 +16,6 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
                     existed_staffprofile_ids.push(staffprofile_id);
                 }
             });
-            var escposweboperator_resource_uri = $tr.attr('resource_uri');
             $modal.data("resource_uri", escposweboperator_resource_uri);
             $modal.data("name", name);
             $modal.data("slug", slug);
@@ -25,7 +25,7 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
         $('[field=slug]', $modal).text($modal.data("slug"));
         var data = {
             page: page,
-            page_size: 1000
+            page_size: 50
         };
         if ('submit' == $btn.attr('type')) {
             var $form = $('form', $modal);
