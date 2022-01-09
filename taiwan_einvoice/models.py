@@ -309,6 +309,7 @@ class ESCPOSWeb(models.Model):
     class Meta:
         permissions = (
             ("operate_te_escposweb", "Operate ESCPOSWeb"),
+            ("edit_te_escposweboperator", "Edit the operators of ESCPOSWeb"),
         )
 
 
@@ -491,6 +492,9 @@ class TurnkeyWeb(models.Model):
     forbidden_above_amount = models.IntegerField(default=20000)
     history = HistoricalRecords()
     @property
+    def groups(self):
+        return []
+    @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0
         for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='07'):
@@ -540,6 +544,7 @@ class TurnkeyWeb(models.Model):
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
+            ("edit_te_turnkeywebgroup", "Edit the groups of TurnkeyWebnn"),
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
             ("view_te_einvoice", "View E-Invoice"),
             ("print_te_einvoice", "Print E-Invoice"),

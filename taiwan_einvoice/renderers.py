@@ -67,6 +67,12 @@ class TurnkeyWebHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
+class TurnkeyWebGroupHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('turnkeywebgroup_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('turnkeywebgroup_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
 class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('sellerinvoicetrackno_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('sellerinvoicetrackno_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)

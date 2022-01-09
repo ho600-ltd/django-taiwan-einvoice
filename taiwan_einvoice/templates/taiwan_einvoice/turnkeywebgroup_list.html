@@ -1,0 +1,69 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/turnkeywebgroup_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<h1>Turnkey Web Group</h1>
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="seller__legal_entity__identifier__icontains">{% trans "Identifier contains" %}</label>
+                    <div class="input-group" id="seller__legal_entity__identifier__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="seller__legal_entity__identifier__icontains" id="id_seller__legal_entity__identifier__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="any_words__icontains">{% trans "Any Words(Exclude Identifier) contains" context "taiwan_einvoice" %}</label>
+                    <div class="input-group" id="any_words__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="any_words__icontains" id="id_any_words__icontains" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+{% endblock %}

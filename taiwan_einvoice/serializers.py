@@ -45,6 +45,15 @@ class UserSerializer(ModelSerializer):
 
 
 
+class GroupSerializer(ModelSerializer):
+    class Meta:
+        model = Group
+        fields = (
+            'id', 'name',
+        )
+
+
+
 class StaffProfileSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail", lookup_field='pk')
@@ -185,6 +194,55 @@ class TurnkeyWebSerializer(ModelSerializer):
         model = TurnkeyWeb
         fields = (
             'id', 'resource_uri', 'seller_dict',
+            'count_now_use_07_sellerinvoicetrackno_blank_no',
+            'count_now_use_08_sellerinvoicetrackno_blank_no',
+            'on_working',
+            'name',
+            'hash_key',
+            'mask_hash_key',
+            'transport_id',
+            'party_id',
+            'routing_id',
+            'mask_qrcode_seed',
+            'mask_turnkey_seed',
+            'mask_download_seed',
+            'mask_epl_base_set',
+            'qrcode_seed',
+            'turnkey_seed',
+            'download_seed',
+            'epl_base_set',
+            'note',
+            'seller'
+        )
+        extra_kwargs = {
+            'hash_key': {'write_only': True},
+            'qrcode_seed': {'write_only': True},
+            'turnkey_seed': {'write_only': True},
+            'download_seed': {'write_only': True},
+            'epl_base_set': {'write_only': True},
+        }
+
+
+
+class TurnkeyWebGroupSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-detail", lookup_field='pk')
+    seller_dict = SellerSerializer(source='seller', read_only=True)
+    groups = GroupSerializer(read_only=True, many=True)
+    count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
+    count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
+    mask_hash_key = CharField(read_only=True)
+    mask_qrcode_seed = CharField(read_only=True)
+    mask_turnkey_seed = CharField(read_only=True)
+    mask_download_seed = CharField(read_only=True)
+    mask_epl_base_set = CharField(read_only=True)
+
+
+
+    class Meta:
+        model = TurnkeyWeb
+        fields = (
+            'id', 'resource_uri', 'seller_dict', 'groups',
             'count_now_use_07_sellerinvoicetrackno_blank_no',
             'count_now_use_08_sellerinvoicetrackno_blank_no',
             'on_working',

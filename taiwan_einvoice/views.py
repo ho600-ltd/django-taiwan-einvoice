@@ -23,6 +23,7 @@ from taiwan_einvoice.permissions import (
     CanEditStaffProfile,
     CanViewSelfStaffProfile,
     CanEditESCPOSWebOperator,
+    CanEditTurnkeyWebGroup,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -30,6 +31,7 @@ from taiwan_einvoice.renderers import (
     ESCPOSWebHtmlRenderer,
     ESCPOSWebOperatorHtmlRenderer,
     TurnkeyWebHtmlRenderer,
+    TurnkeyWebGroupHtmlRenderer,
     LegalEntityHtmlRenderer,
     SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
@@ -56,6 +58,7 @@ from taiwan_einvoice.serializers import (
     LegalEntitySerializerForSuperUser,
     SellerSerializer,
     TurnkeyWebSerializer,
+    TurnkeyWebGroupSerializer,
     SellerInvoiceTrackNoSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
@@ -66,6 +69,7 @@ from taiwan_einvoice.filters import (
     ESCPOSWebFilter,
     LegalEntityFilter,
     TurnkeyWebFilter,
+    TurnkeyWebGroupFilter,
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
@@ -246,6 +250,16 @@ class TurnkeyWebModelViewSet(ModelViewSet):
     filter_class = TurnkeyWebFilter
     renderer_classes = (TurnkeyWebHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
+
+
+
+class TurnkeyWebGroupModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditTurnkeyWebGroup), )
+    queryset = TurnkeyWeb.objects.all().order_by('-id')
+    serializer_class = TurnkeyWebGroupSerializer
+    filter_class = TurnkeyWebGroupFilter
+    renderer_classes = (TurnkeyWebGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', 'patch')
 
 
 

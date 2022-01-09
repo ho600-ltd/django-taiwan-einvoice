@@ -39,6 +39,7 @@ router.register('escposweboperator', views.ESCPOSWebOperatorModelViewSet, basena
 router.register('legalentity', views.LegalEntityModelViewSet, basename="legalentity")
 router.register('seller', views.SellerModelViewSet, basename="seller")
 router.register('turnkeyweb', views.TurnkeyWebModelViewSet, basename="turnkeyweb")
+router.register('turnkeywebgroup', views.TurnkeyWebGroupModelViewSet, basename="turnkeywebgroup")
 router.register('sellerinvoicetrackno', views.SellerInvoiceTrackNoModelViewSet, basename="sellerinvoicetrackno")
 router.register('einvoice', views.EInvoiceModelViewSet, basename="einvoice")
 router.register('einvoiceprintlog', views.EInvoicePrintLogModelViewSet, basename="einvoiceprintlog")
