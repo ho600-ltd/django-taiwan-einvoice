@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-08 18:17+0800\n"
+"POT-Creation-Date: 2022-01-09 12:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,6 +78,9 @@ msgstr "權限"
 
 msgid "Staff"
 msgstr "工作人員"
+
+msgid "Staff Group"
+msgstr "工作人員群組"
 
 msgid "ESC/POS Web Operator"
 msgstr "發票機操作員"

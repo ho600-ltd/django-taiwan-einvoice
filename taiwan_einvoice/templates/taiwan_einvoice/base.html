@@ -68,17 +68,20 @@
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
-                        {% if perms.taiwan_einvoice.view_staffprofile or perms.taiwan_einvoice.view_escposweb %}
+                        {% if perms.taiwan_einvoice.change_staffprofile or perms.taiwan_einvoice.edit_te_escposweboperator or perms.taiwan_einvoice.edit_te_turnkeywebgroup %}
                             <li class="dropdown nav-item nav_permission">
                                 <a data-toggle="dropdown"
                                     aria-expanded="false"
                                     class="dropdown-toggle nav-link"
                                     href="#">{% trans "Permissions" %}</a>
                                 <div role="menu" class="dropdown-menu">
-                                    {% if perms.taiwan_einvoice.view_staffprofile %}
+                                    {% if perms.taiwan_einvoice.change_staffprofile %}
                                         <a role="presentation" class="dropdown-item nav_staffprofile" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">{% trans "Staff" %}</a>
                                     {% endif %}
-                                    {% if perms.taiwan_einvoice.view_escposweb %}
+                                    {% if perms.taiwan_einvoice.edit_te_turnkeywebgroup %}
+                                        <a role="presentation" class="dropdown-item nav_turnkeywebgroup" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-list' %}?format=html">{% trans "Staff Group" %}</a>
+                                    {% endif %}
+                                    {% if perms.taiwan_einvoice.edit_te_escposweboperator %}
                                         <a role="presentation" class="dropdown-item nav_escposweboperator" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-list' %}?format=html">{% trans "ESC/POS Web Operator" %}</a>
                                     {% endif %}
                                 </div>
