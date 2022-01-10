@@ -52,7 +52,18 @@
                 <td field="is_active">{% if staffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
                 <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
                 <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
-                <td></td>
+                <td>
+                    {% with item_length=staffprofile.groups|length %}
+                        {% for turnkeyweb_name, groups in staffprofile.groups.items %}
+                            {% if 1 < item_length and groups %}{{ turnkeyweb_name }}:{% endif %}
+                            {% for group in groups %}
+                                <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                    {{ group.display_name }}
+                                </span></h5>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endwith %}
+                </td>
             </tr>
         {% endwith %}{% else %}{% for staffprofile in data.results %}
             <tr staffprofile_id="{{ staffprofile.id }}"
@@ -71,7 +82,18 @@
                 <td field="is_active">{% if staffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
                 <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
                 <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
-                <td></td>
+                <td>
+                    {% with item_length=staffprofile.groups|length %}
+                        {% for turnkeyweb_name, groups in staffprofile.groups.items %}
+                            {% if 1 < item_length and groups %}{{ turnkeyweb_name }}:{% endif %}
+                            {% for group in groups %}
+                                <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                    {{ group.display_name }}
+                                </span></h5>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endwith %}
+                </td>
             </tr>
         {% endfor %}{% endif %}
     </tbody>

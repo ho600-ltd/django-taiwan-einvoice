@@ -70,6 +70,19 @@ class StaffProfile(models.Model):
     @property
     def in_manager_group(self):
         return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
+    @property
+    def groups(self):
+        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        groups = {}
+        for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)).order_by('name'):
+            turnkeyweb_id = g.name.split(':')[1]
+            turnkeyweb = TurnkeyWeb.objects.get(id=turnkeyweb_id)
+            g.display_name = ''.join(g.name.split(':')[2:])
+            is_member = self.user.groups.filter(id=g.id).exists()
+            groups.setdefault(turnkeyweb.name, []).append({"id": g.id,
+                                                           "display_name": g.display_name,
+                                                           "is_member": is_member})
+        return groups
 
 
     def __str__(self):
@@ -479,7 +492,7 @@ class ForbiddenAboveAmountError(Exception):
 class TurnkeyWeb(models.Model):
     on_working = models.BooleanField(default=True)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32, unique=True)
     hash_key = models.CharField(max_length=40)
     transport_id = models.CharField(max_length=10)
     party_id = models.CharField(max_length=10)

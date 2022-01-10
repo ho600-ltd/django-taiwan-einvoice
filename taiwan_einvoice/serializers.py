@@ -51,6 +51,7 @@ class StaffProfileSerializer(ModelSerializer):
     user_dict = UserSerializer(source='user', read_only=True)
     in_printer_admin_group = BooleanField()
     in_manager_group = BooleanField()
+    groups = JSONField()
 
 
     class Meta:

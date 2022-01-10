@@ -127,7 +127,7 @@
                                 href="#">{{ user.last_name }}{{ user.first_name }}</a>
                             <div role="menu" class="dropdown-menu">
                                 <a role="presentation" class="dropdown-item nav_selfstaffprofile"
-                                    {% if reqeust.user.is_authenticated %}    
+                                    {% if user.is_authenticated %}    
                                         href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=request.user.staffprofile.id %}?format=html"
                                     {% else %}
                                         href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html"
