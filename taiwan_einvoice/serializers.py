@@ -18,7 +18,7 @@ from rest_framework.serializers import (
     ChoiceField,
     RelatedField,
 )
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ValidationError, SerializerMethodField
 from rest_framework.exceptions import PermissionDenied
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
@@ -41,15 +41,6 @@ class UserSerializer(ModelSerializer):
         model = User
         fields = (
             'id', 'last_name', 'first_name', 'email', 'username',
-        )
-
-
-
-class GroupSerializer(ModelSerializer):
-    class Meta:
-        model = Group
-        fields = (
-            'id', 'name',
         )
 
 
@@ -224,52 +215,51 @@ class TurnkeyWebSerializer(ModelSerializer):
 
 
 
+class StaffGroupSerializer(ModelSerializer):
+    display_name = SerializerMethodField()
+    staffs = SerializerMethodField()
+
+
+    class Meta:
+        model = Group
+        fields = (
+            'id', 'name', 'display_name', 'staffs',
+        )
+
+
+
+    def get_display_name(self, instance):
+        return ''.join(instance.name.split(':')[2:])
+
+
+    def get_staffs(self, instance):
+        request = self.context['request']
+        users = instance.user_set.all()
+        return StaffProfileSerializer(StaffProfile.objects.filter(user__in=users).order_by('nickname'),
+                                      many=True,
+                                      context={'request': request}).data
+
+
+
 class TurnkeyWebGroupSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
-        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-detail", lookup_field='pk')
-    seller_dict = SellerSerializer(source='seller', read_only=True)
-    groups = GroupSerializer(read_only=True, many=True)
-    count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
-    count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
-    mask_hash_key = CharField(read_only=True)
-    mask_qrcode_seed = CharField(read_only=True)
-    mask_turnkey_seed = CharField(read_only=True)
-    mask_download_seed = CharField(read_only=True)
-    mask_epl_base_set = CharField(read_only=True)
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail", lookup_field='pk')
+    groups = StaffGroupSerializer(read_only=True, many=True)
+    groups_count = SerializerMethodField()
 
 
 
     class Meta:
         model = TurnkeyWeb
         fields = (
-            'id', 'resource_uri', 'seller_dict', 'groups',
-            'count_now_use_07_sellerinvoicetrackno_blank_no',
-            'count_now_use_08_sellerinvoicetrackno_blank_no',
-            'on_working',
-            'name',
-            'hash_key',
-            'mask_hash_key',
-            'transport_id',
-            'party_id',
-            'routing_id',
-            'mask_qrcode_seed',
-            'mask_turnkey_seed',
-            'mask_download_seed',
-            'mask_epl_base_set',
-            'qrcode_seed',
-            'turnkey_seed',
-            'download_seed',
-            'epl_base_set',
-            'note',
-            'seller'
+            'id', 'resource_uri', 'name', 'groups', 'groups_count',
         )
         extra_kwargs = {
-            'hash_key': {'write_only': True},
-            'qrcode_seed': {'write_only': True},
-            'turnkey_seed': {'write_only': True},
-            'download_seed': {'write_only': True},
-            'epl_base_set': {'write_only': True},
         }
+    
+
+    def get_groups_count(self, instance):
+        return len(instance.groups)
 
 
 

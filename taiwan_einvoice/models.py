@@ -493,7 +493,8 @@ class TurnkeyWeb(models.Model):
     history = HistoricalRecords()
     @property
     def groups(self):
-        return []
+        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        return Group.objects.filter(name__startswith="ct{ct_id}:{id}:".format(ct_id=ct_id, id=self.id)).order_by('name')
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-10 10:45+0800\n"
+"POT-Creation-Date: 2022-01-10 15:28+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -76,11 +76,12 @@ msgstr "導引切換"
 msgid "Permissions"
 msgstr "權限"
 
-msgid "Staff"
-msgstr "工作人員"
-
+#, python-format
 msgid "Staff Group(%(name)s)"
 msgstr "工作人員群組(%(name)s)"
+
+msgid "Staff"
+msgstr "工作人員"
 
 msgid "ESC/POS Web Operator"
 msgstr "發票機操作員"
@@ -699,6 +700,22 @@ msgstr "特種稅額"
 
 msgid "On Working"
 msgstr "使用中"
+
+#, python-format
+msgid "%(name)s's Staff Group"
+msgstr "『%(name)s』的工作人員群組"
+
+msgid "%(groups_count)s records"
+msgstr "共 %(groups_count)s 筆"
+
+msgid "Create Staff Group"
+msgstr "新增工作人員群組"
+
+msgid "Staff Group Name"
+msgstr "工作人員群組名稱"
+
+msgid "Staffs"
+msgstr "工作人員"
 
 msgid "Staff exist"
 msgstr "工作人員已存在"

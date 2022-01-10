@@ -72,6 +72,17 @@ class TurnkeyWebGroupHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('turnkeywebgroup_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+    def get_content(self, renderer, data, accepted_media_type, renderer_context):
+        from taiwan_einvoice.models import TurnkeyWeb
+        request = renderer_context['request']
+        t = get_template(self.content_template)
+        if data.get('id', None):
+            object = TurnkeyWeb.objects.get(id=data['id'])
+        else:
+            object = None
+        html = t.render({"data": data, "object": object}, request)
+        return html
+
 
 class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('sellerinvoicetrackno_list', sub_dir='taiwan_einvoice', show_template_filename=True)

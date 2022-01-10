@@ -12,58 +12,77 @@
 
 {% block body %}
 
-<h1>Turnkey Web Group</h1>
-<div class="form_container" id="id_search_options">
-    <form method="GET" action="./" onsubmit="return false;">
-        <input type='hidden' name='format' value='html' />
+    <h1>{% blocktrans with name=data.name %}{{ name }}'s Staff Group{% endblocktrans %}</h1>
 
-        <div class="row">
-            <div class="col-sm-12 col-md-6">
-                <div class="form-group">
-                    <label for="seller__legal_entity__identifier__icontains">{% trans "Identifier contains" %}</label>
-                    <div class="input-group" id="seller__legal_entity__identifier__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="seller__legal_entity__identifier__icontains" id="id_seller__legal_entity__identifier__icontains" />
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12 col-md-6">
-                <div class="form-group">
-                    <label for="any_words__icontains">{% trans "Any Words(Exclude Identifier) contains" context "taiwan_einvoice" %}</label>
-                    <div class="input-group" id="any_words__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="any_words__icontains" id="id_any_words__icontains" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="search_button_row">
-            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
-        </div>
-    </form>
-</div>
-
-<div class="pagination_row">
-    <nav>
-        {% if paginator %}
-        {% get_pagination_html paginator %}
-        {% endif %}
-    </nav>
-</div>
-
-{% block content %}
-{% if content %}{{ content|safe }}{% endif %}
-{% endblock %}
-
-<div class="pagination_row">
-    <nav>
-        {% if paginator %}
-        {% get_pagination_html paginator %}
-        {% endif %}
-    </nav>
-</div>
-
+    {% block content %}
+        {% if content %}{{ content|safe }}{% endif %}
+    {% endblock %}
 
 {% endblock %}
 
 {% block modals %}
+<div class="modal fade" id="add_turnkeywebgroup_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}"
+    aria-labelledby="add_turnkeywebgroup_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_turnkeywebgroup_modal_label">
+                    {% trans "Create Staff Group" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="inputDisplayName" class="col-sm-2 col-form-label">{% trans "Name" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputDisplayName" name="display_name" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="add_turnkeywebgroup_button" type="button" class="add_turnkeywebgroup btn btn-secondary">{% trans "Create" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="update_turnkeywebgroup_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}"
+    aria-labelledby="update_turnkeywebgroup_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="update_turnkeywebgroup_modal_label">
+                    {% trans "Update Staff Group" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="inputDisplayName" class="col-sm-2 col-form-label">{% trans "Name" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputDisplayName" name="display_name" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <i class="lock_or_unlock_delete fa fa-lock fa-lg btn"></i>
+                <button type="button" class="delete_modal btn btn-danger mr-auto" disabled="disabled">
+                    <i class="fa fa-trash-alt fa-lg"></i> {% trans "Delete" %}
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="update_turnkeywebgroup_button" type="button" class="update_turnkeywebgroup btn btn-secondary">{% trans "Update" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -139,6 +139,23 @@ $(function () {
     };
 
 
+    TAIWAN_EINVOICE_SITE.prototype.lock_or_unlock_delete = function ($self) {
+        return function () {
+            var $i = $(this);
+            var $button = $('button.delete_modal', $i.parent());
+            if($i.hasClass('fa-lock')) {
+                $i.removeClass('fa-lock');
+                $i.addClass('fa-unlock');
+                $button.removeAttr('disabled');
+            } else {
+                $i.removeClass('fa-unlock');
+                $i.addClass('fa-lock');
+                $button.attr('disabled', 'disabled');
+            }
+        }
+    };
+
+
     TAIWAN_EINVOICE_SITE.prototype.after_document_ready = function () {
         var $self = this;
         $('.datetime').each($self.convert_class_datetime($self));
@@ -204,6 +221,7 @@ $(function () {
             }
         }
 
+        $('.lock_or_unlock_delete').click($self.lock_or_unlock_delete($self));
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){
             $(this).val('');

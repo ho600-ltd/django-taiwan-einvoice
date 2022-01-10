@@ -52,6 +52,7 @@ from taiwan_einvoice.models import (
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
+    StaffGroupSerializer,
     ESCPOSWebSerializer,
     ESCPOSWebOperatorSerializer,
     LegalEntitySerializerForUser,
@@ -74,6 +75,12 @@ from taiwan_einvoice.filters import (
     EInvoiceFilter,
     EInvoicePrintLogFilter,
 )
+
+
+class Default30PerPagePagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    page_size = 30
+    max_page_size = 30
 
 
 class TenTo1000PerPagePagination(PageNumberPagination):
@@ -255,11 +262,45 @@ class TurnkeyWebModelViewSet(ModelViewSet):
 
 class TurnkeyWebGroupModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditTurnkeyWebGroup), )
+    pagination_class = Default30PerPagePagination
     queryset = TurnkeyWeb.objects.all().order_by('-id')
     serializer_class = TurnkeyWebGroupSerializer
     filter_class = TurnkeyWebGroupFilter
     renderer_classes = (TurnkeyWebGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', 'patch')
+
+
+    def update(self, request, *args, **kwargs):
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
+        turnkeyweb = self.get_object()
+        if 'delete_group' == data['type']:
+            try:
+                g = Group.objects.get(id=data['group_id'])
+            except Group.DoesNotExist:
+                pass
+            else:
+                g.delete()
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        elif 'add_group' == data['type']:
+            if len(turnkeyweb.groups) >= self.pagination_class.page_size:
+                er = {
+                    "error_title": _("The count of Existed Groups exceeds the limit"),
+                    "error_message": _("The count of Existed Groups exceeds the limit({})").format(self.pagination_class.page_size),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            ct_id = ContentType.objects.get_for_model(turnkeyweb).id
+            group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyweb.id, name=data['display_name'])
+            g, created = Group.objects.get_or_create(name=group_name)
+            if created:
+                serializer = StaffGroupSerializer(g, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                er = {
+                    "error_title": _("Group name exists"),
+                    "error_message": _("Group name exists"),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
 
 
 
