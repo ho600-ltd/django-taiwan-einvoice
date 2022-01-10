@@ -307,10 +307,22 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
             except Group.DoesNotExist:
                 pass
             else:
-                ct_id = ContentType.objects.get_for_model(turnkeyweb).id
-                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyweb.id, name=data['display_name'])
+                ct = ContentType.objects.get_for_model(turnkeyweb)
+                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct.id, id=turnkeyweb.id, name=data['display_name'])
                 g.name = group_name
                 g.save()
+                for k, v in data['permissions'].items():
+                    try:
+                        p = Permission.objects.get(content_type=ct, codename=k)
+                    except Permission.DoesNotExist:
+                        p = Permission.objects.get(codename=k)
+                        target_obj = None
+                    else:
+                        target_obj = turnkeyweb
+                    if v:
+                        assign_perm(p, g, obj=target_obj)
+                    else:
+                        remove_perm(p, g, obj=target_obj)
                 return Response({}, status=status.HTTP_200_OK)
 
 

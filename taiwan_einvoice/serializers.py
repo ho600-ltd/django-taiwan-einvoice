@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from rest_framework.serializers import CharField, IntegerField, BooleanField
+from rest_framework.serializers import CharField, IntegerField, BooleanField, JSONField
 from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     HyperlinkedIdentityField,
@@ -246,13 +246,14 @@ class TurnkeyWebGroupSerializer(ModelSerializer):
         view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail", lookup_field='pk')
     groups = StaffGroupSerializer(read_only=True, many=True)
     groups_count = SerializerMethodField()
+    groups_permissions = JSONField()
 
 
 
     class Meta:
         model = TurnkeyWeb
         fields = (
-            'id', 'resource_uri', 'name', 'groups', 'groups_count',
+            'id', 'resource_uri', 'name', 'groups', 'groups_count', 'groups_permissions',
         )
         extra_kwargs = {
         }

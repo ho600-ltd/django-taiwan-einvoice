@@ -69,6 +69,15 @@ function update_turnkeywebgroup_modal (taiwan_einvoice_site) {
         var $tr = $btn.parents('tr');
         $('[name=display_name]', $modal).val(name);
         $modal.data('group_id', $tr.attr('group_id'));
+        $modal.data('permissions', $tr.attr('permissions'));
+        $('input[type=checkbox]', $modal).each(function(){
+            var $i = $(this);
+            if (0 <= $modal.data('permissions').indexOf($i.attr('name'))) {
+                $i.prop('checked', true);
+            } else {
+                $i.prop('checked', false);
+            }
+        });
         $('.modal-title', $modal).text(name);
         $modal.modal('show');
         var $lock_or_unlock_delete = $('.lock_or_unlock_delete', $modal);
@@ -85,10 +94,15 @@ function update_turnkeywebgroup(taiwan_einvoice_site) {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var group_id = $modal.data('group_id');
+        var permissions = {};
+        $('input[type=checkbox]', $modal).each(function(){
+            var $i = $(this);
+            permissions[$i.attr('name')] = $i.prop('checked');
+        });
         var data = {
             group_id: group_id,
             display_name: $('input[name=display_name]', $modal).val(),
-            permissions: [],
+            permissions: permissions,
             type: "update_group"
         }
         $.ajax({
@@ -107,6 +121,13 @@ function update_turnkeywebgroup(taiwan_einvoice_site) {
             success: function (json) {
                 $modal.modal('hide');
                 $('tr[group_id="'+group_id+'"] td[field=name] button').text(data['display_name']);
+                var p = '';
+                for (var k in permissions) {
+                    if (permissions[k]) {
+                        p += k + ',';
+                    }
+                }
+                $('tr[group_id="'+group_id+'"]').attr('permissions', p);
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$SUCCESS_MODAL,
                     gettext("Success"),

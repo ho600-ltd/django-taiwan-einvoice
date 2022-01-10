@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-10 20:14+0800\n"
+"POT-Creation-Date: 2022-01-10 20:47+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -655,6 +655,9 @@ msgstr "工作人員資料"
 msgid "Update"
 msgstr "更新"
 
+msgid "Staff Group"
+msgstr "工作人員群組"
+
 msgctxt "in_printer_admin_group"
 msgid "Yes"
 msgstr "是"
@@ -711,8 +714,24 @@ msgstr "新增工作人員群組"
 msgid "Update Staff Group"
 msgstr "更新工作人員群組"
 
+#, python-format
+msgid "Set-up permissions under Turnkey Web(%(name)s)"
+msgstr "賦予『Turnkey 伺服器(%(name)s)』的權限"
+
+msgid "View"
+msgstr "瀏覽"
+
+msgid "Edit"
+msgstr "編輯"
+
 msgid "Delete"
 msgstr "刪除"
+
+msgid "Seller Invoice Track No"
+msgstr "字軌號碼"
+
+msgid "Imoprt track-no or delete unuse track-no"
+msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
 
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"

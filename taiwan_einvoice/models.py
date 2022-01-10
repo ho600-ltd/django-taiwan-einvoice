@@ -496,6 +496,14 @@ class TurnkeyWeb(models.Model):
         ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
         return Group.objects.filter(name__startswith="ct{ct_id}:{id}:".format(ct_id=ct_id, id=self.id)).order_by('name')
     @property
+    def groups_permissions(self):
+        permissions = {}
+        for g in self.groups:
+            permissions[g.id] = get_perms(g, self)
+            for p in g.permissions.all():
+                permissions[g.id].append(p.codename)
+        return permissions
+    @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0
         for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='07'):
@@ -546,10 +554,17 @@ class TurnkeyWeb(models.Model):
         unique_together = (('seller', 'name'), )
         permissions = (
             ("edit_te_turnkeywebgroup", "Edit the groups of TurnkeyWebnn"),
+
+            ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No"),
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
+            ("delete_te_sellerinvoicetrackno", "Delete Seller Invoice Track No"),
+
             ("view_te_einvoice", "View E-Invoice"),
-            ("print_te_einvoice", "Print E-Invoice"),
-            ("cancel_te_einvoice", "Cancel E-Invoice"),
+
+            ("view_te_canceleinvoice", "View Cancel E-Invoice"),
+            ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
+
+            ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
         )
     
 
