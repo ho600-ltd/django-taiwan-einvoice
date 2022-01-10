@@ -28,9 +28,7 @@
             <tr group_id="{{ group.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
                 <td field="name">
-                    <button class="btn btn-primary update_turnkeywebgroup_modal">
-                        {{ group.display_name }}
-                    </button>
+                    <button class="btn btn-primary update_turnkeywebgroup_modal">{{ group.display_name }}</button>
                 </td>
                 <td field="staffs">
                     {% for staffprofile in group.staffs %}

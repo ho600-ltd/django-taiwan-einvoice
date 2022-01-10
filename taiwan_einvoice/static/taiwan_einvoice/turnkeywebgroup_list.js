@@ -1,6 +1,7 @@
 function add_turnkeywebgroup_modal (taiwan_einvoice_site) {
     return function() {
         var $modal = $('#add_turnkeywebgroup_modal');
+        $('[name=display_name]', $modal).val('');
         $modal.modal('show');
     };
 };
@@ -66,6 +67,7 @@ function update_turnkeywebgroup_modal (taiwan_einvoice_site) {
         var $btn = $(this);
         var name = $btn.text();
         var $tr = $btn.parents('tr');
+        $('[name=display_name]', $modal).val(name);
         $modal.data('group_id', $tr.attr('group_id'));
         $('.modal-title', $modal).text(name);
         $modal.modal('show');
@@ -73,6 +75,45 @@ function update_turnkeywebgroup_modal (taiwan_einvoice_site) {
         if($lock_or_unlock_delete.hasClass('fa-unlock')) {
             $lock_or_unlock_delete.click();
         }
+    };
+};
+
+
+function update_turnkeywebgroup(taiwan_einvoice_site) {
+    return function() {
+        var resource_uri = $('#turnkeywebgroup').attr("resource_uri");
+        var $btn = $(this);
+        var $modal = $btn.parents('.modal');
+        var group_id = $modal.data('group_id');
+        var data = {
+            group_id: group_id,
+            display_name: $('input[name=display_name]', $modal).val(),
+            permissions: [],
+            type: "update_group"
+        }
+        $.ajax({
+            url: resource_uri,
+            type: "PATCH",
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json',
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
+            },
+            success: function (json) {
+                $modal.modal('hide');
+                $('tr[group_id="'+group_id+'"] td[field=name] button').text(data['display_name']);
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$SUCCESS_MODAL,
+                    gettext("Success"),
+                    gettext("Updated")
+                );
+            }
+        });
     };
 };
 
@@ -154,6 +195,7 @@ $(function () {
     $('.add_turnkeywebgroup_modal').click(add_turnkeywebgroup_modal(taiwan_einvoice_site));
     $('.add_turnkeywebgroup').click(add_turnkeywebgroup(taiwan_einvoice_site));
     $('.update_turnkeywebgroup_modal').click(update_turnkeywebgroup_modal(taiwan_einvoice_site));
+    $('.update_turnkeywebgroup').click(update_turnkeywebgroup(taiwan_einvoice_site));
     $('.delete_turnkeywebgroup_modal').click(delete_turnkeywebgroup_modal(taiwan_einvoice_site));
     $('.delete_turnkeywebgroup').click(delete_turnkeywebgroup(taiwan_einvoice_site));
 });
