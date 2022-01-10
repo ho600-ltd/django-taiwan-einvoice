@@ -1,7 +1,9 @@
 {% load static %}
 {% load i18n %}
 {% load compress %}
+{% load ho600_tags %}
 {% get_current_language as LANGUAGE_CODE %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.edit_te_turnkeywebgroup" as "turnkeywebs_can_be_edited" %}
 <!DOCTYPE html>
 
 <html>
@@ -75,14 +77,23 @@
                                     class="dropdown-toggle nav-link"
                                     href="#">{% trans "Permissions" %}</a>
                                 <div role="menu" class="dropdown-menu">
+                                    {% for escposweb in turnkeywebs_can_be_edited %}
+                                        <a role="presentation" class="dropdown-item nav_turnkeywebgroup"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=escposweb.id %}?format=html">
+                                            {% blocktrans with name=escposweb.name %}Staff Group({{ name }}){% endblocktrans %}
+                                        </a>
+                                    {% endfor %}
                                     {% if perms.taiwan_einvoice.change_staffprofile %}
-                                        <a role="presentation" class="dropdown-item nav_staffprofile" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">{% trans "Staff" %}</a>
-                                    {% endif %}
-                                    {% if perms.taiwan_einvoice.edit_te_turnkeywebgroup %}
-                                        <a role="presentation" class="dropdown-item nav_turnkeywebgroup" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-list' %}?format=html">{% trans "Staff Group" %}</a>
+                                        <a role="presentation" class="dropdown-item nav_staffprofile"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">
+                                            {% trans "Staff" %}
+                                        </a>
                                     {% endif %}
                                     {% if perms.taiwan_einvoice.edit_te_escposweboperator %}
-                                        <a role="presentation" class="dropdown-item nav_escposweboperator" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-list' %}?format=html">{% trans "ESC/POS Web Operator" %}</a>
+                                        <a role="presentation" class="dropdown-item nav_escposweboperator"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-list' %}?format=html">
+                                            {% trans "ESC/POS Web Operator" %}
+                                        </a>
                                     {% endif %}
                                 </div>
                             </li>
@@ -144,7 +155,7 @@
             </div>
         </nav>
     </div>
-    <div class="container" style="margin-top:72px;">
+    <div class="container" style="margin-top:112px;">
         {% block body %}{% endblock %}
     </div>
 
