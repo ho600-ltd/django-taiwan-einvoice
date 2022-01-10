@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-09 00:45+0800\n"
+"POT-Creation-Date: 2022-01-10 19:57+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -246,3 +246,21 @@ msgstr "<p>您的網路似乎有問題，請稍候再試。</p>"
 
 msgid "Error Code"
 msgstr "錯誤碼"
+
+msgid "Name Error"
+msgstr "名稱錯誤"
+
+msgid "Please type words in name"
+msgstr "請輸入名稱"
+
+msgid "NEW RECORD"
+msgstr "新紀錄"
+
+#, javascript-format
+msgid "Are you sure to delete \"%s\"?"
+msgid_plural "Are you sure to delete \"%s\"?"
+msgstr[0] ""
+"您確定要刪除 \"%s\" ?"
+
+msgid "Deleted"
+msgstr "已刪除"

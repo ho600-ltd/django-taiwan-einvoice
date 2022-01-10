@@ -5,7 +5,7 @@
 {% endif %}
 
 <div class="total_count_row">
-    {% blocktrans with groups_count=data.groups_count %}{{ groups_count }} records{% endblocktrans %}
+    {% blocktrans with groups_count=data.groups_count %}<span class="count">{{ groups_count }}</span> records{% endblocktrans %}
 
     {% if object and 'edit_te_turnkeywebgroup' in permissions %}
         <button id="add_turnkeywebgroup_button"
@@ -26,7 +26,7 @@
     <tbody>
         {% for group in data.groups %}
             <tr group_id="{{ group.id }}">
-                <td>{{ forloop.counter }}.</td>
+                <td field="no">{{ forloop.counter }}.</td>
                 <td field="name">
                     <button class="btn btn-primary update_turnkeywebgroup_modal">
                         {{ group.display_name }}

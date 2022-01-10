@@ -12,7 +12,9 @@
 
 {% block body %}
 
-    <h1>{% blocktrans with name=data.name %}{{ name }}'s Staff Group{% endblocktrans %}</h1>
+    <h1 id="turnkeywebgroup"
+        resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}">
+        {% blocktrans with name=data.name %}{{ name }}'s Staff Group{% endblocktrans %}</h1>
 
     {% block content %}
         {% if content %}{{ content|safe }}{% endif %}
@@ -53,7 +55,6 @@
 
 
 <div class="modal fade" id="update_turnkeywebgroup_modal" tabindex="-1" role="dialog"
-    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}"
     aria-labelledby="update_turnkeywebgroup_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-xs">
         <div class="modal-content">
@@ -76,11 +77,37 @@
             </div>
             <div class="modal-footer">
                 <i class="lock_or_unlock_delete fa fa-lock fa-lg btn"></i>
-                <button type="button" class="delete_modal btn btn-danger mr-auto" disabled="disabled">
+                <button type="button" class="delete_turnkeywebgroup_modal delete_modal btn btn-danger mr-auto" disabled="disabled">
                     <i class="fa fa-trash-alt fa-lg"></i> {% trans "Delete" %}
                 </button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
                 <button id="update_turnkeywebgroup_button" type="button" class="update_turnkeywebgroup btn btn-secondary">{% trans "Update" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="delete_turnkeywebgroup_modal" tabindex="-1" role="dialog"
+    aria-labelledby="delete_turnkeywebgroup_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="update_turnkeywebgroup_modal_label">
+                    {% trans "Delete Staff Group" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="message">
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="delete_turnkeywebgroup_button" type="button" class="delete_turnkeywebgroup btn btn-danger">{% trans "Delete" %}</button>
             </div>
         </div>
     </div>

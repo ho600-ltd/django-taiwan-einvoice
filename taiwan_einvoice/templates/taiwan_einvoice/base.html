@@ -77,10 +77,10 @@
                                     class="dropdown-toggle nav-link"
                                     href="#">{% trans "Permissions" %}</a>
                                 <div role="menu" class="dropdown-menu">
-                                    {% for escposweb in turnkeywebs_can_be_edited %}
+                                    {% for turnkeyweb in turnkeywebs_can_be_edited %}
                                         <a role="presentation" class="dropdown-item nav_turnkeywebgroup"
-                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=escposweb.id %}?format=html">
-                                            {% blocktrans with name=escposweb.name %}Staff Group({{ name }}){% endblocktrans %}
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=turnkeyweb.id %}?format=html">
+                                            {% blocktrans with name=turnkeyweb.name %}Staff Group({{ name }}){% endblocktrans %}
                                         </a>
                                     {% endfor %}
                                     {% if perms.taiwan_einvoice.change_staffprofile %}

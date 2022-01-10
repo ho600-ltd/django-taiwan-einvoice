@@ -301,6 +301,17 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
                     "error_message": _("Group name exists"),
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif 'update_group' == data['type']:
+            try:
+                g = Group.objects.get(id=data['group_id'])
+            except Group.DoesNotExist:
+                pass
+            else:
+                ct_id = ContentType.objects.get_for_model(turnkeyweb).id
+                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyweb.id, name=data['display_name'])
+                g.name = group_name
+                g.save()
+                return Response({}, status=status.HTTP_200_OK)
 
 
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-10 15:28+0800\n"
+"POT-Creation-Date: 2022-01-10 19:52+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -705,11 +705,21 @@ msgstr "使用中"
 msgid "%(name)s's Staff Group"
 msgstr "『%(name)s』的工作人員群組"
 
-msgid "%(groups_count)s records"
-msgstr "共 %(groups_count)s 筆"
-
 msgid "Create Staff Group"
 msgstr "新增工作人員群組"
+
+msgid "Update Staff Group"
+msgstr "更新工作人員群組"
+
+msgid "Delete"
+msgstr "刪除"
+
+msgid "Delete Staff Group"
+msgstr "刪除工作人員群組"
+
+#, python-format
+msgid "<span class=\"count\">%(groups_count)s</span> records"
+msgstr "共 <span field=\"count\">%(groups_count)s</span> 筆"
 
 msgid "Staff Group Name"
 msgstr "工作人員群組名稱"
@@ -725,6 +735,15 @@ msgstr "{} 帳號不存在"
 
 msgid "Please check the username, this field is case-sensitive"
 msgstr "請檢查帳號，此欄位有大小寫之分"
+
+msgid "The count of Existed Groups exceeds the limit"
+msgstr "已存在的群組數量已超過限度"
+
+msgid "The count of Existed Groups exceeds the limit({})"
+msgstr "已存在的群組數量已超過限度({})"
+
+msgid "Group name exists"
+msgstr "工作人員群組名稱已存在"
 
 msgid "TurnkeyWeb(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
@@ -787,9 +806,3 @@ msgstr "電子發票(id: {})不存在!"
 
 msgid "E-Invoice({}) was already canceled!"
 msgstr "電子發票({})已被作廢!"
-
-#~ msgid "ESC/POS Web"
-#~ msgstr "發票機"
-
-#~ msgid "Edit"
-#~ msgstr "編輯"
