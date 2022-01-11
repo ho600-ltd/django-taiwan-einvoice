@@ -83,6 +83,16 @@ class StaffProfile(models.Model):
                                                            "display_name": g.display_name,
                                                            "is_member": is_member})
         return groups
+    @property
+    def count_within_groups(self):
+        count_within_groups = {}
+        for k, v in self.groups.items():
+            count_within_groups[k] = 0
+            for group in v:
+                if group['is_member']:
+                    if k in count_within_groups:
+                        count_within_groups[k] += 1
+        return count_within_groups
 
 
     def __str__(self):
