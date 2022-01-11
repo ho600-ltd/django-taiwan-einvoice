@@ -1,0 +1,220 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/turnkeywebgroup_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+    <h1 id="turnkeywebgroup"
+        resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}">
+        {% blocktrans with name=data.name %}{{ name }}'s Staff Group{% endblocktrans %}</h1>
+
+    {% block content %}
+        {% if content %}{{ content|safe }}{% endif %}
+    {% endblock %}
+
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="add_turnkeywebgroup_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}"
+    aria-labelledby="add_turnkeywebgroup_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_turnkeywebgroup_modal_label">
+                    {% trans "Create Staff Group" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="inputDisplayName" class="col-sm-2 col-form-label">{% trans "Name" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputDisplayName" name="display_name" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="add_turnkeywebgroup_button" type="button" class="add_turnkeywebgroup btn btn-secondary">{% trans "Create" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="update_turnkeywebgroup_modal" tabindex="-1" role="dialog"
+    aria-labelledby="update_turnkeywebgroup_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="update_turnkeywebgroup_modal_label">
+                    {% trans "Update Staff Group" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="inputDisplayName" class="col-sm-2 col-form-label">{% trans "Name" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputDisplayName" name="display_name" />
+                    </div>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">{% blocktrans with name=data.name %}Set-up permissions under Turnkey Web({{ name }}){% endblocktrans %}</th>
+                            <th rowspan="2" class="text-center">{% trans "View" %}</th>
+                            <th></th>
+                            <th class="text-center">{% trans "Edit" %}</th>
+                            <th></th>
+                        </tr>
+                        <tr>
+                            <th class="text-center">{% trans "Create" %}</th>
+                            <th class="text-center">{% trans "Update" %}</th>
+                            <th class="text-center">{% trans "Delete" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>{% trans "Seller Invoice Track No" %}:
+                                <p class="help-block">{% trans "Imoprt track-no or delete unuse track-no" %}</p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_te_sellerinvoicetrackno"
+                                    name="view_te_sellerinvoicetrackno">
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_add_te_sellerinvoicetrackno"
+                                    name="add_te_sellerinvoicetrackno">
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_delete_te_sellerinvoicetrackno"
+                                    name="delete_te_sellerinvoicetrackno">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "E-Invoice" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_te_einvoice"
+                                    name="view_te_einvoice">
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Cancel E-Invoice" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_te_canceleinvoice"
+                                    name="view_te_canceleinvoice">
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_add_te_canceleinvoice"
+                                    name="add_te_canceleinvoice">
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Print Log" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_te_einvoiceprintlog"
+                                    name="view_te_einvoiceprintlog">
+                            </td>
+                            <td>
+                                &nbsp;
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Legal Entity" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_legalentity"
+                                    name="view_legalentity">
+                            </td>
+                            <td>
+                                &nbsp;
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Turnkey Web" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_turnkeyweb"
+                                    name="view_turnkeyweb">
+                            </td>
+                            <td>
+                                &nbsp;
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <i class="lock_or_unlock_delete fa fa-lock fa-lg btn"></i>
+                <button type="button" class="delete_turnkeywebgroup_modal delete_modal btn btn-danger mr-auto" disabled="disabled">
+                    <i class="fa fa-trash-alt fa-lg"></i> {% trans "Delete" %}
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="update_turnkeywebgroup_button" type="button" class="update_turnkeywebgroup btn btn-secondary">{% trans "Update" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="delete_turnkeywebgroup_modal" tabindex="-1" role="dialog"
+    aria-labelledby="delete_turnkeywebgroup_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="update_turnkeywebgroup_modal_label">
+                    {% trans "Delete Staff Group" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="message">
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="delete_turnkeywebgroup_button" type="button" class="delete_turnkeywebgroup btn btn-danger">{% trans "Delete" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,7 +1,9 @@
 {% load static %}
 {% load i18n %}
 {% load compress %}
+{% load ho600_tags %}
 {% get_current_language as LANGUAGE_CODE %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.edit_te_turnkeywebgroup" as "turnkeywebs_can_be_edited" %}
 <!DOCTYPE html>
 
 <html>
@@ -68,9 +70,34 @@
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
-                        <li class="nav-item nav_permission" role="presentation">
-                            <a class="nav-link" href="#">{% trans "Permissions" %}</a>
-                        </li>
+                        {% if perms.taiwan_einvoice.change_staffprofile or perms.taiwan_einvoice.edit_te_escposweboperator or perms.taiwan_einvoice.edit_te_turnkeywebgroup %}
+                            <li class="dropdown nav-item nav_permission">
+                                <a data-toggle="dropdown"
+                                    aria-expanded="false"
+                                    class="dropdown-toggle nav-link"
+                                    href="#">{% trans "Permissions" %}</a>
+                                <div role="menu" class="dropdown-menu">
+                                    {% for turnkeyweb in turnkeywebs_can_be_edited %}
+                                        <a role="presentation" class="dropdown-item nav_turnkeywebgroup"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=turnkeyweb.id %}?format=html">
+                                            {% blocktrans with name=turnkeyweb.name %}Staff Group({{ name }}){% endblocktrans %}
+                                        </a>
+                                    {% endfor %}
+                                    {% if perms.taiwan_einvoice.change_staffprofile %}
+                                        <a role="presentation" class="dropdown-item nav_staffprofile"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">
+                                            {% trans "Staff" %}
+                                        </a>
+                                    {% endif %}
+                                    {% if perms.taiwan_einvoice.edit_te_escposweboperator %}
+                                        <a role="presentation" class="dropdown-item nav_escposweboperator"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-list' %}?format=html">
+                                            {% trans "ESC/POS Web Operator" %}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endif %}
                         <li class="nav-item nav_escposweb" role="presentation">
                             <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
                         </li>
@@ -93,16 +120,22 @@
                                 <a role="presentation" class="dropdown-item nav_turnkeyweb" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-list' %}?format=html">{% trans "Turnkey Web" %}</a>
                             </div>
                         </li>
-                        <li class="dropdown nav-item">
+                        <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"
                                 aria-expanded="false"
                                 class="dropdown-toggle nav-link"
                                 href="#">{{ user.last_name }}{{ user.first_name }}</a>
                             <div role="menu" class="dropdown-menu">
-                                <span role="presentation" class="dropdown-item">{{ user.email }}</span>
-                                    <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
-                                        {% trans "Timezone" %}: {% trans "Asia/Taipei" %}
-                                    </span>
+                                <a role="presentation" class="dropdown-item nav_selfstaffprofile"
+                                    {% if user.is_authenticated %}    
+                                        href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=request.user.staffprofile.id %}?format=html"
+                                    {% else %}
+                                        href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html"
+                                    {% endif %}
+                                    >{{ user.email }}</a>
+                                <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
+                                    {% trans "Timezone" %}: {% trans "Asia/Taipei" %}
+                                </span>
                                 <a role="presentation" class="dropdown-item" href="{{ settings.LOGIN_URL }}logout/">{% trans "Logout" %}</a>
                             </div>
                         </li>
@@ -128,7 +161,7 @@
             </div>
         </nav>
     </div>
-    <div class="container" style="margin-top:72px;">
+    <div class="container" style="margin-top:112px;">
         {% block body %}{% endblock %}
     </div>
 
@@ -162,7 +195,7 @@
                 <div class="modal-body">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Close" %}</button>
+                    <button type="button" class="btn btn-success" data-dismiss="modal">{% trans "Close" %}</button>
                 </div>
             </div>
         </div>

@@ -2,11 +2,33 @@ import re, datetime
 import rest_framework_filters as filters
 
 from django.db.models import Q
+from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIPEI_TIMEZONE, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
 
+
+class UserFilter(filters.FilterSet):
+    class Meta:
+        model = User
+        fields = {
+            'username': ('icontains', ),
+        }
+
+
+
+class StaffProfileFilter(filters.FilterSet):
+    user = filters.RelatedFilter(UserFilter, field_name='user', queryset=User.objects.filter(staffprofile__isnull=False))
+
+
+
+    class Meta:
+        model = StaffProfile
+        fields = {
+            'nickname': ('icontains', ),
+            'is_active': ('exact', ),
+        }
 
 class ESCPOSWebFilter(filters.FilterSet):
     class Meta:
@@ -66,6 +88,40 @@ class SellerFilter(filters.FilterSet):
 
 
 class TurnkeyWebFilter(filters.FilterSet):
+    filter_any_words_in_those_fields = (
+        'name',
+        'hash_key',
+        'transport_id',
+        'party_id',
+        'routing_id',
+        'qrcode_seed',
+        'turnkey_seed',
+        'download_seed',
+    )
+    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=Seller.objects.all())
+    any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+
+
+
+    class Meta:
+        model = TurnkeyWeb
+        fields = {
+            'on_working': ('exact', ),
+        }
+
+
+
+    def filter_any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"{}__icontains".format(field): value})
+                  for field in self.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
+
+class TurnkeyWebGroupFilter(filters.FilterSet):
     filter_any_words_in_those_fields = (
         'name',
         'hash_key',

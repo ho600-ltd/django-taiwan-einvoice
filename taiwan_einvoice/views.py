@@ -1,21 +1,37 @@
-import json, datetime
+import json, datetime, logging
 from django.http import Http404
 from django.shortcuts import render
 from django.db.models import Q
+from django.contrib.auth.models import Permission, User, Group
+from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms, remove_perm, assign_perm
+
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from taiwan_einvoice.permissions import IsSuperUser
+from ho600_lib.permissions import Or
+
+from taiwan_einvoice.permissions import (
+    IsSuperUser,
+    CanEditStaffProfile,
+    CanViewSelfStaffProfile,
+    CanEditESCPOSWebOperator,
+    CanEditTurnkeyWebGroup,
+)
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
+    StaffProfileHtmlRenderer,
     ESCPOSWebHtmlRenderer,
+    ESCPOSWebOperatorHtmlRenderer,
     TurnkeyWebHtmlRenderer,
+    TurnkeyWebGroupHtmlRenderer,
     LegalEntityHtmlRenderer,
     SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
@@ -24,6 +40,7 @@ from taiwan_einvoice.renderers import (
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
+    StaffProfile,
     ESCPOSWeb,
     LegalEntity,
     Seller,
@@ -34,24 +51,42 @@ from taiwan_einvoice.models import (
     CancelEInvoice,
 )
 from taiwan_einvoice.serializers import (
+    StaffProfileSerializer,
+    StaffGroupSerializer,
     ESCPOSWebSerializer,
+    ESCPOSWebOperatorSerializer,
     LegalEntitySerializerForUser,
     LegalEntitySerializerForSuperUser,
     SellerSerializer,
     TurnkeyWebSerializer,
+    TurnkeyWebGroupSerializer,
     SellerInvoiceTrackNoSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
+    StaffProfileFilter,
     ESCPOSWebFilter,
     LegalEntityFilter,
     TurnkeyWebFilter,
+    TurnkeyWebGroupFilter,
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
 )
+
+
+class Default30PerPagePagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    page_size = 30
+    max_page_size = 30
+
+
+class TenTo1000PerPagePagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    page_size = 10
+    max_page_size = 1000
 
 
 def index(request):
@@ -72,13 +107,142 @@ def escpos_web_demo(request, escpos_web_id):
 
 
 
+class StaffProfileModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditStaffProfile, CanViewSelfStaffProfile), )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = StaffProfile.objects.all().order_by('-id')
+    serializer_class = StaffProfileSerializer
+    filter_class = StaffProfileFilter
+    renderer_classes = (StaffProfileHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('post', 'get', 'patch')
+
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = instance.user
+        ct = ContentType.objects.get_for_model(TurnkeyWeb)
+        for k, v in request.data.items():
+            if k.startswith('add_group_'):
+                group_id = k.replace('add_group_', '')
+                try:
+                    g = Group.objects.get(id=group_id, name__startswith='ct{}:'.format(ct.id))
+                except Group.DoesNotExist:
+                    continue
+                else:
+                    if v:
+                        user.groups.add(g)
+                    else:
+                        user.groups.remove(g)
+        res = super().update(request, *args, **kwargs)
+        return res
+
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        if StaffProfile.objects.filter(user__username=data['user.username']).exists():
+            er = {
+                "error_title": _("Staff exist"),
+                "error_message": _("Staff exist"),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        try:
+            data['user'] = User.objects.get(username=data['user.username']).id
+        except User.DoesNotExist:
+            er = {
+                "error_title": _("Username does not exist"),
+                "error_message": _("Please check the username, this field is case-sensitive"),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        else:
+            del data['user.username']
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        instance = serializer.instance
+        serializer = StaffProfileSerializer(serializer.instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
 class ESCPOSWebModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super().get_queryset()
+        res = False
+        for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        if res:
+            return queryset
+        else:
+            objs = get_objects_for_user(request.user,
+                                        CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                        any_perm=True)
+            return objs
+
+
+
+class ESCPOSWebOperatorModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
+    queryset = ESCPOSWeb.objects.all().order_by('-id')
+    serializer_class = ESCPOSWebOperatorSerializer
+    filter_class = ESCPOSWebFilter
+    renderer_classes = (ESCPOSWebOperatorHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', 'patch', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super().get_queryset()
+        res = False
+        for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        if res:
+            return queryset
+        else:
+            objs = get_objects_for_user(request.user,
+                                        CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                        any_perm=True)
+            return objs
+    
+
+    def update(self, request, *args, **kwargs):
+        lg = logging.getLogger('info')
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
+        escposweb = self.get_object()
+        if 'remove' == data['type']:
+            try:
+                sp = StaffProfile.objects.get(id=data['staffprofile_id'])
+            except StaffProfile.DoesNotExist:
+                pass
+            else:
+                ct = ContentType.objects.get(app_label='taiwan_einvoice', model='escposweb')
+                p = Permission.objects.get(content_type=ct, codename='operate_te_escposweb')
+                remove_perm(p, sp.user, escposweb)
+        elif 'add' == data['type']:
+            ct = ContentType.objects.get(app_label='taiwan_einvoice', model='escposweb')
+            p = Permission.objects.get(content_type=ct, codename='operate_te_escposweb')
+            for staffprofile_id in data['staffprofile_ids']:
+                try:
+                    sp = StaffProfile.objects.get(id=staffprofile_id)
+                except StaffProfile.DoesNotExist:
+                    continue
+                else:
+                    assign_perm(p, sp.user, escposweb)
+        serializer = ESCPOSWebOperatorSerializer(self.get_object(), context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -113,6 +277,73 @@ class TurnkeyWebModelViewSet(ModelViewSet):
     filter_class = TurnkeyWebFilter
     renderer_classes = (TurnkeyWebHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
+
+
+
+class TurnkeyWebGroupModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditTurnkeyWebGroup), )
+    pagination_class = Default30PerPagePagination
+    queryset = TurnkeyWeb.objects.all().order_by('-id')
+    serializer_class = TurnkeyWebGroupSerializer
+    filter_class = TurnkeyWebGroupFilter
+    renderer_classes = (TurnkeyWebGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', 'patch')
+
+
+    def update(self, request, *args, **kwargs):
+        body_unicode = request.body.decode('utf-8')
+        data = json.loads(body_unicode)
+        turnkeyweb = self.get_object()
+        if 'delete_group' == data['type']:
+            try:
+                g = Group.objects.get(id=data['group_id'])
+            except Group.DoesNotExist:
+                pass
+            else:
+                g.delete()
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+        elif 'add_group' == data['type']:
+            if len(turnkeyweb.groups) >= self.pagination_class.page_size:
+                er = {
+                    "error_title": _("The count of Existed Groups exceeds the limit"),
+                    "error_message": _("The count of Existed Groups exceeds the limit({})").format(self.pagination_class.page_size),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            ct_id = ContentType.objects.get_for_model(turnkeyweb).id
+            group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyweb.id, name=data['display_name'])
+            g, created = Group.objects.get_or_create(name=group_name)
+            if created:
+                serializer = StaffGroupSerializer(g, context={'request': request})
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                er = {
+                    "error_title": _("Group name exists"),
+                    "error_message": _("Group name exists"),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif 'update_group' == data['type']:
+            try:
+                g = Group.objects.get(id=data['group_id'])
+            except Group.DoesNotExist:
+                pass
+            else:
+                ct = ContentType.objects.get_for_model(turnkeyweb)
+                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct.id, id=turnkeyweb.id, name=data['display_name'])
+                g.name = group_name
+                g.save()
+                for k, v in data['permissions'].items():
+                    try:
+                        p = Permission.objects.get(content_type=ct, codename=k)
+                    except Permission.DoesNotExist:
+                        p = Permission.objects.get(codename=k)
+                        target_obj = None
+                    else:
+                        target_obj = turnkeyweb
+                    if v:
+                        assign_perm(p, g, obj=target_obj)
+                    else:
+                        remove_perm(p, g, obj=target_obj)
+                return Response({}, status=status.HTTP_200_OK)
 
 
 

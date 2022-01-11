@@ -9,11 +9,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
 from django.db.models import Max
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext
 from simple_history.models import HistoricalRecords
+from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
 from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
 
@@ -63,6 +64,35 @@ class StaffProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
     nickname = models.CharField(max_length=255, default='')
     is_active = models.BooleanField(default=True)
+    @property
+    def in_printer_admin_group(self):
+        return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoicePrinterAdminGroup").exists()
+    @property
+    def in_manager_group(self):
+        return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
+    @property
+    def groups(self):
+        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        groups = {}
+        for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)).order_by('name'):
+            turnkeyweb_id = g.name.split(':')[1]
+            turnkeyweb = TurnkeyWeb.objects.get(id=turnkeyweb_id)
+            g.display_name = ''.join(g.name.split(':')[2:])
+            is_member = self.user.groups.filter(id=g.id).exists()
+            groups.setdefault(turnkeyweb.name, []).append({"id": g.id,
+                                                           "display_name": g.display_name,
+                                                           "is_member": is_member})
+        return groups
+    @property
+    def count_within_groups(self):
+        count_within_groups = {}
+        for k, v in self.groups.items():
+            count_within_groups[k] = 0
+            for group in v:
+                if group['is_member']:
+                    if k in count_within_groups:
+                        count_within_groups[k] += 1
+        return count_within_groups
 
 
     def __str__(self):
@@ -299,6 +329,38 @@ class ESCPOSWeb(models.Model):
 
 
 
+    class Meta:
+        permissions = (
+            ("operate_te_escposweb", "Operate ESCPOSWeb"),
+            ("edit_te_escposweboperator", "Edit the operators of ESCPOSWeb"),
+        )
+
+
+
+    @property
+    def admins(self):
+        try:
+            g = Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup')
+        except Group.DoesNotExist:
+            return StaffProfile.objects.none()
+        else:
+            return StaffProfile.objects.filter(user__in=g.user_set.all()).order_by('nickname')
+
+
+    @property
+    def operators(self):
+        try:
+            g = Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup')
+        except Group.DoesNotExist:
+            admin_users = []
+        else:
+            admin_users = g.user_set.all()
+        users = get_users_with_perms(self, only_with_perms_in=['operate_te_escposweb'])
+        return StaffProfile.objects.filter(user__is_superuser=False,
+                                           user__in=users
+                                          ).exclude(user__in=admin_users).order_by('nickname')
+
+
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
@@ -440,7 +502,7 @@ class ForbiddenAboveAmountError(Exception):
 class TurnkeyWeb(models.Model):
     on_working = models.BooleanField(default=True)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32, unique=True)
     hash_key = models.CharField(max_length=40)
     transport_id = models.CharField(max_length=10)
     party_id = models.CharField(max_length=10)
@@ -452,6 +514,18 @@ class TurnkeyWeb(models.Model):
     warning_above_amount = models.IntegerField(default=10000)
     forbidden_above_amount = models.IntegerField(default=20000)
     history = HistoricalRecords()
+    @property
+    def groups(self):
+        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        return Group.objects.filter(name__startswith="ct{ct_id}:{id}:".format(ct_id=ct_id, id=self.id)).order_by('name')
+    @property
+    def groups_permissions(self):
+        permissions = {}
+        for g in self.groups:
+            permissions[g.id] = get_perms(g, self)
+            for p in g.permissions.all():
+                permissions[g.id].append(p.codename)
+        return permissions
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0
@@ -502,10 +576,18 @@ class TurnkeyWeb(models.Model):
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
+            ("edit_te_turnkeywebgroup", "Edit the groups of TurnkeyWebnn"),
+
+            ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No"),
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
+            ("delete_te_sellerinvoicetrackno", "Delete Seller Invoice Track No"),
+
             ("view_te_einvoice", "View E-Invoice"),
-            ("print_te_einvoice", "Print E-Invoice"),
-            ("cancel_te_einvoice", "Cancel E-Invoice"),
+
+            ("view_te_canceleinvoice", "View Cancel E-Invoice"),
+            ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
+
+            ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
         )
     
 

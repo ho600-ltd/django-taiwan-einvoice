@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-27 00:34+0800\n"
+"POT-Creation-Date: 2022-01-11 16:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -58,6 +58,9 @@ msgstr "無明細"
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
 msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
 
+msgid "You can not edit yourself"
+msgstr "您無法編輯個人資料"
+
 msgid "Already Logout"
 msgstr "已經登出"
 
@@ -72,6 +75,16 @@ msgstr "導引切換"
 
 msgid "Permissions"
 msgstr "權限"
+
+#, python-format
+msgid "Staff Group(%(name)s)"
+msgstr "工作人員群組(%(name)s)"
+
+msgid "Staff"
+msgstr "工作人員"
+
+msgid "ESC/POS Web Operator"
+msgstr "發票機操作員"
 
 msgid "ESC/POS Printer"
 msgstr "發票機"
@@ -493,6 +506,87 @@ msgstr "按鈕"
 msgid "Set default"
 msgstr "設為預設值"
 
+msgid "Remove Operator"
+msgstr "移除操作員"
+
+msgid ""
+"\n"
+"                    Remove operator(<span field=\"operator\"></span>) from ESC/POS Web: <span field=\"name\"></span>(<span field=\"slug\"></span>) ?\n"
+"                "
+msgstr ""
+"\n"
+" 從發票機： <span field=\"name\"></span>(<span field=\"slug\"></span>)，移除操作員(<span field=\"operator\"></span>)?\n"
+"                "
+
+msgid "Remove"
+msgstr "移除"
+
+msgid "Add Operators"
+msgstr "增加操作員"
+
+msgid ""
+"\n"
+"                    Add operators to ESC/POS Web: <span field=\"name\"></span>(<span field=\"slug\"></span>)\n"
+"                "
+msgstr ""
+"\n"
+" 為發票機： <span field=\"name\"></span>(<span field=\"slug\"></span>)，加入操作員\n"
+"                "
+
+msgid "Nickname contains"
+msgstr "暱稱包含"
+
+msgid "Username contains"
+msgstr "帳號包含"
+
+msgid "Is Active?"
+msgstr "是否啟用?"
+
+msgid "Actived"
+msgstr "啟用"
+
+msgid "Disabled"
+msgstr "停用"
+
+msgid "Search Staff"
+msgstr "搜尋工作人員"
+
+msgid "<span field=\"total_count\"></span> records"
+msgstr "共 <span field=\"total_count\"></span> 筆"
+
+msgid "Check"
+msgstr "勾選"
+
+msgid "Username"
+msgstr "帳號"
+
+msgid "Nickname"
+msgstr "暱稱"
+
+msgid "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)"
+msgstr "已啟用的工作人員才能進入「臺灣電子發票管理系統(本系統)」"
+
+msgid "Printer Admin"
+msgstr "發票機管理員"
+
+msgid "The user belongs this group can use ESCPOS Web"
+msgstr "屬於此群組的工作人員才能使用「發票機伺服器」"
+
+msgid "Permission Manager"
+msgstr "權限管理者"
+
+msgid "The user belongs this group can edit staffs in this page"
+msgstr "屬於此群組的工作人員才能編輯本頁面的工作人員紀錄"
+
+msgid "Add"
+msgstr "加入"
+
+msgid "Admins"
+msgstr "管理員"
+
+msgid "Opertors"
+msgstr "操作員"
+
 msgid "Identifier contains"
 msgstr "統編包含"
 
@@ -546,6 +640,35 @@ msgstr "選擇 .csv"
 msgid "Create"
 msgstr "新增"
 
+msgid "Create Staff"
+msgstr "新增工作人員"
+
+msgid "Add to the Printer Admin Group"
+msgstr "加入發票機管理員群組"
+
+msgid "Add to the Manager Group"
+msgstr "加入權限管理者群組"
+
+msgid "Staff Profile"
+msgstr "工作人員資料"
+
+msgid "Add to the Staff Group"
+msgstr "加入工作人員群組"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Staff Group"
+msgstr "工作人員群組"
+
+msgctxt "in_printer_admin_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "in_manager_group"
+msgid "Yes"
+msgstr "是"
+
 msgid "Is on working?"
 msgstr "是否使用中?"
 
@@ -583,6 +706,66 @@ msgstr "特種稅額"
 
 msgid "On Working"
 msgstr "使用中"
+
+#, python-format
+msgid "%(name)s's Staff Group"
+msgstr "『%(name)s』的工作人員群組"
+
+msgid "Create Staff Group"
+msgstr "新增工作人員群組"
+
+msgid "Update Staff Group"
+msgstr "更新工作人員群組"
+
+#, python-format
+msgid "Set-up permissions under Turnkey Web(%(name)s)"
+msgstr "賦予『Turnkey 伺服器(%(name)s)』的權限"
+
+msgid "View"
+msgstr "瀏覽"
+
+msgid "Edit"
+msgstr "編輯"
+
+msgid "Delete"
+msgstr "刪除"
+
+msgid "Seller Invoice Track No"
+msgstr "字軌號碼"
+
+msgid "Imoprt track-no or delete unuse track-no"
+msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
+
+msgid "Delete Staff Group"
+msgstr "刪除工作人員群組"
+
+#, python-format
+msgid "<span class=\"count\">%(groups_count)s</span> records"
+msgstr "共 <span field=\"count\">%(groups_count)s</span> 筆"
+
+msgid "Staff Group Name"
+msgstr "工作人員群組名稱"
+
+msgid "Staffs"
+msgstr "工作人員"
+
+msgid "Staff exist"
+msgstr "工作人員已存在"
+
+msgid "Username does not exist"
+msgstr "{} 帳號不存在"
+
+msgid "Please check the username, this field is case-sensitive"
+msgstr "請檢查帳號，此欄位有大小寫之分"
+
+msgid "The count of Existed Groups exceeds the limit"
+msgstr "已存在的群組數量已超過限度"
+
+msgid "The count of Existed Groups exceeds the limit({})"
+msgstr "已存在的群組數量已超過限度({})"
+
+msgid "Group name exists"
+msgstr "工作人員群組名稱已存在"
 
 msgid "TurnkeyWeb(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"

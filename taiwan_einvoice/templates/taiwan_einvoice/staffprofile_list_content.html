@@ -1,0 +1,108 @@
+{% load i18n %}{% load ho600_tags %}
+
+<div class="total_count_row">
+    {% if data.id > 0 %}
+    {% else %}
+        {% with data.count as total_count %}
+            {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+        {% endwith %}
+        {% if 'add_staffprofile' in perms %}
+            <button id="create_staffprofile_button"
+                class="btn btn-success create_staffprofile_modal" data-toggle="modal">
+                {% trans "Create Staff" %}
+            </button>
+        {% endif %}
+    {% endif %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%" field="no">{% trans "No." %}</th>
+            <th width="25%" field="user.username">{% trans "Username" %}</th>
+            <th width="10%" field="nickname">{% trans "Nickname" %}</th>
+            <th width="15%" field="is_active">{% trans "Is Active?" %}
+                <i class="fa fa-info-circle" data-toggle="tooltip"
+                    data-html="true" data-placement="left"
+                    title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+            </th>
+            <th width="15%" field="in_printer_admin_group">{% trans "Printer Admin" %}
+                <i class="fa fa-info-circle" data-toggle="tooltip"
+                    data-html="true" data-placement="left"
+                    title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+            </th>
+            <th width="15%" field="in_manager_group">{% trans "Permission Manager" %}
+                <i class="fa fa-info-circle" data-toggle="tooltip"
+                    data-html="true" data-placement="left"
+                    title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+            </th>
+            <th width="15%">
+                {% trans "Staff Group" %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if data.id > 0 %}{% with data as staffprofile %}
+            <tr staffprofile_id="{{ staffprofile.id }}">
+                <td>1.</td>
+                <td field="user.username">
+                    {{ staffprofile.user_dict.username }}
+                </td>
+                <td field="nickname">{{ staffprofile.nickname }}</td>
+                <td field="is_active">{% if staffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
+                <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
+                <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
+                <td>
+                    {% with turnkeyweb_length=staffprofile.groups|length %}
+                        {% for turnkeyweb_name, groups in staffprofile.groups.items %}
+                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyweb_name %}
+                                {% if 1 < turnkeyweb_length and 0 < within_group_length %}{{ turnkeyweb_name }}:{% endif %}
+                                {% for group in groups %}
+                                    {% if group.is_member %}
+                                        <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                            {{ group.display_name }}
+                                        </span></h5>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        {% endfor %}
+                    {% endwith %}
+                </td>
+            </tr>
+        {% endwith %}{% else %}{% for staffprofile in data.results %}
+            <tr staffprofile_id="{{ staffprofile.id }}"
+                resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=staffprofile.id %}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="user.username">
+                    {% if perms.taiwan_einvoice.change_staffprofile %}
+                        <button class="btn btn-primary update_staffprofile_modal">
+                            {{ staffprofile.user_dict.username }}
+                        </button>
+                    {% else %}
+                        {{ staffprofile.user_dict.username }}
+                    {% endif %}
+                </td>
+                <td field="nickname">{{ staffprofile.nickname }}</td>
+                <td field="is_active">{% if staffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
+                <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
+                <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
+                <td field="groups">
+                    {% with turnkeyweb_length=staffprofile.groups|length %}
+                        {% for turnkeyweb_name, groups in staffprofile.groups.items %}
+                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyweb_name %}
+                                {% if 1 < turnkeyweb_length and 0 < within_group_length %}{{ turnkeyweb_name }}:{% endif %}
+                                {% for group in groups %}
+                                    {% if group.is_member %}
+                                        <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                            {{ group.display_name }}
+                                        </span></h5>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        {% endfor %}
+                    {% endwith %}
+                </td>
+            </tr>
+        {% endfor %}{% endif %}
+    </tbody>
+</table>

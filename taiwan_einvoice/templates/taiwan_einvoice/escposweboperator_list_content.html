@@ -1,0 +1,52 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th width="5%">{% trans "No." %}</th>
+            <th width="15%">{% trans "Name" %}</th>
+            <th width="15%">{% trans "Slug" %}</th>
+            <th width="15%">{% trans "Admins" %}</th>
+            <th width="50%" colspan="2">{% trans "Opertors" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for escposweb in data.results %}
+            <tr escposweb_id="{{ escposweb.id }}"
+                resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-detail' pk=escposweb.id %}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="name">{{ escposweb.name }}</td>
+                <td field="slug">{{ escposweb.slug }}</td>
+                {% if forloop.first %}
+                    <td field="admins" rowspan="{{ data.results|length }}" style="vertical-align: middle;">
+                        {% for admin in escposweb.admins %}
+                            <h4 title="{{ admin.user_dict.username }}"><span class="badge badge-pill badge-primary">
+                                {{ admin.nickname }}
+                            </span></h4>
+                        {% endfor %}
+                    </td>
+                {% else %}
+                {% endif %}
+                <td field="operators" width="35%">
+                    {% for operator in escposweb.operators %}
+                        <h4 title="{{ operator.user_dict.username }}"><span class="badge badge-pill badge-success" staffprofile_id="{{ operator.id }}">
+                            {{ operator.nickname }}
+                            <a href="#" class="remove_operator_from_escposweb_modal">
+                                <i class="fas fa-user-times" style="color: red;"></i>
+                            </a>
+                        </span></h4>
+                    {% endfor %}
+                </td>
+                <td width="20%">
+                    <button page="1" class="add_operators_to_escposweb_modal btn btn-success">{% trans "Add Operators" %}</button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

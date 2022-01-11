@@ -1,0 +1,45 @@
+{% load i18n %}
+{% load guardian_tags %}
+{% load ho600_tags %}
+{% if object %}
+    {% get_obj_perms request.user for object as "permissions" %}
+{% endif %}
+
+<div class="total_count_row">
+    {% blocktrans with groups_count=data.groups_count %}<span class="count">{{ groups_count }}</span> records{% endblocktrans %}
+
+    {% if object and 'edit_te_turnkeywebgroup' in permissions %}
+        <button id="add_turnkeywebgroup_button"
+            class="btn btn-success add_turnkeywebgroup_modal" data-toggle="modal">
+            {% trans "Create Staff Group" %}
+        </button>
+    {% endif %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th rowspan="2" width="5%">{% trans "No." %}</th>
+            <th rowspan="2" width="20%">{% trans "Staff Group Name" %}</th>
+            <th rowspan="2" width="75%">{% trans "Staffs" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in data.groups %}
+            <tr group_id="{{ group.id }}"
+                permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
+                <td field="no">{{ forloop.counter }}.</td>
+                <td field="name">
+                    <button class="btn btn-primary update_turnkeywebgroup_modal">{{ group.display_name }}</button>
+                </td>
+                <td field="staffs">
+                    {% for staffprofile in group.staffs %}
+                        <h4 title="{{ staff.user_dict.username }}"><span class="badge badge-pill badge-info" staffprofile_id="{{ staffprofile.id }}">
+                            {{ staffprofile.nickname }}
+                        </span></h4>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

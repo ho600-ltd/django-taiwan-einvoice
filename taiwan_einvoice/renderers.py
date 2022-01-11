@@ -24,6 +24,12 @@ class TEOriginHTMLRenderer(TEBrowsableAPIRenderer):
     format = 'html'
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['data'] = data
+        return  res
+
+
     def get_content(self, renderer, data, accepted_media_type, renderer_context):
         request = renderer_context['request']
         t = get_template(self.content_template)
@@ -37,6 +43,18 @@ class ESCPOSWebHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
+class ESCPOSWebOperatorHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('escposweboperator_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('escposweboperator_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
+class StaffProfileHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('staffprofile_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('staffprofile_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
 class LegalEntityHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('legalentity_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('legalentity_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
@@ -47,6 +65,23 @@ class TurnkeyWebHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('turnkeyweb_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('turnkeyweb_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
+
+
+class TurnkeyWebGroupHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('turnkeywebgroup_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('turnkeywebgroup_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+    def get_content(self, renderer, data, accepted_media_type, renderer_context):
+        from taiwan_einvoice.models import TurnkeyWeb
+        request = renderer_context['request']
+        t = get_template(self.content_template)
+        if data.get('id', None):
+            object = TurnkeyWeb.objects.get(id=data['id'])
+        else:
+            object = None
+        html = t.render({"data": data, "object": object}, request)
+        return html
 
 
 class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):

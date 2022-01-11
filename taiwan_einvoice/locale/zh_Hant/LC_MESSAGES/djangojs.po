@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-11-27 00:31+0800\n"
+"POT-Creation-Date: 2022-01-11 16:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -133,6 +133,15 @@ msgstr "請先設定預設的發票機"
 msgid "Default ESC/POS Printer"
 msgstr "預設發票機"
 
+msgid "Admin"
+msgstr "管理員"
+
+msgid "Added"
+msgstr "已加入"
+
+msgid "Removed"
+msgstr "已移除"
+
 msgid "File Error"
 msgstr "檔案錯誤"
 
@@ -145,6 +154,29 @@ msgstr[0] "匯入 %(count)s 筆"
 
 msgid "Importing Successfully"
 msgstr "成功匯入"
+
+msgid "Created"
+msgstr "已建立"
+
+msgid "Turnkey Web: %(name)s"
+msgid_plural "Turnkey Web: %(name)s"
+msgstr[0] ""
+"Turnkey 伺服器: %(name)s"
+
+msgid "Actived"
+msgstr "啟用"
+
+msgctxt "in_printer_admin_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "in_manager_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "is_active"
+msgid "Yes"
+msgstr "啟用"
 
 msgid "Sun"
 msgstr "日"
@@ -219,3 +251,23 @@ msgstr "<p>您的網路似乎有問題，請稍候再試。</p>"
 
 msgid "Error Code"
 msgstr "錯誤碼"
+
+msgid "Name Error"
+msgstr "名稱錯誤"
+
+msgid "Please type words in name"
+msgstr "請輸入名稱"
+
+msgid "NEW RECORD"
+msgstr "新紀錄"
+
+msgid "Updated"
+msgstr "已更新"
+
+#, javascript-format
+msgid "Are you sure to delete \"%s\"?"
+msgid_plural "Are you sure to delete \"%s\"?"
+msgstr[0] "您確定要刪除 \"%s\" ?"
+
+msgid "Deleted"
+msgstr "已刪除"
