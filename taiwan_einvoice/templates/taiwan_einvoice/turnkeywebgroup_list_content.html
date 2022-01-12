@@ -30,7 +30,11 @@
                 permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
                 <td field="no">{{ forloop.counter }}.</td>
                 <td field="name">
-                    <button class="btn btn-primary update_turnkeywebgroup_modal">{{ group.display_name }}</button>
+                    {% if object and 'edit_te_turnkeywebgroup' in permissions %}
+                        <button class="btn btn-primary update_turnkeywebgroup_modal">{{ group.display_name }}</button>
+                    {% else %}
+                        {{ group.display_name }}
+                    {% endif %}
                 </td>
                 <td field="staffs">
                     {% for staffprofile in group.staffs %}
