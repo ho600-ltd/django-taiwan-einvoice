@@ -170,7 +170,9 @@ function cancel_einvoice(taiwan_einvoice_site) {
 
 
 $(function () {
-    $(".nav_canceleinvoice").addClass("nav_active");
+    $(".nav_else").addClass("nav_active");
+    $('.dropdown-menu a').removeClass('active');
+    $(".nav_canceleinvoice").addClass("active");
 
     taiwan_einvoice_site = new TAIWAN_EINVOICE_SITE('taiwan_einvoice_site', {
         $SUCCESS_MODAL: $('#success_modal'),
