@@ -197,7 +197,7 @@ function remove_operator_from_escposweb(taiwan_einvoice_site) {
             },
             success: function (json) {
                 $modal.modal('hide');
-                $('[staffprofile_id='+staffprofile_id+']').remove();
+                $('tr[resource_uri="'+resource_uri+'"] [staffprofile_id='+staffprofile_id+']').remove();
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$SUCCESS_MODAL,
                     gettext("Success"),
