@@ -41,9 +41,9 @@ function add_turnkeywebgroup(taiwan_einvoice_site) {
             },
             success: function (json) {
                 $modal.modal('hide');
-                var tr_str = '<tr group_id="'+json['id']+'">'
+                var tr_str = '<tr group_id="'+json['id']+'" permissions="">'
                     + '<td>'+gettext('NEW RECORD')+'</td>'
-                    + '<td><button class="btn btn-primary update_turnkeywebgroup_modal">'+json['display_name']+'</button></td>'
+                    + '<td field="name"><button class="btn btn-primary update_turnkeywebgroup_modal">'+json['display_name']+'</button></td>'
                     + '<td></td></tr>';
                 var $tr = $(tr_str);
                 $('.update_turnkeywebgroup_modal', $tr).click(update_turnkeywebgroup_modal(taiwan_einvoice_site));
