@@ -82,13 +82,13 @@
 {% block modals %}
 
 {% if perms.taiwan_einvoice.add_staffprofile %}
-<div class="modal fade" id="create_staffprofile_modal" tabindex="-1" role="dialog"
+<div class="modal fade" id="add_staffprofile_modal" tabindex="-1" role="dialog"
     resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}"
-    aria-labelledby="create_staffprofile_modal_label" aria-hidden="true">
+    aria-labelledby="add_staffprofile_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-xs">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="create_staffprofile_modal_label">
+                <h4 class="modal-title" id="add_staffprofile_modal_label">
                     {% trans "Create Staff" %}
                 </h4>
                 <button type="button" class="close" data-dismiss="modal">
@@ -145,7 +145,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button id="create_staffprofile_button" type="button" class="create_staffprofile btn btn-secondary">{% trans "Create" %}</button>
+                <button id="add_staffprofile_button" type="button" class="add_staffprofile btn btn-secondary">{% trans "Create" %}</button>
             </div>
         </div>
     </div>
