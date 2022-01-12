@@ -22,6 +22,7 @@ from taiwan_einvoice.permissions import (
     IsSuperUser,
     CanEditStaffProfile,
     CanViewSelfStaffProfile,
+    CanOperatorESCPOSWebOperator,
     CanEditESCPOSWebOperator,
     CanEditTurnkeyWebGroup,
 )
@@ -165,7 +166,7 @@ class StaffProfileModelViewSet(ModelViewSet):
 
 
 class ESCPOSWebModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
+    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator, CanOperatorESCPOSWebOperator), )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
@@ -176,18 +177,21 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super().get_queryset()
-        res = False
-        for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
-            res = request.user.has_perm(_p)
-            if res:
-                break
+        res = request.user.is_superuser
         if res:
             return queryset
         else:
-            objs = get_objects_for_user(request.user,
-                                        CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
-                                        any_perm=True)
-            return objs
+            for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                res = request.user.has_perm(_p)
+                if res:
+                    break
+            if res:
+                return queryset
+            else:
+                objs = get_objects_for_user(request.user,
+                                            CanOperatorESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                            any_perm=True)
+                return objs
 
 
 
