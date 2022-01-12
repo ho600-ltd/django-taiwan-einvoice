@@ -47,7 +47,7 @@ function add_turnkeywebgroup(taiwan_einvoice_site) {
                     + '<td></td></tr>';
                 var $tr = $(tr_str);
                 $('.update_turnkeywebgroup_modal', $tr).click(update_turnkeywebgroup_modal(taiwan_einvoice_site));
-                var $table = $('table.table');
+                var $table = $('table.search_result');
                 $('tbody', $table).prepend($tr);
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$SUCCESS_MODAL,
@@ -181,14 +181,14 @@ function delete_turnkeywebgroup(taiwan_einvoice_site) {
             },
             success: function (json) {
                 $modal.modal('hide');
-                $('table.table tbody tr[group_id="'+group_id+'"]').remove();
+                $('table.search_result tbody tr[group_id="'+group_id+'"]').remove();
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$SUCCESS_MODAL,
                     gettext("Success"),
                     gettext("Deleted")
                 );
                 var no = 1;
-                $('table.table tbody tr').each(function(){
+                $('table.search_result tbody tr').each(function(){
                     $('[field=no]', $(this)).text(no);
                     no += 1;
                 });

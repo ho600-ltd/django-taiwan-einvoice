@@ -85,7 +85,7 @@
                                     {% endfor %}
                                     {% if perms.taiwan_einvoice.change_staffprofile %}
                                         <a role="presentation" class="dropdown-item nav_staffprofile"
-                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html&amp;page_size=100">
                                             {% trans "Staff" %}
                                         </a>
                                     {% endif %}
@@ -130,7 +130,7 @@
                                     {% if user.is_authenticated %}    
                                         href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=request.user.staffprofile.id %}?format=html"
                                     {% else %}
-                                        href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html"
+                                        href="#"
                                     {% endif %}
                                     >{{ user.email }}</a>
                                 <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
