@@ -13,7 +13,9 @@
 {% block body %}
 
     <h1 id="turnkeywebgroup"
-        resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}">
+        {% if data.id %}
+            resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}">
+        {% endif %}
         {% blocktrans with name=data.name %}{{ name }}'s Staff Group{% endblocktrans %}</h1>
 
     {% block content %}
@@ -24,7 +26,9 @@
 
 {% block modals %}
 <div class="modal fade" id="add_turnkeywebgroup_modal" tabindex="-1" role="dialog"
-    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}"
+    {% if data.id %}
+        resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=data.id %}"
+    {% endif %}
     aria-labelledby="add_turnkeywebgroup_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-xs">
         <div class="modal-content">
