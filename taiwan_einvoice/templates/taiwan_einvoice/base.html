@@ -3,7 +3,14 @@
 {% load compress %}
 {% load ho600_tags %}
 {% get_current_language as LANGUAGE_CODE %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.edit_te_turnkeywebgroup" as "turnkeywebs_can_be_edited" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.edit_te_turnkeywebgroup" as "can_be_edited_turnkeywebs" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_staffprofile" as "can_view_staffprofiles" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_view_sellerinvoicetrackno_under_turnkeywebs" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_einvoice" as "can_view_einvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_canceleinvoice" as "can_view_canceleinvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_einvoiceprintlog" as "can_view_einvoiceprintlog_under_turnkeywebs" %}
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_turnkeyweb" as "can_view_turnkeywebs" %}
 <!DOCTYPE html>
 
 <html>
@@ -77,7 +84,7 @@
                                     class="dropdown-toggle nav-link"
                                     href="#">{% trans "Permissions" %}</a>
                                 <div role="menu" class="dropdown-menu">
-                                    {% for turnkeyweb in turnkeywebs_can_be_edited %}
+                                    {% for turnkeyweb in can_be_edited_turnkeywebs %}
                                         <a role="presentation" class="dropdown-item nav_turnkeywebgroup"
                                             href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=turnkeyweb.id %}?format=html">
                                             {% blocktrans with name=turnkeyweb.name %}Staff Group({{ name }}){% endblocktrans %}
@@ -85,7 +92,7 @@
                                     {% endfor %}
                                     {% if perms.taiwan_einvoice.change_staffprofile %}
                                         <a role="presentation" class="dropdown-item nav_staffprofile"
-                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html">
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html&amp;page_size=100">
                                             {% trans "Staff" %}
                                         </a>
                                     {% endif %}
@@ -98,28 +105,46 @@
                                 </div>
                             </li>
                         {% endif %}
-                        <li class="nav-item nav_escposweb" role="presentation">
-                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
-                        </li>
-                        <li class="nav-item nav_sellerinvoicetrackno" role="presentation">
-                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-list' %}?format=html">{% trans "Track No." %}</a>
-                        </li>
-                        <li class="nav-item nav_einvoice" role="presentation">
-                            <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?format=html">{% trans "E-Invoice" %}</a>
-                        </li>
-                        <li class="dropdown nav-item nav_else">
-                            <a data-toggle="dropdown"
-                                aria-expanded="false"
-                                class="dropdown-toggle nav-link"
-                                href="#">{% trans "Else" %}</a>
-                            <div role="menu" class="dropdown-menu">
-                                <a role="presentation" class="dropdown-item nav_accounter_audit" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}?format=html">{% trans "Cancel EI." %}</a>
-                                <a role="presentation" class="dropdown-item nav_accounter_audit" href="#">{% trans "Accounter Audit" %}</a>
-                                <a role="presentation" class="dropdown-item nav_einvoiceprintlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-list' %}?format=html">{% trans "Print Log" %}</a>
-                                <a role="presentation" class="dropdown-item nav_legalentity" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:legalentity-list' %}?format=html">{% trans "Legal Entity" %}</a>
-                                <a role="presentation" class="dropdown-item nav_turnkeyweb" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-list' %}?format=html">{% trans "Turnkey Web" %}</a>
-                            </div>
-                        </li>
+                        {% if perms.taiwan_einvoice.view_escposweb or can_operate_escposwebs.exists %}
+                            <li class="nav-item nav_escposweb" role="presentation">
+                                <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
+                            </li>
+                        {% endif %}
+                        {% if can_view_sellerinvoicetrackno_under_turnkeywebs.exists %}
+                            <li class="nav-item nav_sellerinvoicetrackno" role="presentation">
+                                <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-list' %}?format=html">{% trans "Track No." %}</a>
+                            </li>
+                        {% endif %}
+                        {% if can_view_einvoice_under_turnkeywebs.exists %}
+                            <li class="nav-item nav_einvoice" role="presentation">
+                                <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?format=html">{% trans "E-Invoice" %}</a>
+                            </li>
+                        {% endif %}
+                        {% if perms.taiwan_einvoice.view_legalentity or perms.taiwan_einvoice.view_turnkeyweb or can_view_canceleinvoice_under_turnkeywebs.exists or notready_TODO or can_view_einvoiceprintlog_under_turnkeywebs.exists or can_view_turnkeywebs.exists %}
+                            <li class="dropdown nav-item nav_else">
+                                <a data-toggle="dropdown"
+                                    aria-expanded="false"
+                                    class="dropdown-toggle nav-link"
+                                    href="#">{% trans "Else" %}</a>
+                                <div role="menu" class="dropdown-menu">
+                                    {% if can_view_canceleinvoice_under_turnkeywebs.exists %}
+                                        <a role="presentation" class="dropdown-item nav_canceleinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}?format=html">{% trans "Cancel EI." %}</a>
+                                    {% endif %}
+                                    {% if notready_TODO %}
+                                        <a role="presentation" class="dropdown-item nav_accounter_audit" href="#">{% trans "Accounter Audit" %}</a>
+                                    {% endif %}
+                                    {% if can_view_einvoiceprintlog_under_turnkeywebs.exists %}
+                                        <a role="presentation" class="dropdown-item nav_einvoiceprintlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-list' %}?format=html">{% trans "Print Log" %}</a>
+                                    {% endif %}
+                                    {% if perms.taiwan_einvoice.view_legalentity %}
+                                        <a role="presentation" class="dropdown-item nav_legalentity" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:legalentity-list' %}?format=html">{% trans "Legal Entity" %}</a>
+                                    {% endif %}
+                                    {% if perms.taiwan_einvoice.view_turnkeyweb or can_view_turnkeywebs.exists %}
+                                        <a role="presentation" class="dropdown-item nav_turnkeyweb" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-list' %}?format=html">{% trans "Turnkey Web" %}</a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endif %}
                         <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"
                                 aria-expanded="false"
@@ -130,7 +155,7 @@
                                     {% if user.is_authenticated %}    
                                         href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=request.user.staffprofile.id %}?format=html"
                                     {% else %}
-                                        href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html"
+                                        href="#"
                                     {% endif %}
                                     >{{ user.email }}</a>
                                 <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">

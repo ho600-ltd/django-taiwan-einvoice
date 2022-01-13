@@ -1,12 +1,14 @@
-function create_staffprofile_modal (taiwan_einvoice_site) {
+function add_staffprofile_modal (taiwan_einvoice_site) {
     return function () {
-        var $modal = $('#create_staffprofile_modal');
+        var $modal = $('#add_staffprofile_modal');
+        $('input[type=text]', $modal).val('');
+        $('input[type=checkbox]', $modal).prop('checked', false);
         $modal.modal('show');
     }
 }
 
 
-function create_staffprofile (taiwan_einvoice_site) {
+function add_staffprofile (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
@@ -45,10 +47,11 @@ function create_staffprofile (taiwan_einvoice_site) {
                     "nickname": json['nickname'],
                     "is_active": json['is_active'],
                     "in_printer_admin_group": json['in_printer_admin_group'],
-                    "in_manager_group": json['in_manager_group']
+                    "in_manager_group": json['in_manager_group'],
+                    "groups": ""
                 };
-                var $table = $('table.table');
-                var s = '<tr>';
+                var $table = $('table.search_result');
+                var s = '<tr staffprofile_id="'+json['id']+'" resource_uri="'+json['resource_uri']+'">';
                 $('thead tr th', $table).each(function(){
                     var $th = $(this);
                     var k = $th.attr('field');
@@ -245,8 +248,8 @@ $(function () {
 
     adjust_pagination_html();
 
-    $('button.create_staffprofile_modal').click(create_staffprofile_modal(taiwan_einvoice_site));
-    $('button.create_staffprofile').click(create_staffprofile(taiwan_einvoice_site));
+    $('button.add_staffprofile_modal').click(add_staffprofile_modal(taiwan_einvoice_site));
+    $('button.add_staffprofile').click(add_staffprofile(taiwan_einvoice_site));
     $('button.update_staffprofile_modal').click(update_staffprofile_modal(taiwan_einvoice_site));
     $('button.update_staffprofile').click(update_staffprofile(taiwan_einvoice_site));
     var dev_null = [

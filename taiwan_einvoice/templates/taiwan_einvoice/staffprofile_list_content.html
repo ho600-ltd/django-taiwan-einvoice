@@ -6,16 +6,16 @@
         {% with data.count as total_count %}
             {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
         {% endwith %}
-        {% if 'add_staffprofile' in perms %}
-            <button id="create_staffprofile_button"
-                class="btn btn-success create_staffprofile_modal" data-toggle="modal">
+        {% if perms.taiwan_einvoice.add_staffprofile %}
+            <button id="add_staffprofile_button"
+                class="btn btn-success add_staffprofile_modal" data-toggle="modal">
                 {% trans "Create Staff" %}
             </button>
         {% endif %}
     {% endif %}
 </div>
 
-<table class="table">
+<table class="table search_result">
     <thead>
         <tr>
             <th width="5%" field="no">{% trans "No." %}</th>
@@ -36,7 +36,7 @@
                     data-html="true" data-placement="left"
                     title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
             </th>
-            <th width="15%">
+            <th width="15%" field="groups">
                 {% trans "Staff Group" %}
             </th>
         </tr>

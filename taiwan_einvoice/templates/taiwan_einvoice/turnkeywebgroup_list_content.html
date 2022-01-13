@@ -1,14 +1,11 @@
 {% load i18n %}
 {% load guardian_tags %}
 {% load ho600_tags %}
-{% if object %}
-    {% get_obj_perms request.user for object as "permissions" %}
-{% endif %}
 
 <div class="total_count_row">
     {% blocktrans with groups_count=data.groups_count %}<span class="count">{{ groups_count }}</span> records{% endblocktrans %}
 
-    {% if object and 'edit_te_turnkeywebgroup' in permissions %}
+    {% if perms.taiwan_einvoice.edit_te_turnkeywebgroup %}
         <button id="add_turnkeywebgroup_button"
             class="btn btn-success add_turnkeywebgroup_modal" data-toggle="modal">
             {% trans "Create Staff Group" %}
@@ -16,7 +13,7 @@
     {% endif %}
 </div>
 
-<table class="table">
+<table class="table search_result">
     <thead>
         <tr>
             <th rowspan="2" width="5%">{% trans "No." %}</th>
@@ -30,7 +27,11 @@
                 permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
                 <td field="no">{{ forloop.counter }}.</td>
                 <td field="name">
-                    <button class="btn btn-primary update_turnkeywebgroup_modal">{{ group.display_name }}</button>
+                    {% if perms.taiwan_einvoice.edit_te_turnkeywebgroup %}
+                        <button class="btn btn-primary update_turnkeywebgroup_modal">{{ group.display_name }}</button>
+                    {% else %}
+                        {{ group.display_name }}
+                    {% endif %}
                 </td>
                 <td field="staffs">
                     {% for staffprofile in group.staffs %}
