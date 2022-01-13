@@ -182,3 +182,39 @@ class CanEditTurnkeyWebGroup(BasePermission):
         lg.debug("CanEditTurnkeyWebGroup.has_object_permission with {}: {}".format(request.method, res))
         return res
 
+
+class CanEntrySellerInvoiceTrackNoOperator(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_sellerinvoicetrackno",
+        ),
+        "POST": (
+            "taiwan_einvoice.add_te_sellerinvoicetrackno",
+        ),
+        "DELETE": (
+            "taiwan_einvoice.delete_te_sellerinvoicetrackno",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntrySellerInvoiceTrackNoOperator.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            if p in get_perms(request.user, obj.turnkey_web):
+                res = True
+                break
+        lg.debug("CanEntrySellerInvoiceTrackNoOperator.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+

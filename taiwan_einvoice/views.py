@@ -25,6 +25,7 @@ from taiwan_einvoice.permissions import (
     CanOperatorESCPOSWebOperator,
     CanEditESCPOSWebOperator,
     CanEditTurnkeyWebGroup,
+    CanEntrySellerInvoiceTrackNoOperator,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -352,12 +353,23 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
 
 
 class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNoOperator, ), )
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-id')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )
+
+
+    def get_queryset(self):
+        queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
+        request = self.request
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
 
 
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
@@ -455,12 +467,6 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             output_datas.append(serializer.data)
         return Response(output_datas, status=status.HTTP_201_CREATED)
-
-
-    def get_queryset(self):
-        queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
-        return queryset
-
 
 
 class EInvoiceModelViewSet(ModelViewSet):
