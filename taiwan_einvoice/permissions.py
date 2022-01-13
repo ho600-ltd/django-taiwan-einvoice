@@ -218,3 +218,33 @@ class CanEntrySellerInvoiceTrackNoOperator(BasePermission):
         return res
 
 
+
+class CanEntryEInvoicePrintLogOperator(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_einvoiceprintlog",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntryEInvoicePrintLogOperator.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            if p in get_perms(request.user, obj.turnkey_web):
+                res = True
+                break
+        lg.debug("CanEntryEInvoicePrintLogOperator.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+

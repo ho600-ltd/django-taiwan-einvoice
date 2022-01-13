@@ -26,6 +26,7 @@ from taiwan_einvoice.permissions import (
     CanEditESCPOSWebOperator,
     CanEditTurnkeyWebGroup,
     CanEntrySellerInvoiceTrackNoOperator,
+    CanEntryEInvoicePrintLogOperator,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -496,12 +497,23 @@ class EInvoiceModelViewSet(ModelViewSet):
 
 
 class EInvoicePrintLogModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanEntryEInvoicePrintLogOperator), )
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
     filter_class = EInvoicePrintLogFilter
     renderer_classes = (EInvoicePrintLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        queryset = super(EInvoicePrintLogModelViewSet, self).get_queryset()
+        request = self.request
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
 
 
 
