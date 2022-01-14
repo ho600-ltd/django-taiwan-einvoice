@@ -321,3 +321,33 @@ class CanEntryCancelEInvoice(BasePermission):
         return res
 
 
+
+class CanViewLegalEntity(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_legalentity",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        lg.debug("CanViewLegalEntity.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        lg.debug("CanViewLegalEntity.has_object_permission with {}: {}".format(request.method, res))
+        return res
+

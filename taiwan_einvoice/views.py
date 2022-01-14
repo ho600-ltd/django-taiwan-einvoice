@@ -29,6 +29,7 @@ from taiwan_einvoice.permissions import (
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
+    CanViewLegalEntity,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -255,7 +256,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
 
 
 class LegalEntityModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanViewLegalEntity), )
     queryset = LegalEntity.objects.all().order_by('-id')
     serializer_class = None
     filter_class = LegalEntityFilter
