@@ -25,8 +25,9 @@ from taiwan_einvoice.permissions import (
     CanOperatorESCPOSWebOperator,
     CanEditESCPOSWebOperator,
     CanEditTurnkeyWebGroup,
-    CanEntrySellerInvoiceTrackNoOperator,
-    CanEntryEInvoicePrintLogOperator,
+    CanEntrySellerInvoiceTrackNo,
+    CanEntryEInvoice,
+    CanEntryEInvoicePrintLog,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -354,7 +355,7 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
 
 
 class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNoOperator, ), )
+    permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNo, ), )
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-id')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
@@ -471,12 +472,23 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 
 class EInvoiceModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanEntryEInvoice), )
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
     filter_class = EInvoiceFilter
     renderer_classes = (EInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        queryset = super(EInvoiceModelViewSet, self).get_queryset()
+        request = self.request
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(seller_invoice_track_no__turnkey_web__in=turnkey_webs)
 
 
     @action(detail=True, methods=['get'], renderer_classes=[JSONRenderer, ])
@@ -497,7 +509,7 @@ class EInvoiceModelViewSet(ModelViewSet):
 
 
 class EInvoicePrintLogModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEntryEInvoicePrintLogOperator), )
+    permission_classes = (Or(IsSuperUser, CanEntryEInvoicePrintLog), )
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
     filter_class = EInvoicePrintLogFilter
@@ -511,7 +523,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
 

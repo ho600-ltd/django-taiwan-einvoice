@@ -183,7 +183,7 @@ class CanEditTurnkeyWebGroup(BasePermission):
         return res
 
 
-class CanEntrySellerInvoiceTrackNoOperator(BasePermission):
+class CanEntrySellerInvoiceTrackNo(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.view_te_sellerinvoicetrackno",
@@ -200,26 +200,56 @@ class CanEntrySellerInvoiceTrackNoOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        permissions = CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
         if permissions:
             res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntrySellerInvoiceTrackNoOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntrySellerInvoiceTrackNo.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for p in CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+        for p in CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, []):
             if p in get_perms(request.user, obj.turnkey_web):
                 res = True
                 break
-        lg.debug("CanEntrySellerInvoiceTrackNoOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntrySellerInvoiceTrackNo.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
 
-class CanEntryEInvoicePrintLogOperator(BasePermission):
+class CanEntryEInvoice(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_einvoice",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntryEInvoice.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            if p in get_perms(request.user, obj.turnkey_web):
+                res = True
+                break
+        lg.debug("CanEntryEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
+class CanEntryEInvoicePrintLog(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.view_te_einvoiceprintlog",
@@ -230,21 +260,21 @@ class CanEntryEInvoicePrintLogOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        permissions = CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
         if permissions:
             res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntryEInvoicePrintLogOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoicePrintLog.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for p in CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+        for p in CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
             if p in get_perms(request.user, obj.turnkey_web):
                 res = True
                 break
-        lg.debug("CanEntryEInvoicePrintLogOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoicePrintLog.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
