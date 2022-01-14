@@ -770,7 +770,7 @@ class EInvoice(models.Model):
         chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
-        barcode_str = "{}{}{}{}".format(
+        barcode_str = "{:03d}{:02d}{}{}".format(
             chmk_year,
             end_month,
             self.track_no,
