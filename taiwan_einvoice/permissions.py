@@ -287,3 +287,37 @@ class CanEntryEInvoicePrintLog(BasePermission):
         return res
 
 
+
+class CanEntryCancelEInvoice(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_canceleinvoice",
+        ),
+        "POST": (
+            "taiwan_einvoice.add_te_canceleinvoice",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntryCancelEInvoice.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                res = True
+                break
+        lg.debug("CanEntryCancelEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
