@@ -30,6 +30,7 @@ from taiwan_einvoice.permissions import (
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
     CanViewLegalEntity,
+    CanViewTurnkeyWeb,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -280,7 +281,7 @@ class SellerModelViewSet(ModelViewSet):
 
 
 class TurnkeyWebModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUser, )
+    permission_classes = (Or(IsSuperUser, CanViewTurnkeyWeb), )
     queryset = TurnkeyWeb.objects.all().order_by('-id')
     serializer_class = TurnkeyWebSerializer
     filter_class = TurnkeyWebFilter
