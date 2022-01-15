@@ -118,6 +118,16 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         invoice_json = data['invoice_json']
         invoice_data = json.loads(invoice_json)
         invoice_data['details_with_einvoice_in_the_same_paper'] = data.get('details_with_einvoice_in_the_same_paper', False)
+        if invoice_data['details_with_einvoice_in_the_same_paper']:
+            invoice_data['details_content'].insert(0, {
+                "type": "text",
+                "custom_size": True,
+                "width": 1,
+                "height": 3,
+                "align": "left",
+                "text": '--------  --------  --------',
+            })
+
         einvoice = ''
         if einvoice_id > 0:
             from taiwan_einvoice.models import EInvoice
