@@ -536,28 +536,44 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
             dataType: 'json',
             contentType: 'application/json',
             success: function (json) {
-                var details_conent = json['details_content'];
-                delete json['details_content'];
                 var unixtimestamp = Date.now() / 1000;
                 $tr.attr({ unixtimestamp: unixtimestamp, track_no: json["track_no"] });
-                window.WSS['escpos_web_socket'].send(JSON.stringify({
-                    einvoice_id: einvoice_id,
-                    serial_number: einvoice_printer_sn,
-                    unixtimestamp: unixtimestamp,
-                    invoice_json: JSON.stringify(json),
-                    reason: reason
-                }));
-                if (append_to_einvoice && details_conent) {
-                    var pdata = window.PRINTERS_DATA;
-                    json['meet_to_tw_einvoice_standard'] = false;
-                    json['width'] = pdata[details_printer_sn]['width'];
-                    json['content'] = details_conent;
-                    var unixtimestamp = Date.now() / 1000;
+                if (einvoice_printer_sn == details_printer_sn) {
+                    var details_with_einvoice_in_the_same_paper = true;
+                } else {
+                    var details_with_einvoice_in_the_same_paper = false;
+                }
+                if (details_with_einvoice_in_the_same_paper) {
                     window.WSS['escpos_web_socket'].send(JSON.stringify({
-                        serial_number: details_printer_sn,
+                        einvoice_id: einvoice_id,
+                        serial_number: einvoice_printer_sn,
+                        details_with_einvoice_in_the_same_paper: details_with_einvoice_in_the_same_paper,
                         unixtimestamp: unixtimestamp,
-                        invoice_json: JSON.stringify(json)
+                        invoice_json: JSON.stringify(json),
+                        reason: reason
                     }));
+                } else {
+                    var details_conent = json['details_content'];
+                    delete json['details_content'];
+                    window.WSS['escpos_web_socket'].send(JSON.stringify({
+                        einvoice_id: einvoice_id,
+                        serial_number: einvoice_printer_sn,
+                        unixtimestamp: unixtimestamp,
+                        invoice_json: JSON.stringify(json),
+                        reason: reason
+                    }));
+                    if (append_to_einvoice && details_conent) {
+                        var pdata = window.PRINTERS_DATA;
+                        json['meet_to_tw_einvoice_standard'] = false;
+                        json['width'] = pdata[details_printer_sn]['width'];
+                        json['content'] = details_conent;
+                        var unixtimestamp = Date.now() / 1000;
+                        window.WSS['escpos_web_socket'].send(JSON.stringify({
+                            serial_number: details_printer_sn,
+                            unixtimestamp: unixtimestamp,
+                            invoice_json: JSON.stringify(json)
+                        }));
+                    }
                 }
                 setTimeout('print_einvoice_each_by_each(' + allow_number + ', "' + button_id + '", "' + target_selector_query + '")', parseInt(interval_seconds_of_printing));
             }

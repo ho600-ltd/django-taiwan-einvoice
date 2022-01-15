@@ -353,7 +353,7 @@ class Receipt(models.Model):
         return obj
 
 
-    def print(self, printer, print_mark=False, re_print_original_copy=False):
+    def print(self, printer, print_mark=False, re_print_original_copy=False, extra_content=[]):
         copy_order = ReceiptLog.objects.filter(printer=printer, receipt=self).count() + 1
         rl = ReceiptLog(printer=printer,
                         receipt=self,
@@ -363,7 +363,7 @@ class Receipt(models.Model):
                         )
         rl.save()
         try:
-            rl.print()
+            rl.print(extra_content=extra_content)
         except Exception as e:
             rl.delete()
             return (False, "Exception in Receipt: {}".format(e))
@@ -389,7 +389,7 @@ class ReceiptLog(models.Model):
 
 
 
-    def print(self):
+    def print(self, extra_content=[]):
         if self.print_time:
             return False
         if self.printer.is_connected:
@@ -408,7 +408,7 @@ class ReceiptLog(models.Model):
             "barcode": self.print_barcode,
             "qrcode_pair": self.print_qrcode_pair,
         }
-        for line in self.receipt.content:
+        for line in self.receipt.content + extra_content:
             type_method[line['type']](pd, line)
         pd.cut(feed=False)
         self.print_time = now()

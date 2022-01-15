@@ -117,6 +117,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         unixtimestamp = data['unixtimestamp']
         invoice_json = data['invoice_json']
         invoice_data = json.loads(invoice_json)
+        invoice_data['details_with_einvoice_in_the_same_paper'] = data.get('details_with_einvoice_in_the_same_paper', False)
         einvoice = ''
         if einvoice_id > 0:
             from taiwan_einvoice.models import EInvoice
@@ -150,6 +151,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             })
             invoice_json = json.dumps(invoice_data)
 
+        lg.debug(invoice_json)
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
