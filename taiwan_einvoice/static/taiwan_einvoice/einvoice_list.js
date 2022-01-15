@@ -538,7 +538,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
             success: function (json) {
                 var unixtimestamp = Date.now() / 1000;
                 $tr.attr({ unixtimestamp: unixtimestamp, track_no: json["track_no"] });
-                if (einvoice_printer_sn == details_printer_sn) {
+                if (append_to_einvoice && einvoice_printer_sn == details_printer_sn) {
                     var details_with_einvoice_in_the_same_paper = true;
                 } else {
                     var details_with_einvoice_in_the_same_paper = false;
