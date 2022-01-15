@@ -681,7 +681,7 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def get_new_no(self):
-        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        max_no = int(self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max'])
         if not max_no:
             new_no = self.begin_no
         elif max_no >= self.end_no:

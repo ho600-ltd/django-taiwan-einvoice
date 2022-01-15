@@ -52,7 +52,7 @@ from taiwan_einvoice.models import (
     LegalEntity,
     Seller,
     TurnkeyWeb,
-    SellerInvoiceTrackNo, UsedSellerInvoiceTrackNoError,
+    SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError,
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
