@@ -52,7 +52,7 @@ from taiwan_einvoice.models import (
     LegalEntity,
     Seller,
     TurnkeyWeb,
-    SellerInvoiceTrackNo,
+    SellerInvoiceTrackNo, UsedSellerInvoiceTrackNoError,
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
@@ -363,7 +363,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', )
+    http_method_names = ('post', 'get', 'delete')
 
 
     def get_queryset(self):
@@ -472,6 +472,20 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             self.perform_create(serializer)
             output_datas.append(serializer.data)
         return Response(output_datas, status=status.HTTP_201_CREATED)
+
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+        except UsedSellerInvoiceTrackNoError as e:
+            message, track_no_ = e.args
+            return Response({"error_title": _("Delete Error"),
+                             "error_message": message.format(track_no_),
+                            }, status=status.HTTP_403_FORBIDDEN)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 class EInvoiceModelViewSet(ModelViewSet):

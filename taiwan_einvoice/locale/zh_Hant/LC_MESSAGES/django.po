@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-15 10:31+0800\n"
+"POT-Creation-Date: 2022-01-15 20:21+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,6 +35,12 @@ msgstr "一般稅額"
 
 msgid "Special"
 msgstr "特種稅額"
+
+msgid "It could not be deleted, because it had E-Invoice({})"
+msgstr "無法刪除，因為它已開立發票({})"
+
+msgid "Not enough numbers"
+msgstr "號碼不足"
 
 msgid "Mobile barcode"
 msgstr "手機條碼"
@@ -631,6 +637,9 @@ msgstr "結束號碼"
 msgid "Blank No. Count"
 msgstr "空白張數"
 
+msgid "Delete"
+msgstr "刪除"
+
 msgid "Upload .csv to Create Seller Invoice Track No"
 msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
 
@@ -639,6 +648,18 @@ msgstr "選擇 .csv"
 
 msgid "Create"
 msgstr "新增"
+
+msgid "Delete Seller Invoice Track No"
+msgstr "刪除字軌號碼檔"
+
+msgid ""
+"\n"
+"                        <p>Do you sure to delete the above record?</p>\n"
+"                    "
+msgstr ""
+"\n"
+"                        <p>您確定要刪除上述紀錄?</p>\n"
+"                    "
 
 msgid "Create Staff"
 msgstr "新增工作人員"
@@ -736,9 +757,6 @@ msgstr "瀏覽"
 msgid "Edit"
 msgstr "編輯"
 
-msgid "Delete"
-msgstr "刪除"
-
 msgid "Seller Invoice Track No"
 msgstr "字軌號碼"
 
@@ -825,6 +843,9 @@ msgstr ""
 "\n"
 "\n"
 "與先前字軌號碼有重疊"
+
+msgid "Delete Error"
+msgstr "刪除失敗"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"

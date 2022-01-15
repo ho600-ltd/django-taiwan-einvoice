@@ -99,10 +99,7 @@ class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):
         t = get_template(self.content_template)
         view = renderer_context['view']
         request = renderer_context['request']
-        serializer = self._get_serializer(view.serializer_class, view, request)
-        turnkey_web_queryset_in_post_form = serializer.fields['turnkey_web'].get_queryset()
         html = t.render({"data": data,
-                         "turnkey_web_options_in_post_form": turnkey_web_queryset_in_post_form,
                         }, request)
         return html
 

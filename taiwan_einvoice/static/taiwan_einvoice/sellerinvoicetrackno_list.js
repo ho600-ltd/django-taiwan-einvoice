@@ -75,6 +75,53 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
 }
 
 
+function delete_seller_invoice_track_no_modal (taiwan_einvoice_site) {
+    return function () {
+        var $btn = $(this);
+        var $modal = $('#delete_seller_invoice_track_no_modal');
+        var $modal_table = $('table.modal_table', $modal);
+        var $tr = $btn.parents('tr');
+        var $tr_clone = $tr.clone();
+        $('td[field="button"]', $tr_clone).remove();
+        $('tbody tr', $modal_table).remove();
+        $('tbody', $modal_table).append($tr_clone);
+
+        $('thead tr', $modal_table).remove();
+        var $search_result_head_tr_clone = $('table.search_result thead tr:first').clone();
+        $('th[field="button"]', $search_result_head_tr_clone).remove();
+        $('thead', $modal_table).append($search_result_head_tr_clone);
+        $modal.modal('show');
+    }
+}
+
+
+function delete_seller_invoice_track_no (taiwan_einvoice_site) {
+    return function () {
+        var $btn = $(this);
+        var $modal = $btn.parents('.modal');
+        var $modal_table = $('table.modal_table', $modal);
+        var resource_uri = $('tbody tr:first', $modal_table).attr('resource_uri');
+        $.ajax({
+            url: resource_uri,
+            type: "DELETE",
+            dataType: 'json',
+            contentType: 'application/json',
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
+            },
+            success: function (json) {
+                $modal.modal('hide');
+                $('tr[resource_uri="'+resource_uri+'"]').remove();
+            }
+        });
+    }
+}
+
+
 $(function () {
     $(".nav_sellerinvoicetrackno").addClass("nav_active");
 
@@ -90,4 +137,6 @@ $(function () {
 
     $('button.upload_csv_to_multiple_create_modal').click(upload_csv_to_multiple_create_modal(taiwan_einvoice_site));
     $('button.upload_csv_to_multiple_create').click(upload_csv_to_multiple_create(taiwan_einvoice_site));
+    $('button.delete_seller_invoice_track_no_modal').click(delete_seller_invoice_track_no_modal(taiwan_einvoice_site));
+    $('button.delete_seller_invoice_track_no').click(delete_seller_invoice_track_no(taiwan_einvoice_site));
 });

@@ -12,7 +12,7 @@ from django.db.models import Max
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import pgettext
+from django.utils.translation import gettext, pgettext
 from simple_history.models import HistoricalRecords
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
@@ -267,6 +267,11 @@ class EInvoiceSellerAPI(models.Model):
 
 
 class NotEnoughNumberError(Exception):
+    pass
+
+
+
+class UsedSellerInvoiceTrackNoError(Exception):
     pass
 
 
@@ -663,12 +668,24 @@ class SellerInvoiceTrackNo(models.Model):
         return ''
     
 
+    @property
+    def can_be_deleted(self):
+        return not self.einvoice_set.exists()
+    
+
+    def delete(self, *args, **kwargs):
+        if self.einvoice_set.exists():
+            ei = self.einvoice_set.first()
+            raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})"), ei.track_no_)
+        return super().delete(*args, **kwargs)
+
+
     def get_new_no(self):
         max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
         if not max_no:
             new_no = self.begin_no
         elif max_no >= self.end_no:
-            raise NotEnoughNumberError('Not enough numbers')
+            raise NotEnoughNumberError(_('Not enough numbers'))
         else:
             new_no = max_no + 1
         new_no = '{:08d}'.format(new_no)
