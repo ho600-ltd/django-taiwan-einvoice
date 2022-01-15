@@ -3,17 +3,27 @@ import logging
 import pytz
 
 from django.conf import settings
-from django.contrib.auth.models import User, Permission, AnonymousUser 
+from django.contrib.auth.models import User, Group, Permission, AnonymousUser 
 from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from rest_framework.serializers import CharField, IntegerField, BooleanField
-from rest_framework.serializers import PrimaryKeyRelatedField, HyperlinkedIdentityField, ModelSerializer, Serializer, ReadOnlyField, ChoiceField
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import CharField, IntegerField, BooleanField, JSONField
+from rest_framework.serializers import (
+    PrimaryKeyRelatedField,
+    HyperlinkedIdentityField,
+    ModelSerializer,
+    Serializer,
+    ReadOnlyField,
+    ChoiceField,
+    RelatedField,
+)
+from rest_framework.serializers import ValidationError, SerializerMethodField
+from rest_framework.exceptions import PermissionDenied
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     NotEnoughNumberError,
+    StaffProfile,
     ESCPOSWeb,
     Printer,
     LegalEntity,
@@ -35,6 +45,58 @@ class UserSerializer(ModelSerializer):
 
 
 
+class StaffProfileSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail", lookup_field='pk')
+    user_dict = UserSerializer(source='user', read_only=True)
+    in_printer_admin_group = BooleanField()
+    in_manager_group = BooleanField()
+    groups = JSONField(read_only=True)
+    count_within_groups = JSONField(read_only=True)
+
+
+    class Meta:
+        model = StaffProfile
+        fields = '__all__'
+
+
+
+    def update(self, instance, validated_data):
+        if self.context['request'].user == instance.user:
+            raise PermissionDenied(detail=_("You can not edit yourself"))
+        group_dict = {
+            "in_printer_admin_group": Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup'),
+            "in_manager_group": Group.objects.get(name='TaiwanEInvoiceManagerGroup')
+        }
+        for key in ['in_printer_admin_group', 'in_manager_group']:
+            if key in validated_data:
+                if validated_data[key]:
+                    instance.user.groups.add(group_dict[key])
+                else:
+                    instance.user.groups.remove(group_dict[key])
+                del validated_data[key]
+        return super().update(instance, validated_data)
+
+
+    def create(self, validated_data):
+        data = {
+            "in_printer_admin_group": validated_data['in_printer_admin_group'],
+            "in_manager_group": validated_data['in_manager_group'],
+        }
+        for key in ['in_printer_admin_group', 'in_manager_group']:
+            del validated_data[key]
+        instance = super().create(validated_data)
+        for key, group in {"in_printer_admin_group": Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup'),
+                           "in_manager_group": Group.objects.get(name='TaiwanEInvoiceManagerGroup')}.items():
+            if key in data:
+                if data[key]:
+                    instance.user.groups.add(group)
+                else:
+                    instance.user.groups.remove(group)
+        return instance
+
+
+
 class ESCPOSWebSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweb-detail", lookup_field='pk')
@@ -53,12 +115,19 @@ class ESCPOSWebSerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return ESCPOSWeb.objects.all().order_by('-id')
-        else:
-            return ESCPOSWeb.objects.none()
+class ESCPOSWebOperatorSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-detail", lookup_field='pk')
+    admins = StaffProfileSerializer(read_only=True, many=True)
+    operators = StaffProfileSerializer(read_only=True, many=True)
+
+
+
+    class Meta:
+        model = ESCPOSWeb
+        fields = (
+            'id', 'resource_uri', 'name', 'slug', 'admins', 'operators',
+        )
 
 
 
@@ -73,7 +142,7 @@ class PrinterSerializer(ModelSerializer):
 
 
 
-class LegalEntitySerializer(ModelSerializer):
+class LegalEntitySerializerForUser(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:legalentity-detail", lookup_field='pk')
     identifier = ReadOnlyField()
@@ -84,32 +153,19 @@ class LegalEntitySerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return LegalEntity.objects.all().order_by('-id')
-        else:
-            return LegalEntity.objects.none()
+class LegalEntitySerializerForSuperUser(LegalEntitySerializerForUser):
+    identifier = CharField()
 
 
 
 class SellerSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:seller-detail", lookup_field='pk')
-    legal_entity_dict = LegalEntitySerializer(source='legal_entity', read_only=True)
+    legal_entity_dict = LegalEntitySerializerForUser(source='legal_entity', read_only=True)
 
     class Meta:
         model = Seller
         fields = '__all__'
-
-
-
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return Seller.objects.all().order_by('-id')
-        else:
-            return Seller.objects.none()
 
 
 
@@ -135,6 +191,7 @@ class TurnkeyWebSerializer(ModelSerializer):
             'count_now_use_08_sellerinvoicetrackno_blank_no',
             'on_working',
             'name',
+            'hash_key',
             'mask_hash_key',
             'transport_id',
             'party_id',
@@ -159,12 +216,53 @@ class TurnkeyWebSerializer(ModelSerializer):
         }
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return TurnkeyWeb.objects.all().order_by('-id')
-        else:
-            return TurnkeyWeb.objects.none()
+
+class StaffGroupSerializer(ModelSerializer):
+    display_name = SerializerMethodField()
+    staffs = SerializerMethodField()
+
+
+    class Meta:
+        model = Group
+        fields = (
+            'id', 'name', 'display_name', 'staffs',
+        )
+
+
+
+    def get_display_name(self, instance):
+        return ''.join(instance.name.split(':')[2:])
+
+
+    def get_staffs(self, instance):
+        request = self.context['request']
+        users = instance.user_set.all()
+        return StaffProfileSerializer(StaffProfile.objects.filter(user__in=users).order_by('nickname'),
+                                      many=True,
+                                      context={'request': request}).data
+
+
+
+class TurnkeyWebGroupSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail", lookup_field='pk')
+    groups = StaffGroupSerializer(read_only=True, many=True)
+    groups_count = SerializerMethodField()
+    groups_permissions = JSONField()
+
+
+
+    class Meta:
+        model = TurnkeyWeb
+        fields = (
+            'id', 'resource_uri', 'name', 'groups', 'groups_count', 'groups_permissions',
+        )
+        extra_kwargs = {
+        }
+    
+
+    def get_groups_count(self, instance):
+        return len(instance.groups)
 
 
 
@@ -197,14 +295,6 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return SellerInvoiceTrackNo.objects.all().order_by('-id')
-        else:
-            return SellerInvoiceTrackNo.objects.none()
-
-
 class DetailsContentField(ReadOnlyField):
     def get_attribute(self, instance):
         request = self.context['request']
@@ -232,15 +322,6 @@ class EInvoiceSerializer(ModelSerializer):
 
 
 
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return EInvoice.objects.all().order_by('-id')
-        else:
-            return EInvoice.objects.none()
-
-
-
 class EInvoicePrintLogSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-detail", lookup_field='pk')
@@ -251,15 +332,6 @@ class EInvoicePrintLogSerializer(ModelSerializer):
     class Meta:
         model = EInvoicePrintLog
         fields = '__all__'
-
-
-
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return EInvoicePrintLog.objects.all().order_by('-id')
-        else:
-            return EInvoicePrintlog.objects.none()
 
 
 
@@ -275,12 +347,3 @@ class CancelEInvoiceSerializer(ModelSerializer):
     class Meta:
         model = CancelEInvoice
         fields = '__all__'
-
-
-
-    def get_queryset(self):
-        request = self.context.get('request', None)
-        if request and request.user and request.user.is_superuser:
-            return CancelEInvoice.objects.all().order_by('-id')
-        else:
-            return CancelEInvoice.objects.none()

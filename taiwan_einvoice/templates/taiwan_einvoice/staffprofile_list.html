@@ -1,0 +1,228 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/staffprofile_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+{% if data.id > 0 %}{% else %}
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+        <input type='hidden' name='page_size' value='100' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="name__icontains">{% trans "Nickname contains" %}</label>
+                    <div class="input-group" id="nickname__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="nickname__icontains" id="id_nickname__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="user__username__icontains">{% trans "Username contains" %}</label>
+                    <div class="input-group" id="user__username__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="user__username__icontains" id="user__username__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="is_active">{% trans "Is Active?" %}</label>
+                    <div class="input-group" id="is_active" data-target-input="nearest">
+                        <select name="is_active" class="form-control">
+                            <option value=""></option>
+                            <option value="true">{% trans "Actived" %}</option>
+                            <option value="false">{% trans "Disabled" %}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% if perms.taiwan_einvoice.add_staffprofile %}
+<div class="modal fade" id="add_staffprofile_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}"
+    aria-labelledby="add_staffprofile_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_staffprofile_modal_label">
+                    {% trans "Create Staff" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="Username" class="col-sm-2 col-form-label">{% trans "Username" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="Username" name="user.username" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputNickname" class="col-sm-2 col-form-label">{% trans "Nickname" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputNickname" name="nickname" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="is_active" name="is_active" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Is Active?" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_printer_admin_group" name="in_printer_admin_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Printer Admin Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_manager_group" name="in_manager_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Manager Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="add_staffprofile_button" type="button" class="add_staffprofile btn btn-secondary">{% trans "Create" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if perms.taiwan_einvoice.change_staffprofile %}
+<div class="modal fade" id="update_staffprofile_modal" tabindex="-1" role="dialog"
+    aria-labelledby="update_staffprofile_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="update_staffprofile_modal_label">
+                    {% trans "Staff Profile" %}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row">
+                    <label for="Username" class="col-sm-2 col-form-label">{% trans "Username" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" id="Username" name="user.username" value="">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputNickname" class="col-sm-2 col-form-label">{% trans "Nickname" %}</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="inputNickname" name="nickname">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="is_active" name="is_active" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Is Active?" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_printer_admin_group" name="in_printer_admin_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Printer Admin Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2">
+                        <input type="checkbox" class="form-control" id="in_manager_group" name="in_manager_group" />
+                    </div>
+                    <div class="col-sm-10">
+                        {% trans "Add to the Manager Group" %}
+                        <i class="fa fa-info-circle" data-toggle="tooltip"
+                            data-html="true" data-placement="left"
+                            title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-2"></div>
+                    <div class="col-sm-10">{% trans "Add to the Staff Group" %}</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="update_staffprofile_button" type="button" class="update_staffprofile btn btn-secondary">{% trans "Update" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

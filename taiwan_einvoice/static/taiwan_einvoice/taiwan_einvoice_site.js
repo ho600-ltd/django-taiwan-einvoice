@@ -139,6 +139,23 @@ $(function () {
     };
 
 
+    TAIWAN_EINVOICE_SITE.prototype.lock_or_unlock_delete = function ($self) {
+        return function () {
+            var $i = $(this);
+            var $button = $('button.delete_modal', $i.parent());
+            if($i.hasClass('fa-lock')) {
+                $i.removeClass('fa-lock');
+                $i.addClass('fa-unlock');
+                $button.removeAttr('disabled');
+            } else {
+                $i.removeClass('fa-unlock');
+                $i.addClass('fa-lock');
+                $button.attr('disabled', 'disabled');
+            }
+        }
+    };
+
+
     TAIWAN_EINVOICE_SITE.prototype.after_document_ready = function () {
         var $self = this;
         $('.datetime').each($self.convert_class_datetime($self));
@@ -170,6 +187,8 @@ $(function () {
 
         var string_kind_params = [
             'name__icontains',
+            'nickname__icontains',
+            'user__username__icontains',
             'slug__icontains',
             'track_no__icontains',
             'details__description__icontains',
@@ -192,6 +211,7 @@ $(function () {
         }
         var select_kind_params = [
             'is_original_copy',
+            'is_active',
         ]
         for (var param of select_kind_params) {
             var select_kind_param = url.searchParams.get(param);
@@ -201,6 +221,7 @@ $(function () {
             }
         }
 
+        $('.lock_or_unlock_delete').click($self.lock_or_unlock_delete($self));
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
         $("input[name='code39__exact']").click(function(){
             $(this).val('');
@@ -211,7 +232,10 @@ $(function () {
 
         $("button.search").click(function () {
             var url_parts = window.location.href.split('?');
-            var $form = $('form:not(".language_form")');
+            var $form = $(this).parents('form');
+            if ($form.length <= 0) {
+                var $form = $('form:not(".language_form")');
+            }
             var params = new URLSearchParams($form.serialize());
             var second_offset = $self.get_second_offset_by_timezone_id_value();
             for (var k of params.keys()) {

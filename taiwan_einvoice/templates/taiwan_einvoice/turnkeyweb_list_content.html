@@ -10,7 +10,8 @@
     <thead>
         <tr>
             <th rowspan="2" width="5%">{% trans "No." %}</th>
-            <th rowspan="2" width="10%">{% trans "Is on working?" %}</th>
+            <th rowspan="2" width="5%">{% trans "Is on working?" %}</th>
+            <th rowspan="2" width="5%">{% trans "Is Production?" %}</th>
             <th rowspan="2" width="10%">{% trans "Seller Identifier" %}</th>
             <th rowspan="2" width="20%">{% trans "Name" %}</th>
             <th rowspan="2" width="10%">{% trans "Transport ID" %}</th>
@@ -36,6 +37,7 @@
             <tr turnkeyweb_id="{{ turnkeyweb.id }}">
                 <td>{{ forloop.counter }}.</td>
                 <td field="on_working">{% if turnkeyweb.on_working %}{% trans "On Working" %}{% endif %}</td>
+                <td field="in_production">{% if turnkeyweb.in_production %}{% trans "Production" %}{% else %}{% trans "Test" %}{% endif %}</td>
                 <td field="identifier">{{ turnkeyweb.seller_dict.legal_entity_dict.identifier }}</td>
                 <td field="name">{{ turnkeyweb.name }}</td>
                 <td field="transport_id">{{ turnkeyweb.transport_id }}</td>

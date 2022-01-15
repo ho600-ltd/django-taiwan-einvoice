@@ -1,5 +1,7 @@
 {% extends 'taiwan_einvoice/base.html' %}
-{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}{% load ho600_tags %}
+
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
 
 {% block css %}
 {% endblock %}
@@ -329,7 +331,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print Original Copy" %}</button>
+                {% if perms.taiwan_einvoice.edit_te_escposweboperator or can_operate_escposwebs.exists %}
+                    <button id="re_print_einvoice_modal_button_0" type="button" class="re_print_einvoice_modal btn btn-secondary">{% trans "Re-Print Original Copy" %}</button>
+                {% endif %}
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
             </div>
         </div>

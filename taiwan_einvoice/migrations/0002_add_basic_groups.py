@@ -2,28 +2,55 @@
 
 from django.db import migrations
 
-
 NAMES = [
-    'TaiwanEInvoiceWorkerGroup',
-    'TaiwanEInvoicePrinterGroup',
-    'TaiwanEInvoiceManagerGroup',
+    {"group_name": 'TaiwanEInvoicePrinterAdminGroup',
+        "permissions": [
+            "taiwan_einvoice.view_escposweb",
+            "taiwan_einvoice.edit_te_escposweboperator",
+            "taiwan_einvoice.view_staffprofile",
+        ]},
+    {"group_name": 'TaiwanEInvoiceManagerGroup',
+        "permissions": [
+            "taiwan_einvoice.view_staffprofile",
+            "taiwan_einvoice.add_staffprofile",
+            "taiwan_einvoice.change_staffprofile",
+            "taiwan_einvoice.edit_te_turnkeywebgroup",
+        ]},
 ]
 
 
 def add_three_basic_groups(apps, schema_editor):
+    Permission = apps.get_model('auth', 'Permission')
     Group = apps.get_model('auth', 'Group')
-    for name in NAMES:
-        g = Group(name=name)
+    for d in NAMES:
+        g, is_created = Group.objects.get_or_create(name=d['group_name'])
         g.save()
+        for app_pcode in d['permissions']:
+            app, pcode = app_pcode.split('.')
+            p = Permission.objects.get(codename=pcode)
+            g.permissions.add(p)
+
 
 
 def remove_three_basic_groups(apps, schema_editor):
+    Permission = apps.get_model('auth', 'Permission')
     Group = apps.get_model('auth', 'Group')
-    for name in NAMES:
-        g = Group.objects.get(name=name)
+    for d in NAMES:
+        g = Group.objects.get(name=d['group_name'])
         g.delete()
 
 
+def add_default_legalentity(apps, schema_editor):
+    LegalEntity = apps.get_model('taiwan_einvoice', 'LegalEntity')
+    le, is_created = LegalEntity.objects.get_or_create(identifier='0000000000')
+    le.name = '0000000000'
+    le.save()
+
+
+def remove_default_legalentity(apps, schema_editor):
+    LegalEntity = apps.get_model('taiwan_einvoice', 'LegalEntity')
+    le = LegalEntity.objects.get(identifier='0000000000', name='0000000000')
+    le.delete()
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -31,5 +58,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(add_three_basic_groups, remove_three_basic_groups)
+        migrations.RunPython(add_three_basic_groups, remove_three_basic_groups),
+        migrations.RunPython(add_default_legalentity, remove_default_legalentity),
     ]
