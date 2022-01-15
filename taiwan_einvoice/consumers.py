@@ -106,8 +106,11 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
+        lg = logging.getLogger('django')
         if not self.user.is_authenticated:
+            lg.warning("is not authenticated: {}".format(self.user))
             return 
+        lg.debug("is authenticated: {}".format(self.user))
         data = json.loads(text_data)
         einvoice_id = int(data.get('einvoice_id', 0))
         serial_number = data['serial_number']
