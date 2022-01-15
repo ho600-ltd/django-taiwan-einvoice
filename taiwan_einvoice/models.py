@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, urllib3
+import pytz, datetime, hmac, requests, urllib3, logging
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -501,6 +501,7 @@ class ForbiddenAboveAmountError(Exception):
 
 class TurnkeyWeb(models.Model):
     on_working = models.BooleanField(default=True)
+    in_production = models.BooleanField(default=False)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     name = models.CharField(max_length=32, unique=True)
     hash_key = models.CharField(max_length=40)
@@ -641,7 +642,8 @@ class SellerInvoiceTrackNo(models.Model):
         queryset = cls.objects.filter(**kwargs)
         _now = now()
         ids = []
-        for sitn in queryset.filter(begin_time__lte=_now,
+        for sitn in queryset.filter(turnkey_web__on_working=True,
+                                    begin_time__lte=_now,
                                     end_time__gt=_now).order_by('track', 'begin_no'):
             if ignore_count_blank_no:
                 ids.append(sitn.id)
@@ -839,8 +841,12 @@ class EInvoice(models.Model):
             generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
             sales_amount_str = _hex_amount(amounts['SalesAmount'])
             total_amount_str = _hex_amount(amounts['TotalAmount'])
+            if self.seller_invoice_track_no.turnkey_web.in_production:
+                test_str = ''
+            else:
+                test_str = '測 試 '
             return [
-                    {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": test_str + "電 子 發 票 證 明 聯"},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 16:33+0800\n"
+"POT-Creation-Date: 2022-01-15 10:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -672,6 +672,9 @@ msgstr "是"
 msgid "Is on working?"
 msgstr "是否使用中?"
 
+msgid "Is Production?"
+msgstr "是否商用?"
+
 msgid "Seller Identifier"
 msgstr "賣方統編"
 
@@ -706,6 +709,12 @@ msgstr "特種稅額"
 
 msgid "On Working"
 msgstr "使用中"
+
+msgid "Production"
+msgstr "商用"
+
+msgid "Test"
+msgstr "測試"
 
 #, python-format
 msgid "%(name)s's Staff Group"
