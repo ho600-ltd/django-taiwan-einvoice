@@ -359,7 +359,7 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
 
 class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNo, ), )
-    queryset = SellerInvoiceTrackNo.objects.all().order_by('-id')
+    queryset = SellerInvoiceTrackNo.objects.all().order_by('-type', '-begin_time', '-track', '-begin_no')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
