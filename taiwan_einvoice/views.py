@@ -22,7 +22,7 @@ from taiwan_einvoice.permissions import (
     IsSuperUser,
     CanEditStaffProfile,
     CanViewSelfStaffProfile,
-    CanOperatorESCPOSWebOperator,
+    CanOperateESCPOSWebOperator,
     CanEditESCPOSWebOperator,
     CanEditTurnkeyWebGroup,
     CanEntrySellerInvoiceTrackNo,
@@ -172,7 +172,7 @@ class StaffProfileModelViewSet(ModelViewSet):
 
 
 class ESCPOSWebModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator, CanOperatorESCPOSWebOperator), )
+    permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator, CanOperateESCPOSWebOperator), )
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
@@ -195,7 +195,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
                 return queryset
             else:
                 objs = get_objects_for_user(request.user,
-                                            CanOperatorESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                            CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
                                             any_perm=True)
                 return objs
 
@@ -372,7 +372,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 

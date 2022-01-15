@@ -125,7 +125,7 @@ class CanEditESCPOSWebOperator(BasePermission):
 
 
 
-class CanOperatorESCPOSWebOperator(BasePermission):
+class CanOperateESCPOSWebOperator(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.operate_te_escposweb",
@@ -136,22 +136,22 @@ class CanOperatorESCPOSWebOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        permissions = CanOperatorESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        permissions = CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
         if permissions:
             res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanOperatorESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanOperateESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for p in CanOperatorESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+        for p in CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
             app, codename = p.split('.')
             if codename in get_perms(request.user, obj):
                 res = True
                 break
-        lg.debug("CanOperatorESCPOSWebOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanOperateESCPOSWebOperator.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
@@ -249,7 +249,7 @@ class CanEntryEInvoice(BasePermission):
         res = False
         for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
             app, codename = p.split('.')
-            if codename in get_perms(request.user, obj.turnkey_web):
+            if codename in get_perms(request.user, obj.seller_invoice_track_no.turnkey_web):
                 res = True
                 break
         lg.debug("CanEntryEInvoice.has_object_permission with {}: {}".format(request.method, res))
