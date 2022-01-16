@@ -775,6 +775,14 @@ class EInvoice(models.Model):
         else:
             return False
     @property
+    def buyer_is_business_entity(self):
+        if not self.buyer or not self.buyer_identifier:
+            raise Exception("No Buyer")
+        if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier:
+            return False
+        else:
+            return True
+    @property
     def is_canceled(self):
         return self.canceleinvoice_set.exists()
     @property
@@ -897,7 +905,7 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
                         "text": " 賣方 {} {}".format(self.seller_identifier,
-                                                        "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
+                                                        "" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else "買方 "+self.buyer_identifier)},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                     {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                     {"type": "qrcode_pair", "center": False,
@@ -907,7 +915,7 @@ class EInvoice(models.Model):
                             random_number=self.random_number,
                             sales_amount=sales_amount_str,
                             total_amount=total_amount_str,
-                            buyer_identifier="00000000" if '0000000000' == self.buyer_identifier else self.buyer_identifier,
+                            buyer_identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier,
                             seller_identifier=self.seller_identifier,
                             generate_no_sha1=self.generate_no_sha1,
                             qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
@@ -938,6 +946,7 @@ class EInvoice(models.Model):
         _d = {
             "meet_to_tw_einvoice_standard": True,
             "is_canceled": self.is_canceled,
+            "buyer_is_business_entity": self.buyer_is_business_entity,
             "print_mark": self.print_mark,
             "id": self.id,
             "track_no": self.track_no,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 11:42+0800\n"
+"POT-Creation-Date: 2022-01-16 12:24+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -481,6 +481,9 @@ msgstr "列印序號"
 
 msgid "Print Time"
 msgstr "列印時間"
+
+msgid "Buyer"
+msgstr "買受人"
 
 msgid "Donate mark"
 msgstr "捐贈註記"

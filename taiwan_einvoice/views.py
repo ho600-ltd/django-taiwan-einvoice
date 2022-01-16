@@ -519,6 +519,8 @@ class EInvoiceModelViewSet(ModelViewSet):
                 escpos_print_scripts['re_print_original_copy'] = True
             if escpos_print_scripts.get('is_canceled', False):
                 escpos_print_scripts['re_print_original_copy'] = True
+            if escpos_print_scripts.get('buyer_is_business_entity', False):
+                escpos_print_scripts['re_print_original_copy'] = True
             return Response(escpos_print_scripts)
         else:
             return Response({"error_title": _("E-Invoice Error"),
