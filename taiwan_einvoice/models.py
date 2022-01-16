@@ -777,6 +777,13 @@ class EInvoice(models.Model):
     @property
     def is_canceled(self):
         return self.canceleinvoice_set.exists()
+    @property
+    def canceled_time(self):
+        if self.is_canceled:
+            cei = self.canceleinvoice_set.get()
+            return cei.generate_time
+        else:
+            return None
 
 
 
@@ -840,15 +847,33 @@ class EInvoice(models.Model):
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
             ]
         elif self.is_canceled:
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+            cancel_einvoice = self.canceleinvoice_set.get()
+            cancel_note = pgettext("canceleinvoice", "Canceled at {} {}").format(cancel_einvoice.cancel_date, cancel_einvoice.cancel_time)
+            cancel_reason = pgettext("canceleinvoice", "Reason: {}").format(cancel_einvoice.reason)
+            res = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "作  廢  說  明"},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "left", "text": pgettext("canceleinvoice", "Canceled")},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": cancel_note},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": cancel_reason},
             ]
+            if cancel_einvoice.return_tax_document_number:
+                message1 = pgettext("canceleinvoice", "Return tax document number: {}").format(cancel_einvoice.return_tax_document_number)
+                res += [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message1},
+                ]
+            if cancel_einvoice.remark:
+                message2 = pgettext("canceleinvoice", "Remark: {}").format(cancel_einvoice.remark)
+                res += [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
+                ]
+            return res
         else:
             details = self.details
             amounts = self.amounts
@@ -912,6 +937,7 @@ class EInvoice(models.Model):
     def escpos_print_scripts(self):
         _d = {
             "meet_to_tw_einvoice_standard": True,
+            "is_canceled": self.is_canceled,
             "print_mark": self.print_mark,
             "id": self.id,
             "track_no": self.track_no,

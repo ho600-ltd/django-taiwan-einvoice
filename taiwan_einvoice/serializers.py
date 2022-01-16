@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from rest_framework.serializers import CharField, IntegerField, BooleanField, JSONField
+from rest_framework.serializers import CharField, IntegerField, BooleanField, DateTimeField, JSONField
 from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     HyperlinkedIdentityField,
@@ -316,6 +316,7 @@ class EInvoiceSerializer(ModelSerializer):
     details_content = DetailsContentField()
     amount_is_warning = BooleanField(read_only=True)
     is_canceled = BooleanField(read_only=True)
+    canceled_time = DateTimeField(read_only=True)
 
     class Meta:
         model = EInvoice

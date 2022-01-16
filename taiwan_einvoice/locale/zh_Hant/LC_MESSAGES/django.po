@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-15 20:21+0800\n"
+"POT-Creation-Date: 2022-01-16 11:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,8 +54,20 @@ msgid "Donate to NPO( {npoban} )"
 msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
 msgctxt "canceleinvoice"
-msgid "Canceled"
-msgstr "已作廢"
+msgid "Canceled at {} {}"
+msgstr "於 {} {} 已作廢"
+
+msgctxt "canceleinvoice"
+msgid "Reason: {}"
+msgstr "理由: {}"
+
+msgctxt "canceleinvoice"
+msgid "Return tax document number: {}"
+msgstr "專案作廢核准文號: {}"
+
+msgctxt "canceleinvoice"
+msgid "Remark: {}"
+msgstr "備註: {}"
 
 msgid "No details"
 msgstr "無明細"
@@ -482,6 +494,10 @@ msgstr "狀態"
 
 msgid "Reason"
 msgstr "理由"
+
+msgctxt "taiwan_einvoice_einvoiceprintlog_is_original_copy"
+msgid "Cancel Note"
+msgstr "作廢說明"
 
 msgctxt "taiwan_einvoice_einvoiceprintlog_done_status"
 msgid "Done"
