@@ -183,6 +183,8 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super().get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
         res = request.user.is_superuser
         if res:
             return queryset
@@ -213,6 +215,8 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super().get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
         res = False
         for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
             res = request.user.has_perm(_p)
@@ -367,8 +371,10 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 
     def get_queryset(self):
-        queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
         request = self.request
+        queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
         if request.user.is_superuser:
             return queryset
         else:
@@ -498,8 +504,10 @@ class EInvoiceModelViewSet(ModelViewSet):
 
 
     def get_queryset(self):
-        queryset = super(EInvoiceModelViewSet, self).get_queryset()
         request = self.request
+        queryset = super(EInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
         if request.user.is_superuser:
             return queryset
         else:
@@ -539,8 +547,10 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
 
 
     def get_queryset(self):
-        queryset = super(EInvoicePrintLogModelViewSet, self).get_queryset()
         request = self.request
+        queryset = super(EInvoicePrintLogModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
         if request.user.is_superuser:
             return queryset
         else:
@@ -559,8 +569,10 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
 
 
     def get_queryset(self):
-        queryset = super(CancelEInvoiceModelViewSet, self).get_queryset()
         request = self.request
+        queryset = super(CancelEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
         if request.user.is_superuser:
             return queryset
         else:
