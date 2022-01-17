@@ -1,7 +1,6 @@
 # taiwan_einvoice/consumers.py
 import json, logging, datetime
 from asgiref.sync import async_to_sync
-from guardian.shortcuts import get_perms
 from django.utils.translation import ugettext_lazy as _
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -197,6 +196,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
             if self.user.has_perm('taiwan_einvoice.edit_te_escposweboperator'):
                 pass
             else:
+                from guardian.shortcuts import get_perms
                 from taiwan_einvoice.models import ESCPOSWeb
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
@@ -323,6 +323,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
             if self.user.has_perm('taiwan_einvoice.edit_te_escposweboperator'):
                 pass
             else:
+                from guardian.shortcuts import get_perms
                 from taiwan_einvoice.models import ESCPOSWeb
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
