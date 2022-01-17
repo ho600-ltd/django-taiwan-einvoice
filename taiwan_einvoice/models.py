@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, urllib3
+import pytz, datetime, hmac, requests, urllib3, logging
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -12,7 +12,7 @@ from django.db.models import Max
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import pgettext
+from django.utils.translation import gettext, pgettext
 from simple_history.models import HistoricalRecords
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
@@ -271,6 +271,11 @@ class NotEnoughNumberError(Exception):
 
 
 
+class UsedSellerInvoiceTrackNoError(Exception):
+    pass
+
+
+
 class GenerateTimeNotFollowNoOrderError(Exception):
     pass
 
@@ -501,6 +506,7 @@ class ForbiddenAboveAmountError(Exception):
 
 class TurnkeyWeb(models.Model):
     on_working = models.BooleanField(default=True)
+    in_production = models.BooleanField(default=False)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
     name = models.CharField(max_length=32, unique=True)
     hash_key = models.CharField(max_length=40)
@@ -641,7 +647,8 @@ class SellerInvoiceTrackNo(models.Model):
         queryset = cls.objects.filter(**kwargs)
         _now = now()
         ids = []
-        for sitn in queryset.filter(begin_time__lte=_now,
+        for sitn in queryset.filter(turnkey_web__on_working=True,
+                                    begin_time__lte=_now,
                                     end_time__gt=_now).order_by('track', 'begin_no'):
             if ignore_count_blank_no:
                 ids.append(sitn.id)
@@ -661,12 +668,24 @@ class SellerInvoiceTrackNo(models.Model):
         return ''
     
 
+    @property
+    def can_be_deleted(self):
+        return not self.einvoice_set.exists()
+    
+
+    def delete(self, *args, **kwargs):
+        if self.einvoice_set.exists():
+            ei = self.einvoice_set.first()
+            raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})"), ei.track_no_)
+        return super().delete(*args, **kwargs)
+
+
     def get_new_no(self):
-        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        max_no = int(self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max'])
         if not max_no:
             new_no = self.begin_no
         elif max_no >= self.end_no:
-            raise NotEnoughNumberError('Not enough numbers')
+            raise NotEnoughNumberError(_('Not enough numbers'))
         else:
             new_no = max_no + 1
         new_no = '{:08d}'.format(new_no)
@@ -756,8 +775,40 @@ class EInvoice(models.Model):
         else:
             return False
     @property
+    def buyer_is_business_entity(self):
+        if not self.buyer or not self.buyer_identifier:
+            raise Exception("No Buyer")
+        if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier:
+            return False
+        else:
+            return True
+    @property
     def is_canceled(self):
         return self.canceleinvoice_set.exists()
+    @property
+    def canceled_time(self):
+        if self.is_canceled:
+            cei = self.canceleinvoice_set.get()
+            return cei.generate_time
+        else:
+            return None
+    @property
+    def related_einvoices(self):
+        einvoice = self
+        related_einvoices = []
+        while True:
+            related_einvoice = einvoice.canceleinvoice_set.filter(new_einvoice__isnull=False)
+            if related_einvoice:
+                canceled_einvoice = related_einvoice.get()
+                related_einvoices.append(canceled_einvoice.new_einvoice)
+                einvoice = canceled_einvoice.new_einvoice
+            else:
+                break
+        return related_einvoices
+
+
+    def __str__(self):
+        return self.track_no_
 
 
 
@@ -770,7 +821,7 @@ class EInvoice(models.Model):
         chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
-        barcode_str = "{}{}{}{}".format(
+        barcode_str = "{:03d}{:02d}{}{}".format(
             chmk_year,
             end_month,
             self.track_no,
@@ -821,15 +872,33 @@ class EInvoice(models.Model):
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
             ]
         elif self.is_canceled:
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+            cancel_einvoice = self.canceleinvoice_set.get()
+            cancel_note = pgettext("canceleinvoice", "Canceled at {} {}").format(cancel_einvoice.cancel_date, cancel_einvoice.cancel_time)
+            cancel_reason = pgettext("canceleinvoice", "Reason: {}").format(cancel_einvoice.reason)
+            res = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "作  廢  說  明"},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "left", "text": pgettext("canceleinvoice", "Canceled")},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": cancel_note},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": cancel_reason},
             ]
+            if cancel_einvoice.return_tax_document_number:
+                message1 = pgettext("canceleinvoice", "Return tax document number: {}").format(cancel_einvoice.return_tax_document_number)
+                res += [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message1},
+                ]
+            if cancel_einvoice.remark:
+                message2 = pgettext("canceleinvoice", "Remark: {}").format(cancel_einvoice.remark)
+                res += [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
+                ]
+            return res
         else:
             details = self.details
             amounts = self.amounts
@@ -839,8 +908,12 @@ class EInvoice(models.Model):
             generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
             sales_amount_str = _hex_amount(amounts['SalesAmount'])
             total_amount_str = _hex_amount(amounts['TotalAmount'])
+            if self.seller_invoice_track_no.turnkey_web.in_production:
+                test_str = ''
+            else:
+                test_str = '測 試 '
             return [
-                    {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": "電 子 發 票 證 明 聯"},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": test_str + "電 子 發 票 證 明 聯"},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
@@ -849,7 +922,7 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
                         "text": " 賣方 {} {}".format(self.seller_identifier,
-                                                        "" if '0000000000' == self.buyer_identifier else "買方 "+self.buyer_identifier)},
+                                                        "" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else "買方 "+self.buyer_identifier)},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                     {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
                     {"type": "qrcode_pair", "center": False,
@@ -859,7 +932,7 @@ class EInvoice(models.Model):
                             random_number=self.random_number,
                             sales_amount=sales_amount_str,
                             total_amount=total_amount_str,
-                            buyer_identifier="00000000" if '0000000000' == self.buyer_identifier else self.buyer_identifier,
+                            buyer_identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier,
                             seller_identifier=self.seller_identifier,
                             generate_no_sha1=self.generate_no_sha1,
                             qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
@@ -889,6 +962,8 @@ class EInvoice(models.Model):
     def escpos_print_scripts(self):
         _d = {
             "meet_to_tw_einvoice_standard": True,
+            "is_canceled": self.is_canceled,
+            "buyer_is_business_entity": self.buyer_is_business_entity,
             "print_mark": self.print_mark,
             "id": self.id,
             "track_no": self.track_no,

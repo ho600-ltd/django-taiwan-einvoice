@@ -1,6 +1,7 @@
 # taiwan_einvoice/consumers.py
 import json, logging, datetime
 from asgiref.sync import async_to_sync
+from guardian.shortcuts import get_perms
 from django.utils.translation import ugettext_lazy as _
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
@@ -64,16 +65,28 @@ def update_print_einvoice_log(data):
 class ESCPOSWebConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
-        if not self.user.is_superuser:
-            from taiwan_einvoice.models import ESCPOSWeb
-            slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
-            try:
-                escpos_web = ESCPOSWeb.objects.get(slug=slug)
-            except ESCPOSWeb.DoesNotExist:
-                return False
-            if not escpos_web.verify_token_auth(seed, verify_value):
-                return False
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
+        if self.user.is_superuser:
+            pass
+        else:
+            if self.user.has_perm('taiwan_einvoice.edit_te_escposweboperator'):
+                pass
+            else:
+                from taiwan_einvoice.models import ESCPOSWeb
+                try:
+                    escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+                except ESCPOSWeb.DoesNotExist:
+                    return False
+                if 'taiwan_einvoice.operate_te_escposweb' in get_perms(self.user, escpos_web):
+                    pass
+                else:
+                    slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
+                    try:
+                        escpos_web = ESCPOSWeb.objects.get(slug=slug)
+                    except ESCPOSWeb.DoesNotExist:
+                        return False
+                    if not escpos_web.verify_token_auth(seed, verify_value):
+                        return False
         self.escpos_web_group_name = 'escpos_web_%s' % self.escpos_web_id
         async_to_sync(self.channel_layer.group_add)(
             self.escpos_web_group_name,
@@ -93,14 +106,28 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
 
     def receive(self, text_data):
+        lg = logging.getLogger('django')
         if not self.user.is_authenticated:
+            lg.warning("is not authenticated: {}".format(self.user))
             return 
+        lg.debug("is authenticated: {}".format(self.user))
         data = json.loads(text_data)
         einvoice_id = int(data.get('einvoice_id', 0))
         serial_number = data['serial_number']
         unixtimestamp = data['unixtimestamp']
         invoice_json = data['invoice_json']
         invoice_data = json.loads(invoice_json)
+        invoice_data['details_with_einvoice_in_the_same_paper'] = data.get('details_with_einvoice_in_the_same_paper', False)
+        if invoice_data['details_with_einvoice_in_the_same_paper']:
+            invoice_data['details_content'].insert(0, {
+                "type": "text",
+                "custom_size": True,
+                "width": 1,
+                "height": 3,
+                "align": "left",
+                "text": '--------  --------  --------',
+            })
+
         einvoice = ''
         if einvoice_id > 0:
             from taiwan_einvoice.models import EInvoice
@@ -134,6 +161,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             })
             invoice_json = json.dumps(invoice_data)
 
+        lg.debug(invoice_json)
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
@@ -161,19 +189,36 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
-        if not self.user.is_superuser:
-            from taiwan_einvoice.models import ESCPOSWeb
-            slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
-            try:
-                escpos_web = ESCPOSWeb.objects.get(slug=slug)
-            except ESCPOSWeb.DoesNotExist:
-                return False
-            if not escpos_web.verify_token_auth(seed, verify_value):
-                return False
+        escpos_web = None
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
-        if self.user.is_authenticated and self.user.has_perm('taiwan_einvoice.print_einvoice'):
+        if self.user.is_superuser:
+            pass
+        else:
+            if self.user.has_perm('taiwan_einvoice.edit_te_escposweboperator'):
+                pass
+            else:
+                from taiwan_einvoice.models import ESCPOSWeb
+                try:
+                    escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+                except ESCPOSWeb.DoesNotExist:
+                    return False
+                if 'taiwan_einvoice.operate_te_escposweb' in get_perms(self.user, escpos_web):
+                    pass
+                else:
+                    slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
+                    try:
+                        escpos_web = ESCPOSWeb.objects.get(slug=slug)
+                    except ESCPOSWeb.DoesNotExist:
+                        return False
+                    if not escpos_web.verify_token_auth(seed, verify_value):
+                        return False
+        if self.user.is_authenticated:
             from taiwan_einvoice.models import ESCPOSWeb, UserConnectESCPOSWebLog
-            escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+            if not escpos_web:
+                try:
+                    escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+                except ESCPOSWeb.DoesNotExist:
+                    return False
             ucel = UserConnectESCPOSWebLog.objects.get_or_create(escpos_web=escpos_web,
                                                                  user=self.user,
                                                                  channel_name=self.channel_name,
@@ -270,19 +315,36 @@ def save_printer_status_and_parse_receipt_type(escpos_web_id, data):
 class ESCPOSWebStatusConsumer(WebsocketConsumer):
     def connect(self):
         self.user = self.scope["user"]
-        if not self.user.is_superuser:
-            from taiwan_einvoice.models import ESCPOSWeb
-            slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
-            try:
-                escpos_web = ESCPOSWeb.objects.get(slug=slug)
-            except ESCPOSWeb.DoesNotExist:
-                return False
-            if not escpos_web.verify_token_auth(seed, verify_value):
-                return False
+        escpos_web = None
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
-        if self.user.is_authenticated and self.user.has_perm('taiwan_einvoice.print_einvoice'):
+        if self.user.is_superuser:
+            pass
+        else:
+            if self.user.has_perm('taiwan_einvoice.edit_te_escposweboperator'):
+                pass
+            else:
+                from taiwan_einvoice.models import ESCPOSWeb
+                try:
+                    escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+                except ESCPOSWeb.DoesNotExist:
+                    return False
+                if 'taiwan_einvoice.operate_te_escposweb' in get_perms(self.user, escpos_web):
+                    pass
+                else:
+                    slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
+                    try:
+                        escpos_web = ESCPOSWeb.objects.get(slug=slug)
+                    except ESCPOSWeb.DoesNotExist:
+                        return False
+                    if not escpos_web.verify_token_auth(seed, verify_value):
+                        return False
+        if self.user.is_authenticated:
             from taiwan_einvoice.models import ESCPOSWeb, UserConnectESCPOSWebLog
-            escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+            if not escpos_web:
+                try:
+                    escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
+                except ESCPOSWeb.DoesNotExist:
+                    return False
             ucel = UserConnectESCPOSWebLog.objects.get_or_create(escpos_web=escpos_web,
                                                                  user=self.user,
                                                                  channel_name=self.channel_name,

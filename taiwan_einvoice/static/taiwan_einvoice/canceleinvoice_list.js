@@ -3,6 +3,14 @@ function show_canceleinvoice_modal(taiwan_einvoice_site) {
         var $btn = $(this);
         var $form = $btn.parents('form');
         var one_dimensional_barcode_for_canceling = $('[name=one_dimensional_barcode_for_canceling]', $form).val();
+        if (!one_dimensional_barcode_for_canceling) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$WARNING_MODAL,
+                gettext('Cancel E-Invoice Error'),
+                gettext('Please type one-dimensional-barcode!')
+                );
+            return false;
+        }
         var $modal = $('#show_canceleinvoice_modal');
         var resource_uri_tmpl = $modal.attr('resource_uri_tmpl');
         var resource_uri = resource_uri_tmpl.replace('{one_dimensional_barcode_for_canceling}', one_dimensional_barcode_for_canceling);
@@ -136,6 +144,10 @@ function cancel_einvoice(taiwan_einvoice_site) {
                     gettext("Success"),
                     message
                 );
+                $('[name=reason]', $modal).val("");
+                $('[name=return_tax_document_number]', $modal).val("");
+                $('[name=remark]', $modal).val("");
+                $('[name=re_create_einvoice]', $modal).prop("checked", false);
                 var kv = {
                     "no": gettext('NEW Record'),
                     "year_month_range": json['einvoice_dict']['seller_invoice_track_no_dict']['year_month_range'],

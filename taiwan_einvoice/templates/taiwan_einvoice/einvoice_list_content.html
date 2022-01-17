@@ -1,79 +1,83 @@
-{% load i18n %}{% load tz %}
+{% load i18n %}{% load tz %}{% load ho600_tags %}
 
-<div class="total_count_row">
+{% h6_get_objs_by_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
+{% with operate_escposwebs_exists=can_operate_escposwebs.exists %}
 
-    {% with data.count as total_count %}
-        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
-    {% endwith %}
+    <div class="total_count_row">
+        {% with data.count as total_count %}
+            {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+        {% endwith %}
 
-    {% if perms.turnkeyweb.print_einvoice %}
-        <button id="print_einvoice_modal_button_0" class="btn print_einvoice_modal" data-toggle="modal"
-            set_up_default_escpos_printer_url="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html"
-            ws_escposweb_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/by-log-in/"
-            ws_escposweb_status_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/status/by-log-in/"
-            ws_escposweb_print_result_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/print_result/by-log-in/"
-            >
-            <img class="status-error" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Red_Light_Icon.svg" />
-            <img class="status-off" style="width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Gray_Light_Icon.svg" />
-            <img class="status-on" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/led-green-black.svg" />
-            {% blocktrans %}Print E-Invoice with "<span id="default_escpos_print_name"></span>"{% endblocktrans %}
-        </button>
-    {% endif %}
-</div>
+        {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
+            <button id="print_einvoice_modal_button_0" class="btn print_einvoice_modal" data-toggle="modal"
+                set_up_default_escpos_printer_url="{% url 'taiwan_einvoice:taiwaneinvoiceapi:escposweb-list' %}?format=html"
+                ws_escposweb_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/by-log-in/"
+                ws_escposweb_status_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/status/by-log-in/"
+                ws_escposweb_print_result_url_tmpl="/ws/taiwan_einvoice/escpos_web/{id}/print_result/by-log-in/"
+                >
+                <img class="status-error" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Red_Light_Icon.svg" />
+                <img class="status-off" style="width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/Gray_Light_Icon.svg" />
+                <img class="status-on" style="display: none; width: 20px;" src="{{ settings.STATIC_URL }}taiwan_einvoice/assets/led-green-black.svg" />
+                {% blocktrans %}Print E-Invoice with "<span id="default_escpos_print_name"></span>"{% endblocktrans %}
+            </button>
+        {% endif %}
+    </div>
 
-<table class="table search_result">
-    <thead>
-        <tr>
-            {% if perms.turnkeyweb.print_einvoice %}
-                <th width="5%" field="check" class="print_einvoice">
-                    <input type="checkbox" class="choose_all_check_in_the_same_td" />
-                    {% trans "Choose" %}
-                </th>
-            {% endif %}
-            <th width="5%">{% trans "No." %}</th>
-            <th width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
-            <th width="10%">{% trans "Track No." %}</th>
-            <th width="10%">{% trans "Tax Type" %}</th>
-            <th width="10%">{% trans "Sales Amount" %}</th>
-            <th width="10%">{% trans "Tax Amount" %}</th>
-            <th width="10%">{% trans "Total Amount" %}</th>
-            <th width="10%">{% trans "Footprint No." %}</th>
-            <th width="10%">{% trans "Creator" context "taiwan_einvoice" %}</th>
-            <th width="30%">{% trans "Generate Time" %}</th>
-            <th width="5%">{% trans "Print Mark" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for einvoice in data.results %}
-            {% with einvoice.id as einvoice_id %}
-                <tr einvoice_id="{{ einvoice.id }}" carrier_type__display="{{ einvoice.carrier_type__display }}"
-                    donate_mark__display='{% ifequal "1" einvoice.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
-                    {% if perms.turnkeyweb.print_einvoice %}
-                        <td field="check" class="print_einvoice">
-                            <input type="checkbox" name="print_einvoice" />
-                        </td>
-                    {% endif %}
-                    <td>{{ forloop.counter }}.</td>
-                    <td field="year_month_range">{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
-                    <td field="track_no_"><button class="btn btn-primary show_einvoice_modal">{{ einvoice.track_no_ }}</button></td>
-                    <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
-                    <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
-                    <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
-                    <td field="TotalAmount" {% if einvoice.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ einvoice.amounts.TotalAmount }}</td>
-                    <td field="generate_no">{{ einvoice.generate_no }}</td>
-                    <td field="creator_first_name_id">{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
-                    <td class="datetime" field="generate_time" value="{{ einvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
-                    <td field="print_mark" value="{{ einvoice.print_mark }}">{% spaceless %}
-                        {% if einvoice.print_mark %}
-                            {% trans "Yes" context "taiwan_einvoice_print_mark" %}
-                        {% else %}{% if einvoice.carrier_type %}
-                            {{ einvoice.carrier_type__display }}
-                        {% else %}{% if einvoice.npoban %}
-                            {% trans "Donated" context "taiwan_einvoice_donate_mark" %}
-                        {% endif %}{% endif %}{% endif %}
-                    {% endspaceless %}</td>
-                </tr>
-            {% endwith %}
-        {% endfor %}
-    </tbody>
-</table>
+    <table class="table search_result">
+        <thead>
+            <tr>
+                {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
+                    <th width="5%" field="check" class="print_einvoice">
+                        <input type="checkbox" class="choose_all_check_in_the_same_td" />
+                        {% trans "Choose" %}
+                    </th>
+                {% endif %}
+                <th width="5%">{% trans "No." %}</th>
+                <th width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                <th width="10%">{% trans "Track No." %}</th>
+                <th width="10%">{% trans "Tax Type" %}</th>
+                <th width="10%">{% trans "Sales Amount" %}</th>
+                <th width="10%">{% trans "Tax Amount" %}</th>
+                <th width="10%">{% trans "Total Amount" %}</th>
+                <th width="10%">{% trans "Footprint No." %}</th>
+                <th width="10%">{% trans "Creator" context "taiwan_einvoice" %}</th>
+                <th width="30%">{% trans "Generate Time" %}</th>
+                <th width="5%">{% trans "Print Mark" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for einvoice in data.results %}
+                {% with einvoice.id as einvoice_id %}
+                    <tr einvoice_id="{{ einvoice.id }}" carrier_type__display="{{ einvoice.carrier_type__display }}"
+                        donate_mark__display='{% ifequal "1" einvoice.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
+                        {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
+                            <td field="check" class="print_einvoice">
+                                <input type="checkbox" name="print_einvoice" />
+                            </td>
+                        {% endif %}
+                        <td>{{ forloop.counter }}.</td>
+                        <td field="year_month_range">{{ einvoice.seller_invoice_track_no_dict.year_month_range }}</td>
+                        <td field="track_no_"><button class="btn btn-primary show_einvoice_modal">{{ einvoice.track_no_ }}</button></td>
+                        <td field="type__display">{{ einvoice.seller_invoice_track_no_dict.type__display }}</td>
+                        <td field="SalesAmount">{{ einvoice.amounts.SalesAmount }}</td>
+                        <td field="TaxAmount">{{ einvoice.amounts.TaxAmount }}</td>
+                        <td field="TotalAmount" {% if einvoice.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ einvoice.amounts.TotalAmount }}</td>
+                        <td field="generate_no">{{ einvoice.generate_no }}</td>
+                        <td field="creator_first_name_id">{{ einvoice.creator_dict.first_name }}:{{ einvoice.creator_dict.id }}</td>
+                        <td class="datetime" field="generate_time" value="{{ einvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
+                        <td field="print_mark" value="{{ einvoice.print_mark }}">{% spaceless %}
+                            {% if einvoice.print_mark %}
+                                {% trans "Yes" context "taiwan_einvoice_print_mark" %}
+                            {% else %}{% if einvoice.carrier_type %}
+                                {{ einvoice.carrier_type__display }}
+                            {% else %}{% if einvoice.npoban %}
+                                {% trans "Donated" context "taiwan_einvoice_donate_mark" %}
+                            {% endif %}{% endif %}{% endif %}
+                        {% endspaceless %}</td>
+                    </tr>
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endwith %}

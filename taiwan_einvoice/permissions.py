@@ -12,6 +12,11 @@ class IsSuperUser(IsAdminUser):
         return bool(request.user and request.user.is_superuser)
 
 
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user and request.user.is_superuser)
+
+
+
 class CanEditStaffProfile(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
@@ -120,7 +125,7 @@ class CanEditESCPOSWebOperator(BasePermission):
 
 
 
-class CanOperatorESCPOSWebOperator(BasePermission):
+class CanOperateESCPOSWebOperator(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.operate_te_escposweb",
@@ -131,21 +136,22 @@ class CanOperatorESCPOSWebOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        permissions = CanOperatorESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        permissions = CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
         if permissions:
             res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanOperatorESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanOperateESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for p in CanOperatorESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
-            if p in get_perms(request.user, obj):
+        for p in CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj):
                 res = True
                 break
-        lg.debug("CanOperatorESCPOSWebOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanOperateESCPOSWebOperator.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
@@ -183,7 +189,7 @@ class CanEditTurnkeyWebGroup(BasePermission):
         return res
 
 
-class CanEntrySellerInvoiceTrackNoOperator(BasePermission):
+class CanEntrySellerInvoiceTrackNo(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.view_te_sellerinvoicetrackno",
@@ -200,26 +206,58 @@ class CanEntrySellerInvoiceTrackNoOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        permissions = CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
         if permissions:
             res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntrySellerInvoiceTrackNoOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntrySellerInvoiceTrackNo.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for p in CanEntrySellerInvoiceTrackNoOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
-            if p in get_perms(request.user, obj.turnkey_web):
+        for p in CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj.turnkey_web):
                 res = True
                 break
-        lg.debug("CanEntrySellerInvoiceTrackNoOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntrySellerInvoiceTrackNo.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
 
-class CanEntryEInvoicePrintLogOperator(BasePermission):
+class CanEntryEInvoice(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_einvoice",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntryEInvoice.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj.seller_invoice_track_no.turnkey_web):
+                res = True
+                break
+        lg.debug("CanEntryEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
+class CanEntryEInvoicePrintLog(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
             "taiwan_einvoice.view_te_einvoiceprintlog",
@@ -230,21 +268,117 @@ class CanEntryEInvoicePrintLogOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        permissions = CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
         if permissions:
             res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntryEInvoicePrintLogOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoicePrintLog.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        for p in CanEntryEInvoicePrintLogOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
-            if p in get_perms(request.user, obj.turnkey_web):
+        for p in CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
                 res = True
                 break
-        lg.debug("CanEntryEInvoicePrintLogOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoicePrintLog.has_object_permission with {}: {}".format(request.method, res))
         return res
 
+
+
+class CanEntryCancelEInvoice(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_canceleinvoice",
+        ),
+        "POST": (
+            "taiwan_einvoice.add_te_canceleinvoice",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntryCancelEInvoice.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                res = True
+                break
+        lg.debug("CanEntryCancelEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
+class CanViewLegalEntity(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_legalentity",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        lg.debug("CanViewLegalEntity.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            res = request.user.has_perm(_p)
+            if res:
+                break
+        lg.debug("CanViewLegalEntity.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
+class CanViewTurnkeyWeb(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_turnkeyweb",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        permissions = CanViewTurnkeyWeb.METHOD_PERMISSION_MAPPING.get(request.method, [])
+        if permissions:
+            res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanViewTurnkeyWeb.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        for p in CanViewTurnkeyWeb.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            app, codename = p.split('.')
+            if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                res = True
+                break
+        lg.debug("CanViewTurnkeyWeb.has_object_permission with {}: {}".format(request.method, res))
+        return res
 

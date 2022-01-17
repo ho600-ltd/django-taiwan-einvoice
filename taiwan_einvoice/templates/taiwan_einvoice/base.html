@@ -86,7 +86,12 @@
                                 <div role="menu" class="dropdown-menu">
                                     {% for turnkeyweb in can_be_edited_turnkeywebs %}
                                         <a role="presentation" class="dropdown-item nav_turnkeywebgroup"
-                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=turnkeyweb.id %}?format=html">
+                                            {% if turnkeyweb.id %}
+                                                href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail' pk=turnkeyweb.id %}?format=html"
+                                            {% else %}
+                                                href="#"
+                                            {% endif %}
+                                            >
                                             {% blocktrans with name=turnkeyweb.name %}Staff Group({{ name }}){% endblocktrans %}
                                         </a>
                                     {% endfor %}
@@ -152,7 +157,7 @@
                                 href="#">{{ user.last_name }}{{ user.first_name }}</a>
                             <div role="menu" class="dropdown-menu">
                                 <a role="presentation" class="dropdown-item nav_selfstaffprofile"
-                                    {% if user.is_authenticated %}    
+                                    {% if request.user.staffprofile.id %}    
                                         href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=request.user.staffprofile.id %}?format=html"
                                     {% else %}
                                         href="#"

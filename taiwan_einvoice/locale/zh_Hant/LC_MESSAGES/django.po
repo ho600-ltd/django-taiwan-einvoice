@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-11 16:33+0800\n"
+"POT-Creation-Date: 2022-01-17 15:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,6 +36,12 @@ msgstr "一般稅額"
 msgid "Special"
 msgstr "特種稅額"
 
+msgid "It could not be deleted, because it had E-Invoice({})"
+msgstr "無法刪除，因為它已開立發票({})"
+
+msgid "Not enough numbers"
+msgstr "號碼不足"
+
 msgid "Mobile barcode"
 msgstr "手機條碼"
 
@@ -48,8 +54,20 @@ msgid "Donate to NPO( {npoban} )"
 msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
 msgctxt "canceleinvoice"
-msgid "Canceled"
-msgstr "已作廢"
+msgid "Canceled at {} {}"
+msgstr "於 {} {} 已作廢"
+
+msgctxt "canceleinvoice"
+msgid "Reason: {}"
+msgstr "理由: {}"
+
+msgctxt "canceleinvoice"
+msgid "Return tax document number: {}"
+msgstr "專案作廢核准文號: {}"
+
+msgctxt "canceleinvoice"
+msgid "Remark: {}"
+msgstr "備註: {}"
 
 msgid "No details"
 msgstr "無明細"
@@ -266,6 +284,32 @@ msgstr "開立時間晚於"
 msgid "Generate time earlier than"
 msgstr "開立時間早於"
 
+msgid "Print Mark?"
+msgstr "正本是否已列印?"
+
+msgctxt "taiwan_einvoice_print_mark"
+msgid "Yes"
+msgstr "已印出"
+
+msgctxt "taiwan_einvoice_print_mark"
+msgid "No"
+msgstr "尚未印出"
+
+msgid "Cancel E-Invoice Type?"
+msgstr "作廢電子發票類型?"
+
+msgctxt "taiwan_einvoice_cancel_einvoice_type"
+msgid "Not Canceled"
+msgstr "未作廢"
+
+msgctxt "taiwan_einvoice_cancel_einvoice_type"
+msgid "Canceled, No new one"
+msgstr "已作廢，且未開立新發票"
+
+msgctxt "taiwan_einvoice_cancel_einvoice_type"
+msgid "Canceled, has new one"
+msgstr "已作廢，且有開立新發票"
+
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
 
@@ -337,6 +381,10 @@ msgstr "載具ID"
 msgctxt "E-Invoice"
 msgid "Is Cancel?"
 msgstr "是否作廢?"
+
+msgctxt "E-Invoice"
+msgid "Related E-Invoices"
+msgstr "相關的電子發票"
 
 msgid "Re-Print Original Copy"
 msgstr "再列印正本"
@@ -420,10 +468,6 @@ msgctxt "taiwan_einvoice_donate_mark"
 msgid "Donated"
 msgstr "已捐贈"
 
-msgctxt "taiwan_einvoice_print_mark"
-msgid "Yes"
-msgstr "已印出"
-
 msgctxt "taiwan_einvoice"
 msgid "Print ID or Hex"
 msgstr "列印序號或編碼"
@@ -464,6 +508,9 @@ msgstr "列印序號"
 msgid "Print Time"
 msgstr "列印時間"
 
+msgid "Buyer"
+msgstr "買受人"
+
 msgid "Donate mark"
 msgstr "捐贈註記"
 
@@ -476,6 +523,10 @@ msgstr "狀態"
 
 msgid "Reason"
 msgstr "理由"
+
+msgctxt "taiwan_einvoice_einvoiceprintlog_is_original_copy"
+msgid "Cancel Note"
+msgstr "作廢說明"
 
 msgctxt "taiwan_einvoice_einvoiceprintlog_done_status"
 msgid "Done"
@@ -631,6 +682,9 @@ msgstr "結束號碼"
 msgid "Blank No. Count"
 msgstr "空白張數"
 
+msgid "Delete"
+msgstr "刪除"
+
 msgid "Upload .csv to Create Seller Invoice Track No"
 msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
 
@@ -639,6 +693,18 @@ msgstr "選擇 .csv"
 
 msgid "Create"
 msgstr "新增"
+
+msgid "Delete Seller Invoice Track No"
+msgstr "刪除字軌號碼檔"
+
+msgid ""
+"\n"
+"                        <p>Do you sure to delete the above record?</p>\n"
+"                    "
+msgstr ""
+"\n"
+"                        <p>您確定要刪除上述紀錄?</p>\n"
+"                    "
 
 msgid "Create Staff"
 msgstr "新增工作人員"
@@ -671,6 +737,9 @@ msgstr "是"
 
 msgid "Is on working?"
 msgstr "是否使用中?"
+
+msgid "Is Production?"
+msgstr "是否商用?"
 
 msgid "Seller Identifier"
 msgstr "賣方統編"
@@ -707,6 +776,12 @@ msgstr "特種稅額"
 msgid "On Working"
 msgstr "使用中"
 
+msgid "Production"
+msgstr "商用"
+
+msgid "Test"
+msgstr "測試"
+
 #, python-format
 msgid "%(name)s's Staff Group"
 msgstr "『%(name)s』的工作人員群組"
@@ -726,9 +801,6 @@ msgstr "瀏覽"
 
 msgid "Edit"
 msgstr "編輯"
-
-msgid "Delete"
-msgstr "刪除"
 
 msgid "Seller Invoice Track No"
 msgstr "字軌號碼"
@@ -816,6 +888,9 @@ msgstr ""
 "\n"
 "\n"
 "與先前字軌號碼有重疊"
+
+msgid "Delete Error"
+msgstr "刪除失敗"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"

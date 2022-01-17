@@ -8,7 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.timezone import utc, now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import pgettext_lazy
-from rest_framework.serializers import CharField, IntegerField, BooleanField, JSONField
+from rest_framework.serializers import CharField, IntegerField, BooleanField, DateTimeField, JSONField
 from rest_framework.serializers import (
     PrimaryKeyRelatedField,
     HyperlinkedIdentityField,
@@ -288,6 +288,7 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     type__display = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
     year_month_range = CharField(read_only=True)
+    can_be_deleted = BooleanField(read_only=True)
 
     class Meta:
         model = SellerInvoiceTrackNo
@@ -303,6 +304,20 @@ class DetailsContentField(ReadOnlyField):
         return []
 
 
+
+class EInvoiceSimpleSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    track_no = CharField(read_only=True)
+    track_no_ = CharField(read_only=True)
+
+
+    class Meta:
+        model = EInvoice
+        fields = ['resource_uri', 'id', 'track_no_']
+
+
+
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
@@ -314,7 +329,10 @@ class EInvoiceSerializer(ModelSerializer):
     carrier_type__display = CharField(read_only=True)
     details_content = DetailsContentField()
     amount_is_warning = BooleanField(read_only=True)
+    buyer_is_business_entity = BooleanField(read_only=True)
     is_canceled = BooleanField(read_only=True)
+    canceled_time = DateTimeField(read_only=True)
+    related_einvoices = EInvoiceSimpleSerializer(read_only=True, many=True)
 
     class Meta:
         model = EInvoice
