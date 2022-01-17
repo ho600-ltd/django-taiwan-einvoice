@@ -304,6 +304,20 @@ class DetailsContentField(ReadOnlyField):
         return []
 
 
+
+class EInvoiceSimpleSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    track_no = CharField(read_only=True)
+    track_no_ = CharField(read_only=True)
+
+
+    class Meta:
+        model = EInvoice
+        fields = ['resource_uri', 'id', 'track_no_']
+
+
+
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
@@ -318,6 +332,7 @@ class EInvoiceSerializer(ModelSerializer):
     buyer_is_business_entity = BooleanField(read_only=True)
     is_canceled = BooleanField(read_only=True)
     canceled_time = DateTimeField(read_only=True)
+    related_einvoices = EInvoiceSimpleSerializer(read_only=True, many=True)
 
     class Meta:
         model = EInvoice

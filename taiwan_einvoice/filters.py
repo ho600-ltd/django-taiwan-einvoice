@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog
+from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog, CancelEInvoice
 
 
 class UserFilter(filters.FilterSet):
@@ -220,6 +220,7 @@ class EInvoiceFilter(filters.FilterSet):
     details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')
     code39__exact = filters.CharFilter(method='filter_code39__exact')
     any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
+    cancel_einvoice_type = filters.CharFilter(method='filter_cancel_einvoice_type')
 
 
 
@@ -227,7 +228,22 @@ class EInvoiceFilter(filters.FilterSet):
         model = EInvoice
         fields = {
             'generate_time': ('gte', 'lt', ),
+            'print_mark': ('exact', ),
         }
+
+
+    def filter_cancel_einvoice_type(self, queryset, name, value):
+        if value not in ['n', 'c', 'o']:
+            queryset = queryset.none()
+        elif 'n' == value:
+            queryset = queryset.filter(canceleinvoice__isnull=True)
+        elif 'c' == value:
+            queryset = queryset.filter(canceleinvoice__isnull=False,
+                                       canceleinvoice__in=CancelEInvoice.objects.filter(new_einvoice__isnull=True))
+        elif 'o' == value:
+            queryset = queryset.filter(canceleinvoice__isnull=False,
+                                       canceleinvoice__in=CancelEInvoice.objects.filter(new_einvoice__isnull=False))
+        return queryset
 
 
     def filter_code39__exact(self, queryset, name, value):

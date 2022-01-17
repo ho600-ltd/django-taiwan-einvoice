@@ -792,6 +792,23 @@ class EInvoice(models.Model):
             return cei.generate_time
         else:
             return None
+    @property
+    def related_einvoices(self):
+        einvoice = self
+        related_einvoices = []
+        while True:
+            related_einvoice = einvoice.canceleinvoice_set.filter(new_einvoice__isnull=False)
+            if related_einvoice:
+                canceled_einvoice = related_einvoice.get()
+                related_einvoices.append(canceled_einvoice.new_einvoice)
+                einvoice = canceled_einvoice.new_einvoice
+            else:
+                break
+        return related_einvoices
+
+
+    def __str__(self):
+        return self.track_no_
 
 
 

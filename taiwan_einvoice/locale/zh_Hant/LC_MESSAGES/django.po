@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-16 12:24+0800\n"
+"POT-Creation-Date: 2022-01-17 15:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -284,6 +284,32 @@ msgstr "開立時間晚於"
 msgid "Generate time earlier than"
 msgstr "開立時間早於"
 
+msgid "Print Mark?"
+msgstr "正本是否已列印?"
+
+msgctxt "taiwan_einvoice_print_mark"
+msgid "Yes"
+msgstr "已印出"
+
+msgctxt "taiwan_einvoice_print_mark"
+msgid "No"
+msgstr "尚未印出"
+
+msgid "Cancel E-Invoice Type?"
+msgstr "作廢電子發票類型?"
+
+msgctxt "taiwan_einvoice_cancel_einvoice_type"
+msgid "Not Canceled"
+msgstr "未作廢"
+
+msgctxt "taiwan_einvoice_cancel_einvoice_type"
+msgid "Canceled, No new one"
+msgstr "已作廢，且未開立新發票"
+
+msgctxt "taiwan_einvoice_cancel_einvoice_type"
+msgid "Canceled, has new one"
+msgstr "已作廢，且有開立新發票"
+
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
 
@@ -355,6 +381,10 @@ msgstr "載具ID"
 msgctxt "E-Invoice"
 msgid "Is Cancel?"
 msgstr "是否作廢?"
+
+msgctxt "E-Invoice"
+msgid "Related E-Invoices"
+msgstr "相關的電子發票"
 
 msgid "Re-Print Original Copy"
 msgstr "再列印正本"
@@ -437,10 +467,6 @@ msgstr "開立時間"
 msgctxt "taiwan_einvoice_donate_mark"
 msgid "Donated"
 msgstr "已捐贈"
-
-msgctxt "taiwan_einvoice_print_mark"
-msgid "Yes"
-msgstr "已印出"
 
 msgctxt "taiwan_einvoice"
 msgid "Print ID or Hex"

@@ -249,8 +249,12 @@ function show_einvoice_modal(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $tr = $btn.parents('tr');
+        if (0 < $tr.length) {
+            var einvoice_id = $tr.attr('einvoice_id');
+        } else {
+            var einvoice_id = $btn.attr('einvoice_id');
+        }
         var track_no_ = $btn.text();
-        var einvoice_id = $tr.attr('einvoice_id');
         var $modal = $('#show_einvoice_modal');
         $('[field=details_content]', $modal).text('');
         var resource_uri = $modal.attr('resource_uri_tmpl').replace('{id}', einvoice_id);
@@ -308,6 +312,15 @@ function show_einvoice_modal(taiwan_einvoice_site) {
                     $span.attr('value', value).text(value);
                 });
                 $('.datetime', $modal_body).each(taiwan_einvoice_site.convert_class_datetime(taiwan_einvoice_site));
+                $('[field=related_einvoices] button', $modal_body).remove();
+                $('.related_einvoices_div', $modal_body).hide();
+                for (var j=0; j<json['related_einvoices'].length; j++) {
+                    $('.related_einvoices_div', $modal_body).show();
+                    var re = json['related_einvoices'][j];
+                    var s = '<button class="btn btn-sm btn-primary show_einvoice_modal" einvoice_id="'+re['id']+'">'+re['track_no_']+'</button>';
+                    $('[field=related_einvoices]', $modal_body).append($(s));
+                }
+                $('button.show_einvoice_modal', $modal_body).click(show_einvoice_modal(taiwan_einvoice_site));
                 for (var i=0; i<json['details_content'].length; i++) {
                     if ('text' != json['details_content'][i]['type']) {
                         continue;

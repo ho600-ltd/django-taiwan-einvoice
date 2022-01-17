@@ -212,7 +212,9 @@ $(function () {
         var select_kind_params = [
             'is_original_copy',
             'is_active',
-        ]
+            'print_mark',
+            'cancel_einvoice_type'
+        ];
         for (var param of select_kind_params) {
             var select_kind_param = url.searchParams.get(param);
             if (select_kind_param) {

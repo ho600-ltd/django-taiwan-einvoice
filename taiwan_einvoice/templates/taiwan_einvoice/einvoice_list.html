@@ -83,6 +83,36 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="print_mark">{% trans "Print Mark?" %}</label>
+                        <div class="input-group" id="print_mark" data-target-input="nearest">
+                            <select class="form-control" data-target="#print_mark"
+                                name="print_mark" id="id_print_mark">
+                                <option value=""></option>
+                                <option value="ture">{% trans "Yes" context "taiwan_einvoice_print_mark" %}</option>
+                                <option value="false">{% trans "No" context "taiwan_einvoice_print_mark" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="cancel_einvoice_type">{% trans "Cancel E-Invoice Type?" %}</label>
+                        <div class="input-group" id="cancel_einvoice_type" data-target-input="nearest">
+                            <select class="form-control" data-target="#cancel_einvoice_type"
+                                name="cancel_einvoice_type" id="id_cancel_einvoice_type">
+                                <option value=""></option>
+                                <option value="n">{% trans "Not Canceled" context "taiwan_einvoice_cancel_einvoice_type" %}</option>
+                                <option value="c">{% trans "Canceled, No new one" context "taiwan_einvoice_cancel_einvoice_type" %}</option>
+                                <option value="o">{% trans "Canceled, has new one" context "taiwan_einvoice_cancel_einvoice_type" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="search_button_row">
                 <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
             </div>
@@ -317,6 +347,23 @@
                             <span field="is_canceled"></span>
                         </div>
                     </div>
+
+                    <div class="row related_einvoices_div">
+                        <div class="col">
+                            &nbsp;
+                        </div>
+                        <div class="col">
+                            &nbsp;
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Related E-Invoices" context "E-Invoice" %}</b>
+                        </div>
+                        <div class="col">
+                            <div field="related_einvoices">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col">
                             <button class="btn btn-link" data-toggle="collapse" data-target="#details_content_0" aria-expanded="true" aria-controls="details_content_0">
