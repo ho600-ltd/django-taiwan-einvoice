@@ -113,6 +113,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         lg.debug("is authenticated: {}".format(self.user))
         data = json.loads(text_data)
         einvoice_id = int(data.get('einvoice_id', 0))
+        pass_key = data.get('pass_key', '')
         serial_number = data['serial_number']
         unixtimestamp = data['unixtimestamp']
         invoice_json = data['invoice_json']
@@ -165,6 +166,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
+                'pass_key': pass_key,
                 'type': 'taiwan_einvoice_message',
                 'serial_number': serial_number,
                 'unixtimestamp': unixtimestamp,
@@ -174,11 +176,13 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
     
     def taiwan_einvoice_message(self, event):
+        pass_key = event['pass_key']
         serial_number = event['serial_number']
         unixtimestamp = event['unixtimestamp']
         invoice_json = event['invoice_json']
 
         self.send(text_data=json.dumps({
+            'pass_key': pass_key,
             'serial_number': serial_number,
             'unixtimestamp': unixtimestamp,
             'invoice_json': invoice_json,

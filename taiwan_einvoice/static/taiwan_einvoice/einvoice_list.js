@@ -193,8 +193,8 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             $('td[field=print_mark]', $tr_in_search_table).attr('value', print_mark_value).text(print_mark_str);
         } else {
             const status_message = data.status_message;
-            var fmts = ngettext('<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
-                '<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
+            var fmts = ngettext('<p>It could not print E-Invoice successfully, please check the pass key or reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
+                '<p>It could not print E-Invoice successfully, please check the pass key or reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
                 1);
             var message = interpolate(fmts, { status_message: status_message }, true);
             taiwan_einvoice_site.show_modal(
@@ -549,6 +549,9 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
             dataType: 'json',
             contentType: 'application/json',
             success: function (json) {
+                var escposweb_cookie_name = taiwan_einvoice_site.default_escposweb_cookie_name;
+                var pass_key_name = escposweb_cookie_name + '_pass_key';
+                var pass_key = Cookies.get(pass_key_name);
                 var unixtimestamp = Date.now() / 1000;
                 $tr.attr({ unixtimestamp: unixtimestamp, track_no: json["track_no"] });
                 if (append_to_einvoice && einvoice_printer_sn == details_printer_sn) {
@@ -558,6 +561,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                 }
                 if (details_with_einvoice_in_the_same_paper) {
                     window.WSS['escpos_web_socket'].send(JSON.stringify({
+                        pass_key: pass_key,
                         einvoice_id: einvoice_id,
                         serial_number: einvoice_printer_sn,
                         details_with_einvoice_in_the_same_paper: details_with_einvoice_in_the_same_paper,
@@ -569,6 +573,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                     var details_conent = json['details_content'];
                     delete json['details_content'];
                     window.WSS['escpos_web_socket'].send(JSON.stringify({
+                        pass_key: pass_key,
                         einvoice_id: einvoice_id,
                         serial_number: einvoice_printer_sn,
                         unixtimestamp: unixtimestamp,
@@ -582,6 +587,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                         json['content'] = details_conent;
                         var unixtimestamp = Date.now() / 1000;
                         window.WSS['escpos_web_socket'].send(JSON.stringify({
+                            pass_key: pass_key,
                             serial_number: details_printer_sn,
                             unixtimestamp: unixtimestamp,
                             invoice_json: JSON.stringify(json)
@@ -674,7 +680,10 @@ $(function () {
     if (Cookies.get(taiwan_einvoice_site.default_interval_seconds_of_printing_cookie_name)) {
         $('select[name=interval_seconds_of_printing').val(Cookies.get(taiwan_einvoice_site.default_interval_seconds_of_printing_cookie_name));
     }
-    var escposweb_id_name = $.cookie.get(taiwan_einvoice_site.default_escposweb_cookie_name);
+    var escposweb_cookie_name = taiwan_einvoice_site.default_escposweb_cookie_name;
+    var pass_key_name = escposweb_cookie_name + '_pass_key';
+    var escposweb_id_name = $.cookie.get(escposweb_cookie_name);
+    var pass_key = $.cookie.get(pass_key_name);
     if (escposweb_id_name) {
         var escposweb_id = escposweb_id_name.split(':')[0];
         var escposweb_name = escposweb_id_name.split(':')[1].replace(/%3A/g, ':');
@@ -682,7 +691,9 @@ $(function () {
         var ws_escposweb_status_url = $btn.attr('ws_escposweb_status_url_tmpl').replace('{id}', escposweb_id);
         var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
         var ws_escposweb_print_result_url = $btn.attr('ws_escposweb_print_result_url_tmpl').replace('{id}', escposweb_id);
-        $('span#default_escpos_print_name', $btn).text(escposweb_name);
+        var fmts = ngettext('%(escposweb_name)s - Pass Key: %(pass_key)s', '%(escposweb_name)s(Pass Key: %(pass_key)s)', 1);
+        var button_text = interpolate(fmts, {escposweb_name: escposweb_name, pass_key: pass_key}, true);
+        $('span#default_escpos_print_name', $btn).text(button_text);
         var $table = $('table.search_result');
         var $modal = $('#print_einvoice_modal');
         $modal.data({
