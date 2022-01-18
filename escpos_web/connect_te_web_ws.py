@@ -3,6 +3,7 @@
 import json, os, django, sys, asyncio, websockets, logging
 from time import sleep
 from channels.db import database_sync_to_async
+from libs import get_boot_seed
 
 SSL = False
 dir = os.path.abspath(__file__)
@@ -10,7 +11,6 @@ print(dir)
 sys.path.append(dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "escpos_web.settings")
 django.setup()
-from django.utils.translation import ugettext_lazy as _
 from escpos_printer.models import TEWeb, Printer, Receipt, ReceiptLog
 
 logging.basicConfig()
@@ -24,14 +24,37 @@ async def connect_and_print_receipt(te_web):
         i = 0
         await database_sync_to_async(print_receipt)(te_web.id, i, '', '')
         while True:
+            boot_seed = get_boot_seed()
             data_json = await websocket.recv()
             data= json.loads(data_json)
-            result = await database_sync_to_async(print_receipt)(te_web.id,
-                                                                data['serial_number'],
-                                                                data['unixtimestamp'],
-                                                                data['invoice_json'])
+            if '???' == boot_seed:
+                invoice_data = json.loads(data['invoice_json'])
+                result = {"meet_to_tw_einvoice_standard":
+                            invoice_data['meet_to_tw_einvoice_standard'],
+                          "track_no": invoice_data['track_no'],
+                          "unixtimestamp": data['unixtimestamp'],
+                          "status": False,
+                          "status_message": "「發票機」開機時，未產生通行碼種子"}
+            else:
+                pass_key = data.get('pass_key', '')
+                if boot_seed != pass_key:
+                    invoice_data = json.loads(data['invoice_json'])
+                    result = {"meet_to_tw_einvoice_standard":
+                                invoice_data['meet_to_tw_einvoice_standard'],
+                              "track_no": invoice_data['track_no'],
+                              "unixtimestamp": data['unixtimestamp'],
+                              "status": False,
+                              "status_message": "通行碼(Pass Key {})錯誤".format(pass_key)}
+                else:
+                    result = await database_sync_to_async(print_receipt)(te_web.id,
+                                                                         data['serial_number'],
+                                                                         data['unixtimestamp'],
+                                                                         data['invoice_json'])
             token_auth = te_web.generate_token_auth()
             url = "{}print_result/{}/".format(te_web.url, token_auth)
+            lg.info("url: {}".format(url))
+            lg.info("ssl: {}".format(SSL))
+            lg.info("result: {}".format(result))
             async with websockets.connect(url, ssl=SSL) as ws:
                 await ws.send(json.dumps(result))
             i += 1
@@ -64,7 +87,7 @@ def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
         p1 = Printer.objects.get(serial_number=serial_number)
     except Printer.DoesNotExist:
         result['status'] = False
-        result['status_message'] = _("{} is not exist").format(serial_number)
+        result['status_message'] = "印表機 {} 不存在".format(serial_number)
     else:
         try:
             _result = r.print(p1,
