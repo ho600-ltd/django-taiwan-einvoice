@@ -65,4 +65,29 @@
 {% endblock %}
 
 {% block modals %}
+
+<div class="modal fade" id="set_default_escposweb_modal" tabindex="-1" role="dialog"
+    aria-labelledby="set_default_escposweb_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "Set the default ESC/POS Web" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4><span class="text-danger">*</span> {% trans "Pass Key" %}:</h4>
+                <input name="pass_key" class="form-control" type="text"/>
+                <p>{% trans 'Please get the "Pass Key" from the LCD of ESC/POS Web.' %}</p>
+            </div>
+            <div class="modal-footer">
+                <button id="set_default_escposweb_button_0" type="button" class="set_default_escposweb btn btn-secondary">{% trans "Configure" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-15 21:00+0800\n"
+"POT-Creation-Date: 2022-01-18 14:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -138,6 +138,12 @@ msgstr "請先設定預設的發票機"
 
 msgid "Default ESC/POS Printer"
 msgstr "預設發票機"
+
+msgid "Pass Key: "
+msgstr "通行碼(Pass Key): "
+
+msgid "Please input the \"Pass Key\""
+msgstr "請輸入\"通行碼(Pass Key)\""
 
 msgid "Admin"
 msgstr "管理員"
