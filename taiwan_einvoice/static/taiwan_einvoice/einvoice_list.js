@@ -193,8 +193,8 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             $('td[field=print_mark]', $tr_in_search_table).attr('value', print_mark_value).text(print_mark_str);
         } else {
             const status_message = data.status_message;
-            var fmts = ngettext('<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
-                '<p>It could not print E-Invoice successfully, please reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
+            var fmts = ngettext('<p>It could not print E-Invoice successfully, please check the pass key or reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
+                '<p>It could not print E-Invoice successfully, please check the pass key or reboot the ESC/POS Printer server.</p><p>Error Detail: %(status_message)s</p>',
                 1);
             var message = interpolate(fmts, { status_message: status_message }, true);
             taiwan_einvoice_site.show_modal(
