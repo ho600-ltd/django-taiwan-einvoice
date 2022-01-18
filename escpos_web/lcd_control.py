@@ -7,49 +7,12 @@ import RPi.GPIO as GPIO
 
 import time, logging, sys, netifaces, urllib.request, datetime, subprocess
 from PIL import Image, ImageDraw, ImageFont, ImageColor
-
-
-def get_public_ip():
-    no_ip = '?.?.?.?'
-    i = 0
-    while i < 10:
-        try:
-            external_ip = urllib.request.urlopen('https://ipv4.icanhazip.com').read().strip().decode('utf-8')
-        except:
-            external_ip = no_ip
-        if no_ip == external_ip:
-            i += 1
-            time.sleep(3)
-        else:
-            break
-    return external_ip
-
-
-def get_eths():
-    eths = []
-    for eth in netifaces.interfaces():
-        if 'lo' == eth: continue
-        i = netifaces.ifaddresses(eth)
-        try: ip = netifaces.ifaddresses(eth)[netifaces.AF_INET][0]['addr']
-        except: pass
-        else: eths.append((eth, ip))
-    return eths
-
-
-def get_boot_seed():
-    try:
-        seed = open('/var/run/boot_random_seed', 'r').read()[:3].upper()
-    except:
-        seed = '???'
-    return seed
-
-def get_hour_minute():
-    return datetime.datetime.now().strftime('%H:%M')
+from libs import get_public_ip, get_eths, get_boot_seed, get_hour_minute
 
 
 def info_block(lg, draw):
     height = 95
-    draw.text((30, height), "Key:", font=SEED_INFO_FONT, fill=0)
+    draw.text((20, height), "Pass key:", font=MENU_FONT, fill=0)
     height -= 30
     draw.text((5, height), get_boot_seed(), font=SEED_INFO_FONT, fill=0)
 
