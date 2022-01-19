@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding:utf-8 -*-
-import netifaces, urllib.request, datetime
+import time, netifaces, urllib.request, datetime
 
 
 def get_public_ip():
