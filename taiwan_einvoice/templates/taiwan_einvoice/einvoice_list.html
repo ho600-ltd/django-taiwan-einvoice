@@ -1,7 +1,7 @@
 {% extends 'taiwan_einvoice/base.html' %}
 {% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}{% load ho600_tags %}
 
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
 
 {% block css %}
 {% endblock %}

@@ -92,7 +92,7 @@
 
 {% block modals %}
 
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeywebs" %}
 
 {% if can_add_canceleinvoice_under_turnkeywebs.exists %}
 
