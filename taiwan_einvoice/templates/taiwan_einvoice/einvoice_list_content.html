@@ -1,6 +1,6 @@
 {% load i18n %}{% load tz %}{% load ho600_tags %}
 
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
 {% with operate_escposwebs_exists=can_operate_escposwebs.exists %}
 
     <div class="total_count_row">

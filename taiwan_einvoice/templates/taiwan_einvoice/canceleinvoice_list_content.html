@@ -1,6 +1,6 @@
 {% load i18n %}{% load tz %}{% load ho600_tags %}
 
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeywebs" %}
 {% with add_canceleinvoice_under_turnkeywebs_exists=can_add_canceleinvoice_under_turnkeywebs.exists %}
 
     {% if add_canceleinvoice_under_turnkeywebs_exists %}

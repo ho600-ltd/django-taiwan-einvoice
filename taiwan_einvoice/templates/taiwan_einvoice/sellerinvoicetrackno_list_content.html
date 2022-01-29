@@ -1,6 +1,6 @@
 {% load i18n %}{% load ho600_tags %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_add_sellerinvoicetrackno_under_turnkeywebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.delete_te_sellerinvoicetrackno" as "can_delete_sellerinvoicetrackno_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_add_sellerinvoicetrackno_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.delete_te_sellerinvoicetrackno" as "can_delete_sellerinvoicetrackno_under_turnkeywebs" %}
 
 <div class="total_count_row">
     {% with data.count as total_count %}

@@ -3,14 +3,14 @@
 {% load compress %}
 {% load ho600_tags %}
 {% get_current_language as LANGUAGE_CODE %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.edit_te_turnkeywebgroup" as "can_be_edited_turnkeywebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_staffprofile" as "can_view_staffprofiles" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_view_sellerinvoicetrackno_under_turnkeywebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_einvoice" as "can_view_einvoice_under_turnkeywebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_canceleinvoice" as "can_view_canceleinvoice_under_turnkeywebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_te_einvoiceprintlog" as "can_view_einvoiceprintlog_under_turnkeywebs" %}
-{% h6_get_objs_by_perms request.user for "taiwan_einvoice.view_turnkeyweb" as "can_view_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.edit_te_turnkeywebgroup" as "can_be_edited_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_staffprofile" as "can_view_staffprofiles" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_view_sellerinvoicetrackno_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoice" as "can_view_einvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_canceleinvoice" as "can_view_canceleinvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoiceprintlog" as "can_view_einvoiceprintlog_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_turnkeyweb" as "can_view_turnkeywebs" %}
 <!DOCTYPE html>
 
 <html>
