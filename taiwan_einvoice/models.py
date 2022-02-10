@@ -978,11 +978,17 @@ class EInvoice(models.Model):
         return _d
 
 
-    def set_print_mark_true(self):
+    def set_print_mark_true(self, einvoice_print_log=None):
         if '' != self.carrier_type or '' != self.npoban:
             pass
-        elif False == self.print_mark and 'print_mark' in self.only_fields_can_update:
-            EInvoice.objects.filter(id=self.id).update(print_mark=True)
+        elif 'print_mark' in self.only_fields_can_update:
+            if True == self.print_mark:
+                #TODO: CMEC2-324
+                # It is "duplicated original copy"
+                # raise or just log this error?
+                pass
+            elif False == self.print_mark:
+                EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
 
     def delete(self, *args, **kwargs):
