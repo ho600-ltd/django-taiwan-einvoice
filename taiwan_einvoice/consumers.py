@@ -57,7 +57,7 @@ def update_print_einvoice_log(data):
         epl.done_status = status
         epl.save()
         if status:
-            epl.einvoice.set_print_mark_true()
+            epl.einvoice.set_print_mark_true(einvoice_print_log=epl)
 
 
 

@@ -34,7 +34,7 @@ class CanEditStaffProfile(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -46,7 +46,7 @@ class CanEditStaffProfile(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -67,7 +67,7 @@ class CanViewSelfStaffProfile(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = app_codename.split('.')
                 if codename in get_perms(request.user, request.user.staffprofile):
@@ -80,7 +80,7 @@ class CanViewSelfStaffProfile(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = app_codename.split('.')
                 if codename in get_perms(request.user, request.user.staffprofile):
@@ -105,7 +105,7 @@ class CanEditESCPOSWebOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -117,7 +117,7 @@ class CanEditESCPOSWebOperator(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -138,7 +138,7 @@ class CanOperateESCPOSWebOperator(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
@@ -149,7 +149,7 @@ class CanOperateESCPOSWebOperator(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj):
@@ -174,7 +174,7 @@ class CanEditTurnkeyWebGroup(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -186,7 +186,7 @@ class CanEditTurnkeyWebGroup(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -212,7 +212,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
@@ -223,7 +223,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_web):
@@ -245,7 +245,7 @@ class CanEntryEInvoice(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
@@ -256,7 +256,7 @@ class CanEntryEInvoice(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.seller_invoice_track_no.turnkey_web):
@@ -278,7 +278,7 @@ class CanEntryEInvoicePrintLog(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
@@ -289,7 +289,7 @@ class CanEntryEInvoicePrintLog(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
@@ -314,7 +314,7 @@ class CanEntryCancelEInvoice(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
@@ -325,7 +325,7 @@ class CanEntryCancelEInvoice(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
@@ -347,7 +347,7 @@ class CanViewLegalEntity(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -359,7 +359,7 @@ class CanViewLegalEntity(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
@@ -380,7 +380,7 @@ class CanViewTurnkeyWeb(BasePermission):
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewTurnkeyWeb.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
@@ -391,7 +391,7 @@ class CanViewTurnkeyWeb(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('info')
         res = False
-        if request.user.staffprofile and request.user.staffprofile.is_active:
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanViewTurnkeyWeb.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
