@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-18 16:06+0800\n"
+"POT-Creation-Date: 2022-03-25 20:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -185,6 +185,9 @@ msgstr "作廢電子發票"
 
 msgid "Note: Cancel E-Invoice could not be rollback. The track no. will be deprecated."
 msgstr "注意: 作廢電子發票後，是無法回復，該發票的字軌號碼將會被棄用。"
+
+msgid "Note: If the customer lost the original copy of E-Invoice, then please cancel this E-Invoice after you get the statement from the customer."
+msgstr "注意: 如果消費者遺失紙本電子發票證明聯，請先拿到該消費者的聲明書方才作廢發票。"
 
 msgid "Cancel Reason Example"
 msgstr "作廢原因範例"
