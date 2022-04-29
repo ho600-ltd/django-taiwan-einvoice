@@ -45,7 +45,7 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             if (0 < $prev_tr.length) {
                 $('td[field=print_mark]', $prev_tr).text(prev_print_mark_str);
             }
-            $('td[field=status]', $tr).empty().append($('<i class="far fa-check-circle"></i>'));
+            $('td[field=print_status]', $tr).empty().append($('<i class="far fa-check-circle"></i>'));
 
             var print_mark_str = pgettext('print_mark', 'Yes');
             var print_mark_value = 'True';
@@ -230,7 +230,7 @@ function print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_pri
             var $modal = $btn.parents('.modal');
             var $target = $(target_selector_query, $modal);
             var $print_einvoice_btn = $('button.print_einvoice', $modal);
-            $('td[field=status]', $target).attr('value', '').text('');
+            $('td[field=print_status]', $target).attr('value', '').text('');
             var reason = $('span[field=reason]', $modal).text();
             if (!reason) {
                 $('span[field=reason]', $modal).text(gettext('Print original copy before close the modal.'));
@@ -269,7 +269,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
     }
     var interval_seconds_of_printing = $('select[name=interval_seconds_of_printing]', $modal).val();
     interval_seconds_of_printing = interval_seconds_of_printing ? interval_seconds_of_printing : 1000;
-    var $td = $('td[field=status][value=""]:first', $target);
+    var $td = $('td[field=print_status][value=""]:first', $target);
     var $tr = $td.parents('tr');
     var $prev_tr = $tr.prev('tr.data');
     if (0 == window.WSS['escpos_web_socket'].readyState || 0 == window.WSS['escpos_web_print_result_socket'].readyState) {
@@ -319,7 +319,7 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
         }
         $td.empty().append($spinner);
         $td.attr('value', 'spinner');
-        var $next_td = $('td[field=status][value=""]:first', $modal);
+        var $next_td = $('td[field=print_status][value=""]:first', $modal);
 
         console.log('target_selector_query: '+target_selector_query);
         if (target_selector_query.indexOf('einvoice_id') >= 0) {
