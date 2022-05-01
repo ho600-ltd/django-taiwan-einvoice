@@ -147,6 +147,7 @@ class EInvoiceSellerAPI(models.Model):
                                        data=data,
                                        headers={'Content-Type':
                                                 'application/x-www-form-urlencoded'},
+                                       timeout=(10, 10),
                                        **client_kw)
             except:
                 pass

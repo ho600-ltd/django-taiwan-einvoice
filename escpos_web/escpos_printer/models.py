@@ -457,6 +457,10 @@ class ReceiptLog(models.Model):
             {height=64, width=3, pos="BELOW", font="A",
              align_ct=True, function_type=None, check=True}
         """
+        if not line.get('barcode', ''):
+            printer_device.ln(1)
+            return
+
         default_args = ['height', 'width', 'pos', 'font',
                         'align_ct', 'function_type', 'check']
         d = {}
