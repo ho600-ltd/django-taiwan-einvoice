@@ -7,26 +7,6 @@ function delay_set_up_the_escpos_printer(button_id, modal_id, ws_escposweb_statu
 };
 
 
-function suspend_print_einvoice(taiwan_einvoice_site) {
-    return function () {
-        var $btn = $(this);
-        var $tr = $btn.parents('tr');
-        var $prev_tr = $tr.prev('tr.data');
-        if (0 < $('td[field=print_mark][value=""]', $prev_tr).length) {
-            $('button.re_print_original_copy', $prev_tr).show();
-        }
-        var $modal = $btn.parents('.modal');
-        $modal.data('suspend', true);
-        if ('modal' == $btn.attr('data-dismiss')) {
-            //pass;
-        } else {
-            $btn.hide();
-        }
-        $('button.print_einvoice', $modal).show();
-    };
-};
-
-
 function show_einvoice_modal(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
