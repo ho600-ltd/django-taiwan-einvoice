@@ -44,13 +44,13 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
         const unixtimestamp = data.unixtimestamp;
         const track_no = data.track_no;
         const status = data.status;
-        var $tr = $('tr.data[unixtimestamp="' + unixtimestamp + '"][track_no="' + track_no + '"]');
-        if (0 >= $tr.length) {
+        var $obj = $('[unixtimestamp="' + unixtimestamp + '"][track_no="' + track_no + '"]');
+        if (0 >= $obj.length) {
             return false;
         }
         if (status) {
             var prev_print_mark_str = pgettext('print_mark', 'Yes');
-            var $prev_tr = $tr.prev('tr.data');
+            var $prev_tr = $obj.prev('tr.data');
             var $prev_tr_in_search_table = $('table.search_result tr[track_no=' + $prev_tr.attr('track_no') + ']');
             if ("" != $prev_tr_in_search_table.attr('carrier_type__display')) {
                 prev_print_mark_str = $prev_tr_in_search_table.attr('carrier_type__display');
@@ -60,7 +60,7 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             if (0 < $prev_tr.length) {
                 $('td[field=print_mark]', $prev_tr).text(prev_print_mark_str);
             }
-            $('td[field=print_status]', $tr).empty().append($('<i class="far fa-check-circle"></i>'));
+            $('td[field=print_status]', $obj).empty().append($('<i class="far fa-check-circle"></i>'));
 
             var print_mark_str = pgettext('print_mark', 'Yes');
             var print_mark_value = 'True';
