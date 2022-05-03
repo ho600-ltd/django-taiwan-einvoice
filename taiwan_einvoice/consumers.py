@@ -77,7 +77,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
                     return False
-                if 'taiwan_einvoice.operate_te_escposweb' in get_perms(self.user, escpos_web):
+                if 'operate_te_escposweb' in get_perms(self.user, escpos_web):
                     pass
                 else:
                     slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
@@ -207,7 +207,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
                     return False
-                if 'taiwan_einvoice.operate_te_escposweb' in get_perms(self.user, escpos_web):
+                if 'operate_te_escposweb' in get_perms(self.user, escpos_web):
                     pass
                 else:
                     slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
@@ -334,7 +334,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
                     return False
-                if 'taiwan_einvoice.operate_te_escposweb' in get_perms(self.user, escpos_web):
+                if 'operate_te_escposweb' in get_perms(self.user, escpos_web):
                     pass
                 else:
                     slug, seed, verify_value = self.scope['url_route']['kwargs']['token_auth'].split('-')
