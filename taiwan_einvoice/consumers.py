@@ -40,12 +40,12 @@ def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
 
 def update_print_einvoice_log(data):
     meet_to_tw_einvoice_standard = data['meet_to_tw_einvoice_standard']
+    if not meet_to_tw_einvoice_standard:
+        return
     track = data['track_no'][:2]
     no = int(data['track_no'][2:])
     unixtimestamp = data['unixtimestamp']
     status = data['status']
-    if not meet_to_tw_einvoice_standard:
-        return
     from taiwan_einvoice.models import EInvoicePrintLog
     try:
         epl = EInvoicePrintLog.objects.get(einvoice__track=track,
