@@ -61,11 +61,12 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
 .. code-block:: sh
 
-    $ sudo yum install python-dev python-virtualenv git zsh util-linux-user jq
+    $ sudo yum install python3-dev python-virtualenv git zsh util-linux-user jq mysql-devel
         * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
     $ virtualenv -p python3 django-taiwan-einvoice.py3env
     $ source django-taiwan-einvoice.py3env/bin/activate
+    $ pip install --upgrade pip
     $ pip install -r django-taiwan-einvoice/turnkey_web/requirements.txt
     $ pip install ipython
     $ cd django-taiwan-einvoice/turnkey_web/
