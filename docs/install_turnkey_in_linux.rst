@@ -1,7 +1,7 @@
-在 Linux 安裝 Turnkey 及 DTE 伺服器
+在 Linux 安裝 Turnkey 及 TKW 伺服器
 ===============================================================================
 
-下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/1536133205094.html
+Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/1536133205094.html
 
 最低需求: 
 
@@ -11,10 +11,11 @@
 
 安裝建議:
 
-1. EI 平台有限制 Turnkey 系統的來源 IP ，所以建議到雲端平台去建立 DTE 伺服器，本文中範例是運作在 AWS
+1. EI 平台有限制 Turnkey 系統的來源 IP ，所以建議到雲端平台去建立 TKW 伺服器，本文中範例是運作在 AWS
+#. 安裝 Turnkey 的系統，建議使用 OpenVPN 連線或是部置在 NAT 的後面，讓 Turnkey 可以 OpenVPN Server 或 NAT Server 的 IP 去跟 EI 連線
 #. Turnkey 須搭配 Xwindow ，所以建議使用「Amazon Linux 2 with .Net Core, PowerShell, Mono, and MATE Desktop Environment」AMI，有 LTS 支援
-#. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，可多個 Turnkey 系統置於同一 Linux ，也可各自裝在獨立的 Linux OS , 
-建議安裝 OpenVPN 伺服器，並設定 NAT 模式
+#. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，可多個 Turnkey 系統置於同一 Linux 的不同資料夾中，也可各自裝在獨立的 Linux OS
+#. TKW 是以檔案系統與 Turnkey 系統互動，所以多個 Turnkey 系統置於一 Linux 中，可只安裝一個 TKW ，若裝在不同 Linux ，則每個 Linux 至少都裝一個 TKW
 
 創建 PostgreSQL 資料庫:
 
@@ -54,3 +55,23 @@
 .. figure:: install_turnkey_in_linux/turnkey_ui.png
 
     Turnkey UI
+
+安裝 TKW 伺服器
+-------------------------------------------------------------------------------
+
+.. code-block:: sh
+
+    $ sudo yum install python-dev python-virtualenv git zsh util-linux-user jq
+        * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
+    $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
+    $ virtualenv -p python3 django-taiwan-einvoice.py3env
+    $ source django-taiwan-einvoice.py3env/bin/activate
+    $ pip install -r django-taiwan-einvoice/turnkey_web/requirements.txt
+    $ pip install ipython
+    $ cd django-taiwan-einvoice/turnkey_web/
+    $ ./manage.py migrate
+    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TE service
+    $ cp -rf django-taiwan-einvoice/turnkey_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ sudo apt install supervisor
+    $ sudo supervisorctl reread
+    $ sudo supervisorctl start all
