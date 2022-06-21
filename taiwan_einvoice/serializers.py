@@ -28,7 +28,7 @@ from taiwan_einvoice.models import (
     Printer,
     LegalEntity,
     Seller,
-    TurnkeyWeb,
+    TurnkeyService,
     SellerInvoiceTrackNo,
     EInvoice,
     EInvoicePrintLog,
@@ -169,9 +169,9 @@ class SellerSerializer(ModelSerializer):
 
 
 
-class TurnkeyWebSerializer(ModelSerializer):
+class TurnkeyServiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
-        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyweb-detail", lookup_field='pk')
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyservice-detail", lookup_field='pk')
     seller_dict = SellerSerializer(source='seller', read_only=True)
     count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
     count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
@@ -184,7 +184,7 @@ class TurnkeyWebSerializer(ModelSerializer):
 
 
     class Meta:
-        model = TurnkeyWeb
+        model = TurnkeyService
         fields = (
             'id', 'resource_uri', 'seller_dict',
             'count_now_use_07_sellerinvoicetrackno_blank_no',
@@ -243,9 +243,9 @@ class StaffGroupSerializer(ModelSerializer):
 
 
 
-class TurnkeyWebGroupSerializer(ModelSerializer):
+class TurnkeyServiceGroupSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
-        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeywebgroup-detail", lookup_field='pk')
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:turnkeyservicegroup-detail", lookup_field='pk')
     groups = StaffGroupSerializer(read_only=True, many=True)
     groups_count = SerializerMethodField()
     groups_permissions = JSONField()
@@ -253,7 +253,7 @@ class TurnkeyWebGroupSerializer(ModelSerializer):
 
 
     class Meta:
-        model = TurnkeyWeb
+        model = TurnkeyService
         fields = (
             'id', 'resource_uri', 'name', 'groups', 'groups_count', 'groups_permissions',
         )
@@ -266,7 +266,7 @@ class TurnkeyWebGroupSerializer(ModelSerializer):
 
 
 
-class TurnkeyWebRelatedField(PrimaryKeyRelatedField):
+class TurnkeyServiceRelatedField(PrimaryKeyRelatedField):
     def get_queryset(self):
         request = self.context.get('request', None)
         return get_objects_for_user(request.user if request else AnonymousUser,
@@ -282,8 +282,8 @@ class TurnkeyWebRelatedField(PrimaryKeyRelatedField):
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
-    turnkey_web = TurnkeyWebRelatedField(required=True, allow_null=False)
-    turnkey_web_dict = TurnkeyWebSerializer(source='turnkey_web', read_only=True)
+    turnkey_web = TurnkeyServiceRelatedField(required=True, allow_null=False)
+    turnkey_web_dict = TurnkeyServiceSerializer(source='turnkey_web', read_only=True)
     type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
     type__display = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)

@@ -63,25 +63,25 @@ class LegalEntityHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
-class TurnkeyWebHtmlRenderer(TEOriginHTMLRenderer):
-    template = _get_template_name('turnkeyweb_list', sub_dir='taiwan_einvoice', show_template_filename=True)
-    content_template = _get_template_name('turnkeyweb_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+class TurnkeyServiceHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('turnkeyservice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('turnkeyservice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
 
-class TurnkeyWebGroupHtmlRenderer(TEOriginHTMLRenderer):
-    template = _get_template_name('turnkeywebgroup_list', sub_dir='taiwan_einvoice', show_template_filename=True)
-    content_template = _get_template_name('turnkeywebgroup_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+class TurnkeyServiceGroupHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('turnkeyservicegroup_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('turnkeyservicegroup_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
     def get_content(self, renderer, data, accepted_media_type, renderer_context):
         if getattr(data.get('detail', ''), 'code', ''):
             return data['detail']
-        from taiwan_einvoice.models import TurnkeyWeb
+        from taiwan_einvoice.models import TurnkeyService
         request = renderer_context['request']
         t = get_template(self.content_template)
         if data.get('id', None):
-            object = TurnkeyWeb.objects.get(id=data['id'])
+            object = TurnkeyService.objects.get(id=data['id'])
         else:
             object = None
         html = t.render({"data": data, "object": object}, request)

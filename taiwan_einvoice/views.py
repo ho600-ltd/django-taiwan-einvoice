@@ -24,21 +24,21 @@ from taiwan_einvoice.permissions import (
     CanViewSelfStaffProfile,
     CanOperateESCPOSWebOperator,
     CanEditESCPOSWebOperator,
-    CanEditTurnkeyWebGroup,
+    CanEditTurnkeyServiceGroup,
     CanEntrySellerInvoiceTrackNo,
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
     CanViewLegalEntity,
-    CanViewTurnkeyWeb,
+    CanViewTurnkeyService,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     StaffProfileHtmlRenderer,
     ESCPOSWebHtmlRenderer,
     ESCPOSWebOperatorHtmlRenderer,
-    TurnkeyWebHtmlRenderer,
-    TurnkeyWebGroupHtmlRenderer,
+    TurnkeyServiceHtmlRenderer,
+    TurnkeyServiceGroupHtmlRenderer,
     LegalEntityHtmlRenderer,
     SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
@@ -51,7 +51,7 @@ from taiwan_einvoice.models import (
     ESCPOSWeb,
     LegalEntity,
     Seller,
-    TurnkeyWeb,
+    TurnkeyService,
     SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError,
     EInvoice,
     EInvoicePrintLog,
@@ -65,8 +65,8 @@ from taiwan_einvoice.serializers import (
     LegalEntitySerializerForUser,
     LegalEntitySerializerForSuperUser,
     SellerSerializer,
-    TurnkeyWebSerializer,
-    TurnkeyWebGroupSerializer,
+    TurnkeyServiceSerializer,
+    TurnkeyServiceGroupSerializer,
     SellerInvoiceTrackNoSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
@@ -76,8 +76,8 @@ from taiwan_einvoice.filters import (
     StaffProfileFilter,
     ESCPOSWebFilter,
     LegalEntityFilter,
-    TurnkeyWebFilter,
-    TurnkeyWebGroupFilter,
+    TurnkeyServiceFilter,
+    TurnkeyServiceGroupFilter,
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
@@ -127,7 +127,7 @@ class StaffProfileModelViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = instance.user
-        ct = ContentType.objects.get_for_model(TurnkeyWeb)
+        ct = ContentType.objects.get_for_model(TurnkeyService)
         for k, v in request.data.items():
             if k.startswith('add_group_'):
                 group_id = k.replace('add_group_', '')
@@ -284,30 +284,30 @@ class SellerModelViewSet(ModelViewSet):
 
 
 
-class TurnkeyWebModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewTurnkeyWeb), )
-    queryset = TurnkeyWeb.objects.all().order_by('-id')
-    serializer_class = TurnkeyWebSerializer
-    filter_class = TurnkeyWebFilter
-    renderer_classes = (TurnkeyWebHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+class TurnkeyServiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    queryset = TurnkeyService.objects.all().order_by('-id')
+    serializer_class = TurnkeyServiceSerializer
+    filter_class = TurnkeyServiceFilter
+    renderer_classes = (TurnkeyServiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
 
 
-class TurnkeyWebGroupModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEditTurnkeyWebGroup), )
+class TurnkeyServiceGroupModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditTurnkeyServiceGroup), )
     pagination_class = Default30PerPagePagination
-    queryset = TurnkeyWeb.objects.all().order_by('-id')
-    serializer_class = TurnkeyWebGroupSerializer
-    filter_class = TurnkeyWebGroupFilter
-    renderer_classes = (TurnkeyWebGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    queryset = TurnkeyService.objects.all().order_by('-id')
+    serializer_class = TurnkeyServiceGroupSerializer
+    filter_class = TurnkeyServiceGroupFilter
+    renderer_classes = (TurnkeyServiceGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', 'patch')
 
 
     def update(self, request, *args, **kwargs):
         body_unicode = request.body.decode('utf-8')
         data = json.loads(body_unicode)
-        turnkeyweb = self.get_object()
+        turnkeyservice = self.get_object()
         if 'delete_group' == data['type']:
             try:
                 g = Group.objects.get(id=data['group_id'])
@@ -317,14 +317,14 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
                 g.delete()
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         elif 'add_group' == data['type']:
-            if len(turnkeyweb.groups) >= self.pagination_class.page_size:
+            if len(turnkeyservice.groups) >= self.pagination_class.page_size:
                 er = {
                     "error_title": _("The count of Existed Groups exceeds the limit"),
                     "error_message": _("The count of Existed Groups exceeds the limit({})").format(self.pagination_class.page_size),
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
-            ct_id = ContentType.objects.get_for_model(turnkeyweb).id
-            group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyweb.id, name=data['display_name'])
+            ct_id = ContentType.objects.get_for_model(turnkeyservice).id
+            group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyservice.id, name=data['display_name'])
             g, created = Group.objects.get_or_create(name=group_name)
             if created:
                 serializer = StaffGroupSerializer(g, context={'request': request})
@@ -341,8 +341,8 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
             except Group.DoesNotExist:
                 pass
             else:
-                ct = ContentType.objects.get_for_model(turnkeyweb)
-                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct.id, id=turnkeyweb.id, name=data['display_name'])
+                ct = ContentType.objects.get_for_model(turnkeyservice)
+                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct.id, id=turnkeyservice.id, name=data['display_name'])
                 g.name = group_name
                 g.save()
                 for k, v in data['permissions'].items():
@@ -352,7 +352,7 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
                         p = Permission.objects.get(codename=k)
                         target_obj = None
                     else:
-                        target_obj = turnkeyweb
+                        target_obj = turnkeyservice
                     if v:
                         assign_perm(p, g, obj=target_obj)
                     else:
@@ -386,11 +386,11 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
     def upload_csv_to_multiple_create(self, request, *args, **kwargs):
         try:
-            turnkey_web = TurnkeyWeb.objects.get(id=request.POST['turnkey_web'])
-        except TurnkeyWeb.DoesNotExist:
+            turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
+        except TurnkeyService.DoesNotExist:
             er = {
-                "error_title": "TurnkeyWeb Does Not Exist",
-                "error_message": _("TurnkeyWeb(id: {}) does not exist").format(turnkey_web),
+                "error_title": "TurnkeyService Does Not Exist",
+                "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_web),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         csv_file = request.FILES['file']

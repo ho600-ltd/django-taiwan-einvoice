@@ -53,10 +53,10 @@
                 <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
                 <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
                 <td>
-                    {% with turnkeyweb_length=staffprofile.groups|length %}
-                        {% for turnkeyweb_name, groups in staffprofile.groups.items %}
-                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyweb_name %}
-                                {% if 1 < turnkeyweb_length and 0 < within_group_length %}{{ turnkeyweb_name }}:{% endif %}
+                    {% with turnkeyservice_length=staffprofile.groups|length %}
+                        {% for turnkeyservice_name, groups in staffprofile.groups.items %}
+                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyservice_name %}
+                                {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
                                 {% for group in groups %}
                                     {% if group.is_member %}
                                         <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
@@ -87,10 +87,10 @@
                 <td field="in_printer_admin_group">{% if staffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
                 <td field="in_manager_group">{% if staffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
                 <td field="groups">
-                    {% with turnkeyweb_length=staffprofile.groups|length %}
-                        {% for turnkeyweb_name, groups in staffprofile.groups.items %}
-                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyweb_name %}
-                                {% if 1 < turnkeyweb_length and 0 < within_group_length %}{{ turnkeyweb_name }}:{% endif %}
+                    {% with turnkeyservice_length=staffprofile.groups|length %}
+                        {% for turnkeyservice_name, groups in staffprofile.groups.items %}
+                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyservice_name %}
+                                {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
                                 {% for group in groups %}
                                     {% if group.is_member %}
                                         <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">

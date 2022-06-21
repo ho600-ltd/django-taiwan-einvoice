@@ -92,9 +92,9 @@
 
 {% block modals %}
 
-{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeyservices" %}
 
-{% if can_add_canceleinvoice_under_turnkeywebs.exists %}
+{% if can_add_canceleinvoice_under_turnkeyservices.exists %}
 
     <div class="modal fade" id="show_canceleinvoice_modal" tabindex="-1" role="dialog"
         resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_canceling}"

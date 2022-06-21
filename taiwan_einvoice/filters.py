@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog, CancelEInvoice
+from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyService, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog, CancelEInvoice
 
 
 class UserFilter(filters.FilterSet):
@@ -87,7 +87,7 @@ class SellerFilter(filters.FilterSet):
 
 
 
-class TurnkeyWebFilter(filters.FilterSet):
+class TurnkeyServiceFilter(filters.FilterSet):
     filter_any_words_in_those_fields = (
         'name',
         'hash_key',
@@ -104,7 +104,7 @@ class TurnkeyWebFilter(filters.FilterSet):
 
 
     class Meta:
-        model = TurnkeyWeb
+        model = TurnkeyService
         fields = {
             'on_working': ('exact', ),
         }
@@ -121,7 +121,7 @@ class TurnkeyWebFilter(filters.FilterSet):
 
 
 
-class TurnkeyWebGroupFilter(filters.FilterSet):
+class TurnkeyServiceGroupFilter(filters.FilterSet):
     filter_any_words_in_those_fields = (
         'name',
         'hash_key',
@@ -138,7 +138,7 @@ class TurnkeyWebGroupFilter(filters.FilterSet):
 
 
     class Meta:
-        model = TurnkeyWeb
+        model = TurnkeyService
         fields = {
             'on_working': ('exact', ),
         }

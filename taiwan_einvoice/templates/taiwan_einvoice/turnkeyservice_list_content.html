@@ -33,24 +33,24 @@
         </tr>
     </thead>
     <tbody>
-        {% for turnkeyweb in data.results %}
-            <tr turnkeyweb_id="{{ turnkeyweb.id }}">
+        {% for turnkeyservice in data.results %}
+            <tr turnkeyservice_id="{{ turnkeyservice.id }}">
                 <td>{{ forloop.counter }}.</td>
-                <td field="on_working">{% if turnkeyweb.on_working %}{% trans "On Working" %}{% endif %}</td>
-                <td field="in_production">{% if turnkeyweb.in_production %}{% trans "Production" %}{% else %}{% trans "Test" %}{% endif %}</td>
-                <td field="identifier">{{ turnkeyweb.seller_dict.legal_entity_dict.identifier }}</td>
-                <td field="name">{{ turnkeyweb.name }}</td>
-                <td field="transport_id">{{ turnkeyweb.transport_id }}</td>
-                <td field="party_id">{{ turnkeyweb.party_id }}</td>
-                <td field="routing_id">{{ turnkeyweb.routing_id }}</td>
+                <td field="on_working">{% if turnkeyservice.on_working %}{% trans "On Working" %}{% endif %}</td>
+                <td field="in_production">{% if turnkeyservice.in_production %}{% trans "Production" %}{% else %}{% trans "Test" %}{% endif %}</td>
+                <td field="identifier">{{ turnkeyservice.seller_dict.legal_entity_dict.identifier }}</td>
+                <td field="name">{{ turnkeyservice.name }}</td>
+                <td field="transport_id">{{ turnkeyservice.transport_id }}</td>
+                <td field="party_id">{{ turnkeyservice.party_id }}</td>
+                <td field="routing_id">{{ turnkeyservice.routing_id }}</td>
                 <td>
-                    <div field="hash_key">{{ turnkeyweb.mask_hash_key }}</div>
-                    <div field="qrcode_seed">{{ turnkeyweb.mask_qrcode_seed }}</div>
-                    <div field="turnkey_seed">{{ turnkeyweb.mask_turnkey_seed }}</div>
-                    <div field="download_seed">{{ turnkeyweb.mask_download_seed }}</div>
+                    <div field="hash_key">{{ turnkeyservice.mask_hash_key }}</div>
+                    <div field="qrcode_seed">{{ turnkeyservice.mask_qrcode_seed }}</div>
+                    <div field="turnkey_seed">{{ turnkeyservice.mask_turnkey_seed }}</div>
+                    <div field="download_seed">{{ turnkeyservice.mask_download_seed }}</div>
                 </td>
-                <td field="count_now_use_07_sellerinvoicetrackno_blank_no">{{ turnkeyweb.count_now_use_07_sellerinvoicetrackno_blank_no }}</td>
-                <td field="count_now_use_08_sellerinvoicetrackno_blank_no">{{ turnkeyweb.count_now_use_08_sellerinvoicetrackno_blank_no }}</td>
+                <td field="count_now_use_07_sellerinvoicetrackno_blank_no">{{ turnkeyservice.count_now_use_07_sellerinvoicetrackno_blank_no }}</td>
+                <td field="count_now_use_08_sellerinvoicetrackno_blank_no">{{ turnkeyservice.count_now_use_08_sellerinvoicetrackno_blank_no }}</td>
             </tr>
         {% endfor %}
     </tbody>
