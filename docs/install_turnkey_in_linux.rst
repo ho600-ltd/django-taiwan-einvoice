@@ -76,3 +76,15 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
     $ sudo apt install supervisor
     $ sudo supervisorctl reread
     $ sudo supervisorctl start all
+
+.. ::
+
+    1. register TKW to CEC with TKW website(like sns subscribe)
+        * browse https://tkw.web.site.url/turnkey_wrapper/, then POST fields to https://tkw.web.site.url/turnkey_wrapper/ to create new turnkey_wrapper object
+            * turnkey_abspath
+            * transport_id
+            * party_id
+            * routing_id
+            * hash_key
+            * turnkey_web_url
+    #. CRON job in turnkeyservice
