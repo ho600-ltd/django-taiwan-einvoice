@@ -72,14 +72,14 @@ class StaffProfile(models.Model):
         return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
     @property
     def groups(self):
-        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        ct_id = ContentType.objects.get_for_model(TurnkeyService).id
         groups = {}
         for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)).order_by('name'):
-            turnkeyweb_id = g.name.split(':')[1]
-            turnkeyweb = TurnkeyWeb.objects.get(id=turnkeyweb_id)
+            turnkeyservice_id = g.name.split(':')[1]
+            turnkeyservice = TurnkeyService.objects.get(id=turnkeyservice_id)
             g.display_name = ''.join(g.name.split(':')[2:])
             is_member = self.user.groups.filter(id=g.id).exists()
-            groups.setdefault(turnkeyweb.name, []).append({"id": g.id,
+            groups.setdefault(turnkeyservice.name, []).append({"id": g.id,
                                                            "display_name": g.display_name,
                                                            "is_member": is_member})
         return groups
@@ -505,7 +505,7 @@ class ForbiddenAboveAmountError(Exception):
 
 
 
-class TurnkeyWeb(models.Model):
+class TurnkeyService(models.Model):
     on_working = models.BooleanField(default=True)
     in_production = models.BooleanField(default=False)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
@@ -523,7 +523,7 @@ class TurnkeyWeb(models.Model):
     history = HistoricalRecords()
     @property
     def groups(self):
-        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        ct_id = ContentType.objects.get_for_model(TurnkeyService).id
         return Group.objects.filter(name__startswith="ct{ct_id}:{id}:".format(ct_id=ct_id, id=self.id)).order_by('name')
     @property
     def groups_permissions(self):
@@ -576,14 +576,14 @@ class TurnkeyWeb(models.Model):
         if not self.hash_key:
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
             
-        super(TurnkeyWeb, self).save(*args, **kwargs)
+        super(TurnkeyService, self).save(*args, **kwargs)
 
 
 
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
-            ("edit_te_turnkeywebgroup", "Edit the groups of TurnkeyWebnn"),
+            ("edit_te_turnkeyservicegroup", "Edit the groups of TurnkeyService"),
 
             ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No"),
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
@@ -600,7 +600,7 @@ class TurnkeyWeb(models.Model):
 
 
 class SellerInvoiceTrackNo(models.Model):
-    turnkey_web = models.ForeignKey(TurnkeyWeb, on_delete=models.DO_NOTHING)
+    turnkey_web = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     type_choices = (
         ('07', _('General')),
         ('08', _('Special')),
@@ -1056,7 +1056,7 @@ class EInvoicePrintLog(models.Model):
             else:
                 ids.append(id)
         else:
-            for tw in TurnkeyWeb.objects.all():
+            for tw in TurnkeyService.objects.all():
                 try:
                     id = integer_from_customize_hex(hex, base=tw.epl_base_set)
                 except:

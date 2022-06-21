@@ -1,17 +1,17 @@
-function add_turnkeywebgroup_modal (taiwan_einvoice_site) {
+function add_turnkeyservicegroup_modal (taiwan_einvoice_site) {
     return function() {
-        var $modal = $('#add_turnkeywebgroup_modal');
+        var $modal = $('#add_turnkeyservicegroup_modal');
         $('[name=display_name]', $modal).val('');
         $modal.modal('show');
     };
 };
 
 
-function add_turnkeywebgroup(taiwan_einvoice_site) {
+function add_turnkeyservicegroup(taiwan_einvoice_site) {
     return function() {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
-        var resource_uri = $('#turnkeywebgroup').attr("resource_uri");
+        var resource_uri = $('#turnkeyservicegroup').attr("resource_uri");
         var data = {
             display_name: $('input[name=display_name]', $modal).val(),
             type: "add_group"
@@ -43,10 +43,10 @@ function add_turnkeywebgroup(taiwan_einvoice_site) {
                 $modal.modal('hide');
                 var tr_str = '<tr group_id="'+json['id']+'" permissions="">'
                     + '<td>'+gettext('NEW RECORD')+'</td>'
-                    + '<td field="name"><button class="btn btn-primary update_turnkeywebgroup_modal">'+json['display_name']+'</button></td>'
+                    + '<td field="name"><button class="btn btn-primary update_turnkeyservicegroup_modal">'+json['display_name']+'</button></td>'
                     + '<td></td></tr>';
                 var $tr = $(tr_str);
-                $('.update_turnkeywebgroup_modal', $tr).click(update_turnkeywebgroup_modal(taiwan_einvoice_site));
+                $('.update_turnkeyservicegroup_modal', $tr).click(update_turnkeyservicegroup_modal(taiwan_einvoice_site));
                 var $table = $('table.search_result');
                 $('tbody', $table).prepend($tr);
                 taiwan_einvoice_site.show_modal(
@@ -61,9 +61,9 @@ function add_turnkeywebgroup(taiwan_einvoice_site) {
 };
 
 
-function update_turnkeywebgroup_modal (taiwan_einvoice_site) {
+function update_turnkeyservicegroup_modal (taiwan_einvoice_site) {
     return function() {
-        var $modal = $('#update_turnkeywebgroup_modal');
+        var $modal = $('#update_turnkeyservicegroup_modal');
         var $btn = $(this);
         var name = $btn.text();
         var $tr = $btn.parents('tr');
@@ -88,9 +88,9 @@ function update_turnkeywebgroup_modal (taiwan_einvoice_site) {
 };
 
 
-function update_turnkeywebgroup(taiwan_einvoice_site) {
+function update_turnkeyservicegroup(taiwan_einvoice_site) {
     return function() {
-        var resource_uri = $('#turnkeywebgroup').attr("resource_uri");
+        var resource_uri = $('#turnkeyservicegroup').attr("resource_uri");
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var group_id = $modal.data('group_id');
@@ -139,9 +139,9 @@ function update_turnkeywebgroup(taiwan_einvoice_site) {
 };
 
 
-function delete_turnkeywebgroup_modal (taiwan_einvoice_site) {
+function delete_turnkeyservicegroup_modal (taiwan_einvoice_site) {
     return function() {
-        var $delete_modal = $('#delete_turnkeywebgroup_modal');
+        var $delete_modal = $('#delete_turnkeyservicegroup_modal');
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var group_id = $modal.data('group_id');
@@ -156,9 +156,9 @@ function delete_turnkeywebgroup_modal (taiwan_einvoice_site) {
 };
 
 
-function delete_turnkeywebgroup(taiwan_einvoice_site) {
+function delete_turnkeyservicegroup(taiwan_einvoice_site) {
     return function() {
-        var resource_uri = $('#turnkeywebgroup').attr("resource_uri");
+        var resource_uri = $('#turnkeyservicegroup').attr("resource_uri");
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var group_id = $modal.data('group_id');
@@ -202,7 +202,7 @@ function delete_turnkeywebgroup(taiwan_einvoice_site) {
 $(function () {
     $('.dropdown-menu a').removeClass('active');
     $(".nav_permission").addClass("nav_active");
-    $(".nav_turnkeywebgroup").addClass("active");
+    $(".nav_turnkeyservicegroup").addClass("active");
 
     taiwan_einvoice_site = new TAIWAN_EINVOICE_SITE('taiwan_einvoice_site', {
         $SUCCESS_MODAL: $('#success_modal'),
@@ -213,10 +213,10 @@ $(function () {
 
     adjust_pagination_html();
 
-    $('.add_turnkeywebgroup_modal').click(add_turnkeywebgroup_modal(taiwan_einvoice_site));
-    $('.add_turnkeywebgroup').click(add_turnkeywebgroup(taiwan_einvoice_site));
-    $('.update_turnkeywebgroup_modal').click(update_turnkeywebgroup_modal(taiwan_einvoice_site));
-    $('.update_turnkeywebgroup').click(update_turnkeywebgroup(taiwan_einvoice_site));
-    $('.delete_turnkeywebgroup_modal').click(delete_turnkeywebgroup_modal(taiwan_einvoice_site));
-    $('.delete_turnkeywebgroup').click(delete_turnkeywebgroup(taiwan_einvoice_site));
+    $('.add_turnkeyservicegroup_modal').click(add_turnkeyservicegroup_modal(taiwan_einvoice_site));
+    $('.add_turnkeyservicegroup').click(add_turnkeyservicegroup(taiwan_einvoice_site));
+    $('.update_turnkeyservicegroup_modal').click(update_turnkeyservicegroup_modal(taiwan_einvoice_site));
+    $('.update_turnkeyservicegroup').click(update_turnkeyservicegroup(taiwan_einvoice_site));
+    $('.delete_turnkeyservicegroup_modal').click(delete_turnkeyservicegroup_modal(taiwan_einvoice_site));
+    $('.delete_turnkeyservicegroup').click(delete_turnkeyservicegroup(taiwan_einvoice_site));
 });

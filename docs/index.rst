@@ -70,9 +70,9 @@
 * EPW: 使用 django-based escpos_web App 建構的發票列印管理系統
 * TKW: 使用 django-based turnkey_web 程式來擴充 Turnkey 系統，使其提供 Web Api 功能的電子發票管理系統
 * CEC: 叫用 EPW 及 TKW 系統的自架電子商務銷售系統(Customize E-Commercial system)
-* TE: 提供 CEC 系統叫用的 django-based taiwan_einvoice App ，嚴格地說，是由 TE 去叫用 EPW 或 TKW ，
-  如果說 CEC 是 Python 撰寫的，那 CEC 是利用 TE 函式庫去叫用 EPW/TKW ，若 CEC 是 PHP/.Net/Java/... 撰寫的，
-  那就先叫用 TE Web Api ，再由 TE 去叫用 EPW/TKW
+* TE: 提供 CEC 系統叫用的 django-based taiwan_einvoice App 。
+  如果說 CEC 是 CPython 撰寫的，那 CEC 就直接利用 TE 函式庫去跟 EPW/TKW 互動，若 CEC 是 PHP/.Net/Java/... 撰寫的，
+  那就先叫用整合 TE 的 Web Api Service (taiwan_einvoice_web)，間接與 EPW/TKW 互動
 
 事前準備說明
 -------------------------------------------------------------------------------

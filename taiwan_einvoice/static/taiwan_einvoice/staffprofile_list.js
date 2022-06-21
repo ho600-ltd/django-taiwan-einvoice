@@ -112,11 +112,11 @@ function update_staffprofile_modal (taiwan_einvoice_site) {
                 });
                 $('.modal-body .group_set', $modal).remove();
                 for (var k in json['groups']) {
-                    var fmts = ngettext("Turnkey Web: %(name)s", "Turnkey Web: %(name)s", 1);
-                    var turnkeyweb_name = interpolate(fmts, {name: k}, true);
-                    var $turnkeyweb_div = $('<div class="form-group row group_set">'
-                        +'<div class="col-sm-12"><p>'+turnkeyweb_name+'</p></div></div>');
-                    $('.modal-body', $modal).append($turnkeyweb_div);
+                    var fmts = ngettext("Turnkey Service: %(name)s", "Turnkey Service: %(name)s", 1);
+                    var turnkeyservice_name = interpolate(fmts, {name: k}, true);
+                    var $turnkeyservice_div = $('<div class="form-group row group_set">'
+                        +'<div class="col-sm-12"><p>'+turnkeyservice_name+'</p></div></div>');
+                    $('.modal-body', $modal).append($turnkeyservice_div);
                     for (var i=0; i<json['groups'][k].length; i++) {
                         var g = json['groups'][k][i];
                         var $group_div = $('<div class="form-group row group_set">'
@@ -186,13 +186,13 @@ function update_staffprofile (taiwan_einvoice_site) {
                 }
                 var s = '';
                 $('td[field=groups]', $tr).html(s);
-                var turnkeyweb_length = 0;
+                var turnkeyservice_length = 0;
                 for (var k in json['groups']) {
-                    turnkeyweb_length += 1;
+                    turnkeyservice_length += 1;
                 }
                 for (var k in json['groups']) {
                     var groups = json['groups'][k];
-                    if (1 < turnkeyweb_length && 0 < json['count_within_groups'][k] ) {
+                    if (1 < turnkeyservice_length && 0 < json['count_within_groups'][k] ) {
                         s += k;
                     }
                     for (var i=0; i<groups.length; i++){

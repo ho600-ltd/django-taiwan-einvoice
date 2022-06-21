@@ -1,7 +1,7 @@
 $(function () {
     $(".nav_else").addClass("nav_active");
     $('.dropdown-menu a').removeClass('active');
-    $(".nav_turnkeyweb").addClass("active");
+    $(".nav_turnkeyservice").addClass("active");
 
     taiwan_einvoice_site = new TAIWAN_EINVOICE_SITE('taiwan_einvoice_site', {
         $SUCCESS_MODAL: $('#success_modal'),

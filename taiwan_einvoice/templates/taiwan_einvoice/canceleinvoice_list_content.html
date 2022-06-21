@@ -1,9 +1,9 @@
 {% load i18n %}{% load tz %}{% load ho600_tags %}
 
-{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeywebs" %}
-{% with add_canceleinvoice_under_turnkeywebs_exists=can_add_canceleinvoice_under_turnkeywebs.exists %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeyservices" %}
+{% with add_canceleinvoice_under_turnkeyservices_exists=can_add_canceleinvoice_under_turnkeyservices.exists %}
 
-    {% if add_canceleinvoice_under_turnkeywebs_exists %}
+    {% if add_canceleinvoice_under_turnkeyservices_exists %}
         <form class="form-inline" onsubmit="javascript: return false;">
             <div class="form-group">
                 <label for="one_dimensional_barcode_for_canceling">
