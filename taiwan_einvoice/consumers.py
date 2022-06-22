@@ -149,7 +149,6 @@ class ESCPOSWebConsumer(WebsocketConsumer):
                     customize_hex_from_id = epl.customize_hex_from_id
                     customize_hex_from_id_len = len(customize_hex_from_id)
                     new_word = ":{}{}:".format(einvoice.generate_no_sha1[:-1*customize_hex_from_id_len], customize_hex_from_id)
-                    print(new_word)
                     invoice_data['content'][index]['qr1_str'] = invoice_data['content'][index]['qr1_str'].replace(ori_word, new_word)
                     break
             invoice_data['content'].append({
