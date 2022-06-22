@@ -33,7 +33,7 @@
         </div>
         <span href="http://purl.org/dc/dcmitype/Text" rel="dct:type">
             <span href="http://purl.org/dc/dcmitype/Text"
-                rel="dct:type">django-taiwan-einvoice.readthedocs.io</span>
+                rel="dct:type">Django-taiwan-einvoice.readthedocs.io</span>
                 網站內容為 <a href="https://www.ho600.info/" rel="cc:attributionURL">ho600 Ltd.</a> 所創作，
                 除非另有說明，否則皆採用
                 <a href="http://creativecommons.org/licenses/by-sa/3.0/tw/"
@@ -51,7 +51,7 @@
 * (撰寫中)協助營業人透過 **Linux** 版的 Turnkey 系統存證開立、作廢、註銷、開立折讓、作廢折讓 B2C 電子發票。所使用版本:
     * Turnkey 軟體版本: **2.0.2**
     * 電子發票資料交換標準訊息建置指引(Message Implementation Guideline)版本: **3.2.1**
-* (撰寫中)協助營業人利用 django-taiwan-einvoice app 為 Turnkey 系統提供 Web API 服務
+* (撰寫中)協助營業人利用 Django-taiwan-einvoice app 為 Turnkey 系統提供 Web API 服務
 * (待續)協助營業人透過加值服務中心完成電子發票相關服務
 * (待續)「查詢電子發票API」教學
 
@@ -66,10 +66,10 @@
 -------------------------------------------------------------------------------
 
 * EI: 財政部電子發票整合服務平台
-* EPW: 使用 django-based escpos_web App 建構的發票列印管理系統
-* TKW: 使用 django-based turnkey_web 程式來擴充 Turnkey 系統，使其提供 Web Api 功能的電子發票管理系統
+* EPW: 使用 Django-based escpos_web App 建構的發票列印管理系統
+* TKW: 使用 Django-based turnkey_web 程式來擴充 Turnkey 系統，使其提供 Web Api 功能的電子發票管理系統
 * CEC: 叫用 EPW 及 TKW 系統的自架電子商務銷售系統(Customize E-Commercial system)
-* TEA: 提供 CEC 系統叫用的 django-based taiwan_einvoice App 。
+* TEA: 提供 CEC 系統叫用的 Django-based taiwan_einvoice App 。
   如果說 CEC 是 CPython 撰寫的，那 CEC 就直接利用 TEA 函式庫去跟 EPW/TKW 互動，若 CEC 是 PHP/.Net/Java/... 撰寫的，
   那就先叫用整合 TEA 的 Web Api Service (TEAWEB 或 taiwan_einvoice_web)，間接與 EPW/TKW 互動
 
@@ -128,7 +128,8 @@
     merchant_operations
     b2c_invoice_brief
     EPW_TKW_TEA_brief
-    install_turnkey_in_linux
+    install_epw_in_pi
+    install_tkw_in_linux
     merchant_create_b2c_invoice
     import_django_taiwan_einvoice
     agent
