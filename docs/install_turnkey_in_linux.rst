@@ -71,7 +71,7 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
     $ pip install ipython
     $ cd django-taiwan-einvoice/turnkey_web/
     $ ./manage.py migrate
-    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TE service
+    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TEA service
     $ cp -rf django-taiwan-einvoice/turnkey_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
     $ sudo apt install supervisor
     $ sudo supervisorctl reread

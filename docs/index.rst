@@ -10,7 +10,7 @@
     請詳見其平台之「`著作權保護政策 <https://www.einvoice.nat.gov.tw/index!showCopyRights>`_」\
     及「`政府網站資料開放宣告 <https://www.ntbna.gov.tw/singlehtml/18025799a2014c6e8be6f305f2e474ca>`_」網頁。
 
-.. note::
+.. warning::
 
     本文件集乃基於忠實、客觀、利己且利他等原則寫作，\
     難免還是有錯字、過版、語意模糊、誤用等情事發生。\
@@ -48,8 +48,7 @@
 
 * (完成)協助消費者在整合平台設定發票載具
 * (撰寫中)協助營業人在整合服務平台上，開立、作廢、開立折讓、作廢折讓、退回 B2B 電子發票
-* (撰寫中)協助營業人透過 **Linux** 版的 Turnkey 系統存證開立、作廢、註銷、開立折讓、
-  作廢折讓 B2C 電子發票。所使用版本:
+* (撰寫中)協助營業人透過 **Linux** 版的 Turnkey 系統存證開立、作廢、註銷、開立折讓、作廢折讓 B2C 電子發票。所使用版本:
     * Turnkey 軟體版本: **2.0.2**
     * 電子發票資料交換標準訊息建置指引(Message Implementation Guideline)版本: **3.2.1**
 * (撰寫中)協助營業人利用 django-taiwan-einvoice app 為 Turnkey 系統提供 Web API 服務
@@ -70,9 +69,9 @@
 * EPW: 使用 django-based escpos_web App 建構的發票列印管理系統
 * TKW: 使用 django-based turnkey_web 程式來擴充 Turnkey 系統，使其提供 Web Api 功能的電子發票管理系統
 * CEC: 叫用 EPW 及 TKW 系統的自架電子商務銷售系統(Customize E-Commercial system)
-* TE: 提供 CEC 系統叫用的 django-based taiwan_einvoice App 。
-  如果說 CEC 是 CPython 撰寫的，那 CEC 就直接利用 TE 函式庫去跟 EPW/TKW 互動，若 CEC 是 PHP/.Net/Java/... 撰寫的，
-  那就先叫用整合 TE 的 Web Api Service (taiwan_einvoice_web)，間接與 EPW/TKW 互動
+* TEA: 提供 CEC 系統叫用的 django-based taiwan_einvoice App 。
+  如果說 CEC 是 CPython 撰寫的，那 CEC 就直接利用 TEA 函式庫去跟 EPW/TKW 互動，若 CEC 是 PHP/.Net/Java/... 撰寫的，
+  那就先叫用整合 TEA 的 Web Api Service (TEAWEB 或 taiwan_einvoice_web)，間接與 EPW/TKW 互動
 
 事前準備說明
 -------------------------------------------------------------------------------
@@ -116,9 +115,9 @@
                 * 電子發票QRCode加解密工具/營業人啟用第2層資訊防偽機制流程說明文件v20160817
                 * 軟體憑證製作手冊
 * `財政部北區國稅局>主題專區>稅務專區>營業稅>電子發票專區 <https://www.ntbna.gov.tw/multiplehtml/724e140e325f497d82ba12d7509ec6ec>`_
-    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-初級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7f7937000009138a0f265d996cb>`_、`影片 <https://youtu.be/XuMKrTba-KI>`_
-    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-中級: `簡報 <https://www.ntbna.gov.tw/download/16a9f7fca430000051f5a5d72c858058>`_、`影片 <https://youtu.be/SGrMUKy_LeM>`_
-    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-高級: `簡報 <https://www.ntbca.gov.tw/registration/detail/e86d4d7cd08644c7a9733caefa1b4d59/bea437d010f6429abbb953dc2b59ab42>`_、`影片 <https://youtu.be/0FNIdsIeUT0>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-初級: `初級簡報 <https://www.ntbna.gov.tw/download/16a9f7f7937000009138a0f265d996cb>`_、`初級影片 <https://youtu.be/XuMKrTba-KI>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-中級: `中級簡報 <https://www.ntbna.gov.tw/download/16a9f7fca430000051f5a5d72c858058>`_、`中級影片 <https://youtu.be/SGrMUKy_LeM>`_
+    * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-高級: `高級簡報 <https://www.ntbca.gov.tw/registration/detail/e86d4d7cd08644c7a9733caefa1b4d59/bea437d010f6429abbb953dc2b59ab42>`_、`高級影片 <https://youtu.be/0FNIdsIeUT0>`_
 
 .. toctree::
     :maxdepth: 4
@@ -128,7 +127,7 @@
     merchant_create_b2b_invoice
     merchant_operations
     b2c_invoice_brief
-    EPW_TKW_TE_brief
+    EPW_TKW_TEA_brief
     install_turnkey_in_linux
     merchant_create_b2c_invoice
     import_django_taiwan_einvoice
