@@ -936,7 +936,7 @@ class EInvoice(models.Model):
                             random_number=self.random_number,
                             sales_amount=sales_amount_str,
                             total_amount=total_amount_str,
-                            buyer_identifier=(LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier)[:8]
+                            buyer_identifier=(LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier)[:8],
                             seller_identifier=self.seller_identifier,
                             generate_no_sha1=self.generate_no_sha1,
                             qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
