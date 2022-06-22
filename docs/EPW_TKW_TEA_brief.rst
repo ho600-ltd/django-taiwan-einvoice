@@ -35,7 +35,7 @@ TEA 設定
     * slug: 可自動隨機產生
     * hash_key: 可自動隨機產生
 
-EPW 設定
+EPW 資料設定
 -------------------------------------------------------------------------------
 
 .. note::
@@ -43,7 +43,7 @@ EPW 設定
     EPW 安裝部份，請見: :doc:`./install_epw_in_pi` 。
 
 1. 套用 TEA 的 escposweb 紀錄來新增 EPW 中的 TEWeb 紀錄，需要資料有:
-    * escpos_web uri ，如: wss://<web site url>/ws/taiwan_einvoice/escpos_web/<id>/
+    * escpos_web uri ，如: wss://<CEC or TEA url>/ws/taiwan_einvoice/escpos_web/<turnkeyservice id>/
     * slug ，如: BB737
     * hash_key ，如: 5817f0172c9482605d16386a263a7296de8b22f8
 #. 更新 EPW 中的 Printer 紀錄，當 USB printer 開機並連線到 EPW 後，系統就會自動抓取 serial_number, type, vendor_number, product_name, profile ，後 3 者是在 python-escpos 函式庫有支援下，才能正確讀取。需要手動更新的，只有 3 個欄位:
@@ -51,12 +51,21 @@ EPW 設定
     * receipt_type: 選項有 0, 5, 6, 8 。意義分別是 0 表不能使用、 5 表 58mm 收據、 6 表 58mm 電子發票、 8 表 80mm 收據
     * default_encoding: 選項有 B, G 。為印表機內置的編碼表設定，其中 B 表 CP950 、 G 表 GB18030 編碼表
 
-TKW 設定
+TKW 資料設定
 -------------------------------------------------------------------------------
 
 .. note::
 
     TKW 安裝部份，請見: :doc:`./install_tkw_in_linux` 。
+
+1. 將 TKW 中的 EITurnkey Api Endpoint 登記到 CEC 中，類似 SNS subscribe 模式，先瀏覽 https://<tkw url>/turnkey_wrapper/api/v1/eiturnkey/ ，再使用 HTTP POST 新增 EITurnkey 紀錄，輸入欄位有:
+    * abspath: 以 / 開頭的本地端路徑來指出 EINVTurnkey 程式的 einvTurnkey.sct 的資料夾所在
+    * transport_id: 對應 turnkeyservice 紀錄
+    * party_id: 對應 turnkeyservice 紀錄
+    * routing_id: 對應 turnkeyservice 紀錄
+    * hash_key: 對應 turnkeyservice 紀錄
+    * tea_turnkey_service_endpoint ，如: https://<CEC or TEA url>/taiwan_einvoice/api/v1/turnkeyservice/<turnkeyservice id>/
+    * endpoint: 無需填寫， POST 後由 TKW 自動計算
 
 TEA - EPW 的互動說明
 -------------------------------------------------------------------------------
@@ -66,12 +75,4 @@ TEA - TKW 的互動說明
 
 .. ::
 
-    1. register TKW to CEC with TKW website(like sns subscribe)
-        * browse https://tkw.web.site.url/turnkey_wrapper/, then POST fields to https://tkw.web.site.url/turnkey_wrapper/ to create new turnkey_wrapper object
-            * turnkey_abspath
-            * transport_id
-            * party_id
-            * routing_id
-            * hash_key
-            * turnkey_web_url
     #. CRON job in turnkeyservice
