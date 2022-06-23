@@ -723,6 +723,7 @@ class EInvoice(models.Model):
     @property
     def track_no_(self):
         return "{}-{}".format(self.track, self.no)
+    reverse_void_order = models.SmallIntegerField(default=0)
     carrier_type_choices = (
         ('3J0002', _('Mobile barcode')),
     )
@@ -817,7 +818,7 @@ class EInvoice(models.Model):
 
 
     class Meta:
-        unique_together = (('seller_invoice_track_no', 'track', 'no'), )
+        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
     
 
     @property
@@ -1100,3 +1101,22 @@ class CancelEInvoice(models.Model):
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
+
+class VoidEInvoice(models.Model):
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
+    @property
+    def invoice_date(self):
+        return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
+    generate_time = models.DateTimeField()
+    @property
+    def void_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def void_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
+    reason = models.CharField(max_length=20, null=False)
+    remark = models.CharField(max_length=200, default='', null=True, blank=True)
