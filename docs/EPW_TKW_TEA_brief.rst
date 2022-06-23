@@ -13,7 +13,7 @@ TEA 支援 WebSocket 協定，當 EPW 系統開機後， EPW 會連線至 TEA We
 TKW 再以 HTTP GET 模式以批次編號為搜尋值抓取所有相關的發票 JSON ，該批次發票抓取完畢後， TKW 會將發票 JSON 轉成 MIG 標準的 xml ，\
 存入本地端的 Turnkey 系統，再由 Turnkey 系統處理與 EI 大平台的發票上傳作業。
 
-TEA 設定
+TEA 資料設定
 -------------------------------------------------------------------------------
 
 1. 創建「統編(legalentity)」紀錄
@@ -30,6 +30,7 @@ TEA 設定
     * turnkey_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
     * download_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
     * epl_base_set: 預設值是 GHIJKLMNOPQRSTUVWXYZ ，用來驗證「電子發票證明聯列印序號」用的字元集合，建議使用「大寫英文、符號」並打亂順序
+    * cronjob_every_x_minutes: 5, 10, 15, 20, 30, 60; 5 => "\*/5 \* \* \* \*"(cron format)
 #. 創建「發票機(escposweb)」紀錄:
     * name: 建議包含發票機外形、地點、特徵
     * slug: 可自動隨機產生
@@ -66,13 +67,3 @@ TKW 資料設定
     * hash_key: 對應 turnkeyservice 紀錄
     * tea_turnkey_service_endpoint ，如: https://<CEC or TEA url>/taiwan_einvoice/api/v1/turnkeyservice/<turnkeyservice id>/
     * endpoint: 無需填寫， POST 後由 TKW 自動計算
-
-TEA - EPW 的互動說明
--------------------------------------------------------------------------------
-
-TEA - TKW 的互動說明
--------------------------------------------------------------------------------
-
-.. ::
-
-    #. CRON job in turnkeyservice
