@@ -139,6 +139,23 @@
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
                         </tr>
+                        {% if request.user.is_superuser %}
+                        <tr>
+                            <th>{% trans "Void E-Invoice" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_view_te_voideinvoice"
+                                    name="view_te_voideinvoice">
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_add_te_voideinvoice"
+                                    name="add_te_voideinvoice">
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>{% trans "Print Log" %}:
                                 <p class="help-block"></p>

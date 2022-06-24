@@ -594,6 +594,9 @@ class TurnkeyService(models.Model):
             ("view_te_canceleinvoice", "View Cancel E-Invoice"),
             ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
 
+            ("view_te_voideinvoice", "View Void E-Invoice"),
+            ("add_te_voideinvoice", "Add Void E-Invoice"),
+
             ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
         )
     
@@ -711,7 +714,8 @@ class SellerInvoiceTrackNo(models.Model):
 
 
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark']
+    only_fields_can_update = ['print_mark', 'ei_synced', ]
+    ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
@@ -980,6 +984,11 @@ class EInvoice(models.Model):
         return _d
 
 
+    def set_ei_synced_true(self):
+        if 'ei_synced' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
     def set_print_mark_true(self, einvoice_print_log=None):
         if '' != self.carrier_type or '' != self.npoban:
             pass
@@ -1078,6 +1087,7 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
@@ -1101,8 +1111,21 @@ class CancelEInvoice(models.Model):
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
+    def set_ei_synced_true(self):
+        CancelEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
+            super().save(*args, **kwargs)
+
+
 
 class VoidEInvoice(models.Model):
+    ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
@@ -1120,3 +1143,15 @@ class VoidEInvoice(models.Model):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     reason = models.CharField(max_length=20, null=False)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    
+
+    def set_ei_synced_true(self):
+        VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
+            super().save(*args, **kwargs)
