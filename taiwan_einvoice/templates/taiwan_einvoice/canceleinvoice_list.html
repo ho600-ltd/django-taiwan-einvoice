@@ -114,6 +114,7 @@
                     <h4 style="color: red;">{% trans "Note: If the customer lost the original copy of E-Invoice, then please cancel this E-Invoice after you get the statement from the customer." %}</h4>
                     <h4>{% trans "Cancel Reason Example" %}:</h4>
                     <ol>
+                        <li>{% trans "Return the WorkOrder" context "cancel_einvoice" %}</li>
                         <li>{% trans "Lost original copy" context "cancel_einvoice" %}</li>
                         <li>{% trans "Got the return tax document number from IRS" context "cancel_einvoice" %}</li>
                     </ol>

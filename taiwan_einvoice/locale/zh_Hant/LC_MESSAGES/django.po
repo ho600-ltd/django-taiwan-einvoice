@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-21 21:22+0800\n"
+"POT-Creation-Date: 2022-06-24 11:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -191,6 +191,10 @@ msgstr "注意: 如果消費者遺失紙本電子發票證明聯，請先拿到�
 
 msgid "Cancel Reason Example"
 msgstr "作廢原因範例"
+
+msgctxt "cancel_einvoice"
+msgid "Return the WorkOrder"
+msgstr "訂單退貨"
 
 msgctxt "cancel_einvoice"
 msgid "Lost original copy"
