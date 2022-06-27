@@ -15,6 +15,10 @@
             <button type="submit" id="show_canceleinvoice_modal_button_0" class="btn btn-success show_canceleinvoice_modal">
                 {% blocktrans %}Cancel E-Invoice{% endblocktrans %}
             </button>
+
+            <small id="one_dimensional_barcode_for_cancelingHelp" class="form-text text-muted">{% blocktrans %}
+                It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.
+            {% endblocktrans %}</small>
         </form>
     {% endif %}
 

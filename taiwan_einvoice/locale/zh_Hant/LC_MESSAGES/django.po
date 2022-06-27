@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-24 11:40+0800\n"
+"POT-Creation-Date: 2022-06-27 14:22+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -249,6 +249,15 @@ msgstr "關閉"
 
 msgid "Please input the one-dimensional barcode for canceling: "
 msgstr "請輸入欲作廢之發票的一維條碼"
+
+msgid ""
+"\n"
+"                It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.\n"
+"            "
+msgstr ""
+"\n"
+"作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
+"            "
 
 #, python-format
 msgid "%(total_count)s records"
@@ -831,6 +840,9 @@ msgstr "字軌號碼"
 
 msgid "Imoprt track-no or delete unuse track-no"
 msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
+
+msgid "Void E-Invoice"
+msgstr "註銷電子發票"
 
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"
