@@ -229,6 +229,7 @@ class EInvoiceFilter(filters.FilterSet):
         fields = {
             'generate_time': ('gte', 'lt', ),
             'print_mark': ('exact', ),
+            'reverse_void_order': ('exact', 'gte', 'gt', 'lte', 'lt'),
         }
 
 

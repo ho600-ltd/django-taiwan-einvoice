@@ -97,7 +97,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-6 col-md-3">
                     <div class="form-group">
                         <label for="cancel_einvoice_type">{% trans "Cancel E-Invoice Type?" %}</label>
                         <div class="input-group" id="cancel_einvoice_type" data-target-input="nearest">
@@ -107,6 +107,17 @@
                                 <option value="n">{% trans "Not Canceled" context "taiwan_einvoice_cancel_einvoice_type" %}</option>
                                 <option value="c">{% trans "Canceled, No new one" context "taiwan_einvoice_cancel_einvoice_type" %}</option>
                                 <option value="o">{% trans "Canceled, has new one" context "taiwan_einvoice_cancel_einvoice_type" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <div class="form-group">
+                        <label for="void_einvoice_type">{% trans "Void E-Invoice Type?" %}</label>
+                        <div class="input-group" id="void_einvoice_type" data-target-input="nearest">
+                            <select class="form-control" data-target="#void_einvoice_type" name="void_einvoice_type" id="id_void_einvoice_type">
+                                <option value="reverse_void_order__lte=0">{% trans "Not yet" context "taiwan_einvoice_void_einvoice_type" %}</option>
+                                <option value="reverse_void_order__gte=1">{% trans "Voided" context "taiwan_einvoice_void_einvoice_type" %}</option>
                             </select>
                         </div>
                     </div>

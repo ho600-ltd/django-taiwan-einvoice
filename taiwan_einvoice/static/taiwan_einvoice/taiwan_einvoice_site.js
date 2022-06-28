@@ -222,6 +222,19 @@ $(function () {
                 $("select[name='"+param+"'] option[value='"+select_kind_param+"']").prop('selected', true);
             }
         }
+        var gte_gt_lte_lt_kind_params = {
+            "void_einvoice_type": ["reverse_void_order__lte=0", "reverse_void_order__gte=1"]
+        }
+        for (var key in gte_gt_lte_lt_kind_params) {
+            for (var item of gte_gt_lte_lt_kind_params[key]) {
+                param = item.split("=")[0];
+                var value = url.searchParams.get(param);
+                if (value) {
+                    $("select[name='"+key+"']").val(item);
+                    $("select[name='"+key+"'] option[value='"+item+"']").prop('selected', true);
+                }
+            }
+        }
 
         $('.lock_or_unlock_delete').click($self.lock_or_unlock_delete($self));
         $('input.choose_all_check_in_the_same_td').click($self.choose_all_check_in_the_same_td($self));
@@ -246,6 +259,11 @@ $(function () {
                                                                 -1 * second_offset,
                                                                 $self.django_datetime_format);
                     params.set(k, value);
+                } else if (gte_gt_lte_lt_kind_params[k]) {
+                    var item = $('[name='+k+']', $form).val();
+                    var _is = item.split('=');
+                    params.set(_is[0], _is[1]);
+                    params.delete(k);
                 }
             }
 

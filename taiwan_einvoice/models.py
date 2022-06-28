@@ -1167,7 +1167,7 @@ class VoidEInvoice(models.Model):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     reason = models.CharField(max_length=20, null=False)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
-    
+
 
     def set_ei_synced_true(self):
         VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
