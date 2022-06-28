@@ -1130,6 +1130,12 @@ class CancelEInvoice(models.Model):
         CancelEInvoice.objects.filter(id=self.id).update(ei_synced=True)
 
 
+    def set_new_einvoice(self, new_einvoice):
+        if not self.new_einvoice:
+            CancelEInvoice.objects.filter(id=self.id).update(new_einvoice=new_einvoice)
+            self.new_einvoice = new_einvoice
+
+
     def post_cancel_einvoice(self):
         lg = logging.getLogger('taiwan_einvoice')
         lg.debug('CancelEInvoice(id:{}) post_cancel_einvoice'.format(self.id))

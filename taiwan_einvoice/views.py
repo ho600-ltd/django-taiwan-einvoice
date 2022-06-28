@@ -643,8 +643,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d['print_mark'] = False
             new_einvoice = EInvoice(**_d)
             new_einvoice.save()
-            serializer.instance.new_einvoice = new_einvoice
-            serializer.instance.save()
+            serializer.instance.set_new_einvoice(new_einvoice)
             serializer.instance.post_cancel_einvoice()
         serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
