@@ -33,6 +33,7 @@ from taiwan_einvoice.models import (
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
+    VoidEInvoice,
 )
 
 
@@ -364,4 +365,19 @@ class CancelEInvoiceSerializer(ModelSerializer):
 
     class Meta:
         model = CancelEInvoice
+        fields = '__all__'
+
+
+
+class VoidEInvoiceSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-detail", lookup_field='pk')
+    creator_dict = UserSerializer(source='creator', read_only=True)
+    einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
+    new_einvoice_dict = EInvoiceSerializer(source='new_einvoice', read_only=True)
+
+
+
+    class Meta:
+        model = VoidEInvoice
         fields = '__all__'

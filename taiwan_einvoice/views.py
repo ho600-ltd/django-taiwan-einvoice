@@ -29,6 +29,7 @@ from taiwan_einvoice.permissions import (
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
+    CanEntryVoidEInvoice,
     CanViewLegalEntity,
     CanViewTurnkeyService,
 )
@@ -44,6 +45,7 @@ from taiwan_einvoice.renderers import (
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
     CancelEInvoiceHtmlRenderer,
+    VoidEInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -56,6 +58,7 @@ from taiwan_einvoice.models import (
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
+    VoidEInvoice,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -71,6 +74,7 @@ from taiwan_einvoice.serializers import (
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
+    VoidEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -646,4 +650,86 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             serializer.instance.set_new_einvoice(new_einvoice)
             serializer.instance.post_cancel_einvoice()
         serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class VoidEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEntryVoidEInvoice), )
+    queryset = VoidEInvoice.objects.all().order_by('-id')
+    serializer_class = VoidEInvoiceSerializer
+    renderer_classes = (VoidEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(VoidEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+    
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        if data['npoban'] and data['buyer_identifier']:
+            er = {
+                "error_title": _("E-Invoice Error"),
+                "error_message": _("NPOBAN can not be set with Buyer Identifier at the same time")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        einvoice_id = data['einvoice_id']
+        try:
+            einvoice = EInvoice.objects.get(id=einvoice_id)
+        except EInvoice.DoesNotExist:
+            er = {
+                "error_title": _("E-Invoice Error"),
+                "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        else:
+            if einvoice.voideinvoice_set.exists():
+                er = {
+                    "error_title": _("E-Invoice Error"),
+                    "error_message": _("E-Invoice({}) was already voided!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        #TODO check npoban, buyer_identifier, mobile-barcode, natural-person-id
+
+        data['creator'] = request.user.id
+        data['einvoice'] = einvoice.id
+        data['seller_identifier'] = einvoice.seller_identifier
+        data['buyer_identifier'] = einvoice.buyer_identifier
+        data['generate_time'] = now()
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        _d = {f.name: getattr(einvoice, f.name)
+            for f in EInvoice._meta.fields
+        }
+        del _d['id']
+        del _d['random_number']
+        _d['creator'] = request.user
+        _d['print_mark'] = False
+
+        #TODO
+        _d['carrier_type'] = ''
+        _d['carrier_id1'] = ''
+        _d['carrier_id2'] = ''
+        _d['npoban'] = ''
+        _d['buyer_identifier'] = ''
+
+        new_einvoice = EInvoice(**_d)
+        new_einvoice.save()
+        serializer.instance.new_einvoice = new_einvoice
+        serializer.instance.save()
+        serializer.instance.post_void_einvoice()
+        serializer = VoidEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

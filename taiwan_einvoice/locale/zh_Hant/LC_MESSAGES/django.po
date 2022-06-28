@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-28 14:31+0800\n"
+"POT-Creation-Date: 2022-06-28 17:46+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,6 +44,9 @@ msgstr "號碼不足"
 
 msgid "Mobile barcode"
 msgstr "手機條碼"
+
+msgid "Natural person barcode"
+msgstr "自然人憑證條碼"
 
 #, python-brace-format
 msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
@@ -127,6 +130,9 @@ msgstr "其他"
 
 msgid "Cancel EI."
 msgstr "作廢發票"
+
+msgid "Void EI."
+msgstr "註銷發票"
 
 msgid "Accounter Audit"
 msgstr "會計查驗"
@@ -261,8 +267,8 @@ msgstr "請輸入欲作廢之發票的一維條碼"
 
 msgid ""
 "\n"
-"                It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.\n"
-"            "
+"            It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.\n"
+"        "
 msgstr ""
 "\n"
 "作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
@@ -877,104 +883,68 @@ msgstr "工作人員群組名稱"
 msgid "Staffs"
 msgstr "工作人員"
 
-#, fuzzy
-#| msgctxt "taiwan_einvoice"
-#| msgid "One-dimensional Barcode from the Canceled E-Invoice"
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Voided E-Invoice"
-msgstr "被作廢發票的一維條碼"
+msgstr "被註銷發票的一維條碼"
 
-#, fuzzy
-#| msgid "Track No. from the Canceled E-Invoice contains"
 msgid "Track No. from the Voided E-Invoice contains"
-msgstr "被作廢發票的字軌號碼包含"
+msgstr "被註銷發票的字軌號碼包含"
 
-#, fuzzy
-#| msgid "Print time later than"
 msgid "Void time later than"
-msgstr "列印時間晚於"
+msgstr "註銷時間晚於"
 
-#, fuzzy
-#| msgid "Print time earlier than"
 msgid "Void time earlier than"
-msgstr "列印時間早於"
+msgstr "註銷時間早於"
 
-#, fuzzy
-#| msgid "Note: Cancel E-Invoice could not be rollback. The track no. will be deprecated."
-msgid "Note: Void E-Invoice could not be rollback. The track no. will be deprecated."
-msgstr "注意: 作廢電子發票後，是無法回復，該發票的字軌號碼將會被棄用。"
+msgid "Note: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
+msgstr "注意: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
 
-#, fuzzy
-#| msgid "Note: If the customer lost the original copy of E-Invoice, then please cancel this E-Invoice after you get the statement from the customer."
-msgid "Note: If the customer lost the original copy of E-Invoice, then please voided this E-Invoice after you get the statement from the customer."
-msgstr "注意: 如果消費者遺失紙本電子發票證明聯，請先拿到該消費者的聲明書方才作廢發票。"
+msgid "Note: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
+msgstr "注意: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
 
-#, fuzzy
-#| msgid "Reason Example"
 msgid "Void Reason Example"
 msgstr "理由範例"
 
-#, fuzzy
-#| msgctxt "cancel_einvoice"
-#| msgid "Return the WorkOrder"
 msgctxt "voided_einvoice"
-msgid "Return the WorkOrder"
-msgstr "訂單退貨"
+msgid "Update buyer identifier"
+msgstr "更新買方統編"
 
-#, fuzzy
-#| msgctxt "cancel_einvoice"
-#| msgid "Lost original copy"
 msgctxt "voided_einvoice"
-msgid "Lost original copy"
-msgstr "遺失正本"
+msgid "Update NPO Ban"
+msgstr "更新捐贈碼"
 
-#, fuzzy
-#| msgctxt "cancel_einvoice"
-#| msgid "Got the return tax document number from IRS"
 msgctxt "voided_einvoice"
-msgid "Got the return tax document number from IRS"
-msgstr "已拿到專案作廢核准文號"
+msgid "Update Mobile barcode"
+msgstr "更新手機條碼"
 
-#, fuzzy
-#| msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
-msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the voideded E-Invoice, except track no, generate_time, creator and random_number.)"
-msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
+msgctxt "voided_einvoice"
+msgid "Update Natural Person barcode"
+msgstr "更新自然人憑證條碼"
 
 msgid "Void"
-msgstr ""
+msgstr "註銷"
 
-#, fuzzy
-#| msgid "Please input the one-dimensional barcode for canceling: "
 msgid "Please input the one-dimensional barcode for voiding: "
-msgstr "請輸入欲作廢之發票的一維條碼"
+msgstr "請輸入欲註銷之發票的一維條碼"
 
-#, fuzzy
-#| msgid ""
-#| "\n"
-#| "                It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.\n"
-#| "            "
 msgid ""
 "\n"
-"                It uses the <b>new track no.</b> to create the new E-Invoice after voiding the E-Invoice.\n"
-"            "
+"            It uses the <b>same track no.</b> to create the new E-Invoice after voiding the E-Invoice.\n"
+"        "
 msgstr ""
 "\n"
-"作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
+"註銷電子發票後，再開立的新電子發票，其字軌號碼會是<b>相同</b>於被註銷的電子發票。\n"
 "            "
 
-#, fuzzy
-#| msgid "Track No."
 msgid "Voided Track No."
-msgstr "字軌號碼"
+msgstr "已註銷字軌號碼"
 
 msgctxt "taiwan_einvoice"
 msgid "Voider"
-msgstr ""
+msgstr "註銷者"
 
-#, fuzzy
-#| msgid "Print Time"
 msgid "Void Time"
-msgstr "列印時間"
+msgstr "註銷時間"
 
 msgid "Staff exist"
 msgstr "工作人員已存在"
@@ -1058,3 +1028,27 @@ msgstr "電子發票(id: {})不存在!"
 
 msgid "E-Invoice({}) was already canceled!"
 msgstr "電子發票({})已被作廢!"
+
+msgid "NPOBAN can not be set with Buyer Identifier at the same time"
+msgstr "捐贈碼與買方統編無法同時設定"
+
+msgid "E-Invoice({}) was already voided!"
+msgstr "電子發票({})已被註銷!"
+
+#~ msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the voideded E-Invoice, except track no, generate_time, creator and random_number.)"
+#~ msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
+
+#~ msgctxt "voided_einvoice"
+#~ msgid "Return the WorkOrder"
+#~ msgstr "訂單退貨"
+
+#~ msgctxt "voided_einvoice"
+#~ msgid "Lost original copy"
+#~ msgstr "遺失正本"
+
+#~ msgctxt "voided_einvoice"
+#~ msgid "Got the return tax document number from IRS"
+#~ msgstr "已拿到專案作廢核准文號"
+
+#~ msgid "Note: If the customer lost the original copy of E-Invoice, then please voided this E-Invoice after you get the statement from the customer."
+#~ msgstr "注意: 如果消費者遺失紙本電子發票證明聯，請先拿到該消費者的聲明書方才作廢發票。"

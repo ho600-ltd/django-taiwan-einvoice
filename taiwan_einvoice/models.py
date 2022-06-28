@@ -735,6 +735,7 @@ class EInvoice(models.Model):
     reverse_void_order = models.SmallIntegerField(default=0) #INFO: only E-Invoice with reverse_void_order=0 is the normal E-Invoice, others are the voided E-Invoice
     carrier_type_choices = (
         ('3J0002', _('Mobile barcode')),
+        ('CQ0001', _('Natural person barcode')),
     )
     carrier_type = models.CharField(max_length=6, default='', choices=carrier_type_choices, db_index=True)
     @property
@@ -807,7 +808,18 @@ class EInvoice(models.Model):
         else:
             return None
     @property
+    def is_voided(self):
+        return self.voideinvoice_set.exists()
+    @property
+    def voided_time(self):
+        if self.is_voided:
+            vei = self.voideinvoice_set.get()
+            return vei.generate_time
+        else:
+            return None
+    @property
     def related_einvoices(self):
+        #TODO: how put "voided-einvoice" in here?
         einvoice = self
         related_einvoices = []
         while True:

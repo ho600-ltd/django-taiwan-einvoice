@@ -9,6 +9,7 @@
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_view_sellerinvoicetrackno_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoice" as "can_view_einvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_canceleinvoice" as "can_view_canceleinvoice_under_turnkeyservices" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_voideinvoice" as "can_view_voideinvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoiceprintlog" as "can_view_einvoiceprintlog_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_turnkeyservice" as "can_view_turnkeyservices" %}
 <!DOCTYPE html>
@@ -126,7 +127,7 @@
                                 <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?format=html">{% trans "E-Invoice" %}</a>
                             </li>
                         {% endif %}
-                        {% if perms.taiwan_einvoice.view_legalentity or perms.taiwan_einvoice.view_turnkeyservice or can_view_canceleinvoice_under_turnkeyservices.exists or notready_TODO or can_view_einvoiceprintlog_under_turnkeyservices.exists or can_view_turnkeyservices.exists %}
+                        {% if perms.taiwan_einvoice.view_legalentity or perms.taiwan_einvoice.view_turnkeyservice or can_view_canceleinvoice_under_turnkeyservices.exists or can_view_voideinvoice_under_turnkeyservices.exists or notready_TODO or can_view_einvoiceprintlog_under_turnkeyservices.exists or can_view_turnkeyservices.exists %}
                             <li class="dropdown nav-item nav_else">
                                 <a data-toggle="dropdown"
                                     aria-expanded="false"
@@ -135,6 +136,9 @@
                                 <div role="menu" class="dropdown-menu">
                                     {% if can_view_canceleinvoice_under_turnkeyservices.exists %}
                                         <a role="presentation" class="dropdown-item nav_canceleinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}?format=html">{% trans "Cancel EI." %}</a>
+                                    {% endif %}
+                                    {% if can_view_voideinvoice_under_turnkeyservices.exists %}
+                                        <a role="presentation" class="dropdown-item nav_voideinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-list' %}?format=html">{% trans "Void EI." %}</a>
                                     {% endif %}
                                     {% if notready_TODO %}
                                         <a role="presentation" class="dropdown-item nav_accounter_audit" href="#">{% trans "Accounter Audit" %}</a>
