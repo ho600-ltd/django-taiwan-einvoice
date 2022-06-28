@@ -584,28 +584,37 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
         einvoice_id = data['einvoice_id']
+        re_create_einvoice = data['re_create_einvoice']
+        del data['re_create_einvoice']
         try:
             einvoice = EInvoice.objects.get(id=einvoice_id)
         except EInvoice.DoesNotExist:
             er = {
-                "error_title": "E-Invoice Error",
+                "error_title": _("E-Invoice Error"),
                 "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
             if einvoice.canceleinvoice_set.exists():
                 er = {
-                    "error_title": "E-Invoice Error",
+                    "error_title": _("E-Invoice Error"),
                     "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not re_create_einvoice:
+                message = einvoice.check_before_cancel_einvoice()
+                if message:
+                    er = {
+                        "error_title": _("E-Invoice Error"),
+                        "error_message": message,
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
         data['seller_identifier'] = einvoice.seller_identifier
         data['buyer_identifier'] = einvoice.buyer_identifier
         data['generate_time'] = now()
-        re_create_einvoice = data['re_create_einvoice']
-        del data['re_create_einvoice']
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -636,5 +645,6 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             new_einvoice.save()
             serializer.instance.new_einvoice = new_einvoice
             serializer.instance.save()
+            serializer.instance.post_cancel_einvoice()
         serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

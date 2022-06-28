@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-27 14:22+0800\n"
+"POT-Creation-Date: 2022-06-28 11:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,6 +71,15 @@ msgstr "備註: {}"
 
 msgid "No details"
 msgstr "無明細"
+
+msgid "Content object is not existed"
+msgstr "內容物件: {} 不存在"
+
+msgid "Content Object: {} has no 'check_before_cancel_einvoice' method"
+msgstr "內容物件: {} 無「check_before_cancel_einvoice」方法"
+
+msgid "Content Object: {} has no 'post_cancel_einvoice' method"
+msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
@@ -241,8 +250,8 @@ msgstr "總金額"
 msgid "Footprint No."
 msgstr "追蹤編號"
 
-msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no.)"
-msgstr "同時開立新的電子發票(新發票除字軌號碼不同外，其餘資訊皆同原作廢發票)"
+msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
+msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
 
 msgid "Cancel"
 msgstr "關閉"

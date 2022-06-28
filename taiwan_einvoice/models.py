@@ -500,6 +500,11 @@ class Seller(models.Model):
 
 
 
+class ContentObjectError(Exception):
+    pass
+
+
+
 class ForbiddenAboveAmountError(Exception):
     pass
 
@@ -727,7 +732,7 @@ class EInvoice(models.Model):
     @property
     def track_no_(self):
         return "{}-{}".format(self.track, self.no)
-    reverse_void_order = models.SmallIntegerField(default=0)
+    reverse_void_order = models.SmallIntegerField(default=0) #INFO: only E-Invoice with reverse_void_order=0 is the normal E-Invoice, others are the voided E-Invoice
     carrier_type_choices = (
         ('3J0002', _('Mobile barcode')),
     )
@@ -984,6 +989,10 @@ class EInvoice(models.Model):
         return _d
 
 
+    def check_before_cancel_einvoice(self):
+        return self.content_object.check_before_cancel_einvoice()
+
+
     def set_ei_synced_true(self):
         if 'ei_synced' in self.only_fields_can_update:
             EInvoice.objects.filter(id=self.id).update(ei_synced=True)
@@ -1007,7 +1016,13 @@ class EInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if kwargs.get('force_save', False):
+        if not self.content_object:
+            raise ContentObjectError(_("Content object is not existed"))
+        elif not hasattr(self.content_object, 'check_before_cancel_einvoice'):
+            raise ContentObjectError(_("Content Object: {} has no 'check_before_cancel_einvoice' method").format(self.content_object))
+        elif not hasattr(self.content_object, 'post_cancel_einvoice'):
+            raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
+        elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
         elif not self.pk:
@@ -1091,7 +1106,7 @@ class CancelEInvoice(models.Model):
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
-        related_name="new_einvoice_cancel_einvoice_set",
+        related_name="new_einvoice_on_cancel_einvoice_set",
         null=True,
         on_delete=models.DO_NOTHING)
     @property
@@ -1115,6 +1130,15 @@ class CancelEInvoice(models.Model):
         CancelEInvoice.objects.filter(id=self.id).update(ei_synced=True)
 
 
+    def post_cancel_einvoice(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('CancelEInvoice(id:{}) post_cancel_einvoice'.format(self.id))
+        message = ""
+        if self.new_einvoice:
+            message = self.einvoice.content_object.post_cancel_einvoice(self.new_einvoice)
+        return message
+
+
     def save(self, *args, **kwargs):
         if kwargs.get('force_save', False):
             del kwargs['force_save']
@@ -1128,7 +1152,7 @@ class VoidEInvoice(models.Model):
     ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=False, on_delete=models.DO_NOTHING)
     @property
     def invoice_date(self):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
@@ -1147,6 +1171,13 @@ class VoidEInvoice(models.Model):
 
     def set_ei_synced_true(self):
         VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def post_void_einvoice(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('VoidEInvoice(id:{}) post_void_einvoice'.format(self.id))
+        message = self.einvoice.content_object.post_void_einvoice(self.new_einvoice)
+        return message
 
 
     def save(self, *args, **kwargs):
