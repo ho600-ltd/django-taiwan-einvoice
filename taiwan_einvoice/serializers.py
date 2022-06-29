@@ -332,6 +332,8 @@ class EInvoiceSerializer(ModelSerializer):
     amount_is_warning = BooleanField(read_only=True)
     buyer_is_business_entity = BooleanField(read_only=True)
     is_canceled = BooleanField(read_only=True)
+    is_voided = BooleanField(read_only=True)
+    can_void = BooleanField(read_only=True)
     canceled_time = DateTimeField(read_only=True)
     related_einvoices = EInvoiceSimpleSerializer(read_only=True, many=True)
 

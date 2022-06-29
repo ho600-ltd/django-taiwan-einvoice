@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-28 17:46+0800\n"
+"POT-Creation-Date: 2022-06-29 18:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -896,33 +896,49 @@ msgstr "註銷時間晚於"
 msgid "Void time earlier than"
 msgstr "註銷時間早於"
 
-msgid "Note: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
-msgstr "注意: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
+msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
+msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
 
-msgid "Note: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
-msgstr "注意: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
+msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
+msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
 
-msgid "Void Reason Example"
-msgstr "理由範例"
+msgid "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time."
+msgstr "注意 3: 無法同時更新捐贈碼及買方統編；也無法同時更新手機條碼及自然人憑證條碼。"
 
-msgctxt "voided_einvoice"
-msgid "Update buyer identifier"
-msgstr "更新買方統編"
+msgctxt "void_einvoice"
+msgid "Reason(Required)"
+msgstr "註銷原因(必填)"
 
-msgctxt "voided_einvoice"
-msgid "Update NPO Ban"
-msgstr "更新捐贈碼"
+msgctxt "void_einvoice"
+msgid "Please one"
+msgstr "請選擇 1 項"
 
-msgctxt "voided_einvoice"
-msgid "Update Mobile barcode"
-msgstr "更新手機條碼"
+msgid "Buyer Identifier"
+msgstr "買方統編"
 
-msgctxt "voided_einvoice"
-msgid "Update Natural Person barcode"
-msgstr "更新自然人憑證條碼"
+msgid "Please input 8 digits number"
+msgstr "請輸入 8 碼數字"
 
-msgid "Void"
-msgstr "註銷"
+msgid "NPOBAN"
+msgstr "捐贈碼"
+
+msgid "Only accept numbers"
+msgstr "只接受數字"
+
+msgid "Please input 8 digits valid barcode"
+msgstr "請輸入 8 碼有效條碼"
+
+msgid "Natural Person Barcode"
+msgstr "自然人憑證條碼"
+
+msgid "Please input 16 digits valid barcode"
+msgstr "請輸入 16 碼有效條碼"
+
+msgid "Buyer identifier or NPOBAN"
+msgstr "買方統編<br/>或捐贈碼"
+
+msgid "Barcode"
+msgstr "條碼"
 
 msgid "Please input the one-dimensional barcode for voiding: "
 msgstr "請輸入欲註銷之發票的一維條碼"
@@ -938,6 +954,9 @@ msgstr ""
 
 msgid "Voided Track No."
 msgstr "已註銷字軌號碼"
+
+msgid "Random Number"
+msgstr "隨機碼"
 
 msgctxt "taiwan_einvoice"
 msgid "Voider"
@@ -1029,26 +1048,38 @@ msgstr "電子發票(id: {})不存在!"
 msgid "E-Invoice({}) was already canceled!"
 msgstr "電子發票({})已被作廢!"
 
+msgid "Void Error"
+msgstr "註銷發票錯誤"
+
 msgid "NPOBAN can not be set with Buyer Identifier at the same time"
 msgstr "捐贈碼與買方統編無法同時設定"
+
+msgid "Mobile barcode can not be set with Natural Person barcode at the same time"
+msgstr "手機條碼與自然人憑證條碼無法同時設定"
+
+msgid "Natural Person barcode Error"
+msgstr "自然人憑證條碼錯誤"
+
+msgid "Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number."
+msgstr "自然人憑證條碼格式應為開頭 2 碼為英文字，後 14 碼為數字。"
 
 msgid "E-Invoice({}) was already voided!"
 msgstr "電子發票({})已被註銷!"
 
-#~ msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the voideded E-Invoice, except track no, generate_time, creator and random_number.)"
-#~ msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
+msgid "Buyer Identifier Error"
+msgstr "買方統編錯誤"
 
-#~ msgctxt "voided_einvoice"
-#~ msgid "Return the WorkOrder"
-#~ msgstr "訂單退貨"
+msgid "Buyer identifier does not exist."
+msgstr "買方統編不存在"
 
-#~ msgctxt "voided_einvoice"
-#~ msgid "Lost original copy"
-#~ msgstr "遺失正本"
+msgid "NPOBan Error"
+msgstr "捐贈碼錯誤"
 
-#~ msgctxt "voided_einvoice"
-#~ msgid "Got the return tax document number from IRS"
-#~ msgstr "已拿到專案作廢核准文號"
+msgid "NPO bn does not exist."
+msgstr "捐贈碼不存在"
 
-#~ msgid "Note: If the customer lost the original copy of E-Invoice, then please voided this E-Invoice after you get the statement from the customer."
-#~ msgstr "注意: 如果消費者遺失紙本電子發票證明聯，請先拿到該消費者的聲明書方才作廢發票。"
+msgid "Mobile barcode Error"
+msgstr "手機條碼錯誤"
+
+msgid "Mobile barcode does not exist."
+msgstr "手機條碼不存在"

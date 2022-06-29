@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-21 21:22+0800\n"
+"POT-Creation-Date: 2022-06-29 18:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -286,3 +286,65 @@ msgstr[0] "您確定要刪除 \"%s\" ?"
 
 msgid "Deleted"
 msgstr "已刪除"
+
+msgid "Void E-Invoice Error"
+msgstr "註銷電子發票錯誤"
+
+msgid "%(one_dimensional_barcode_for_voiding)s does not exist!"
+msgid_plural "%(one_dimensional_barcode_for_voiding)s does not exist!"
+msgstr[0] "%(one_dimensional_barcode_for_voiding)s 不存在!"
+
+msgid "E-Invoice(%(track_no_)s) was already voided!"
+msgid_plural "E-Invoice(%(track_no_)s) was already voided!"
+msgstr[0] "電子發票(%(track_no_)s)已被註銷"
+
+msgid "E-Invoice(%(track_no_)s) was already canceled and has created the new one!"
+msgid_plural "E-Invoice(%(track_no_)s) was already canceled and has created the new one!"
+msgstr[0] "電子發票(%(track_no_)s)已被作廢，且有開立新字軌的電子發票!"
+
+msgid "Please choose one of the reasons"
+msgstr "請選擇 1 項原因"
+
+msgctxt "void_reason_tag_name"
+msgid "buyer_identifier"
+msgstr "買方統編"
+
+msgctxt "void_reason_tag_name"
+msgid "npoban"
+msgstr "捐贈碼"
+
+msgctxt "void_reason_tag_name"
+msgid "mobile_barcode"
+msgstr "手機條碼"
+
+msgctxt "void_reason_tag_name"
+msgid "natural_person_barcode"
+msgstr "自然人憑證條碼"
+
+msgid "Please input the new value of %(name)s depends on the reason!"
+msgid_plural "Please input the new value of %(name)s depends on the reason!"
+msgstr[0] "請依據原因來填寫「%(name)s」的新值"
+
+msgid "Void Error"
+msgstr "註銷錯誤"
+
+msgid "Buyer identifier/NPOBAN Error"
+msgstr "買方統編/捐贈碼錯誤"
+
+msgid "Do not set buyer identifier and npoban at the same time."
+msgstr "無法同時更新買方統編及捐贈碼。"
+
+msgid "Mobile/Natural Person barcode Error"
+msgstr "手機/自然人憑證條碼錯誤"
+
+msgid "Do not set mobile and natural person barcode at the same time."
+msgstr "無法同時更新手機條碼及自然人憑證條碼。"
+
+msgid "Natural Person barcode Error"
+msgstr "自然人憑證條碼錯誤"
+
+msgid "Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number."
+msgstr "自然人憑證條碼格式應為開頭 2 碼為英文字，後 14 碼為數字。"
+
+msgid "Voided"
+msgstr "已註銷"

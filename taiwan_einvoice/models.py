@@ -8,7 +8,7 @@ from random import random, randint
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
-from django.db.models import Max
+from django.db.models import Max, F
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -292,7 +292,12 @@ class MobileBarcodeDoesNotExist(Exception):
 
 
 
-class NPOBnDoesNotExist(Exception):
+class NPOBanDoesNotExist(Exception):
+    pass
+
+
+
+class NatualPersonBarcodeFormatError(Exception):
     pass
 
 
@@ -818,6 +823,14 @@ class EInvoice(models.Model):
         else:
             return None
     @property
+    def can_void(self):
+        if self.is_voided:
+            return False
+        elif self.is_canceled and self.canceleivoice_set.filter(new_einvoice__isnull=False).exists():
+            return False
+        else:
+            return True
+    @property
     def related_einvoices(self):
         #TODO: how put "voided-einvoice" in here?
         einvoice = self
@@ -1023,6 +1036,10 @@ class EInvoice(models.Model):
                 EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
 
+    def increase_reverse_void_order(self):
+        EInvoice.objects.filter(id=self.id).update(reverse_void_order=F('reverse_void_order')+1)
+
+
     def delete(self, *args, **kwargs):
         raise Exception('Can not delete')
 
@@ -1176,7 +1193,7 @@ class VoidEInvoice(models.Model):
     ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=False, on_delete=models.DO_NOTHING)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
     @property
     def invoice_date(self):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
@@ -1195,6 +1212,12 @@ class VoidEInvoice(models.Model):
 
     def set_ei_synced_true(self):
         VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def set_new_einvoice(self, new_einvoice):
+        if not self.new_einvoice:
+            VoidEInvoice.objects.filter(id=self.id).update(new_einvoice=new_einvoice)
+            self.new_einvoice = new_einvoice
 
 
     def post_void_einvoice(self):

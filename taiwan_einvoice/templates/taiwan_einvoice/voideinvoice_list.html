@@ -97,7 +97,7 @@
 {% if can_add_voideinvoice_under_turnkeyservices.exists %}
 
     <div class="modal fade" id="show_voideinvoice_modal" tabindex="-1" role="dialog"
-        resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_voideding}"
+        resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_voiding}"
         resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-list' %}"
         aria-labelledby="show_voideinvoice_modal_label" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -110,33 +110,62 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h4 style="color: red;">{% trans "Note: Void E-Invoice could not be rollback. The track no. will be the same as previous one." %}</h4>
-                    <h4 style="color: red;">{% trans "Note: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one." %}</h4>
-                    <h4>{% trans "Void Reason Example" %}:</h4>
-                    <ol>
-                        <li>{% trans "Update buyer identifier" context "voided_einvoice" %}</li>
-                        <li>{% trans "Update NPO Ban" context "voided_einvoice" %}</li>
-                        <li>{% trans "Update Mobile barcode" context "voided_einvoice" %}</li>
-                        <li>{% trans "Update Natural Person barcode" context "voided_einvoice" %}</li>
-                    </ol>
+                    <h4 style="color: red;">{% trans "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one." %}</h4>
+                    <h4 style="color: red;">{% trans "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one." %}</h4>
+                    <h4 style="color: red;">{% trans "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time." %}</h4>
                     <div class="form-group row">
-                        <label for="reason" class="col-4 col-form-label"><span class="text-danger">*</span> {% trans "Reason(Required)" %}</label>
+                        <label for="reason" class="col-4 col-form-label"><span class="text-danger">*</span> {% trans "Reason(Required)" context "void_einvoice" %}</label>
                         <div class="col-8">
-                            <input type="text" class="form-control" name="reason" id="reason" placeholder="{% trans 'Limit from 4 to 20 words' %}" />
+                            <select class="form-control" name="reason" id="reason">
+                                <option value="" tags="">{% trans "Please one" context "void_einvoice" %}</option>
+                                <option value="更新買方統編" tags="buyer_identifier">更新買方統編</option>
+                                <option value="更新捐贈碼" tags="npoban">更新捐贈碼</option>
+                                <option value="更新手機條碼" tags="mobile_barcode">更新手機條碼</option>
+                                <option value="更新自然人憑證條碼" tags="natural_person_barcode">更新自然人憑證條碼</option>
+                                <option value="更新買方統編及手機條碼" tags="buyer_identifier,mobile_barcode">更新買方統編及手機條碼</option>
+                                <option value="更新買方統編及自然人憑證條碼" tags="buyer_identifier,natural_person_barcode">更新買方統編及自然人憑證條碼</option>
+                                <option value="更新捐贈碼及手機條碼" tags="npoban,mobile_barcode">更新捐贈碼及手機條碼</option>
+                                <option value="更新捐贈碼及自然人憑證條碼" tags="npoban,natural_person_barcode">更新捐贈碼及自然人憑證條碼</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="remark" class="col-4 col-form-label">{% trans "Remark(Optional)" %}</label>
                         <div class="col-8">
-                            <textarea class="form-control" name="remark" id="remark" rows="3" placeholder="{% trans 'Limit to 200 words' %}"></textarea>
+                            <textarea class="form-control" name="remark" id="remark" rows="3" placeholder="{% trans 'Limit to 200 words' %}" maxlength="200" ></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="buyer_identifier" class="col-4 col-form-label">{% trans "Buyer Identifier" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="buyer_identifier" id="buyer_identifier" placeholder="{% trans 'Please input 8 digits number' %}" minlength="8" maxlength="8" disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="npoban" class="col-4 col-form-label">{% trans "NPOBAN" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="npoban" id="npoban" placeholder="{% trans 'Only accept numbers' %}" minlength="3" maxlength="7"  disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="mobile_barcode" class="col-4 col-form-label">{% trans "Mobile barcode" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="mobile_barcode" id="mobile_barcode" placeholder="{% trans 'Please input 8 digits valid barcode' %}" minlength="8" maxlength="8" disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="natural_person_barcode" class="col-4 col-form-label">{% trans "Natural Person Barcode" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="natural_person_barcode" id="natural_person_barcode" placeholder="{% trans 'Please input 16 digits valid barcode' %}" minlength="16" maxlength="16" disabled="disabled" />
                         </div>
                     </div>
                     <table class="table table-hover table-striped">
                         <thead>
                                 <tr>
-                                    <th field="no">{% trans "No." %}</th>
                                     <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
                                     <th field="track_no_">{% trans "Track No." %}</th>
+                                    <th field="buyer_identifier_npoban">{% trans "Buyer identifier or NPOBAN" %}</th>
+                                    <th field="barcode">{% trans "Barcode" %}</th>
                                     <th field="SalesAmount">{% trans "Sales Amount" %}</th>
                                     <th field="TaxAmount">{% trans "Tax Amount" %}</th>
                                     <th field="TotalAmount">{% trans "Total Amount" %}</th>
@@ -145,9 +174,10 @@
                         </thead>
                         <tbody>
                             <tr class="tr_tmpl" style="display: none;">
-                                <td field="no"></td>
                                 <td field="year_month_range"></td>
                                 <td field="track_no_"></td>
+                                <td field="buyer_identifier_npoban"></td>
+                                <td field="barcode"></td>
                                 <td field="SalesAmount"></td>
                                 <td field="TaxAmount"></td>
                                 <td field="TotalAmount"></td>
@@ -157,8 +187,8 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                    <button id="voided_einvoice_button_1" type="button" class="voided_einvoice btn btn-secondary">{% trans "Void E-Invoice" %}</button>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Void" %}</button>
+                    <button id="void_einvoice_button_1" type="button" class="void_einvoice btn btn-secondary">{% trans "Void E-Invoice" %}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
                 </div>
             </div>
         </div>

@@ -21,6 +21,8 @@ function show_voideinvoice_modal(taiwan_einvoice_site) {
             contentType: 'application/json',
             success: function (json) {
                 var $modal_table = $('table', $modal);
+                $('select, textarea, input', $modal).val('');
+                $('input', $modal).prop('disabled', true);
                 $('tr.data', $modal_table).remove();
                 if (0 >= json['results'].length) {
                     var fmts = ngettext("%(one_dimensional_barcode_for_voiding)s does not exist!",
@@ -47,15 +49,30 @@ function show_voideinvoice_modal(taiwan_einvoice_site) {
                             message
                         );
                         return false;
+                    } else if (!einvoice['can_void']) {
+                        var fmts = ngettext("E-Invoice(%(track_no_)s) was already canceled and has created the new one!",
+                            "E-Invoice(%(track_no_)s) was already canceled and has created the new one!",
+                            1);
+                        var message = interpolate(fmts, { track_no_: einvoice['track_no_'] }, true);
+                        taiwan_einvoice_site.show_modal(
+                            taiwan_einvoice_site.$WARNING_MODAL,
+                            gettext('E-Invoice Error'),
+                            message
+                        );
+                        return false;
                     }
                     var kv = {
                         "year_month_range": einvoice['seller_invoice_track_no_dict']['year_month_range'],
                         "track_no_": einvoice['track_no_'],
+                        "buyer_identifier_npoban": einvoice['npoban'] ? einvoice['npoban'] : einvoice['buyer_identifier'],
+                        "barcode": einvoice['carrier_id1'],
                         "SalesAmount": einvoice['amounts']['SalesAmount'],
                         "TaxAmount": einvoice['amounts']['TaxAmount'],
                         "TotalAmount": einvoice['amounts']['TotalAmount'],
                         "generate_no": einvoice['generate_no']
                     }
+                                // <td field="buyer_identifier_npoban"></td>
+                                // <td field="barcode"></td>
                     var $tr_tmpl = $('tr.tr_tmpl', $modal_table).clone().removeClass('tr_tmpl').addClass('data');
                     $tr_tmpl.attr('einvoice_id', einvoice['id']);
                     $('td[field=no]', $tr_tmpl).text(i+1);
@@ -73,6 +90,24 @@ function show_voideinvoice_modal(taiwan_einvoice_site) {
 };
 
 
+function change_reason(taiwan_einvoice_site) {
+    return function () {
+        var $select = $(this);
+        var $modal = $select.parents('.modal');
+        var tags = $('option:selected', $select).attr('tags');
+        $('input[name=buyer_identifier], input[name=npoban], input[name=mobile_barcode], input[name=natural_person_barcode]', $modal).each(function() {
+            var $i = $(this);
+            var name = $i.attr('name');
+            if (tags && tags.indexOf(name) >= 0) {
+                $i.prop('disabled', false);
+            } else {
+                $i.prop('disabled', true);
+            }
+        });
+    };
+};
+
+
 function void_einvoice(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
@@ -80,25 +115,20 @@ function void_einvoice(taiwan_einvoice_site) {
         var resource_uri = $modal.attr('resource_uri');
         var einvoice_id = $('tr.data', $modal).attr('einvoice_id');
         var reason = $('[name=reason]', $modal).val();
-        var return_tax_document_number = $('[name=return_tax_document_number]', $modal).val();
         var remark = $('[name=remark]', $modal).val();
+        var tags = $('[name=reason] option:selected', $modal).attr('tags').split(',');
+        var updates = {
+            "buyer_identifier": $('[name=buyer_identifier]', $modal).val(),
+            "npoban": $('[name=npoban]', $modal).val(),
+            "mobile_barcode": $('[name=mobile_barcode]', $modal).val(),
+            "natural_person_barcode": $('[name=natural_person_barcode]', $modal).val()
+        }
         if (reason && reason.length >=4 && reason.length <= 20){
             //pass
         } else {
             taiwan_einvoice_site.show_modal(taiwan_einvoice_site.$WARNING_MODAL,
                 gettext("Reason Error"),
-                gettext("Limit from 4 to 20 words")
-            );
-            return false;
-        }
-        if (return_tax_document_number && return_tax_document_number.length <= 60){
-            //pass
-        } else if (!return_tax_document_number) {
-            //pass
-        } else {
-            taiwan_einvoice_site.show_modal(taiwan_einvoice_site.$WARNING_MODAL,
-                gettext("Return Tax Document Number Error"),
-                gettext("Limit to 60 words")
+                gettext("Please choose one of the reasons")
             );
             return false;
         }
@@ -113,15 +143,54 @@ function void_einvoice(taiwan_einvoice_site) {
             );
             return false;
         }
-        var re_create_einvoice = $('[name=re_create_einvoice]', $modal).is(":checked");
+        var dev_null = [
+            pgettext('void_reason_tag_name', 'buyer_identifier'),
+            pgettext('void_reason_tag_name', 'npoban'),
+            pgettext('void_reason_tag_name', 'mobile_barcode'),
+            pgettext('void_reason_tag_name', 'natural_person_barcode')
+        ];
+        for (i=0; i<tags.length; i++) {
+            if (!updates[tags[i]]) {
+                var fmts = ngettext("Please input the new value of %(name)s depends on the reason!",
+                        "Please input the new value of %(name)s depends on the reason!",
+                        1);
+                var message = interpolate(fmts, { name: pgettext('void_reason_tag_name', tags[i]) }, true);
+                taiwan_einvoice_site.show_modal(taiwan_einvoice_site.$WARNING_MODAL,
+                    gettext("Void Error"),
+                    message
+                );
+                return false;
+            }
+        }
+        if (updates["buyer_identifier"] && updates["npoban"]) {
+            taiwan_einvoice_site.show_modal(taiwan_einvoice_site.$WARNING_MODAL,
+                gettext("Buyer identifier/NPOBAN Error"),
+                gettext("Do not set buyer identifier and npoban at the same time.")
+            );
+            return false;
+        } else if (updates["mobile_barcode"] && updates["natural_person_barcode"]) {
+            taiwan_einvoice_site.show_modal(taiwan_einvoice_site.$WARNING_MODAL,
+                gettext("Mobile/Natural Person barcode Error"),
+                gettext("Do not set mobile and natural person barcode at the same time.")
+            );
+            return false;
+        } else if (updates["natural_person_barcode"] && ! /[a-zA-Z][a-zA-z][0-9]{14}/.test(updates["natural_person_barcode"])) {
+            taiwan_einvoice_site.show_modal(taiwan_einvoice_site.$WARNING_MODAL,
+                gettext("Natural Person barcode Error"),
+                gettext("Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number.")
+            );
+            return false;
+        }
         $.ajax({
             url: resource_uri,
             type: "POST",
             data: JSON.stringify({"einvoice_id": einvoice_id,
                    "reason": reason,
-                   "return_tax_document_number": return_tax_document_number,
                    "remark": remark,
-                   "re_create_einvoice": re_create_einvoice
+                   "buyer_identifier": updates["buyer_identifier"],
+                   "npoban": updates["npoban"],
+                   "mobile_barcode": updates["mobile_barcode"],
+                   "natural_person_barcode": updates["natural_person_barcode"]
                   }),
             dataType: 'json',
             contentType: 'application/json',
@@ -134,32 +203,25 @@ function void_einvoice(taiwan_einvoice_site) {
             },
             success: function (json) {
                 $modal.modal('hide');
-                if (re_create_einvoice) {
-                    var message = gettext("Voided and re-create: ")+json['new_einvoice_dict']['track_no_'];
-                } else {
-                    var message = gettext("Voided");
-                }
+                var message = gettext("Voided");
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$SUCCESS_MODAL,
                     gettext("Success"),
                     message
                 );
-                $('[name=reason]', $modal).val("");
-                $('[name=return_tax_document_number]', $modal).val("");
-                $('[name=remark]', $modal).val("");
-                $('[name=re_create_einvoice]', $modal).prop("checked", false);
+                $('[name=reason], [name=remark]', $modal).val("");
                 var kv = {
                     "no": gettext('NEW Record'),
                     "year_month_range": json['einvoice_dict']['seller_invoice_track_no_dict']['year_month_range'],
                     "track_no_": json['einvoice_dict']['track_no_'],
+                    "random_number": json['einvoice_dict']['random_number'],
                     "type__display": json['einvoice_dict']['seller_invoice_track_no_dict']['type__display'],
                     "SalesAmount": json['einvoice_dict']['amounts']['SalesAmount'],
                     "TaxAmount": json['einvoice_dict']['amounts']['TaxAmount'],
                     "TotalAmount": json['einvoice_dict']['amounts']['TotalAmount'],
                     "generate_no": json['einvoice_dict']['generate_no'],
                     "creator_first_name_id": json['creator_dict']['first_name']+':'+json['creator_dict']['id'],
-                    "generate_time": json['generate_time'],
-                    "new_einvoice__track_no_": json['new_einvoice_dict'] ? json['new_einvoice_dict']['track_no_'] : ''
+                    "generate_time": json['generate_time']
                 };
                 var $table = $('table.search_result');
                 var s = '<tr>';
@@ -197,6 +259,7 @@ $(function () {
 
     adjust_pagination_html();
 
+    $('select#reason').change(change_reason(taiwan_einvoice_site));
     $('button.show_voideinvoice_modal').click(show_voideinvoice_modal(taiwan_einvoice_site));
     $('button.void_einvoice').click(void_einvoice(taiwan_einvoice_site));
 });
