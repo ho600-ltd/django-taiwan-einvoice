@@ -1053,9 +1053,15 @@ class EInvoice(models.Model):
                     break
                 else:
                     obj = objs[len(objs)-1]
-                    if not self._meta.model.objects.filter(id__gte=obj.id,
-                                                           seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                           random_number=random_number).exists():
+                    if not (self._meta.model.objects.filter(id__gte=obj.id,
+                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                            random_number=random_number).exists()
+                            or self._meta.model.objects.filter(reverse_void_order__gt=0,
+                                                               seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                               track=self.track,
+                                                               no=self.no,
+                                                               random_number=random_number,
+                                                               ).exists()):
                         break
             self.random_number = random_number
             self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
