@@ -689,6 +689,8 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
+        cancel_before_void = data['cancel_before_void']
+        del data['cancel_before_void']
         if data['npoban'] and data['buyer_identifier']:
             er = {
                 "error_title": _("Void Error"),
@@ -750,6 +752,17 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                 "error_message": _('Mobile barcode does not exist.')
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        if cancel_before_void:
+            cei = CancelEInvoice(creator=request.user,
+                                 einvoice=einvoice,
+                                 seller_identifier=einvoice.seller_identifier,
+                                 buyer_identifier=einvoice.buyer_identifier,
+                                 generate_time=now(),
+                                 reason=data['reason'],
+                                 remark=data['remark']
+                                )
+            cei.save()
 
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id

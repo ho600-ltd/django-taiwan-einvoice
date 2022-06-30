@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-30 16:09+0800\n"
+"POT-Creation-Date: 2022-06-30 16:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -939,6 +939,9 @@ msgstr "買方統編<br/>或捐贈碼"
 
 msgid "Barcode"
 msgstr "條碼"
+
+msgid "Cancel it before the void process. This option is only for testing before 'applying for B2C E-Invoice qualifier'."
+msgstr "註銷前先作廢。此選項僅用於'申請 B2C 電子發票資格'前的測試。"
 
 msgid "Please input the one-dimensional barcode for voiding: "
 msgstr "請輸入欲註銷之發票的一維條碼"

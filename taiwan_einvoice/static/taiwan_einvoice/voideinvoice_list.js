@@ -22,7 +22,8 @@ function show_voideinvoice_modal(taiwan_einvoice_site) {
             success: function (json) {
                 var $modal_table = $('table', $modal);
                 $('select, textarea, input', $modal).val('');
-                $('input', $modal).prop('disabled', true);
+                $('input[type=text]', $modal).prop('disabled', true);
+                $('input[type=checkbox]', $modal).prop("checked", false);
                 $('tr.data', $modal_table).remove();
                 if (0 >= json['results'].length) {
                     var fmts = ngettext("%(one_dimensional_barcode_for_voiding)s does not exist!",
@@ -116,6 +117,7 @@ function void_einvoice(taiwan_einvoice_site) {
         var einvoice_id = $('tr.data', $modal).attr('einvoice_id');
         var reason = $('[name=reason]', $modal).val();
         var remark = $('[name=remark]', $modal).val();
+        var cancel_before_void = $('[name=cancel_before_void]', $modal).prop('checked');
         var tags = $('[name=reason] option:selected', $modal).attr('tags').split(',');
         var updates = {
             "buyer_identifier": $('[name=buyer_identifier]', $modal).val(),
@@ -190,7 +192,8 @@ function void_einvoice(taiwan_einvoice_site) {
                    "buyer_identifier": updates["buyer_identifier"],
                    "npoban": updates["npoban"],
                    "mobile_barcode": updates["mobile_barcode"],
-                   "natural_person_barcode": updates["natural_person_barcode"]
+                   "natural_person_barcode": updates["natural_person_barcode"],
+                   "cancel_before_void": cancel_before_void
                   }),
             dataType: 'json',
             contentType: 'application/json',
