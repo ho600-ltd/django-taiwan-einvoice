@@ -22,7 +22,7 @@ install_requires = [r for r in REQUIREMENTS.split('\n') if r
 
 setup(name='taiwan_einvoice',
       install_requires=install_requires,
-      version='0.0.47-1',
+      version='0.0.48-1',
       packages=[
                 'taiwan_einvoice',
                 'taiwan_einvoice.migrations',
