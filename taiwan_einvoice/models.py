@@ -813,6 +813,14 @@ class EInvoice(models.Model):
         else:
             return None
     @property
+    def can_cancel(self):
+        if self.is_canceled:
+            return False
+        elif self.is_voided and self.voideinvoice_set.filter(new_einvoice__isnull=False).exists():
+            return False
+        else:
+            return True
+    @property
     def is_voided(self):
         return self.voideinvoice_set.exists()
     @property
@@ -826,7 +834,7 @@ class EInvoice(models.Model):
     def can_void(self):
         if self.is_voided:
             return False
-        elif self.is_canceled and self.canceleivoice_set.filter(new_einvoice__isnull=False).exists():
+        elif self.is_canceled and self.canceleinvoice_set.filter(new_einvoice__isnull=False).exists():
             return False
         else:
             return True

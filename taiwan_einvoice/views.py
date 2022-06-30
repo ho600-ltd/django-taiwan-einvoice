@@ -604,17 +604,23 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
-            if einvoice.canceleinvoice_set.exists():
+            if einvoice.is_canceled:
                 er = {
-                    "error_title": _("E-Invoice Error"),
+                    "error_title": _("Cancel Error"),
                     "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not einvoice.can_cancel:
+                er = {
+                    "error_title": _("Cancel Error"),
+                    "error_message": _("E-Invoice({}) was already voieded and has created the new one!").format(einvoice.track_no_)
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
             elif not re_create_einvoice:
                 message = einvoice.check_before_cancel_einvoice()
                 if message:
                     er = {
-                        "error_title": _("E-Invoice Error"),
+                        "error_title": _("Cancel Error"),
                         "error_message": message,
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -721,7 +727,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             elif not einvoice.can_void:
                 er = {
                     "error_title": _("Void Error"),
-                    "error_message": "E-Invoice({}) was already canceled and has created the new one!".format(einvoice.track_no_)
+                    "error_message": _("E-Invoice({}) was already canceled and has created the new one!").format(einvoice.track_no_)
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
 
