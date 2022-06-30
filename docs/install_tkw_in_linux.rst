@@ -21,13 +21,13 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
 .. code-block:: sql 
 
-    # create database dte Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
-    # create  user dte with password 'dte';
-    # alter database dte owner to dte;
+    # create database dtei Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
+    # create  user dtei with password 'dtei';
+    # alter database dtei owner to dtei;
 
 .. code-block:: sh 
 
-    $ psql -h 127.0.0.1 -U dte -W dte < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
+    $ psql -h 127.0.0.1 -U dtei -W dtei < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
 
 設定 Turnkey 所需基本參數:
 
@@ -36,7 +36,7 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
     $ cd ${SOME_WHERE}/EINVTurnkey2.0.2-linux/linux
     $ ./runFirst.sct
 
-.. figure:: install_turnkey_in_linux/run_first.png
+.. figure:: install_tkw_in_linux/run_first.png
 
     設定資料庫、工作目錄
 
@@ -46,13 +46,13 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
     $ ./einvTurnkey.sct
 
-.. figure:: install_turnkey_in_linux/einv_turnkey.png
+.. figure:: install_tkw_in_linux/einv_turnkey.png
 
     更新中
 
 成功執行後，可見:
 
-.. figure:: install_turnkey_in_linux/turnkey_ui.png
+.. figure:: install_tkw_in_linux/turnkey_ui.png
 
     Turnkey UI
 
@@ -63,16 +63,16 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
     $ sudo yum install python3-dev python-virtualenv git zsh util-linux-user jq mysql-devel
         * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
-    $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
-    $ virtualenv -p python3 django-taiwan-einvoice.py3env
-    $ source django-taiwan-einvoice.py3env/bin/activate
+    $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
+    $ virtualenv -p python3 Django-taiwan-einvoice.py3env
+    $ source Django-taiwan-einvoice.py3env/bin/activate
     $ pip install --upgrade pip
-    $ pip install -r django-taiwan-einvoice/turnkey_web/requirements.txt
+    $ pip install -r Django-taiwan-einvoice/turnkey_web/requirements.txt
     $ pip install ipython
-    $ cd django-taiwan-einvoice/turnkey_web/
+    $ cd Django-taiwan-einvoice/turnkey_web/
     $ ./manage.py migrate
-    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TE service
-    $ cp -rf django-taiwan-einvoice/turnkey_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TEA service
+    $ cp -rf Django-taiwan-einvoice/turnkey_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
     $ sudo apt install supervisor
     $ sudo supervisorctl reread
     $ sudo supervisorctl start all

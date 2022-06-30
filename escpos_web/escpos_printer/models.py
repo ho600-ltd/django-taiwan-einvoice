@@ -262,7 +262,7 @@ class Printer(models.Model):
 
 
 
-class TEWeb(models.Model):
+class TEAWeb(models.Model):
     url = models.CharField(max_length=755)
     slug = models.CharField(max_length=4)
     hash_key = models.CharField(max_length=40)
@@ -312,7 +312,7 @@ class Receipt(models.Model):
     ]
 }
 """
-    te_web = models.ForeignKey(TEWeb, on_delete=models.DO_NOTHING)
+    tea_web = models.ForeignKey(TEAWeb, on_delete=models.DO_NOTHING)
     meet_to_tw_einvoice_standard = models.BooleanField(default=False)
     track_no = models.CharField(max_length=32)
     generate_time = models.DateTimeField()
@@ -333,13 +333,13 @@ class Receipt(models.Model):
 
 
     @classmethod
-    def create_receipt(cls, te_web, message, re_print_original_copy=False):
+    def create_receipt(cls, tea_web, message, re_print_original_copy=False):
         J = json.loads(message)
         try:
             obj = cls.objects.get(meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
                                   track_no=J['track_no'])
         except cls.DoesNotExist:
-            obj = cls(te_web=te_web,
+            obj = cls(tea_web=tea_web,
                       meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
                       track_no=J['track_no'],
                       generate_time=J['generate_time'],

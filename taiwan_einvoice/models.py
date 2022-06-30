@@ -8,7 +8,7 @@ from random import random, randint
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
-from django.db.models import Max
+from django.db.models import Max, F
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -292,7 +292,12 @@ class MobileBarcodeDoesNotExist(Exception):
 
 
 
-class NPOBnDoesNotExist(Exception):
+class NPOBanDoesNotExist(Exception):
+    pass
+
+
+
+class NatualPersonBarcodeFormatError(Exception):
     pass
 
 
@@ -500,6 +505,11 @@ class Seller(models.Model):
 
 
 
+class ContentObjectError(Exception):
+    pass
+
+
+
 class ForbiddenAboveAmountError(Exception):
     pass
 
@@ -593,6 +603,9 @@ class TurnkeyService(models.Model):
 
             ("view_te_canceleinvoice", "View Cancel E-Invoice"),
             ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
+
+            ("view_te_voideinvoice", "View Void E-Invoice"),
+            ("add_te_voideinvoice", "Add Void E-Invoice"),
 
             ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
         )
@@ -711,7 +724,8 @@ class SellerInvoiceTrackNo(models.Model):
 
 
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark']
+    only_fields_can_update = ['print_mark', 'ei_synced', ]
+    ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
     type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
@@ -723,8 +737,10 @@ class EInvoice(models.Model):
     @property
     def track_no_(self):
         return "{}-{}".format(self.track, self.no)
+    reverse_void_order = models.SmallIntegerField(default=0) #INFO: only E-Invoice with reverse_void_order=0 is the normal E-Invoice, others are the voided E-Invoice
     carrier_type_choices = (
         ('3J0002', _('Mobile barcode')),
+        ('CQ0001', _('Natural person barcode')),
     )
     carrier_type = models.CharField(max_length=6, default='', choices=carrier_type_choices, db_index=True)
     @property
@@ -797,7 +813,39 @@ class EInvoice(models.Model):
         else:
             return None
     @property
+    def can_cancel(self):
+        if self.is_canceled:
+            return False
+        elif self.is_voided and self.voideinvoice_set.filter(new_einvoice__isnull=False).exists():
+            return False
+        else:
+            return True
+    @property
+    def is_voided(self):
+        return self.voideinvoice_set.exists()
+    @property
+    def voided_time(self):
+        if self.is_voided:
+            vei = self.voideinvoice_set.get()
+            return vei.generate_time
+        else:
+            return None
+    @property
+    def can_void(self):
+        if self.is_voided:
+            return False
+        elif self.is_canceled and self.canceleinvoice_set.filter(new_einvoice__isnull=False).exists():
+            return False
+        elif self.is_canceled:
+            #INFO: Logically, a normal flow can be C401 > C501 > C701 > C401
+            #But in the general case, an E-Invoice state is from C401 to C501 and has no new C401 means "Return Order"
+            #So the "E-Invoice depends on the return order" does not need another C701
+            return False
+        else:
+            return True
+    @property
     def related_einvoices(self):
+        #TODO: how put "voided-einvoice" in here?
         einvoice = self
         related_einvoices = []
         while True:
@@ -817,7 +865,7 @@ class EInvoice(models.Model):
 
 
     class Meta:
-        unique_together = (('seller_invoice_track_no', 'track', 'no'), )
+        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
     
 
     @property
@@ -936,7 +984,7 @@ class EInvoice(models.Model):
                             random_number=self.random_number,
                             sales_amount=sales_amount_str,
                             total_amount=total_amount_str,
-                            buyer_identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier,
+                            buyer_identifier=(LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier)[:8],
                             seller_identifier=self.seller_identifier,
                             generate_no_sha1=self.generate_no_sha1,
                             qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
@@ -979,6 +1027,15 @@ class EInvoice(models.Model):
         return _d
 
 
+    def check_before_cancel_einvoice(self):
+        return self.content_object.check_before_cancel_einvoice()
+
+
+    def set_ei_synced_true(self):
+        if 'ei_synced' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
     def set_print_mark_true(self, einvoice_print_log=None):
         if '' != self.carrier_type or '' != self.npoban:
             pass
@@ -992,12 +1049,22 @@ class EInvoice(models.Model):
                 EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
 
+    def increase_reverse_void_order(self):
+        EInvoice.objects.filter(id=self.id).update(reverse_void_order=F('reverse_void_order')+1)
+
+
     def delete(self, *args, **kwargs):
         raise Exception('Can not delete')
 
 
     def save(self, *args, **kwargs):
-        if kwargs.get('force_save', False):
+        if not self.content_object:
+            raise ContentObjectError(_("Content object is not existed"))
+        elif not hasattr(self.content_object, 'check_before_cancel_einvoice'):
+            raise ContentObjectError(_("Content Object: {} has no 'check_before_cancel_einvoice' method").format(self.content_object))
+        elif not hasattr(self.content_object, 'post_cancel_einvoice'):
+            raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
+        elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
         elif not self.pk:
@@ -1016,9 +1083,15 @@ class EInvoice(models.Model):
                     break
                 else:
                     obj = objs[len(objs)-1]
-                    if not self._meta.model.objects.filter(id__gte=obj.id,
-                                                           seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                           random_number=random_number).exists():
+                    if not (self._meta.model.objects.filter(id__gte=obj.id,
+                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                            random_number=random_number).exists()
+                            or self._meta.model.objects.filter(reverse_void_order__gt=0,
+                                                               seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                               track=self.track,
+                                                               no=self.no,
+                                                               random_number=random_number,
+                                                               ).exists()):
                         break
             self.random_number = random_number
             self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
@@ -1077,10 +1150,11 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    ei_synced = models.BooleanField(default=False)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
-        related_name="new_einvoice_cancel_einvoice_set",
+        related_name="new_einvoice_on_cancel_einvoice_set",
         null=True,
         on_delete=models.DO_NOTHING)
     @property
@@ -1100,3 +1174,75 @@ class CancelEInvoice(models.Model):
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
+    def set_ei_synced_true(self):
+        CancelEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def set_new_einvoice(self, new_einvoice):
+        if not self.new_einvoice:
+            CancelEInvoice.objects.filter(id=self.id).update(new_einvoice=new_einvoice)
+            self.new_einvoice = new_einvoice
+
+
+    def post_cancel_einvoice(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('CancelEInvoice(id:{}) post_cancel_einvoice'.format(self.id))
+        message = ""
+        if self.new_einvoice:
+            message = self.einvoice.content_object.post_cancel_einvoice(self.new_einvoice)
+        return message
+
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
+            super().save(*args, **kwargs)
+
+
+
+class VoidEInvoice(models.Model):
+    ei_synced = models.BooleanField(default=False)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
+    @property
+    def invoice_date(self):
+        return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
+    generate_time = models.DateTimeField()
+    @property
+    def void_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def void_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
+    reason = models.CharField(max_length=20, null=False)
+    remark = models.CharField(max_length=200, default='', null=True, blank=True)
+
+
+    def set_ei_synced_true(self):
+        VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def set_new_einvoice(self, new_einvoice):
+        if not self.new_einvoice:
+            VoidEInvoice.objects.filter(id=self.id).update(new_einvoice=new_einvoice)
+            self.new_einvoice = new_einvoice
+
+
+    def post_void_einvoice(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('VoidEInvoice(id:{}) post_void_einvoice'.format(self.id))
+        message = self.einvoice.content_object.post_void_einvoice(self.new_einvoice)
+        return message
+
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
+            super().save(*args, **kwargs)

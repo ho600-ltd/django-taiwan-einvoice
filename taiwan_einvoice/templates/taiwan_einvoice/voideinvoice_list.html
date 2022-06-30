@@ -1,0 +1,203 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}{% load ho600_tags %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/voideinvoice_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+    <div class="form_container" id="id_search_options">
+        <form method="GET" action="./" onsubmit="return false;">
+            <input type='hidden' name='format' value='html' />
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="einvoice__code39__exact">{% trans "One-dimensional Barcode from the Voided E-Invoice" context "taiwan_einvoice" %} <i class="fa fa-barcode" aria-hidden="true"></i></label>
+                        <div class="input-group" id="einvoice__code39__exact" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__code39__exact" id="id_einvoice__code39__exact" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="einvoice__track_no__icontains">{% trans "Track No. from the Voided E-Invoice contains" %}</label>
+                        <div class="input-group" id="einvoice__track_no__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__track_no__icontains" id="id_einvoice__track_no__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="generate_time__gte">{% trans "Void time later than" %}</label>
+                        <div class="input-group date" id="generate_time__gte" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#generate_time__gte"
+                                name="generate_time__gte" id="id_generate_time__gte" />
+                            <div class="input-group-append" data-target="#generate_time__gte" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-6">
+                    <div class="form-group">
+                        <label for="generate_time__lt">{% trans "Void time earlier than" %}</label>
+                        <div class="input-group date" id="generate_time__lt" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#generate_time__lt"
+                                name="generate_time__lt" id="id_generate_time__lt" />
+                            <div class="input-group-append" data-target="#generate_time__lt" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search_button_row">
+                <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% block content %}
+    {% if content %}{{ content|safe }}{% endif %}
+    {% endblock %}
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% endblock %}
+
+{% block modals %}
+
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_voideinvoice" as "can_add_voideinvoice_under_turnkeyservices" %}
+
+{% if can_add_voideinvoice_under_turnkeyservices.exists %}
+
+    <div class="modal fade" id="show_voideinvoice_modal" tabindex="-1" role="dialog"
+        resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_voiding}"
+        resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-list' %}"
+        aria-labelledby="show_voideinvoice_modal_label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="show_voideinvoice_modal_label">{% trans "Void E-Invoice" %}</h4>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4 style="color: red;">{% trans "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one." %}</h4>
+                    <h4 style="color: red;">{% trans "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one." %}</h4>
+                    <h4 style="color: red;">{% trans "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time." %}</h4>
+                    <div class="form-group row">
+                        <label for="reason" class="col-4 col-form-label"><span class="text-danger">*</span> {% trans "Reason(Required)" context "void_einvoice" %}</label>
+                        <div class="col-8">
+                            <select class="form-control" name="reason" id="reason">
+                                <option value="" tags="">{% trans "Please one" context "void_einvoice" %}</option>
+                                <option value="更新買方統編" tags="buyer_identifier">更新買方統編</option>
+                                <option value="更新捐贈碼" tags="npoban">更新捐贈碼</option>
+                                <option value="更新手機條碼" tags="mobile_barcode">更新手機條碼</option>
+                                <option value="更新自然人憑證條碼" tags="natural_person_barcode">更新自然人憑證條碼</option>
+                                <option value="更新買方統編及手機條碼" tags="buyer_identifier,mobile_barcode">更新買方統編及手機條碼</option>
+                                <option value="更新買方統編及自然人憑證條碼" tags="buyer_identifier,natural_person_barcode">更新買方統編及自然人憑證條碼</option>
+                                <option value="更新捐贈碼及手機條碼" tags="npoban,mobile_barcode">更新捐贈碼及手機條碼</option>
+                                <option value="更新捐贈碼及自然人憑證條碼" tags="npoban,natural_person_barcode">更新捐贈碼及自然人憑證條碼</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="remark" class="col-4 col-form-label">{% trans "Remark(Optional)" %}</label>
+                        <div class="col-8">
+                            <textarea class="form-control" name="remark" id="remark" rows="3" placeholder="{% trans 'Limit to 200 words' %}" maxlength="200" ></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="buyer_identifier" class="col-4 col-form-label">{% trans "Buyer Identifier" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="buyer_identifier" id="buyer_identifier" placeholder="{% trans 'Please input 8 digits number' %}" minlength="8" maxlength="8" disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="npoban" class="col-4 col-form-label">{% trans "NPOBAN" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="npoban" id="npoban" placeholder="{% trans 'Only accept numbers' %}" minlength="3" maxlength="7"  disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="mobile_barcode" class="col-4 col-form-label">{% trans "Mobile barcode" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="mobile_barcode" id="mobile_barcode" placeholder="{% trans 'Please input 8 digits valid barcode' %}" minlength="8" maxlength="8" disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="natural_person_barcode" class="col-4 col-form-label">{% trans "Natural Person Barcode" %}</label>
+                        <div class="col-8">
+                            <input class="form-control" name="natural_person_barcode" id="natural_person_barcode" placeholder="{% trans 'Please input 16 digits valid barcode' %}" minlength="16" maxlength="16" disabled="disabled" />
+                        </div>
+                    </div>
+                    <table class="table table-hover table-striped">
+                        <thead>
+                                <tr>
+                                    <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                                    <th field="track_no_">{% trans "Track No." %}</th>
+                                    <th field="buyer_identifier_npoban">{% trans "Buyer identifier or NPOBAN" %}</th>
+                                    <th field="barcode">{% trans "Barcode" %}</th>
+                                    <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                    <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                    <th field="TotalAmount">{% trans "Total Amount" %}</th>
+                                    <th field="generate_no">{% trans "Footprint No." %}</th>
+                                </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="tr_tmpl" style="display: none;">
+                                <td field="year_month_range"></td>
+                                <td field="track_no_"></td>
+                                <td field="buyer_identifier_npoban"></td>
+                                <td field="barcode"></td>
+                                <td field="SalesAmount"></td>
+                                <td field="TaxAmount"></td>
+                                <td field="TotalAmount"></td>
+                                <td field="generate_no"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="cancel_before_void" name="cancel_before_void" />
+                        <label class="form-check-label" for="cancel_before_void">{% trans "Cancel it before the void process. This option is only for testing before 'applying for B2C E-Invoice qualifier'." %}</label>
+                    </div>
+                    <button id="void_einvoice_button_1" type="button" class="void_einvoice btn btn-secondary">{% trans "Void E-Invoice" %}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
+{% endblock %}

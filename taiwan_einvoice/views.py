@@ -1,4 +1,5 @@
-import json, datetime, logging
+import json, datetime, logging, re
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render
 from django.db.models import Q
@@ -29,6 +30,7 @@ from taiwan_einvoice.permissions import (
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
+    CanEntryVoidEInvoice,
     CanViewLegalEntity,
     CanViewTurnkeyService,
 )
@@ -44,6 +46,7 @@ from taiwan_einvoice.renderers import (
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
     CancelEInvoiceHtmlRenderer,
+    VoidEInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -56,6 +59,8 @@ from taiwan_einvoice.models import (
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
+    VoidEInvoice,
+    EInvoiceSellerAPI,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -71,6 +76,7 @@ from taiwan_einvoice.serializers import (
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
+    VoidEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -81,6 +87,8 @@ from taiwan_einvoice.filters import (
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
+    CancelEInvoiceFilter,
+    VoidEInvoiceFilter,
 )
 
 
@@ -564,6 +572,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryCancelEInvoice), )
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
+    filter_class = CancelEInvoiceFilter
     renderer_classes = (CancelEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )
 
@@ -584,28 +593,43 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
         einvoice_id = data['einvoice_id']
+        re_create_einvoice = data['re_create_einvoice']
+        del data['re_create_einvoice']
         try:
             einvoice = EInvoice.objects.get(id=einvoice_id)
         except EInvoice.DoesNotExist:
             er = {
-                "error_title": "E-Invoice Error",
+                "error_title": _("E-Invoice Error"),
                 "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
-            if einvoice.canceleinvoice_set.exists():
+            if einvoice.is_canceled:
                 er = {
-                    "error_title": "E-Invoice Error",
+                    "error_title": _("Cancel Error"),
                     "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not einvoice.can_cancel:
+                er = {
+                    "error_title": _("Cancel Error"),
+                    "error_message": _("E-Invoice({}) was already voieded and has created the new one!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not re_create_einvoice:
+                message = einvoice.check_before_cancel_einvoice()
+                if message:
+                    er = {
+                        "error_title": _("Cancel Error"),
+                        "error_message": message,
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
         data['seller_identifier'] = einvoice.seller_identifier
         data['buyer_identifier'] = einvoice.buyer_identifier
         data['generate_time'] = now()
-        re_create_einvoice = data['re_create_einvoice']
-        del data['re_create_einvoice']
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -634,7 +658,165 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d['print_mark'] = False
             new_einvoice = EInvoice(**_d)
             new_einvoice.save()
-            serializer.instance.new_einvoice = new_einvoice
-            serializer.instance.save()
+            serializer.instance.set_new_einvoice(new_einvoice)
+            serializer.instance.post_cancel_einvoice()
         serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class VoidEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEntryVoidEInvoice), )
+    queryset = VoidEInvoice.objects.all().order_by('-id')
+    serializer_class = VoidEInvoiceSerializer
+    filter_class = VoidEInvoiceFilter
+    renderer_classes = (VoidEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(VoidEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+    
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        cancel_before_void = data['cancel_before_void']
+        del data['cancel_before_void']
+        if data['npoban'] and data['buyer_identifier']:
+            er = {
+                "error_title": _("Void Error"),
+                "error_message": _("NPOBAN can not be set with Buyer Identifier at the same time")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['mobile_barcode'] and data['natural_person_barcode']:
+            er = {
+                "error_title": _("Void Error"),
+                "error_message": _("Mobile barcode can not be set with Natural Person barcode at the same time")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['natural_person_barcode'] and not re.search('[a-zA-Z]{2}[0-9]{14}', data['natural_person_barcode']):
+            er = {
+                "error_title": _("Natural Person barcode Error"),
+                "error_message": _("Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number.")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        einvoice_id = data['einvoice_id']
+        try:
+            einvoice = EInvoice.objects.get(id=einvoice_id)
+        except EInvoice.DoesNotExist:
+            er = {
+                "error_title": _("E-Invoice Error"),
+                "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        else:
+            if einvoice.is_voided:
+                er = {
+                    "error_title": _("Void Error"),
+                    "error_message": _("E-Invoice({}) was already voided!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not einvoice.can_void:
+                er = {
+                    "error_title": _("Void Error"),
+                    "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        eisa = EInvoiceSellerAPI.objects.get(AppId=settings.TAIWAN_EINVOICE_APP_ID)
+        if data['buyer_identifier'] and False == eisa.inquery('seller-identifier', data['buyer_identifier']):
+            er = {
+                "error_title": _("Buyer Identifier Error"),
+                "error_message": _('Buyer identifier does not exist.')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['npoban'] and False == eisa.inquery('donate-mark', data['npoban']):
+            er = {
+                "error_title": _("NPOBan Error"),
+                "error_message": _('NPO bn does not exist.')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['mobile_barcode'] and False == eisa.inquery('mobile-barcode', data['mobile_barcode']):
+            er = {
+                "error_title": _("Mobile barcode Error"),
+                "error_message": _('Mobile barcode does not exist.')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        if cancel_before_void:
+            cei = CancelEInvoice(creator=request.user,
+                                 einvoice=einvoice,
+                                 seller_identifier=einvoice.seller_identifier,
+                                 buyer_identifier=einvoice.buyer_identifier,
+                                 generate_time=now(),
+                                 reason=data['reason'],
+                                 remark=data['remark']
+                                )
+            cei.save()
+
+        data['creator'] = request.user.id
+        data['einvoice'] = einvoice.id
+        data['seller_identifier'] = einvoice.seller_identifier
+        _post_buyer_identifier = data['buyer_identifier']
+        data['buyer_identifier'] = einvoice.buyer_identifier
+        data['generate_time'] = now()
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        for _ei in EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=einvoice.seller_invoice_track_no.turnkey_web,
+                                           track=einvoice.track,
+                                           no=einvoice.no).order_by('-reverse_void_order'):
+            _ei.increase_reverse_void_order()
+
+
+        _d = {f.name: getattr(einvoice, f.name) for f in EInvoice._meta.fields }
+        del _d['id']
+        del _d['random_number']
+        _d['creator'] = request.user
+        _d['print_mark'] = False
+        data['buyer_identifier'] = _post_buyer_identifier
+
+        if data['mobile_barcode']:
+            _d['carrier_type'] = '3J0002'
+            _d['carrier_id1'] = _d['carrier_id2'] = data['mobile_barcode']
+        elif data['natural_person_barcode']:
+            _d['carrier_type'] = 'CQ0001'
+            _d['carrier_id1'] = _d['carrier_id2'] = data['natural_person_barcode']
+
+        lg = logging.getLogger('taiwan_einvoice')
+        if data['npoban']:
+            _d['npoban'] = data['npoban']
+        elif data['buyer_identifier']:
+            _d['buyer_identifier'] = data['buyer_identifier']
+            try:
+                buyer_legal_entity = LegalEntity.objects.get(identifier=_d['buyer_identifier'])
+            except LegalEntity.DoesNotExist:
+                buyer_legal_entity = LegalEntity(identifier=_d['buyer_identifier'], name=_d['buyer_identifier'])
+                buyer_legal_entity.save()
+            _d["buyer"] = buyer_legal_entity
+            _d["buyer_name"] = buyer_legal_entity.name if buyer_legal_entity else ''
+            _d["buyer_address"] = buyer_legal_entity.address if buyer_legal_entity else ''
+            _d["buyer_person_in_charge"] = buyer_legal_entity.person_in_charge if buyer_legal_entity else ''
+            _d["buyer_telephone_number"] = buyer_legal_entity.telephone_number if buyer_legal_entity else ''
+            _d["buyer_facsimile_number"] = buyer_legal_entity.facsimile_number if buyer_legal_entity else ''
+            _d["buyer_email_address"] = buyer_legal_entity.email_address if buyer_legal_entity else ''
+            _d["buyer_customer_number"] = buyer_legal_entity.customer_number if buyer_legal_entity else ''
+            _d["buyer_role_remark"] = buyer_legal_entity.role_remark if buyer_legal_entity else ''
+
+        new_einvoice = EInvoice(**_d)
+        new_einvoice.save()
+        serializer.instance.set_new_einvoice(new_einvoice)
+        serializer.instance.save()
+        serializer.instance.post_void_einvoice()
+        serializer = VoidEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

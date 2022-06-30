@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-21 21:22+0800\n"
+"POT-Creation-Date: 2022-06-30 16:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,6 +45,9 @@ msgstr "號碼不足"
 msgid "Mobile barcode"
 msgstr "手機條碼"
 
+msgid "Natural person barcode"
+msgstr "自然人憑證條碼"
+
 #, python-brace-format
 msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
 msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
@@ -71,6 +74,15 @@ msgstr "備註: {}"
 
 msgid "No details"
 msgstr "無明細"
+
+msgid "Content object is not existed"
+msgstr "內容物件: {} 不存在"
+
+msgid "Content Object: {} has no 'check_before_cancel_einvoice' method"
+msgstr "內容物件: {} 無「check_before_cancel_einvoice」方法"
+
+msgid "Content Object: {} has no 'post_cancel_einvoice' method"
+msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
@@ -118,6 +130,9 @@ msgstr "其他"
 
 msgid "Cancel EI."
 msgstr "作廢發票"
+
+msgid "Void EI."
+msgstr "註銷發票"
 
 msgid "Accounter Audit"
 msgstr "會計查驗"
@@ -193,6 +208,10 @@ msgid "Cancel Reason Example"
 msgstr "作廢原因範例"
 
 msgctxt "cancel_einvoice"
+msgid "Return the WorkOrder"
+msgstr "訂單退貨"
+
+msgctxt "cancel_einvoice"
 msgid "Lost original copy"
 msgstr "遺失正本"
 
@@ -237,14 +256,23 @@ msgstr "總金額"
 msgid "Footprint No."
 msgstr "追蹤編號"
 
-msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no.)"
-msgstr "同時開立新的電子發票(新發票除字軌號碼不同外，其餘資訊皆同原作廢發票)"
+msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
+msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
 
 msgid "Cancel"
 msgstr "關閉"
 
 msgid "Please input the one-dimensional barcode for canceling: "
 msgstr "請輸入欲作廢之發票的一維條碼"
+
+msgid ""
+"\n"
+"            It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.\n"
+"        "
+msgstr ""
+"\n"
+"作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
+"            "
 
 #, python-format
 msgid "%(total_count)s records"
@@ -312,6 +340,17 @@ msgstr "已作廢，且未開立新發票"
 msgctxt "taiwan_einvoice_cancel_einvoice_type"
 msgid "Canceled, has new one"
 msgstr "已作廢，且有開立新發票"
+
+msgid "Void E-Invoice Type?"
+msgstr "註銷電子發票類型?"
+
+msgctxt "taiwan_einvoice_void_einvoice_type"
+msgid "Not yet"
+msgstr "未註銷"
+
+msgctxt "taiwan_einvoice_void_einvoice_type"
+msgid "Voided"
+msgstr "已註銷"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -828,6 +867,9 @@ msgstr "字軌號碼"
 msgid "Imoprt track-no or delete unuse track-no"
 msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
 
+msgid "Void E-Invoice"
+msgstr "註銷電子發票"
+
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"
 
@@ -840,6 +882,91 @@ msgstr "工作人員群組名稱"
 
 msgid "Staffs"
 msgstr "工作人員"
+
+msgctxt "taiwan_einvoice"
+msgid "One-dimensional Barcode from the Voided E-Invoice"
+msgstr "被註銷發票的一維條碼"
+
+msgid "Track No. from the Voided E-Invoice contains"
+msgstr "被註銷發票的字軌號碼包含"
+
+msgid "Void time later than"
+msgstr "註銷時間晚於"
+
+msgid "Void time earlier than"
+msgstr "註銷時間早於"
+
+msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
+msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
+
+msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
+msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
+
+msgid "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time."
+msgstr "注意 3: 無法同時更新捐贈碼及買方統編；也無法同時更新手機條碼及自然人憑證條碼。"
+
+msgctxt "void_einvoice"
+msgid "Reason(Required)"
+msgstr "註銷原因(必填)"
+
+msgctxt "void_einvoice"
+msgid "Please one"
+msgstr "請選擇 1 項"
+
+msgid "Buyer Identifier"
+msgstr "買方統編"
+
+msgid "Please input 8 digits number"
+msgstr "請輸入 8 碼數字"
+
+msgid "NPOBAN"
+msgstr "捐贈碼"
+
+msgid "Only accept numbers"
+msgstr "只接受數字"
+
+msgid "Please input 8 digits valid barcode"
+msgstr "請輸入 8 碼有效條碼"
+
+msgid "Natural Person Barcode"
+msgstr "自然人憑證條碼"
+
+msgid "Please input 16 digits valid barcode"
+msgstr "請輸入 16 碼有效條碼"
+
+msgid "Buyer identifier or NPOBAN"
+msgstr "買方統編<br/>或捐贈碼"
+
+msgid "Barcode"
+msgstr "條碼"
+
+msgid "Cancel it before the void process. This option is only for testing before 'applying for B2C E-Invoice qualifier'."
+msgstr "註銷前先作廢。此選項僅用於'申請 B2C 電子發票資格'前的測試。"
+
+msgid "Please input the one-dimensional barcode for voiding: "
+msgstr "請輸入欲註銷之發票的一維條碼"
+
+msgid ""
+"\n"
+"            It uses the <b>same track no.</b> to create the new E-Invoice after voiding the E-Invoice.\n"
+"        "
+msgstr ""
+"\n"
+"註銷電子發票後，再開立的新電子發票，其字軌號碼會是<b>相同</b>於被註銷的電子發票。\n"
+"            "
+
+msgid "Voided Track No."
+msgstr "已註銷字軌號碼"
+
+msgid "Random Number"
+msgstr "隨機碼"
+
+msgctxt "taiwan_einvoice"
+msgid "Voider"
+msgstr "註銷者"
+
+msgid "Void Time"
+msgstr "註銷時間"
 
 msgid "Staff exist"
 msgstr "工作人員已存在"
@@ -921,5 +1048,50 @@ msgstr "{} 不存在"
 msgid "E-Invoice(id: {}) does not exist!"
 msgstr "電子發票(id: {})不存在!"
 
+msgid "Cancel Error"
+msgstr "作廢錯誤"
+
 msgid "E-Invoice({}) was already canceled!"
 msgstr "電子發票({})已被作廢!"
+
+msgid "E-Invoice({}) was already voieded and has created the new one!"
+msgstr "電子發票({})已被註銷且另有開立!"
+
+msgid "Void Error"
+msgstr "註銷發票錯誤"
+
+msgid "NPOBAN can not be set with Buyer Identifier at the same time"
+msgstr "捐贈碼與買方統編無法同時設定"
+
+msgid "Mobile barcode can not be set with Natural Person barcode at the same time"
+msgstr "手機條碼與自然人憑證條碼無法同時設定"
+
+msgid "Natural Person barcode Error"
+msgstr "自然人憑證條碼錯誤"
+
+msgid "Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number."
+msgstr "自然人憑證條碼格式應為開頭 2 碼為英文字，後 14 碼為數字。"
+
+msgid "E-Invoice({}) was already voided!"
+msgstr "電子發票({})已被註銷!"
+
+msgid "Buyer Identifier Error"
+msgstr "買方統編錯誤"
+
+msgid "Buyer identifier does not exist."
+msgstr "買方統編不存在"
+
+msgid "NPOBan Error"
+msgstr "捐贈碼錯誤"
+
+msgid "NPO bn does not exist."
+msgstr "捐贈碼不存在"
+
+msgid "Mobile barcode Error"
+msgstr "手機條碼錯誤"
+
+msgid "Mobile barcode does not exist."
+msgstr "手機條碼不存在"
+
+#~ msgid "E-Invoice({}) was already canceled and has created the new one!"
+#~ msgstr "電子發票({})已被作廢且另有開立!"

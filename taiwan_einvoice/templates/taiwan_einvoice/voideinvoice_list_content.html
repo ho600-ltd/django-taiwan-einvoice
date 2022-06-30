@@ -1,0 +1,68 @@
+{% load i18n %}{% load tz %}{% load ho600_tags %}
+
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_voideinvoice" as "can_add_voideinvoice_under_turnkeyservices" %}
+{% with add_voideinvoice_under_turnkeyservices_exists=can_add_voideinvoice_under_turnkeyservices.exists %}
+
+    {% if add_voideinvoice_under_turnkeyservices_exists %}
+        <form class="form-inline" onsubmit="javascript: return false;">
+            <div class="form-group">
+                <label for="one_dimensional_barcode_for_voiding">
+                    {% trans "Please input the one-dimensional barcode for voiding: " %}
+                </label>
+                <input type="text" class="form-control" name="one_dimensional_barcode_for_voiding" id="one_dimensional_barcode_for_voiding" />
+            </div>
+
+            <button type="submit" id="show_voideinvoice_modal_button_0" class="btn btn-dark show_voideinvoice_modal">
+                {% blocktrans %}Void E-Invoice{% endblocktrans %}
+            </button>
+        </form>
+
+        <small id="one_dimensional_barcode_for_voidingHelp" class="form-text text-muted">{% blocktrans %}
+            It uses the <b>same track no.</b> to create the new E-Invoice after voiding the E-Invoice.
+        {% endblocktrans %}</small>
+    {% endif %}
+
+    <div class="total_count_row">
+        {% with data.count as total_count %}
+            {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+        {% endwith %}
+    </div>
+
+    <table class="table search_result">
+        <thead>
+            <tr>
+                <th field="no" width="5%">{% trans "No." %}</th>
+                <th field="year_month_range" width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                <th field="track_no_" width="10%">{% trans "Voided Track No." %}</th>
+                <th field="random_number" width="5%">{% trans "Random Number" %}</th>
+                <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
+                <th field="SalesAmount" width="10%">{% trans "Sales Amount" %}</th>
+                <th field="TaxAmount" width="10%">{% trans "Tax Amount" %}</th>
+                <th field="TotalAmount" width="10%">{% trans "Total Amount" %}</th>
+                <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
+                <th field="creator_first_name_id" width="10%">{% trans "Voider" context "taiwan_einvoice" %}</th>
+                <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Void Time" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for voideinvoice in data.results %}
+                {% with voideinvoice.id as einvoice_id %}
+                    <tr voideinvoice_id="{{ voideinvoice.id }}" >
+                        <td field="no">{{ forloop.counter }}.</td>
+                        <td field="year_month_range">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
+                        <td field="track_no_">{{ voideinvoice.einvoice_dict.track_no_ }}</td>
+                        <td field="random_number">{{ voideinvoice.einvoice_dict.random_number }}</td>
+                        <td field="type__display">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>
+                        <td field="SalesAmount">{{ voideinvoice.einvoice_dict.amounts.SalesAmount }}</td>
+                        <td field="TaxAmount">{{ voideinvoice.einvoice_dict.amounts.TaxAmount }}</td>
+                        <td field="TotalAmount" {% if voideinvoice.einvoice_dict.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ voideinvoice.einvoice_dict.amounts.TotalAmount }}</td>
+                        <td field="generate_no">{{ voideinvoice.einvoice_dict.generate_no }}</td>
+                        <td field="creator_first_name_id">{{ voideinvoice.creator_dict.first_name }}:{{ voideinvoice.creator_dict.id }}</td>
+                        <td class="datetime" field="generate_time" value="{{ voideinvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
+                    </tr>
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endwith %}

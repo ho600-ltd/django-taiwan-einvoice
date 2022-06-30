@@ -1,20 +1,8 @@
-EPW / TKW / TE 架構
+在 PI 安裝設定 EPW 伺服器
 ===============================================================================
 
-TE 是一個 django-based 的 python app ，可直接以 Web Api Service 方式執行，或是導入至其他 django-based 的專案中。\
-TE 支援 WebSocket 模式，當 EPW 系統開機後，會連線至 TE Web Api 或 CEC 中，由 TE 提供的 Web Api 。\
-當 TE 有列印發票的指令，其包含的發票資料格式為 JSON ，會透過 WebSocket 傳至 EPW ， EPW 再將發票 JSON 轉譯為 esc 指令，\
-再送至系統 OS 所控管的 thermal esc printer 。
-
-當 TE 要上傳發票至 EI 大平台時，一樣先由 TKW 以 WebSocket 模式連線至 TE Web Api Endpoint 或是 CEC 中，由 TE 提供的 Api Endpoint。\
-TE 以 WebSocket 模式傳送要上傳的發票 JSON 給 TKW ， TKW 會將發票 JSON 轉成 MIG 標準的 xml ，並存入 Turnkey 系統，\
-由 Turnkey 系統負責與 EI 大平台的發票上傳作業。
-
-安裝設定 EPW
--------------------------------------------------------------------------------
-
-建議使用 raspberry pi + Linux OS 為 EPW 的伺服器，\
-雖然 EPW 是由 django-based 程式碼及相關 python 函式庫所組成的應用程式，\
+建議使用 Raspberry PI + Linux OS 為 EPW 的伺服器，\
+雖然 EPW 是由 Django-based 程式碼及相關 python 函式庫所組成的應用程式，\
 要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用；\
 若要在 Windows 上，則需修改部份硬體控制相關的程式碼。\
 考慮長期運作的高可用性，還是應以 pi 來執行 EPW 。
@@ -24,7 +12,7 @@ EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-esc
 安裝 raspberry OS 時，須將時區設為 Asia/Taipei
 
 ESC/POS 印表機設定
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------------------------------------------
 
 1. 將執行 EPW 的用戶帳號加入到 lp, lpadmin 群組
     * .. code-block:: sh
@@ -39,21 +27,21 @@ ESC/POS 印表機設定
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
 
 Set up EPW Service
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------------------------------------------
 
 .. code-block:: sh
 
     $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
     $ sudo apt install build-essential libssl-dev libffi-dev python3-dev cargo aptitude python-virtualenv python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate
-    $ git clone git@github.com:ho600-ltd/django-taiwan-einvoice.git
-    $ virtualenv -p python3 django-taiwan-einvoice.py3env
-    $ source django-taiwan-einvoice.py3env/bin/activate
-    $ pip install -r django-taiwan-einvoice/escpos_web/requirements.txt
+    $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
+    $ virtualenv -p python3 Django-taiwan-einvoice.py3env
+    $ source Django-taiwan-einvoice.py3env/bin/activate
+    $ pip install -r Django-taiwan-einvoice/escpos_web/requirements.txt
     $ pip install ipython
-    $ cd django-taiwan-einvoice/escpos_web/
+    $ cd Django-taiwan-einvoice/escpos_web/
     $ ./manage.py migrate
-    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TE service
-    $ cp -rf django-taiwan-einvoice/escpos_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be getting from TEA service; update "printer object"
+    $ cp -rf Django-taiwan-einvoice/escpos_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
     $ sudo apt install supervisor
     $ sudo supervisorctl reread
     $ sudo supervisorctl start all
@@ -70,17 +58,17 @@ Display with waveshare LCD(Optional)
     $ sudo raspi-config
     Choose Interfacing Options -> SPI -> Yes  to enable SPI interface
 
-.. figure:: EPW_TKW_TE_brief/PI_interfaces.png
+.. figure:: EPW_TKW_TEA_brief/PI_interfaces.png
     :width: 600px
 
     選擇介面選項
 
-.. figure:: EPW_TKW_TE_brief/SPI.png
+.. figure:: EPW_TKW_TEA_brief/SPI.png
     :width: 600px
 
     選擇 SPI
 
-.. figure:: EPW_TKW_TE_brief/Enable_SPI.png
+.. figure:: EPW_TKW_TEA_brief/Enable_SPI.png
     :width: 600px
 
     啟用 SPI
@@ -104,7 +92,7 @@ Display with waveshare LCD(Optional)
 
 .. code-block:: sh
 
-    $ sudo cp -rf ~/django-taiwan-einvoice/escpos_web/lcd_control.conf /etc/supervisor/conf.d/
+    $ sudo cp -rf ~/Django-taiwan-einvoice/escpos_web/lcd_control.conf /etc/supervisor/conf.d/
     $ sudo supervisorctl reread
     $ sudo supervisorctl restart all
     lcd_control:asgi0: stopped
@@ -116,14 +104,14 @@ Display with waveshare LCD(Optional)
 
 LCD 顯示成果:
 
-.. figure:: EPW_TKW_TE_brief/Result.jpeg
+.. figure:: EPW_TKW_TEA_brief/Result.jpeg
     :width: 600px
 
     IP: 4.5.6.7 為出口 IP
 
 
-TE supports ASGI with daphne, supervisor and nginx
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TEA supports ASGI with daphne, supervisor and nginx
+-------------------------------------------------------------------------------
 
 .. code-block:: sh
 
@@ -205,7 +193,7 @@ TE supports ASGI with daphne, supervisor and nginx
 
 
 讓 EPW 支援 Web API 關機
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------------------------------------------
 
 先讓 EPW 在每次開機時，產製出驗證碼，供 Web API 執行時驗證用:
 
@@ -222,8 +210,3 @@ TE supports ASGI with daphne, supervisor and nginx
     EOF
     $ exit
     $ chmod a+x /etc/rc.local
-
-安裝設定 TKW
--------------------------------------------------------------------------------
-
-請見下一章節( :doc:`install_turnkey_in_linux` )。
