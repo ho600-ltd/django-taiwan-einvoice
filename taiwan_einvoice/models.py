@@ -836,6 +836,11 @@ class EInvoice(models.Model):
             return False
         elif self.is_canceled and self.canceleinvoice_set.filter(new_einvoice__isnull=False).exists():
             return False
+        elif self.is_canceled:
+            #INFO: Logically, a normal flow can be C401 > C501 > C701 > C401
+            #But in the general case, an E-Invoice state is from C401 to C501 and has no new C401 means "Return Order"
+            #So the "E-Invoice depends on the return order" does not need another C701
+            return False
         else:
             return True
     @property

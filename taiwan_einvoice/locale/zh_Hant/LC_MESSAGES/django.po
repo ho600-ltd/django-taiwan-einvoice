@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-30 15:17+0800\n"
+"POT-Creation-Date: 2022-06-30 16:09+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1072,9 +1072,6 @@ msgstr "自然人憑證條碼格式應為開頭 2 碼為英文字，後 14 碼�
 msgid "E-Invoice({}) was already voided!"
 msgstr "電子發票({})已被註銷!"
 
-msgid "E-Invoice({}) was already canceled and has created the new one!"
-msgstr "電子發票({})已被作廢且另有開立!"
-
 msgid "Buyer Identifier Error"
 msgstr "買方統編錯誤"
 
@@ -1092,3 +1089,6 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
+
+#~ msgid "E-Invoice({}) was already canceled and has created the new one!"
+#~ msgstr "電子發票({})已被作廢且另有開立!"

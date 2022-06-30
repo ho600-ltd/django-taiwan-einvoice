@@ -727,7 +727,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             elif not einvoice.can_void:
                 er = {
                     "error_title": _("Void Error"),
-                    "error_message": _("E-Invoice({}) was already canceled and has created the new one!").format(einvoice.track_no_)
+                    "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
 
