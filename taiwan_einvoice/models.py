@@ -951,6 +951,28 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
                 ]
             return res
+        elif self.is_voided:
+            void_einvoice = self.voideinvoice_set.get()
+            void_note = pgettext("voideinvoice", "voided at {} {}").format(void_einvoice.void_date, void_einvoice.void_time)
+            void_reason = pgettext("voideinvoice", "Reason: {}").format(void_einvoice.reason)
+            res = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "註  銷  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": void_note},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": void_reason},
+            ]
+            if void_einvoice.remark:
+                message2 = pgettext("voideinvoice", "Remark: {}").format(void_einvoice.remark)
+                res += [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
+                ]
+            return res
         else:
             details = self.details
             amounts = self.amounts
