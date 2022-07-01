@@ -127,6 +127,7 @@
     merchant_create_b2b_invoice
     merchant_operations
     b2c_invoice_brief
+    create_software_certification
     EPW_TKW_TEA_brief
     install_epw_in_pi
     install_tkw_in_linux

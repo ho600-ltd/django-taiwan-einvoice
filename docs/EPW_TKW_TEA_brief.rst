@@ -4,7 +4,7 @@ EPW / TKW / TEA 架構
 本專案 Django-Taiwan-EInvoice (DTEI) 是由 3 部份: EPW / TKW / TEA 所組成。
 
 TEA 是一個 Django-based 的 Python app ，可直接以 Web Api Service 方式執行，或是導入至其他 Django-based 的專案中。\
-TEA 支援 WebSocket 協定，當 EPW 系統開機後， EPW 會連線至 TEA Web Api 或 CEC Web Api(導入 TEA)。
+TEA 支援 WebSocket 協定，當 EPW 系統開機後， EPW 會連線至 TEA Web Api 或 CEC Web Api(import TEA)。
 
 當 TEA 有列印發票的需求，可送出其發票資料(JSON)，發票 JSON 透過 WebSocket 傳至 EPW ， EPW 再將發票 JSON 轉譯為 ESC/POS 指令，\
 再送至系統 OS 所控管的 Thermal ESC/POS Printer ，由 Printer 印出發票證明聯。
