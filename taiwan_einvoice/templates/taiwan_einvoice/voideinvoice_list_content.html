@@ -18,7 +18,8 @@
         </form>
 
         <small id="one_dimensional_barcode_for_voidingHelp" class="form-text text-muted">{% blocktrans %}
-            It uses the <b>same track no.</b> to create the new E-Invoice after voiding the E-Invoice.
+            It uses <b>the same track no. and the different random number</b> to create the new E-Invoice after voiding the E-Invoice.<br/>
+            So the maximal void times on the same track no. in the same year/month is 9,000 ~ 10,000.
         {% endblocktrans %}</small>
     {% endif %}
 
@@ -34,11 +35,12 @@
                 <th field="no" width="5%">{% trans "No." %}</th>
                 <th field="year_month_range" width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
                 <th field="track_no_" width="10%">{% trans "Voided Track No." %}</th>
-                <th field="random_number" width="5%">{% trans "Random Number" %}</th>
+                <th field="einvoice_dict.random_number" width="5%">{% trans "Voided Random Number" %}</th>
+                <th field="new_einvoice_dict.random_number" width="5%">{% trans "New Random Number" %}</th>
                 <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
                 <th field="SalesAmount" width="10%">{% trans "Sales Amount" %}</th>
-                <th field="TaxAmount" width="10%">{% trans "Tax Amount" %}</th>
-                <th field="TotalAmount" width="10%">{% trans "Total Amount" %}</th>
+                <th field="TaxAmount" width="6%">{% trans "Tax Amount" %}</th>
+                <th field="TotalAmount" width="9%">{% trans "Total Amount" %}</th>
                 <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
                 <th field="creator_first_name_id" width="10%">{% trans "Voider" context "taiwan_einvoice" %}</th>
                 <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Void Time" %}</th>
@@ -51,7 +53,8 @@
                         <td field="no">{{ forloop.counter }}.</td>
                         <td field="year_month_range">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
                         <td field="track_no_">{{ voideinvoice.einvoice_dict.track_no_ }}</td>
-                        <td field="random_number">{{ voideinvoice.einvoice_dict.random_number }}</td>
+                        <td field="einvoice_dict.random_number">{{ voideinvoice.einvoice_dict.random_number }}</td>
+                        <td field="new_einvoice_dict.random_number">{{ voideinvoice.new_einvoice_dict.random_number }}</td>
                         <td field="type__display">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>
                         <td field="SalesAmount">{{ voideinvoice.einvoice_dict.amounts.SalesAmount }}</td>
                         <td field="TaxAmount">{{ voideinvoice.einvoice_dict.amounts.TaxAmount }}</td>
