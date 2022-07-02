@@ -30,7 +30,8 @@ TEA 資料設定
     * turnkey_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
     * download_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
     * epl_base_set: 預設值是 GHIJKLMNOPQRSTUVWXYZ ，用來驗證「電子發票證明聯列印序號」用的字元集合，建議使用「大寫英文、符號」並打亂順序
-    * cronjob_every_x_minutes: 5, 10, 15, 20, 30, 60; 5 => "\*/5 \* \* \* \*"(cron format)
+    * auto_upload_einvoice: True/False ; if True, then it upload B2C certificate invoices at upload_cronjob_format time 
+    * upload_cronjob_format: 5, 10, 15, 20, 30, 60; 5 => "\*/5 \* \* \* \*"(cron format)
 #. 創建「發票機(escposweb)」紀錄:
     * name: 建議包含發票機外形、地點、特徵
     * slug: 可自動隨機產生

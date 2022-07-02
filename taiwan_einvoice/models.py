@@ -618,21 +618,21 @@ class SellerInvoiceTrackNo(models.Model):
         ('07', _('General')),
         ('08', _('Special')),
     )
-    type = models.CharField(max_length=2, default='07', choices=type_choices)
+    type = models.CharField(max_length=2, default='07', choices=type_choices, db_index=True)
     @property
     def type__display(self):
         return self.get_type_display()
-    begin_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    begin_time = models.DateTimeField(db_index=True)
+    end_time = models.DateTimeField(db_index=True)
     @property
     def year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
-    track = models.CharField(max_length=2)
-    begin_no = models.IntegerField()
-    end_no = models.IntegerField()
+    track = models.CharField(max_length=2, db_index=True)
+    begin_no = models.IntegerField(db_index=True)
+    end_no = models.IntegerField(db_index=True)
 
 
 
@@ -723,14 +723,52 @@ class SellerInvoiceTrackNo(models.Model):
 
 
 
+
+
+
+class EInvoiceMIG(models.Model):
+    no_choices = (
+        ('A0101', _('B2B Exchange Invoice')),
+        ('A0102', _('B2B Exchange Invoice Confirm')),
+        ('B0101', _('B2B Exchange Allowance')),
+        ('B0102', _('B2B Exchange Allowance Confirm')),
+        ('A0201', _('B2B Exchange Cancel Invoice')),
+        ('A0202', _('B2B Exchange Cancel Invoice Confirm')),
+        ('B0201', _('B2B Exchange Cancel Allowance')),
+        ('B0202', _('B2B Exchange Cancel Allowance Confirm')),
+        ('A0301', _('B2B Exchange Reject Invoice')),
+        ('A0302', _('B2B Exchange Reject Invoice Confirm')),
+
+        ('A0401', _('B2B Certificate Invoice')),
+        ('B0401', _('B2B Certificate Allowance')),
+        ('A0501', _('B2B Certificate Cancel Invoice')),
+        ('B0501', _('B2B Certificate Cancel Allowance')),
+        ('A0601', _('B2B Certificate Reject Invoice')),
+
+        ('C0401', _('B2C Certificate Invoice')),
+        ('C0501', _('B2C Certificate Cancel Invoice')),
+        ('C0701', _('B2C Certificate Void Invoice')),
+        ('D0401', _('B2C Certificate Allowance')),
+        ('D0501', _('B2C Certificate Cancel Allowance')),
+
+        ('E0401', _('Branch Track')),
+        ('E0402', _('Branch Track Blank')),
+        ('E0501', _('Invoice Assign No')),
+    )
+    no = models.CharField(max_length=5, choices=no_choices, unique=True)
+
+
+
+
 class EInvoice(models.Model):
     only_fields_can_update = ['print_mark', 'ei_synced', ]
-    ei_synced = models.BooleanField(default=False)
+    ei_synced = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
-    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
+    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices, db_index=True)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.CharField(max_length=8)
+    no = models.CharField(max_length=8, db_index=True)
     @property
     def track_no(self):
         return "{}{}".format(self.track, self.no)
@@ -759,8 +797,8 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    generate_no = models.CharField(max_length=40, default='')
-    generate_no_sha1 = models.CharField(max_length=10, default='')
+    generate_no = models.CharField(max_length=40, default='', db_index=True)
+    generate_no_sha1 = models.CharField(max_length=10, default='', db_index=True)
     batch_id = models.SmallIntegerField(default=0)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
@@ -837,9 +875,9 @@ class EInvoice(models.Model):
         elif self.is_canceled and self.canceleinvoice_set.filter(new_einvoice__isnull=False).exists():
             return False
         elif self.is_canceled:
-            #INFO: Logically, a normal flow can be C401 > C501 > C701 > C401
-            #But in the general case, an E-Invoice state is from C401 to C501 and has no new C401 means "Return Order"
-            #So the "E-Invoice depends on the return order" does not need another C701
+            #INFO: Logically, a normal flow can be C0401 > C0501 > C0701 > C0401
+            #But in the general case, an E-Invoice state is from C0401 to C0501 and has no new C0401 means "Return Order"
+            #So the "E-Invoice depends on the return order" does not need another C0701
             return False
         else:
             return True
@@ -1125,9 +1163,9 @@ class EInvoicePrintLog(models.Model):
     user = models.ForeignKey(User, default=102, on_delete=models.DO_NOTHING)
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    is_original_copy = models.BooleanField(default=True)
-    done_status = models.BooleanField(default=False)
-    print_time = models.DateTimeField(null=True)
+    is_original_copy = models.BooleanField(default=True, db_index=True)
+    done_status = models.BooleanField(default=False, db_index=True)
+    print_time = models.DateTimeField(null=True, db_index=True)
     reason = models.TextField(default='')
 
 
@@ -1172,7 +1210,7 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
-    ei_synced = models.BooleanField(default=False)
+    ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
@@ -1184,15 +1222,15 @@ class CancelEInvoice(models.Model):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    generate_time = models.DateTimeField()
+    generate_time = models.DateTimeField(db_index=True)
     @property
     def cancel_date(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     @property
     def cancel_time(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
-    reason = models.CharField(max_length=20, null=False)
-    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True)
+    reason = models.CharField(max_length=20, null=False, db_index=True)
+    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
@@ -1225,7 +1263,7 @@ class CancelEInvoice(models.Model):
 
 
 class VoidEInvoice(models.Model):
-    ei_synced = models.BooleanField(default=False)
+    ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
@@ -1234,14 +1272,14 @@ class VoidEInvoice(models.Model):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    generate_time = models.DateTimeField()
+    generate_time = models.DateTimeField(db_index=True)
     @property
     def void_date(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     @property
     def void_time(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
-    reason = models.CharField(max_length=20, null=False)
+    reason = models.CharField(max_length=20, null=False, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
