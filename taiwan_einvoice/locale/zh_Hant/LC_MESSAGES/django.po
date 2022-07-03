@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-01 10:54+0800\n"
+"POT-Creation-Date: 2022-07-03 11:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,75 @@ msgstr ""
 
 msgid "Print Serial No.:{}"
 msgstr "列印序號: {}"
+
+msgid "B2B Exchange Invoice"
+msgstr "B2B交換 開立發票"
+
+msgid "B2B Exchange Invoice Confirm"
+msgstr "B2B交換 接受確認發票"
+
+msgid "B2B Exchange Allowance"
+msgstr "B2B交換 開立折讓"
+
+msgid "B2B Exchange Allowance Confirm"
+msgstr "B2B交換 接受確認折讓"
+
+msgid "B2B Exchange Cancel Invoice"
+msgstr "B2B交換 作廢發票"
+
+msgid "B2B Exchange Cancel Invoice Confirm"
+msgstr "B2B交換 接受確認作廢"
+
+msgid "B2B Exchange Cancel Allowance"
+msgstr "B2B交換 作廢折讓"
+
+msgid "B2B Exchange Cancel Allowance Confirm"
+msgstr "B2B交換 接受確認作廢折讓"
+
+msgid "B2B Exchange Reject Invoice"
+msgstr "B2B交換 退回發票"
+
+msgid "B2B Exchange Reject Invoice Confirm"
+msgstr "B2B交換 接受確認退回發票"
+
+msgid "B2B Certificate Invoice"
+msgstr "B2B存證 開立發票"
+
+msgid "B2B Certificate Allowance"
+msgstr "B2B存證 開立折讓"
+
+msgid "B2B Certificate Cancel Invoice"
+msgstr "B2B存證 作廢發票"
+
+msgid "B2B Certificate Cancel Allowance"
+msgstr "B2B存證 作廢折讓"
+
+msgid "B2B Certificate Reject Invoice"
+msgstr "B2B存證 退回發票"
+
+msgid "B2C Certificate Invoice"
+msgstr "B2C存證 開立發票"
+
+msgid "B2C Certificate Cancel Invoice"
+msgstr "B2C存證 作廢發票"
+
+msgid "B2C Certificate Void Invoice"
+msgstr "B2C存證 註銷發票"
+
+msgid "B2C Certificate Allowance"
+msgstr "B2C存證 開立折讓"
+
+msgid "B2C Certificate Cancel Allowance"
+msgstr "B2C存證 作廢折讓"
+
+msgid "Branch Track"
+msgstr "分支機構配號檔"
+
+msgid "Branch Track Blank"
+msgstr "空白未使用字軌檔"
+
+msgid "Invoice Assign No"
+msgstr "營業人電子發票配號檔"
 
 msgid "58mm Receipt"
 msgstr "58mm 收據"
@@ -69,6 +138,18 @@ msgid "Return tax document number: {}"
 msgstr "專案作廢核准文號: {}"
 
 msgctxt "canceleinvoice"
+msgid "Remark: {}"
+msgstr "備註: {}"
+
+msgctxt "voideinvoice"
+msgid "voided at {} {}"
+msgstr "於 {} {} 已註銷"
+
+msgctxt "voideinvoice"
+msgid "Reason: {}"
+msgstr "理由: {}"
+
+msgctxt "voideinvoice"
 msgid "Remark: {}"
 msgstr "備註: {}"
 
@@ -506,6 +587,12 @@ msgstr "勾選"
 msgid "Generate Time"
 msgstr "開立時間"
 
+msgid "Canceled?"
+msgstr "作<br/>廢<br/>?"
+
+msgid "Voided?"
+msgstr "註<br/>銷<br/>?"
+
 msgctxt "taiwan_einvoice_donate_mark"
 msgid "Donated"
 msgstr "已捐贈"
@@ -899,11 +986,11 @@ msgstr "註銷時間早於"
 msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
 msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
 
-msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, amount, details in the new E-Invoice will be same as the previous one."
-msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、金額、明細皆與被註銷發票一致。"
+msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
+msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
 
 msgid "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time."
-msgstr "注意 3: 無法同時更新捐贈碼及買方統編；也無法同時更新手機條碼及自然人憑證條碼。"
+msgstr "注意 3: 無法同時設定捐贈碼及買方統編；也無法同時設定手機條碼及自然人憑證條碼。"
 
 msgctxt "void_einvoice"
 msgid "Reason(Required)"

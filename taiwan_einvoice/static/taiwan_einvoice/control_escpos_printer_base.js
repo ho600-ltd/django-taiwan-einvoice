@@ -52,7 +52,10 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             var prev_print_mark_str = pgettext('print_mark', 'Yes');
             var $prev_tr = $obj.prev('tr.data');
             var $prev_tr_in_search_table = $('table.search_result tr[track_no=' + $prev_tr.attr('track_no') + ']');
-            if ("" != $prev_tr_in_search_table.attr('carrier_type__display')) {
+            if ("3J0002" == $prev_tr_in_search_table.attr('carrier_type')
+                && "1" == $prev_tr_in_search_table.attr('buyer_is_business_entity')) {
+                //pass
+            } else if ("" != $prev_tr_in_search_table.attr('carrier_type__display')) {
                 prev_print_mark_str = $prev_tr_in_search_table.attr('carrier_type__display');
             } else if("" != $prev_tr_in_search_table.attr('donate_mark__display')) {
                 prev_print_mark_str = $prev_tr_in_search_table.attr('donate_mark__display');
@@ -65,7 +68,10 @@ function build_two_websockets(taiwan_einvoice_site, ws_escposweb_url, ws_escposw
             var print_mark_str = pgettext('print_mark', 'Yes');
             var print_mark_value = 'True';
             var $tr_in_search_table = $('table.search_result tr[track_no=' + track_no + ']');
-            if ("" != $tr_in_search_table.attr('carrier_type__display')) {
+            if ("3J0002" == $tr_in_search_table.attr('carrier_type')
+                && "1" == $tr_in_search_table.attr('buyer_is_business_entity')) {
+                //pass
+            } else if ("" != $tr_in_search_table.attr('carrier_type__display')) {
                 print_mark_value = '';
                 print_mark_str = $tr_in_search_table.attr('carrier_type__display');
             } else if("" != $tr_in_search_table.attr('donate_mark__display')) {

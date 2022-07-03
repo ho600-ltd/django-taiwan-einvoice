@@ -116,8 +116,9 @@
                         <label for="void_einvoice_type">{% trans "Void E-Invoice Type?" %}</label>
                         <div class="input-group" id="void_einvoice_type" data-target-input="nearest">
                             <select class="form-control" data-target="#void_einvoice_type" name="void_einvoice_type" id="id_void_einvoice_type">
+                                <option value="reverse_void_order__gte=0"></option>
                                 <option value="reverse_void_order__lte=0">{% trans "Not yet" context "taiwan_einvoice_void_einvoice_type" %}</option>
-                                <option value="reverse_void_order__gte=1">{% trans "Voided" context "taiwan_einvoice_void_einvoice_type" %}</option>
+                                <option value="reverse_void_order__gt=0">{% trans "Voided" context "taiwan_einvoice_void_einvoice_type" %}</option>
                             </select>
                         </div>
                     </div>

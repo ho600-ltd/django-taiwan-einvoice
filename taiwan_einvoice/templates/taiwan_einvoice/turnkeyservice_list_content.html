@@ -12,12 +12,16 @@
             <th rowspan="2" width="5%">{% trans "No." %}</th>
             <th rowspan="2" width="5%">{% trans "Is on working?" %}</th>
             <th rowspan="2" width="5%">{% trans "Is Production?" %}</th>
-            <th rowspan="2" width="10%">{% trans "Seller Identifier" %}</th>
-            <th rowspan="2" width="20%">{% trans "Name" %}</th>
-            <th rowspan="2" width="10%">{% trans "Transport ID" %}</th>
-            <th rowspan="2" width="10%">{% trans "Party ID" %}</th>
-            <th rowspan="2" width="10%">{% trans "Routing ID" %}</th>
             <th rowspan="2" width="20%">
+                {% trans "Seller Identifier" %}<br/>
+                {% trans "Name" %}
+            </th>
+            <th rowspan="2" width="15%">
+                {% trans "Transport ID" %}<br/>
+                {% trans "Party ID" %}<br/>
+                {% trans "Routing ID" %}
+            </th>
+            <th rowspan="2" width="30%">
                 {% trans "Hash Key" %}<br/>
                 {% trans "Qrcode Seed" %}<br/>
                 {% trans "Turnkey Seed" %}<br/>
@@ -38,11 +42,15 @@
                 <td>{{ forloop.counter }}.</td>
                 <td field="on_working">{% if turnkeyservice.on_working %}{% trans "On Working" %}{% endif %}</td>
                 <td field="in_production">{% if turnkeyservice.in_production %}{% trans "Production" %}{% else %}{% trans "Test" %}{% endif %}</td>
-                <td field="identifier">{{ turnkeyservice.seller_dict.legal_entity_dict.identifier }}</td>
-                <td field="name">{{ turnkeyservice.name }}</td>
-                <td field="transport_id">{{ turnkeyservice.transport_id }}</td>
-                <td field="party_id">{{ turnkeyservice.party_id }}</td>
-                <td field="routing_id">{{ turnkeyservice.routing_id }}</td>
+                <td>
+                    <dv field="identifier">{{ turnkeyservice.seller_dict.legal_entity_dict.identifier }}</div>
+                    <div field="name">{{ turnkeyservice.name }}</div>
+                </td>
+                <td>
+                    <div field="transport_id">{{ turnkeyservice.transport_id }}</div>
+                    <div field="party_id">{{ turnkeyservice.party_id }}</div>
+                    <div field="routing_id">{{ turnkeyservice.routing_id }}</div>
+                </td>
                 <td>
                     <div field="hash_key">{{ turnkeyservice.mask_hash_key }}</div>
                     <div field="qrcode_seed">{{ turnkeyservice.mask_qrcode_seed }}</div>

@@ -223,7 +223,7 @@ $(function () {
             }
         }
         var gte_gt_lte_lt_kind_params = {
-            "void_einvoice_type": ["reverse_void_order__lte=0", "reverse_void_order__gte=1"]
+            "void_einvoice_type": ["reverse_void_order__gte=0", "reverse_void_order__lte=0", "reverse_void_order__gt=0"]
         }
         for (var key in gte_gt_lte_lt_kind_params) {
             for (var item of gte_gt_lte_lt_kind_params[key]) {

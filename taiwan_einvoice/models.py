@@ -461,7 +461,7 @@ class IdentifierRule(object):
 
 
 class LegalEntity(models.Model, IdentifierRule):
-    GENERAL_CONSUMER_IDENTIFIER = '0000000000'
+    GENERAL_CONSUMER_IDENTIFIER = 10 * '0'
     identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     name = models.CharField(max_length=60, default='', db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
@@ -618,21 +618,21 @@ class SellerInvoiceTrackNo(models.Model):
         ('07', _('General')),
         ('08', _('Special')),
     )
-    type = models.CharField(max_length=2, default='07', choices=type_choices)
+    type = models.CharField(max_length=2, default='07', choices=type_choices, db_index=True)
     @property
     def type__display(self):
         return self.get_type_display()
-    begin_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    begin_time = models.DateTimeField(db_index=True)
+    end_time = models.DateTimeField(db_index=True)
     @property
     def year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
-    track = models.CharField(max_length=2)
-    begin_no = models.IntegerField()
-    end_no = models.IntegerField()
+    track = models.CharField(max_length=2, db_index=True)
+    begin_no = models.IntegerField(db_index=True)
+    end_no = models.IntegerField(db_index=True)
 
 
 
@@ -723,14 +723,52 @@ class SellerInvoiceTrackNo(models.Model):
 
 
 
+
+
+
+class EInvoiceMIG(models.Model):
+    no_choices = (
+        ('A0101', _('B2B Exchange Invoice')),
+        ('A0102', _('B2B Exchange Invoice Confirm')),
+        ('B0101', _('B2B Exchange Allowance')),
+        ('B0102', _('B2B Exchange Allowance Confirm')),
+        ('A0201', _('B2B Exchange Cancel Invoice')),
+        ('A0202', _('B2B Exchange Cancel Invoice Confirm')),
+        ('B0201', _('B2B Exchange Cancel Allowance')),
+        ('B0202', _('B2B Exchange Cancel Allowance Confirm')),
+        ('A0301', _('B2B Exchange Reject Invoice')),
+        ('A0302', _('B2B Exchange Reject Invoice Confirm')),
+
+        ('A0401', _('B2B Certificate Invoice')),
+        ('B0401', _('B2B Certificate Allowance')),
+        ('A0501', _('B2B Certificate Cancel Invoice')),
+        ('B0501', _('B2B Certificate Cancel Allowance')),
+        ('A0601', _('B2B Certificate Reject Invoice')),
+
+        ('C0401', _('B2C Certificate Invoice')),
+        ('C0501', _('B2C Certificate Cancel Invoice')),
+        ('C0701', _('B2C Certificate Void Invoice')),
+        ('D0401', _('B2C Certificate Allowance')),
+        ('D0501', _('B2C Certificate Cancel Allowance')),
+
+        ('E0401', _('Branch Track')),
+        ('E0402', _('Branch Track Blank')),
+        ('E0501', _('Invoice Assign No')),
+    )
+    no = models.CharField(max_length=5, choices=no_choices, unique=True)
+
+
+
+
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark', 'ei_synced', ]
-    ei_synced = models.BooleanField(default=False)
+    only_fields_can_update = ['print_mark', 'ei_synced', 'generate_time']
+    ei_synced = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
-    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
+    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices, db_index=True)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.CharField(max_length=8)
+    no = models.CharField(max_length=8, db_index=True)
     @property
     def track_no(self):
         return "{}{}".format(self.track, self.no)
@@ -759,8 +797,8 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    generate_no = models.CharField(max_length=40, default='')
-    generate_no_sha1 = models.CharField(max_length=10, default='')
+    generate_no = models.CharField(max_length=40, default='', db_index=True)
+    generate_no_sha1 = models.CharField(max_length=10, default='', db_index=True)
     batch_id = models.SmallIntegerField(default=0)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
@@ -837,9 +875,9 @@ class EInvoice(models.Model):
         elif self.is_canceled and self.canceleinvoice_set.filter(new_einvoice__isnull=False).exists():
             return False
         elif self.is_canceled:
-            #INFO: Logically, a normal flow can be C401 > C501 > C701 > C401
-            #But in the general case, an E-Invoice state is from C401 to C501 and has no new C401 means "Return Order"
-            #So the "E-Invoice depends on the return order" does not need another C701
+            #INFO: Logically, a normal flow can be C0401 > C0501 > C0701 > C0401
+            #But in the general case, an E-Invoice state is from C0401 to C0501 and has no new C0401 means "Return Order"
+            #So the "E-Invoice depends on the return order" does not need another C0701
             return False
         else:
             return True
@@ -893,37 +931,8 @@ class EInvoice(models.Model):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
             return '0' * (8 - len(a)) + a
-        if '' != self.carrier_type:
-            carrier_id1 = self.carrier_id1
-            if carrier_id1 == self.carrier_id2:
-                carrier_id2 = ''
-            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
-                carrier_type=self.get_carrier_type_display(),
-                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
-            )
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
-            ]
-        elif '' != self.npoban:
-            message = _("Donate to NPO( {npoban} )").format(
-                npoban=self.npoban,
-            )
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
-            ]
-        elif self.is_canceled:
+        print_original_copy = False
+        if self.is_canceled:
             cancel_einvoice = self.canceleinvoice_set.get()
             cancel_note = pgettext("canceleinvoice", "Canceled at {} {}").format(cancel_einvoice.cancel_date, cancel_einvoice.cancel_time)
             cancel_reason = pgettext("canceleinvoice", "Reason: {}").format(cancel_einvoice.reason)
@@ -973,7 +982,48 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
                 ]
             return res
+        elif "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+            print_original_copy = True
+        elif '' != self.carrier_type:
+            carrier_id1 = self.carrier_id1
+            if carrier_id1 == self.carrier_id2:
+                carrier_id2 = ''
+            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
+                carrier_type=self.get_carrier_type_display(),
+                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
+            )
+            _result = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
+            if '' != self.npoban:
+                message = _("Donate to NPO( {npoban} )").format(npoban=self.npoban)
+                _result += [{"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message}]
+            elif LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+                _result += [{"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "買方 "+self.buyer_identifier}]
+            return _result
+        elif '' != self.npoban:
+            message = _("Donate to NPO( {npoban} )").format(
+                npoban=self.npoban,
+            )
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
         else:
+            print_original_copy = True
+        
+        if print_original_copy:
             details = self.details
             amounts = self.amounts
             chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -1053,19 +1103,34 @@ class EInvoice(models.Model):
         return self.content_object.check_before_cancel_einvoice()
 
 
+    def set_generate_time(self, generate_time):
+        if 'generate_time' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(generate_time=generate_time)
+
+
     def set_ei_synced_true(self):
         if 'ei_synced' in self.only_fields_can_update:
             EInvoice.objects.filter(id=self.id).update(ei_synced=True)
 
 
     def set_print_mark_true(self, einvoice_print_log=None):
-        if '' != self.carrier_type or '' != self.npoban:
+        if self.is_canceled:
+            return False
+        elif self.is_voided:
+            return False
+        elif "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
             pass
-        elif 'print_mark' in self.only_fields_can_update:
+        elif '' != self.carrier_type:
+            return False
+        elif '' != self.npoban:
+            return False
+
+        if 'print_mark' in self.only_fields_can_update:
             if True == self.print_mark:
                 #TODO: CMEC2-324
                 # It is "duplicated original copy"
                 # raise or just log this error?
+                # Now, I prefer "log", because raise error in websocket does not help user.
                 pass
             elif False == self.print_mark:
                 EInvoice.objects.filter(id=self.id).update(print_mark=True)
@@ -1125,9 +1190,9 @@ class EInvoicePrintLog(models.Model):
     user = models.ForeignKey(User, default=102, on_delete=models.DO_NOTHING)
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    is_original_copy = models.BooleanField(default=True)
-    done_status = models.BooleanField(default=False)
-    print_time = models.DateTimeField(null=True)
+    is_original_copy = models.BooleanField(default=True, db_index=True)
+    done_status = models.BooleanField(default=False, db_index=True)
+    print_time = models.DateTimeField(null=True, db_index=True)
     reason = models.TextField(default='')
 
 
@@ -1172,7 +1237,7 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
-    ei_synced = models.BooleanField(default=False)
+    ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
@@ -1184,15 +1249,15 @@ class CancelEInvoice(models.Model):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    generate_time = models.DateTimeField()
+    generate_time = models.DateTimeField(db_index=True)
     @property
     def cancel_date(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     @property
     def cancel_time(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
-    reason = models.CharField(max_length=20, null=False)
-    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True)
+    reason = models.CharField(max_length=20, null=False, db_index=True)
+    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
@@ -1225,7 +1290,7 @@ class CancelEInvoice(models.Model):
 
 
 class VoidEInvoice(models.Model):
-    ei_synced = models.BooleanField(default=False)
+    ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
@@ -1234,14 +1299,14 @@ class VoidEInvoice(models.Model):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    generate_time = models.DateTimeField()
+    generate_time = models.DateTimeField(db_index=True)
     @property
     def void_date(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     @property
     def void_time(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
-    reason = models.CharField(max_length=20, null=False)
+    reason = models.CharField(max_length=20, null=False, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
