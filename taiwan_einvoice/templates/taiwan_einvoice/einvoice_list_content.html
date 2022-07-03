@@ -36,13 +36,15 @@
                 <th width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
                 <th width="10%">{% trans "Track No." %}</th>
                 <th width="10%">{% trans "Tax Type" %}</th>
-                <th width="10%">{% trans "Sales Amount" %}</th>
-                <th width="10%">{% trans "Tax Amount" %}</th>
+                <th width="5%">{% trans "Sales Amount" %}</th>
+                <th width="5%">{% trans "Tax Amount" %}</th>
                 <th width="10%">{% trans "Total Amount" %}</th>
                 <th width="10%">{% trans "Footprint No." %}</th>
                 <th width="10%">{% trans "Creator" context "taiwan_einvoice" %}</th>
                 <th width="30%">{% trans "Generate Time" %}</th>
                 <th width="5%">{% trans "Print Mark" %}</th>
+                <th width="5%">{% trans "Canceled?" %}</th>
+                <th width="5%">{% trans "Voided?" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -74,6 +76,12 @@
                                 {% trans "Donated" context "taiwan_einvoice_donate_mark" %}
                             {% endif %}{% endif %}{% endif %}
                         {% endspaceless %}</td>
+                        <td field="is_canceled">
+                            {% if einvoice.is_canceled %}Y{% endif %}
+                        </td>
+                        <td field="is_voided">
+                            {% if einvoice.is_voided %}Y{% endif %}
+                        </td>
                     </tr>
                 {% endwith %}
             {% endfor %}

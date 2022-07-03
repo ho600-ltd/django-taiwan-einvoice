@@ -461,7 +461,7 @@ class IdentifierRule(object):
 
 
 class LegalEntity(models.Model, IdentifierRule):
-    GENERAL_CONSUMER_IDENTIFIER = '0000000000'
+    GENERAL_CONSUMER_IDENTIFIER = 10 * '0'
     identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     name = models.CharField(max_length=60, default='', db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
@@ -761,7 +761,7 @@ class EInvoiceMIG(models.Model):
 
 
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark', 'ei_synced', ]
+    only_fields_can_update = ['print_mark', 'ei_synced', 'generate_time']
     ei_synced = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1091,19 +1091,28 @@ class EInvoice(models.Model):
         return self.content_object.check_before_cancel_einvoice()
 
 
+    def set_generate_time(self, generate_time):
+        if 'generate_time' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(generate_time=generate_time)
+
+
     def set_ei_synced_true(self):
         if 'ei_synced' in self.only_fields_can_update:
             EInvoice.objects.filter(id=self.id).update(ei_synced=True)
 
 
     def set_print_mark_true(self, einvoice_print_log=None):
-        if '' != self.carrier_type or '' != self.npoban:
+        if "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
             pass
-        elif 'print_mark' in self.only_fields_can_update:
+        elif '' != self.carrier_type or '' != self.npoban:
+            return
+
+        if 'print_mark' in self.only_fields_can_update:
             if True == self.print_mark:
                 #TODO: CMEC2-324
                 # It is "duplicated original copy"
                 # raise or just log this error?
+                # Now, I prefer "log", because raise error in websocket does not help user.
                 pass
             elif False == self.print_mark:
                 EInvoice.objects.filter(id=self.id).update(print_mark=True)

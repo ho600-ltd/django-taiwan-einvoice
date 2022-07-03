@@ -815,6 +815,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
         new_einvoice = EInvoice(**_d)
         new_einvoice.save()
+        new_einvoice.set_generate_time(einvoice.generate_time)
         serializer.instance.set_new_einvoice(new_einvoice)
         serializer.instance.save()
         serializer.instance.post_void_einvoice()
