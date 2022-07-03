@@ -931,37 +931,8 @@ class EInvoice(models.Model):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
             return '0' * (8 - len(a)) + a
-        if '' != self.carrier_type:
-            carrier_id1 = self.carrier_id1
-            if carrier_id1 == self.carrier_id2:
-                carrier_id2 = ''
-            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
-                carrier_type=self.get_carrier_type_display(),
-                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
-            )
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
-            ]
-        elif '' != self.npoban:
-            message = _("Donate to NPO( {npoban} )").format(
-                npoban=self.npoban,
-            )
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
-            ]
-        elif self.is_canceled:
+        print_original_copy = False
+        if self.is_canceled:
             cancel_einvoice = self.canceleinvoice_set.get()
             cancel_note = pgettext("canceleinvoice", "Canceled at {} {}").format(cancel_einvoice.cancel_date, cancel_einvoice.cancel_time)
             cancel_reason = pgettext("canceleinvoice", "Reason: {}").format(cancel_einvoice.reason)
@@ -1011,7 +982,48 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
                 ]
             return res
+        elif "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+            print_original_copy = True
+        elif '' != self.carrier_type:
+            carrier_id1 = self.carrier_id1
+            if carrier_id1 == self.carrier_id2:
+                carrier_id2 = ''
+            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
+                carrier_type=self.get_carrier_type_display(),
+                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
+            )
+            _result = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
+            if '' != self.npoban:
+                message = _("Donate to NPO( {npoban} )").format(npoban=self.npoban)
+                _result += [{"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message}]
+            elif LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+                _result += [{"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "買方 "+self.buyer_identifier}]
+            return _result
+        elif '' != self.npoban:
+            message = _("Donate to NPO( {npoban} )").format(
+                npoban=self.npoban,
+            )
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
         else:
+            print_original_copy = True
+        
+        if print_original_copy:
             details = self.details
             amounts = self.amounts
             chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -1102,10 +1114,16 @@ class EInvoice(models.Model):
 
 
     def set_print_mark_true(self, einvoice_print_log=None):
-        if "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+        if self.is_canceled:
+            return False
+        elif self.is_voided:
+            return False
+        elif "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
             pass
-        elif '' != self.carrier_type or '' != self.npoban:
-            return
+        elif '' != self.carrier_type:
+            return False
+        elif '' != self.npoban:
+            return False
 
         if 'print_mark' in self.only_fields_can_update:
             if True == self.print_mark:

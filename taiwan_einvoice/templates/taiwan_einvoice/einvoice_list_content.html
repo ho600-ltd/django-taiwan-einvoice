@@ -50,7 +50,12 @@
         <tbody>
             {% for einvoice in data.results %}
                 {% with einvoice.id as einvoice_id %}
-                    <tr einvoice_id="{{ einvoice.id }}" carrier_type__display="{{ einvoice.carrier_type__display }}"
+                    <tr 
+                        einvoice_id="{{ einvoice.id }}"
+                        track_no="{{ einvoice.track_no }}"
+                        buyer_is_business_entity="{% if einvoice.buyer_is_business_entity %}1{% endif %}"
+                        carrier_type="{{ einvoice.carrier_type }}"
+                        carrier_type__display="{{ einvoice.carrier_type__display }}"
                         donate_mark__display='{% ifequal "1" einvoice.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
                         {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
                             <td field="check" class="print_einvoice">
