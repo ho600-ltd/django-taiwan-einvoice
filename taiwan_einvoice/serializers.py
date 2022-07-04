@@ -34,6 +34,8 @@ from taiwan_einvoice.models import (
     EInvoicePrintLog,
     CancelEInvoice,
     VoidEInvoice,
+    UploadBatch,
+    BatchEInvoice,
 )
 
 
@@ -382,4 +384,27 @@ class VoidEInvoiceSerializer(ModelSerializer):
 
     class Meta:
         model = VoidEInvoice
+        fields = '__all__'
+
+
+class UploadBatchSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-detail", lookup_field='pk')
+
+
+
+    class Meta:
+        model = UploadBatch
+        fields = '__all__'
+
+
+
+class BatchEInvoiceSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-detail", lookup_field='pk')
+
+
+
+    class Meta:
+        model = BatchEInvoice
         fields = '__all__'

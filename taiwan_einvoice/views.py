@@ -61,6 +61,8 @@ from taiwan_einvoice.models import (
     CancelEInvoice,
     VoidEInvoice,
     EInvoiceSellerAPI,
+    UploadBatch,
+    BatchEInvoice,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -77,6 +79,8 @@ from taiwan_einvoice.serializers import (
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
     VoidEInvoiceSerializer,
+    UploadBatchSerializer,
+    BatchEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -89,6 +93,8 @@ from taiwan_einvoice.filters import (
     EInvoicePrintLogFilter,
     CancelEInvoiceFilter,
     VoidEInvoiceFilter,
+    UploadBatchFilter,
+    BatchEInvoiceFilter,
 )
 
 
@@ -393,6 +399,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
     def upload_csv_to_multiple_create(self, request, *args, **kwargs):
+        NOW = now()
         try:
             turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
         except TurnkeyService.DoesNotExist:
@@ -423,10 +430,23 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
                 except Exception as e:
                     er = {
-                        "error_title": "Year Month Range Error",
+                        "error_title": _("Year Month Range Error"),
                         "error_message": _("{} has error: \n\n\n{}").format(line, e)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
+                else:
+                    if NOW < begin_time - datetime.timedelta(days=15):
+                        er = {
+                            "error_title": _("Begin Time Error"),
+                            "error_message": _("{} has error: \nToo early to import.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    elif NOW > end_time:
+                        er = {
+                            "error_title": _("End Time Error"),
+                            "error_message": _("{} has error: \nToo late to import.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
                 
                 begin_no = cols[5]
                 end_no = cols[6]
@@ -467,6 +487,12 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
         output_datas = []
+        if not datas:
+            er = {
+                "error_title": _("Identifier Error"),
+                "error_message": _("Identifier does not match the seller identifier of the TurnkeyService."),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
         for data in datas:
             if SellerInvoiceTrackNo.objects.filter(type=data['type'],
                                                    begin_time=data['begin_time'],
@@ -821,3 +847,49 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         serializer.instance.post_void_einvoice()
         serializer = VoidEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class UploadBatchModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, ), )
+    queryset = UploadBatch.objects.all().order_by('-id')
+    serializer_class = UploadBatchSerializer
+    filter_class = UploadBatchFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(UploadBatchModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+
+class BatchEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, ), )
+    queryset = BatchEInvoice.objects.all().order_by('-id')
+    serializer_class = BatchEInvoiceSerializer
+    filter_class = BatchEInvoiceFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(BatchEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(batch__turnkey_web__in=turnkey_webs)

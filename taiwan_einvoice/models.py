@@ -4,12 +4,13 @@ from base64 import b64encode, b64decode
 from binascii import unhexlify 
 from Crypto.Cipher import AES
 from hashlib import sha1
-from random import random, randint
+from random import random, randint, choice
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
 from django.db.models import Max, F
 from django.contrib.auth.models import User, Group
+from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext, pgettext
@@ -1183,6 +1184,7 @@ class EInvoice(models.Model):
             self.random_number = random_number
             self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
             super().save(*args, **kwargs)
+        UploadBatch.append_to_the_upload_batch(self)
         
 
 
@@ -1286,6 +1288,7 @@ class CancelEInvoice(models.Model):
             super().save(*args, **kwargs)
         elif not self.pk:
             super().save(*args, **kwargs)
+        UploadBatch.append_to_the_upload_batch(self)
 
 
 
@@ -1333,3 +1336,128 @@ class VoidEInvoice(models.Model):
             super().save(*args, **kwargs)
         elif not self.pk:
             super().save(*args, **kwargs)
+        UploadBatch.append_to_the_upload_batch(self)
+    
+
+
+class UploadBatch(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    update_time = models.DateTimeField(auto_now=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    slug = models.CharField(max_length=14, unique=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, on_delete=models.DO_NOTHING)
+    kind_choices = (
+        ("wp", _("Wait for printed")),
+        ("cp", _("Could print")),
+        ("np", _("No need to print")),
+        ("57", _("Wait for C0501 or C0701")),
+
+        ("w4", _("Wait for C0401")),
+        ("54", _("Wait for C0501 or C0401")),
+    )
+    kind = models.CharField(max_length=2)
+    executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
+    status_choices = (
+        ("0", _("Collecting")),
+        ("1", _("Waiting for trigger(Stop Collecting)")),
+        ("2", _("Uploading to TKW")),
+        ("3", _("Uploaded to TKW")),
+        ("p", _("Preparing for EI(P)")),
+        ("g", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("e", _("E Error for EI process(E)")),
+        ("i", _("I Error for EI process(I)")),
+        ("c", _("Successful EI process(C)")),
+        ("m", _("Swith to Successful EI process manually(S-C)")),
+    )
+    status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
+
+
+    @classmethod
+    def append_to_the_upload_batch(cls, content_object):
+        ct = ContentType.objects.get_for_model(content_object)
+        if content_object.ei_synced:
+            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='0000').batch
+        elif BatchEInvoice.objects.filter(content_type=ct, object_id=content_object.id, result_code='').exists():
+            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
+
+        if 'einvoice' == content_object._meta.model_name:
+            mig_type = EInvoiceMIG.objects.get(no='C0401')
+            _now = now().astimezone(TAIPEI_TIMEZONE)
+            _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
+            start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
+            end_time = start_time + datetime.timedelta(days=1)
+            if content_object.is_canceled or content_object.is_voided:
+                kind = '57'
+            elif '3J0002' == content_object.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != content_object.buyer_identifier:
+                kind = 'cp'
+            elif "" != content_object.carrier_type:
+                kind = 'np'
+            elif "1" == content_object.donate_mark:
+                kind = 'np'
+            else:
+                kind = 'wp'
+
+            if UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).exists():
+                ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).get()
+            else:
+                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status='0')
+                ub.save()
+            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be.save()
+            return ub
+        elif content_object._meta.model_name in ['canceleinvoice', 'voideinvoice']:
+            if 'canceleinvoice' == content_object._meta.model_name:
+                mig_type = EInvoiceMIG.objects.get(no='C0501')
+                kind = 'w4'
+            elif 'voideinvoice' == content_object._meta.model_name:
+                mig_type = EInvoiceMIG.objects.get(no='C0701')
+                kind = '54'
+            slug_prefix = '{}{}'.format(mig_type.no[2], content_object.track_no)
+            slug = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
+            ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, slug=slug, mig_type=mig_type, kind=kind, status='0')
+            ub.save()
+            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be.save()
+            return ub
+        else:
+            return None
+
+
+    def generate_slug(self):
+        if self.slug:
+            return self.slug
+        _now = now().astimezone(TAIPEI_TIMEZONE)
+        _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
+        start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
+        end_time = start_time + datetime.timedelta(days=1)
+        _no = UploadBatch.objects.filter(create_time__gte=start_time, create_time__lt=end_time).count() + 1
+        no = '{:04d}'.format(_no)
+        return '{}{}{}'.format(no, get_codes(int(_now.strftime('%y%m%d')+no), seed=365724), choice(KEY_CODE_SET))
+        
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_slug()
+        super().save(*args, **kwargs)
+
+
+
+class BatchEInvoice(models.Model):
+    batch = models.ForeignKey(UploadBatch, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    body_json = models.TextField()
+    @property
+    def body(self):
+        if not self.body_json:
+            return {}
+        else:
+            return json.loads(self.body_json)
+    @body.setter
+    def body(self, DICT):
+        self.body_json = json.dumps(DICT)
+        self.save()
+    result_code = models.CharField(max_length=5, default='', db_index=True)
+    pass_if_error = models.BooleanField(default=False)
+
