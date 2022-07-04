@@ -6,7 +6,21 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyService, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog, CancelEInvoice, VoidEInvoice
+from taiwan_einvoice.models import (
+    TAIPEI_TIMEZONE,
+    StaffProfile,
+    ESCPOSWeb,
+    Seller,
+    LegalEntity,
+    TurnkeyService,
+    SellerInvoiceTrackNo,
+    EInvoice,
+    EInvoicePrintLog,
+    CancelEInvoice,
+    VoidEInvoice,
+    UploadBatch,
+    BatchEInvoice,
+)
 
 
 class UserFilter(filters.FilterSet):
@@ -435,3 +449,25 @@ class VoidEInvoiceFilter(filters.FilterSet):
                 if alphabet:
                     queryset = queryset.filter(einvoice__track__icontains=alphabet)
         return queryset
+
+
+
+class UploadBatchFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = UploadBatch
+        fields = {
+        }
+
+
+
+class BatchEInvoiceFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = BatchEInvoice
+        fields = {
+        }

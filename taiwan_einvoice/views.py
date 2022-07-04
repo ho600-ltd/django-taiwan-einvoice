@@ -61,6 +61,8 @@ from taiwan_einvoice.models import (
     CancelEInvoice,
     VoidEInvoice,
     EInvoiceSellerAPI,
+    UploadBatch,
+    BatchEInvoice,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -77,6 +79,8 @@ from taiwan_einvoice.serializers import (
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
     VoidEInvoiceSerializer,
+    UploadBatchSerializer,
+    BatchEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -89,6 +93,8 @@ from taiwan_einvoice.filters import (
     EInvoicePrintLogFilter,
     CancelEInvoiceFilter,
     VoidEInvoiceFilter,
+    UploadBatchFilter,
+    BatchEInvoiceFilter,
 )
 
 
@@ -841,3 +847,49 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         serializer.instance.post_void_einvoice()
         serializer = VoidEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class UploadBatchModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, ), )
+    queryset = UploadBatch.objects.all().order_by('-id')
+    serializer_class = UploadBatchSerializer
+    filter_class = UploadBatchFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(UploadBatchModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+
+class BatchEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, ), )
+    queryset = BatchEInvoice.objects.all().order_by('-id')
+    serializer_class = BatchEInvoiceSerializer
+    filter_class = BatchEInvoiceFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(BatchEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(batch__turnkey_web__in=turnkey_webs)
