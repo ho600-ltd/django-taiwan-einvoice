@@ -393,6 +393,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
     def upload_csv_to_multiple_create(self, request, *args, **kwargs):
+        NOW = now()
         try:
             turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
         except TurnkeyService.DoesNotExist:
@@ -423,10 +424,23 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
                 except Exception as e:
                     er = {
-                        "error_title": "Year Month Range Error",
+                        "error_title": _("Year Month Range Error"),
                         "error_message": _("{} has error: \n\n\n{}").format(line, e)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
+                else:
+                    if NOW < begin_time - datetime.timedelta(days=15):
+                        er = {
+                            "error_title": _("Begin Time Error"),
+                            "error_message": _("{} has error: \nToo early to import.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    elif NOW > end_time:
+                        er = {
+                            "error_title": _("End Time Error"),
+                            "error_message": _("{} has error: \nToo late to import.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
                 
                 begin_no = cols[5]
                 end_no = cols[6]
@@ -467,6 +481,12 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
         output_datas = []
+        if not datas:
+            er = {
+                "error_title": _("Identifier Error"),
+                "error_message": _("Identifier does not match the seller identifier of the TurnkeyService."),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
         for data in datas:
             if SellerInvoiceTrackNo.objects.filter(type=data['type'],
                                                    begin_time=data['begin_time'],
