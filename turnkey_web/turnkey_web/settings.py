@@ -75,11 +75,21 @@ WSGI_APPLICATION = 'turnkey_web.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tkw',
+        'USER': 'tkw',
+        'PASSWORD': 'tkw',
+        'HOST': 'dtei-db.ho600.com',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+            'init_command': 'SET NAMES utf8mb4; SET character_set_client = utf8mb4',},
+        'TEST': {
+        'CHARSET': 'utf8mb4',
+        'COLLATION': 'utf8mb4_unicode_ci',
+        }
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
