@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-25 20:51+0800\n"
+"POT-Creation-Date: 2022-07-05 12:06+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,6 +21,75 @@ msgstr ""
 msgid "Print Serial No.:{}"
 msgstr "列印序號: {}"
 
+msgid "B2B Exchange Invoice"
+msgstr "B2B交換 開立發票"
+
+msgid "B2B Exchange Invoice Confirm"
+msgstr "B2B交換 接受確認發票"
+
+msgid "B2B Exchange Allowance"
+msgstr "B2B交換 開立折讓"
+
+msgid "B2B Exchange Allowance Confirm"
+msgstr "B2B交換 接受確認折讓"
+
+msgid "B2B Exchange Cancel Invoice"
+msgstr "B2B交換 作廢發票"
+
+msgid "B2B Exchange Cancel Invoice Confirm"
+msgstr "B2B交換 接受確認作廢"
+
+msgid "B2B Exchange Cancel Allowance"
+msgstr "B2B交換 作廢折讓"
+
+msgid "B2B Exchange Cancel Allowance Confirm"
+msgstr "B2B交換 接受確認作廢折讓"
+
+msgid "B2B Exchange Reject Invoice"
+msgstr "B2B交換 退回發票"
+
+msgid "B2B Exchange Reject Invoice Confirm"
+msgstr "B2B交換 接受確認退回發票"
+
+msgid "B2B Certificate Invoice"
+msgstr "B2B存證 開立發票"
+
+msgid "B2B Certificate Allowance"
+msgstr "B2B存證 開立折讓"
+
+msgid "B2B Certificate Cancel Invoice"
+msgstr "B2B存證 作廢發票"
+
+msgid "B2B Certificate Cancel Allowance"
+msgstr "B2B存證 作廢折讓"
+
+msgid "B2B Certificate Reject Invoice"
+msgstr "B2B存證 退回發票"
+
+msgid "B2C Certificate Invoice"
+msgstr "B2C存證 開立發票"
+
+msgid "B2C Certificate Cancel Invoice"
+msgstr "B2C存證 作廢發票"
+
+msgid "B2C Certificate Void Invoice"
+msgstr "B2C存證 註銷發票"
+
+msgid "B2C Certificate Allowance"
+msgstr "B2C存證 開立折讓"
+
+msgid "B2C Certificate Cancel Allowance"
+msgstr "B2C存證 作廢折讓"
+
+msgid "Branch Track"
+msgstr "分支機構配號檔"
+
+msgid "Branch Track Blank"
+msgstr "空白未使用字軌檔"
+
+msgid "Invoice Assign No"
+msgstr "營業人電子發票配號檔"
+
 msgid "58mm Receipt"
 msgstr "58mm 收據"
 
@@ -29,6 +98,24 @@ msgstr "58mm 電子發票"
 
 msgid "80mm Receipt"
 msgstr "80mm 收據"
+
+msgid "once per 5 minutes"
+msgstr "每 5 分鐘 1 次"
+
+msgid "once per 10 minutes"
+msgstr "每 10 分鐘 1 次"
+
+msgid "once per 15 minutes"
+msgstr "每 15 分鐘 1 次"
+
+msgid "once per 20 minutes"
+msgstr "每 20 分鐘 1 次"
+
+msgid "once per 30 minutes"
+msgstr "每 30 分鐘 1 次"
+
+msgid "once per 60 minutes"
+msgstr "每 60 分鐘 1 次"
 
 msgid "General"
 msgstr "一般稅額"
@@ -45,13 +132,8 @@ msgstr "號碼不足"
 msgid "Mobile barcode"
 msgstr "手機條碼"
 
-#, python-brace-format
-msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
-msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
-
-#, python-brace-format
-msgid "Donate to NPO( {npoban} )"
-msgstr "捐贈社福團體(捐贈碼 {npoban} )"
+msgid "Natural person barcode"
+msgstr "自然人憑證條碼"
 
 msgctxt "canceleinvoice"
 msgid "Canceled at {} {}"
@@ -69,12 +151,92 @@ msgctxt "canceleinvoice"
 msgid "Remark: {}"
 msgstr "備註: {}"
 
+msgctxt "voideinvoice"
+msgid "voided at {} {}"
+msgstr "於 {} {} 已註銷"
+
+msgctxt "voideinvoice"
+msgid "Reason: {}"
+msgstr "理由: {}"
+
+msgctxt "voideinvoice"
+msgid "Remark: {}"
+msgstr "備註: {}"
+
+#, python-brace-format
+msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
+msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
+
+#, python-brace-format
+msgid "Donate to NPO( {npoban} )"
+msgstr "捐贈社福團體(捐贈碼 {npoban} )"
+
 msgid "No details"
 msgstr "無明細"
+
+msgid "Content object is not existed"
+msgstr "內容物件: {} 不存在"
+
+msgid "Content Object: {} has no 'check_before_cancel_einvoice' method"
+msgstr "內容物件: {} 無「check_before_cancel_einvoice」方法"
+
+msgid "Content Object: {} has no 'post_cancel_einvoice' method"
+msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
 msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
+
+msgid "Wait for printed"
+msgstr "等待列印紙本"
+
+msgid "Could print"
+msgstr "可能需要列印"
+
+msgid "No need to print"
+msgstr "無需列印紙本"
+
+msgid "Wait for C0501 or C0701"
+msgstr "等待C0501或C0701"
+
+msgid "Wait for C0401"
+msgstr "等待C0401"
+
+msgid "Wait for C0501 or C0401"
+msgstr "等待C0501或C0401"
+
+msgid "Collecting"
+msgstr "收集中"
+
+msgid "Waiting for trigger(Stop Collecting)"
+msgstr "等待觸發(停止收集)"
+
+msgid "Noticed to TKW"
+msgstr "已通知 TKW"
+
+msgid "Uploading to TKW"
+msgstr "上傳到 TKW 中"
+
+msgid "Uploaded to TKW"
+msgstr "已上傳到 TKW"
+
+msgid "Preparing for EI(P)"
+msgstr "準備上傳到 EI(P)"
+
+msgid "Uploaded to EI or Downloaded from EI(G)"
+msgstr "已上傳到 EI 或已從 EI 下載(G)"
+
+msgid "E Error for EI process(E)"
+msgstr "EI 回傳 E 錯誤(E)"
+
+msgid "I Error for EI process(I)"
+msgstr "EI 回傳 I 錯誤(I)"
+
+msgid "Successful EI process(C)"
+msgstr "成功完成 EI 程序(C)"
+
+msgid "Swith to Successful EI process manually(S-C)"
+msgstr "手動切成「成功的 EI 完成程序」(S-C)"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -119,6 +281,9 @@ msgstr "其他"
 msgid "Cancel EI."
 msgstr "作廢發票"
 
+msgid "Void EI."
+msgstr "註銷發票"
+
 msgid "Accounter Audit"
 msgstr "會計查驗"
 
@@ -128,8 +293,8 @@ msgstr "列印紀錄"
 msgid "Legal Entity"
 msgstr "買受人"
 
-msgid "Turnkey Web"
-msgstr "Turnkey 伺服器"
+msgid "Turnkey Service"
+msgstr "Turnkey 服務"
 
 msgid "Timezone"
 msgstr "時區"
@@ -193,6 +358,10 @@ msgid "Cancel Reason Example"
 msgstr "作廢原因範例"
 
 msgctxt "cancel_einvoice"
+msgid "Return the WorkOrder"
+msgstr "訂單退貨"
+
+msgctxt "cancel_einvoice"
 msgid "Lost original copy"
 msgstr "遺失正本"
 
@@ -237,14 +406,23 @@ msgstr "總金額"
 msgid "Footprint No."
 msgstr "追蹤編號"
 
-msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no.)"
-msgstr "同時開立新的電子發票(新發票除字軌號碼不同外，其餘資訊皆同原作廢發票)"
+msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
+msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
 
 msgid "Cancel"
 msgstr "關閉"
 
 msgid "Please input the one-dimensional barcode for canceling: "
 msgstr "請輸入欲作廢之發票的一維條碼"
+
+msgid ""
+"\n"
+"            It uses the <b>new track no.</b> to create the new E-Invoice after canceling the E-Invoice.\n"
+"        "
+msgstr ""
+"\n"
+"作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
+"            "
 
 #, python-format
 msgid "%(total_count)s records"
@@ -312,6 +490,17 @@ msgstr "已作廢，且未開立新發票"
 msgctxt "taiwan_einvoice_cancel_einvoice_type"
 msgid "Canceled, has new one"
 msgstr "已作廢，且有開立新發票"
+
+msgid "Void E-Invoice Type?"
+msgstr "註銷電子發票類型?"
+
+msgctxt "taiwan_einvoice_void_einvoice_type"
+msgid "Not yet"
+msgstr "未註銷"
+
+msgctxt "taiwan_einvoice_void_einvoice_type"
+msgid "Voided"
+msgstr "已註銷"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -466,6 +655,12 @@ msgstr "勾選"
 
 msgid "Generate Time"
 msgstr "開立時間"
+
+msgid "Canceled?"
+msgstr "作<br/>廢<br/>?"
+
+msgid "Voided?"
+msgstr "註<br/>銷<br/>?"
 
 msgctxt "taiwan_einvoice_donate_mark"
 msgid "Donated"
@@ -764,23 +959,29 @@ msgstr "是否商用?"
 msgid "Seller Identifier"
 msgstr "賣方統編"
 
+msgid "Auto Upload C0401?"
+msgstr "自動上傳 C0401?"
+
+msgid "Cron(execute once per ? minutes"
+msgstr "排程(每 ? 分鐘執行 1 次)"
+
 msgid "Transport ID"
-msgstr ""
+msgstr "傳送帳號"
 
 msgid "Party ID"
-msgstr ""
+msgstr "送方統編"
 
 msgid "Routing ID"
-msgstr ""
+msgstr "繞送代碼"
 
 msgid "Qrcode Seed"
-msgstr ""
+msgstr "Qrcode 種子"
 
 msgid "Turnkey Seed"
-msgstr ""
+msgstr "Turnkey 種子"
 
 msgid "Download Seed"
-msgstr ""
+msgstr "下載清冊種子"
 
 msgid "Remaining Count of the current period"
 msgstr "當期剩餘張數"
@@ -802,6 +1003,18 @@ msgstr "商用"
 msgid "Test"
 msgstr "測試"
 
+msgctxt "auto_upload_c0401_einvoice"
+msgid "Yes to C0401"
+msgstr "自動上傳 C0401"
+
+msgctxt "auto_upload_c0401_einvoice"
+msgid "Manually"
+msgstr "手動"
+
+msgctxt "upload_cronjob_format"
+msgid "No Cron"
+msgstr "無排程"
+
 #, python-format
 msgid "%(name)s's Staff Group"
 msgstr "『%(name)s』的工作人員群組"
@@ -813,8 +1026,8 @@ msgid "Update Staff Group"
 msgstr "更新工作人員群組"
 
 #, python-format
-msgid "Set-up permissions under Turnkey Web(%(name)s)"
-msgstr "賦予『Turnkey 伺服器(%(name)s)』的權限"
+msgid "Set-up permissions under Turnkey Service(%(name)s)"
+msgstr "賦予『Turnkey 服務(%(name)s)』的權限"
 
 msgid "View"
 msgstr "瀏覽"
@@ -828,6 +1041,9 @@ msgstr "字軌號碼"
 msgid "Imoprt track-no or delete unuse track-no"
 msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
 
+msgid "Void E-Invoice"
+msgstr "註銷電子發票"
+
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"
 
@@ -840,6 +1056,96 @@ msgstr "工作人員群組名稱"
 
 msgid "Staffs"
 msgstr "工作人員"
+
+msgctxt "taiwan_einvoice"
+msgid "One-dimensional Barcode from the Voided E-Invoice"
+msgstr "被註銷發票的一維條碼"
+
+msgid "Track No. from the Voided E-Invoice contains"
+msgstr "被註銷發票的字軌號碼包含"
+
+msgid "Void time later than"
+msgstr "註銷時間晚於"
+
+msgid "Void time earlier than"
+msgstr "註銷時間早於"
+
+msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
+msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
+
+msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
+msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
+
+msgid "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time."
+msgstr "注意 3: 無法同時設定捐贈碼及買方統編；也無法同時設定手機條碼及自然人憑證條碼。"
+
+msgctxt "void_einvoice"
+msgid "Reason(Required)"
+msgstr "註銷原因(必填)"
+
+msgctxt "void_einvoice"
+msgid "Please one"
+msgstr "請選擇 1 項"
+
+msgid "Buyer Identifier"
+msgstr "買方統編"
+
+msgid "Please input 8 digits number"
+msgstr "請輸入 8 碼數字"
+
+msgid "NPOBAN"
+msgstr "捐贈碼"
+
+msgid "Only accept numbers"
+msgstr "只接受數字"
+
+msgid "Please input 8 digits valid barcode"
+msgstr "請輸入 8 碼有效條碼"
+
+msgid "Natural Person Barcode"
+msgstr "自然人憑證條碼"
+
+msgid "Please input 16 digits valid barcode"
+msgstr "請輸入 16 碼有效條碼"
+
+msgid "Buyer identifier or NPOBAN"
+msgstr "買方統編<br/>或捐贈碼"
+
+msgid "Barcode"
+msgstr "條碼"
+
+msgid "Cancel it before the void process. This option is only for testing before 'applying for B2C E-Invoice qualifier'."
+msgstr "註銷前先作廢。此選項僅用於'申請 B2C 電子發票資格'前的測試。"
+
+msgid "Please input the one-dimensional barcode for voiding: "
+msgstr "請輸入欲註銷之發票的一維條碼"
+
+msgid ""
+"\n"
+"            It uses <b>the same track no. and the different random number</b> to create the new E-Invoice after voiding the E-Invoice.<br/>\n"
+"            So the maximal void times on the same track no. in the same year/month is 9,000 ~ 10,000.\n"
+"        "
+msgstr ""
+"\n"
+"註銷電子發票後，再開立的新電子發票，其<b>字軌號碼會是相同</b>於被註銷的電子發票，但<b>隨機碼會是不同</b>的。<br/>\n"
+"所以相同期別的單一字軌號碼可被註銷的最大次數為 9,000 到 10,000 次之間。\n"
+"            "
+
+msgid "Voided Track No."
+msgstr "有註銷<br/>字軌號碼"
+
+msgid "Voided Random Number"
+msgstr "已註銷之<br/>隨機碼"
+
+msgid "New Random Number"
+msgstr "新開立之<br/>隨機碼"
+
+msgctxt "taiwan_einvoice"
+msgid "Voider"
+msgstr "註銷者"
+
+msgid "Void Time"
+msgstr "註銷<br/>時間"
 
 msgid "Staff exist"
 msgstr "工作人員已存在"
@@ -859,8 +1165,11 @@ msgstr "已存在的群組數量已超過限度({})"
 msgid "Group name exists"
 msgstr "工作人員群組名稱已存在"
 
-msgid "TurnkeyWeb(id: {}) does not exist"
+msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
+
+msgid "Year Month Range Error"
+msgstr "期別錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -872,6 +1181,26 @@ msgstr ""
 "\n"
 "\n"
 "{}"
+
+msgid "Begin Time Error"
+msgstr "開始時間錯誤"
+
+msgid ""
+"{} has error: \n"
+"Too early to import."
+msgstr ""
+"{} 有誤: \n"
+"太早匯入。"
+
+msgid "End Time Error"
+msgstr "結束期間錯誤"
+
+msgid ""
+"{} has error: \n"
+"Too late to import."
+msgstr ""
+"{} 有誤: \n"
+"太晚匯入。"
 
 msgid ""
 "{} has error: \n"
@@ -898,6 +1227,12 @@ msgstr ""
 msgid "{} exists"
 msgstr "{} 已存在"
 
+msgid "Identifier Error"
+msgstr "統編錯誤"
+
+msgid "Identifier does not match the seller identifier of the TurnkeyService."
+msgstr "統編無法對應 Turnkey 服務的賣方統編。"
+
 msgid ""
 "{} ~ {} has error: \n"
 "\n"
@@ -921,5 +1256,54 @@ msgstr "{} 不存在"
 msgid "E-Invoice(id: {}) does not exist!"
 msgstr "電子發票(id: {})不存在!"
 
+msgid "Cancel Error"
+msgstr "作廢錯誤"
+
 msgid "E-Invoice({}) was already canceled!"
 msgstr "電子發票({})已被作廢!"
+
+msgid "E-Invoice({}) was already voieded and has created the new one!"
+msgstr "電子發票({})已被註銷且另有開立!"
+
+msgid "Void Error"
+msgstr "註銷發票錯誤"
+
+msgid "NPOBAN can not be set with Buyer Identifier at the same time"
+msgstr "捐贈碼與買方統編無法同時設定"
+
+msgid "Mobile barcode can not be set with Natural Person barcode at the same time"
+msgstr "手機條碼與自然人憑證條碼無法同時設定"
+
+msgid "Natural Person barcode Error"
+msgstr "自然人憑證條碼錯誤"
+
+msgid "Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number."
+msgstr "自然人憑證條碼格式應為開頭 2 碼為英文字，後 14 碼為數字。"
+
+msgid "E-Invoice({}) was already voided!"
+msgstr "電子發票({})已被註銷!"
+
+msgid "Buyer Identifier Error"
+msgstr "買方統編錯誤"
+
+msgid "Buyer identifier does not exist."
+msgstr "買方統編不存在"
+
+msgid "NPOBan Error"
+msgstr "捐贈碼錯誤"
+
+msgid "NPO bn does not exist."
+msgstr "捐贈碼不存在"
+
+msgid "Mobile barcode Error"
+msgstr "手機條碼錯誤"
+
+msgid "Mobile barcode does not exist."
+msgstr "手機條碼不存在"
+
+#~ msgctxt "auto_upload_c0401_einvoice"
+#~ msgid "Yes"
+#~ msgstr "自動上傳"
+
+#~ msgid "E-Invoice({}) was already canceled and has created the new one!"
+#~ msgstr "電子發票({})已被作廢且另有開立!"

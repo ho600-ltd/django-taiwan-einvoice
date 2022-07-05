@@ -160,13 +160,13 @@ class CanOperateESCPOSWebOperator(BasePermission):
 
 
 
-class CanEditTurnkeyWebGroup(BasePermission):
+class CanEditTurnkeyServiceGroup(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
-            "taiwan_einvoice.edit_te_turnkeywebgroup",
+            "taiwan_einvoice.edit_te_turnkeyservicegroup",
         ),
         "PATCH": (
-            "taiwan_einvoice.edit_te_turnkeywebgroup",
+            "taiwan_einvoice.edit_te_turnkeyservicegroup",
         ),
     }
 
@@ -179,7 +179,7 @@ class CanEditTurnkeyWebGroup(BasePermission):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanEditTurnkeyWebGroup.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditTurnkeyServiceGroup.has_permission with {}: {}".format(request.method, res))
         return res
         
 
@@ -191,7 +191,7 @@ class CanEditTurnkeyWebGroup(BasePermission):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanEditTurnkeyWebGroup.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditTurnkeyServiceGroup.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
@@ -336,6 +336,42 @@ class CanEntryCancelEInvoice(BasePermission):
 
 
 
+class CanEntryVoidEInvoice(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_voideinvoice",
+        ),
+        "POST": (
+            "taiwan_einvoice.add_te_voideinvoice",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanEntryVoidEInvoice.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            for p in CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                    res = True
+                    break
+        lg.debug("CanEntryVoidEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
 class CanViewLegalEntity(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
@@ -369,10 +405,10 @@ class CanViewLegalEntity(BasePermission):
 
 
 
-class CanViewTurnkeyWeb(BasePermission):
+class CanViewTurnkeyService(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
-            "taiwan_einvoice.view_turnkeyweb",
+            "taiwan_einvoice.view_turnkeyservice",
         ),
     }
 
@@ -381,10 +417,10 @@ class CanViewTurnkeyWeb(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            permissions = CanViewTurnkeyWeb.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTurnkeyService.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewTurnkeyWeb.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTurnkeyService.has_permission with {}: {}".format(request.method, res))
         return res
         
 
@@ -392,11 +428,11 @@ class CanViewTurnkeyWeb(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for p in CanViewTurnkeyWeb.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewTurnkeyService.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
                     res = True
                     break
-        lg.debug("CanViewTurnkeyWeb.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTurnkeyService.has_object_permission with {}: {}".format(request.method, res))
         return res
 

@@ -1,0 +1,85 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th rowspan="2" width="5%">{% trans "No." %}</th>
+            <th rowspan="2" width="5%">{% trans "Is on working?" %}</th>
+            <th rowspan="2" width="5%">{% trans "Is Production?" %}</th>
+            <th rowspan="2" width="10%">
+                {% trans "Seller Identifier" %}<br/>
+                {% trans "Name" %}
+            </th>
+            <th rowspan="2" width="15%">
+                {% trans "Auto Upload C0401?" %}<br/>
+                {% trans "Cron(execute once per ? minutes" %}
+            </th>
+            <th rowspan="2" width="10%">
+                {% trans "Transport ID" %}<br/>
+                {% trans "Party ID" %}<br/>
+                {% trans "Routing ID" %}
+            </th>
+            <th rowspan="2" width="30%">
+                {% trans "Hash Key" %}<br/>
+                {% trans "Qrcode Seed" %}<br/>
+                {% trans "Turnkey Seed" %}<br/>
+                {% trans "Download Seed" %}
+            </th>
+            <th width="20%" colspan="2">
+                {% trans "Remaining Count of the current period" %}
+            </th>
+        </tr>
+        <tr>
+            <th width="10%">{% trans "General" context "tax_type" %}</th>
+            <th width="10%">{% trans "Special" context "tax_type" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for turnkeyservice in data.results %}
+            <tr turnkeyservice_id="{{ turnkeyservice.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td field="on_working">{% if turnkeyservice.on_working %}{% trans "On Working" %}{% endif %}</td>
+                <td field="in_production">{% if turnkeyservice.in_production %}{% trans "Production" %}{% else %}{% trans "Test" %}{% endif %}</td>
+                <td>
+                    <dv field="identifier">{{ turnkeyservice.seller_dict.legal_entity_dict.identifier }}</div>
+                    <div field="name">{{ turnkeyservice.name }}</div>
+                </td>
+                <td>
+                    <dv field="auto_upload_c0401_einvoice">
+                        {% if turnkeyservice.auto_upload_c0401_einvoice %}
+                            {% trans "Yes to C0401" context "auto_upload_c0401_einvoice" %}
+                        {% else %}
+                            {% trans "Manually" context "auto_upload_c0401_einvoice" %}
+                        {% endif %}
+                    </div>
+                    <div field="upload_cronjob_format">
+                        {% if turnkeyservice.auto_upload_c0401_einvoice %}
+                            {{ turnkeyservice.upload_cronjob_format__display }}
+                        {% else %}
+                            {% trans "No Cron" context "upload_cronjob_format" %}
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div field="transport_id">{{ turnkeyservice.transport_id }}</div>
+                    <div field="party_id">{{ turnkeyservice.party_id }}</div>
+                    <div field="routing_id">{{ turnkeyservice.routing_id }}</div>
+                </td>
+                <td>
+                    <div field="hash_key">{{ turnkeyservice.mask_hash_key }}</div>
+                    <div field="qrcode_seed">{{ turnkeyservice.mask_qrcode_seed }}</div>
+                    <div field="turnkey_seed">{{ turnkeyservice.mask_turnkey_seed }}</div>
+                    <div field="download_seed">{{ turnkeyservice.mask_download_seed }}</div>
+                </td>
+                <td field="count_now_use_07_sellerinvoicetrackno_blank_no">{{ turnkeyservice.count_now_use_07_sellerinvoicetrackno_blank_no }}</td>
+                <td field="count_now_use_08_sellerinvoicetrackno_blank_no">{{ turnkeyservice.count_now_use_08_sellerinvoicetrackno_blank_no }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

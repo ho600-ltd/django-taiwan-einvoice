@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-18 15:49+0800\n"
+"POT-Creation-Date: 2022-06-29 18:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -65,17 +65,6 @@ msgstr "成功"
 msgid "NEW Record"
 msgstr "新紀錄"
 
-msgctxt "taiwan_einvoice"
-msgid "WebSocket Connection Error"
-msgstr "WebSocket 連線錯誤"
-
-msgid "<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>"
-msgstr "<p>目前無法使用 WebSocket 協定與伺服器連線。這會導致列印發票作業無法執行，但仍可正常搜尋、瀏覽電子發票紀錄。</p><p>如果您需要列印電子發票，請靜待連線成功。</p>"
-
-msgctxt "taiwan_einvoice"
-msgid "WARNING"
-msgstr "警示"
-
 msgctxt "print_mark"
 msgid "Yes"
 msgstr "已印"
@@ -87,6 +76,33 @@ msgstr[0] "<p>無法列印電子發票，請確認 Pass Key 或發票機伺服�
 msgctxt "taiwan_einvoice"
 msgid "ESC/POS Printer Error"
 msgstr "發票機錯誤"
+
+msgctxt "taiwan_einvoice"
+msgid "WebSocket Connection Error"
+msgstr "WebSocket 連線錯誤"
+
+msgid "<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>"
+msgstr "<p>目前無法使用 WebSocket 協定與伺服器連線。這會導致列印發票作業無法執行，但仍可正常搜尋、瀏覽電子發票紀錄。</p><p>如果您需要列印電子發票，請靜待連線成功。</p>"
+
+msgctxt "taiwan_einvoice"
+msgid "WARNING"
+msgstr "警示"
+
+msgid "Print original copy before close the modal."
+msgstr "在離開列印小視窗前，就重印正本。"
+
+msgid "Executed"
+msgstr "已執行"
+
+msgid "Loading..."
+msgstr "處理中..."
+
+msgid "Re-print original copy"
+msgstr "重印<br/>正本"
+
+msgctxt "suspend_print_einvoice"
+msgid "Suspend"
+msgstr "暫停"
 
 msgid "E-Invoice: %(track_no_)s"
 msgid_plural "E-Invoice: %(track_no_)s"
@@ -114,26 +130,9 @@ msgstr "無法連線發票機伺服器"
 msgid "Reason must has more than 10 words."
 msgstr "理由須超過 10 個字。"
 
-msgid "Re-print original copy"
-msgstr "重印<br/>正本"
-
-msgid "Loading..."
-msgstr "處理中..."
-
-msgctxt "suspend_print_einvoice"
-msgid "Suspend"
-msgstr "暫停"
-
-msgid "Print original copy before close the modal."
-msgstr "在離開列印小視窗前，就重印正本。"
-
-msgid "Executed"
-msgstr "已執行"
-
 msgid "%(escposweb_name)s - Pass Key: %(pass_key)s"
 msgid_plural "%(escposweb_name)s(Pass Key: %(pass_key)s)"
-msgstr[0] ""
-"%(escposweb_name)s(Pass Key: %(pass_key)s)"
+msgstr[0] "%(escposweb_name)s(Pass Key: %(pass_key)s)"
 
 msgid "Please choose one record at least"
 msgstr "請至少選擇 1 筆紀錄"
@@ -175,9 +174,9 @@ msgstr "成功匯入"
 msgid "Created"
 msgstr "已建立"
 
-msgid "Turnkey Web: %(name)s"
-msgid_plural "Turnkey Web: %(name)s"
-msgstr[0] "Turnkey 伺服器: %(name)s"
+msgid "Turnkey Service: %(name)s"
+msgid_plural "Turnkey Service: %(name)s"
+msgstr[0] "Turnkey 服務: %(name)s"
 
 msgid "Actived"
 msgstr "啟用"
@@ -287,3 +286,65 @@ msgstr[0] "您確定要刪除 \"%s\" ?"
 
 msgid "Deleted"
 msgstr "已刪除"
+
+msgid "Void E-Invoice Error"
+msgstr "註銷電子發票錯誤"
+
+msgid "%(one_dimensional_barcode_for_voiding)s does not exist!"
+msgid_plural "%(one_dimensional_barcode_for_voiding)s does not exist!"
+msgstr[0] "%(one_dimensional_barcode_for_voiding)s 不存在!"
+
+msgid "E-Invoice(%(track_no_)s) was already voided!"
+msgid_plural "E-Invoice(%(track_no_)s) was already voided!"
+msgstr[0] "電子發票(%(track_no_)s)已被註銷"
+
+msgid "E-Invoice(%(track_no_)s) was already canceled and has created the new one!"
+msgid_plural "E-Invoice(%(track_no_)s) was already canceled and has created the new one!"
+msgstr[0] "電子發票(%(track_no_)s)已被作廢，且有開立新字軌的電子發票!"
+
+msgid "Please choose one of the reasons"
+msgstr "請選擇 1 項原因"
+
+msgctxt "void_reason_tag_name"
+msgid "buyer_identifier"
+msgstr "買方統編"
+
+msgctxt "void_reason_tag_name"
+msgid "npoban"
+msgstr "捐贈碼"
+
+msgctxt "void_reason_tag_name"
+msgid "mobile_barcode"
+msgstr "手機條碼"
+
+msgctxt "void_reason_tag_name"
+msgid "natural_person_barcode"
+msgstr "自然人憑證條碼"
+
+msgid "Please input the new value of %(name)s depends on the reason!"
+msgid_plural "Please input the new value of %(name)s depends on the reason!"
+msgstr[0] "請依據原因來填寫「%(name)s」的新值"
+
+msgid "Void Error"
+msgstr "註銷錯誤"
+
+msgid "Buyer identifier/NPOBAN Error"
+msgstr "買方統編/捐贈碼錯誤"
+
+msgid "Do not set buyer identifier and npoban at the same time."
+msgstr "無法同時更新買方統編及捐贈碼。"
+
+msgid "Mobile/Natural Person barcode Error"
+msgstr "手機/自然人憑證條碼錯誤"
+
+msgid "Do not set mobile and natural person barcode at the same time."
+msgstr "無法同時更新手機條碼及自然人憑證條碼。"
+
+msgid "Natural Person barcode Error"
+msgstr "自然人憑證條碼錯誤"
+
+msgid "Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number."
+msgstr "自然人憑證條碼格式應為開頭 2 碼為英文字，後 14 碼為數字。"
+
+msgid "Voided"
+msgstr "已註銷"

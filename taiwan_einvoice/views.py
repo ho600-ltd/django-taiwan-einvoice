@@ -1,4 +1,5 @@
-import json, datetime, logging
+import json, datetime, logging, re
+from django.conf import settings
 from django.http import Http404
 from django.shortcuts import render
 from django.db.models import Q
@@ -24,26 +25,28 @@ from taiwan_einvoice.permissions import (
     CanViewSelfStaffProfile,
     CanOperateESCPOSWebOperator,
     CanEditESCPOSWebOperator,
-    CanEditTurnkeyWebGroup,
+    CanEditTurnkeyServiceGroup,
     CanEntrySellerInvoiceTrackNo,
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
+    CanEntryVoidEInvoice,
     CanViewLegalEntity,
-    CanViewTurnkeyWeb,
+    CanViewTurnkeyService,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
     StaffProfileHtmlRenderer,
     ESCPOSWebHtmlRenderer,
     ESCPOSWebOperatorHtmlRenderer,
-    TurnkeyWebHtmlRenderer,
-    TurnkeyWebGroupHtmlRenderer,
+    TurnkeyServiceHtmlRenderer,
+    TurnkeyServiceGroupHtmlRenderer,
     LegalEntityHtmlRenderer,
     SellerInvoiceTrackNoHtmlRenderer,
     EInvoiceHtmlRenderer,
     EInvoicePrintLogHtmlRenderer,
     CancelEInvoiceHtmlRenderer,
+    VoidEInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -51,11 +54,15 @@ from taiwan_einvoice.models import (
     ESCPOSWeb,
     LegalEntity,
     Seller,
-    TurnkeyWeb,
+    TurnkeyService,
     SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError,
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
+    VoidEInvoice,
+    EInvoiceSellerAPI,
+    UploadBatch,
+    BatchEInvoice,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -65,22 +72,29 @@ from taiwan_einvoice.serializers import (
     LegalEntitySerializerForUser,
     LegalEntitySerializerForSuperUser,
     SellerSerializer,
-    TurnkeyWebSerializer,
-    TurnkeyWebGroupSerializer,
+    TurnkeyServiceSerializer,
+    TurnkeyServiceGroupSerializer,
     SellerInvoiceTrackNoSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
+    VoidEInvoiceSerializer,
+    UploadBatchSerializer,
+    BatchEInvoiceSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
     ESCPOSWebFilter,
     LegalEntityFilter,
-    TurnkeyWebFilter,
-    TurnkeyWebGroupFilter,
+    TurnkeyServiceFilter,
+    TurnkeyServiceGroupFilter,
     SellerInvoiceTrackNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
+    CancelEInvoiceFilter,
+    VoidEInvoiceFilter,
+    UploadBatchFilter,
+    BatchEInvoiceFilter,
 )
 
 
@@ -127,7 +141,7 @@ class StaffProfileModelViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = instance.user
-        ct = ContentType.objects.get_for_model(TurnkeyWeb)
+        ct = ContentType.objects.get_for_model(TurnkeyService)
         for k, v in request.data.items():
             if k.startswith('add_group_'):
                 group_id = k.replace('add_group_', '')
@@ -284,30 +298,30 @@ class SellerModelViewSet(ModelViewSet):
 
 
 
-class TurnkeyWebModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewTurnkeyWeb), )
-    queryset = TurnkeyWeb.objects.all().order_by('-id')
-    serializer_class = TurnkeyWebSerializer
-    filter_class = TurnkeyWebFilter
-    renderer_classes = (TurnkeyWebHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+class TurnkeyServiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    queryset = TurnkeyService.objects.all().order_by('-id')
+    serializer_class = TurnkeyServiceSerializer
+    filter_class = TurnkeyServiceFilter
+    renderer_classes = (TurnkeyServiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
 
 
-class TurnkeyWebGroupModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEditTurnkeyWebGroup), )
+class TurnkeyServiceGroupModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditTurnkeyServiceGroup), )
     pagination_class = Default30PerPagePagination
-    queryset = TurnkeyWeb.objects.all().order_by('-id')
-    serializer_class = TurnkeyWebGroupSerializer
-    filter_class = TurnkeyWebGroupFilter
-    renderer_classes = (TurnkeyWebGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    queryset = TurnkeyService.objects.all().order_by('-id')
+    serializer_class = TurnkeyServiceGroupSerializer
+    filter_class = TurnkeyServiceGroupFilter
+    renderer_classes = (TurnkeyServiceGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', 'patch')
 
 
     def update(self, request, *args, **kwargs):
         body_unicode = request.body.decode('utf-8')
         data = json.loads(body_unicode)
-        turnkeyweb = self.get_object()
+        turnkeyservice = self.get_object()
         if 'delete_group' == data['type']:
             try:
                 g = Group.objects.get(id=data['group_id'])
@@ -317,14 +331,14 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
                 g.delete()
             return Response({}, status=status.HTTP_204_NO_CONTENT)
         elif 'add_group' == data['type']:
-            if len(turnkeyweb.groups) >= self.pagination_class.page_size:
+            if len(turnkeyservice.groups) >= self.pagination_class.page_size:
                 er = {
                     "error_title": _("The count of Existed Groups exceeds the limit"),
                     "error_message": _("The count of Existed Groups exceeds the limit({})").format(self.pagination_class.page_size),
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
-            ct_id = ContentType.objects.get_for_model(turnkeyweb).id
-            group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyweb.id, name=data['display_name'])
+            ct_id = ContentType.objects.get_for_model(turnkeyservice).id
+            group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct_id, id=turnkeyservice.id, name=data['display_name'])
             g, created = Group.objects.get_or_create(name=group_name)
             if created:
                 serializer = StaffGroupSerializer(g, context={'request': request})
@@ -341,8 +355,8 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
             except Group.DoesNotExist:
                 pass
             else:
-                ct = ContentType.objects.get_for_model(turnkeyweb)
-                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct.id, id=turnkeyweb.id, name=data['display_name'])
+                ct = ContentType.objects.get_for_model(turnkeyservice)
+                group_name = "ct{ct_id}:{id}:{name}".format(ct_id=ct.id, id=turnkeyservice.id, name=data['display_name'])
                 g.name = group_name
                 g.save()
                 for k, v in data['permissions'].items():
@@ -352,7 +366,7 @@ class TurnkeyWebGroupModelViewSet(ModelViewSet):
                         p = Permission.objects.get(codename=k)
                         target_obj = None
                     else:
-                        target_obj = turnkeyweb
+                        target_obj = turnkeyservice
                     if v:
                         assign_perm(p, g, obj=target_obj)
                     else:
@@ -385,12 +399,13 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
     def upload_csv_to_multiple_create(self, request, *args, **kwargs):
+        NOW = now()
         try:
-            turnkey_web = TurnkeyWeb.objects.get(id=request.POST['turnkey_web'])
-        except TurnkeyWeb.DoesNotExist:
+            turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
+        except TurnkeyService.DoesNotExist:
             er = {
-                "error_title": "TurnkeyWeb Does Not Exist",
-                "error_message": _("TurnkeyWeb(id: {}) does not exist").format(turnkey_web),
+                "error_title": "TurnkeyService Does Not Exist",
+                "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_web),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         csv_file = request.FILES['file']
@@ -415,10 +430,23 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
                 except Exception as e:
                     er = {
-                        "error_title": "Year Month Range Error",
+                        "error_title": _("Year Month Range Error"),
                         "error_message": _("{} has error: \n\n\n{}").format(line, e)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
+                else:
+                    if NOW < begin_time - datetime.timedelta(days=15):
+                        er = {
+                            "error_title": _("Begin Time Error"),
+                            "error_message": _("{} has error: \nToo early to import.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    elif NOW > end_time:
+                        er = {
+                            "error_title": _("End Time Error"),
+                            "error_message": _("{} has error: \nToo late to import.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
                 
                 begin_no = cols[5]
                 end_no = cols[6]
@@ -459,6 +487,12 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
         output_datas = []
+        if not datas:
+            er = {
+                "error_title": _("Identifier Error"),
+                "error_message": _("Identifier does not match the seller identifier of the TurnkeyService."),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
         for data in datas:
             if SellerInvoiceTrackNo.objects.filter(type=data['type'],
                                                    begin_time=data['begin_time'],
@@ -564,6 +598,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryCancelEInvoice), )
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
+    filter_class = CancelEInvoiceFilter
     renderer_classes = (CancelEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )
 
@@ -584,28 +619,43 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         data = request.data
         einvoice_id = data['einvoice_id']
+        re_create_einvoice = data['re_create_einvoice']
+        del data['re_create_einvoice']
         try:
             einvoice = EInvoice.objects.get(id=einvoice_id)
         except EInvoice.DoesNotExist:
             er = {
-                "error_title": "E-Invoice Error",
+                "error_title": _("E-Invoice Error"),
                 "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
-            if einvoice.canceleinvoice_set.exists():
+            if einvoice.is_canceled:
                 er = {
-                    "error_title": "E-Invoice Error",
+                    "error_title": _("Cancel Error"),
                     "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not einvoice.can_cancel:
+                er = {
+                    "error_title": _("Cancel Error"),
+                    "error_message": _("E-Invoice({}) was already voieded and has created the new one!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not re_create_einvoice:
+                message = einvoice.check_before_cancel_einvoice()
+                if message:
+                    er = {
+                        "error_title": _("Cancel Error"),
+                        "error_message": message,
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
         data['seller_identifier'] = einvoice.seller_identifier
         data['buyer_identifier'] = einvoice.buyer_identifier
         data['generate_time'] = now()
-        re_create_einvoice = data['re_create_einvoice']
-        del data['re_create_einvoice']
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -634,7 +684,212 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d['print_mark'] = False
             new_einvoice = EInvoice(**_d)
             new_einvoice.save()
-            serializer.instance.new_einvoice = new_einvoice
-            serializer.instance.save()
+            serializer.instance.set_new_einvoice(new_einvoice)
+            serializer.instance.post_cancel_einvoice()
         serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class VoidEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEntryVoidEInvoice), )
+    queryset = VoidEInvoice.objects.all().order_by('-id')
+    serializer_class = VoidEInvoiceSerializer
+    filter_class = VoidEInvoiceFilter
+    renderer_classes = (VoidEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('post', 'get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(VoidEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+    
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        cancel_before_void = data['cancel_before_void']
+        del data['cancel_before_void']
+        if data['npoban'] and data['buyer_identifier']:
+            er = {
+                "error_title": _("Void Error"),
+                "error_message": _("NPOBAN can not be set with Buyer Identifier at the same time")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['mobile_barcode'] and data['natural_person_barcode']:
+            er = {
+                "error_title": _("Void Error"),
+                "error_message": _("Mobile barcode can not be set with Natural Person barcode at the same time")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['natural_person_barcode'] and not re.search('[a-zA-Z]{2}[0-9]{14}', data['natural_person_barcode']):
+            er = {
+                "error_title": _("Natural Person barcode Error"),
+                "error_message": _("Natural Person barcode should be prefixed two digits alphabets and follow 14 digits number.")
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        einvoice_id = data['einvoice_id']
+        try:
+            einvoice = EInvoice.objects.get(id=einvoice_id)
+        except EInvoice.DoesNotExist:
+            er = {
+                "error_title": _("E-Invoice Error"),
+                "error_message": _("E-Invoice(id: {}) does not exist!").format(einvoice_id),
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        else:
+            if einvoice.is_voided:
+                er = {
+                    "error_title": _("Void Error"),
+                    "error_message": _("E-Invoice({}) was already voided!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            elif not einvoice.can_void:
+                er = {
+                    "error_title": _("Void Error"),
+                    "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        eisa = EInvoiceSellerAPI.objects.get(AppId=settings.TAIWAN_EINVOICE_APP_ID)
+        if data['buyer_identifier'] and False == eisa.inquery('seller-identifier', data['buyer_identifier']):
+            er = {
+                "error_title": _("Buyer Identifier Error"),
+                "error_message": _('Buyer identifier does not exist.')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['npoban'] and False == eisa.inquery('donate-mark', data['npoban']):
+            er = {
+                "error_title": _("NPOBan Error"),
+                "error_message": _('NPO bn does not exist.')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif data['mobile_barcode'] and False == eisa.inquery('mobile-barcode', data['mobile_barcode']):
+            er = {
+                "error_title": _("Mobile barcode Error"),
+                "error_message": _('Mobile barcode does not exist.')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        if cancel_before_void:
+            cei = CancelEInvoice(creator=request.user,
+                                 einvoice=einvoice,
+                                 seller_identifier=einvoice.seller_identifier,
+                                 buyer_identifier=einvoice.buyer_identifier,
+                                 generate_time=now(),
+                                 reason=data['reason'],
+                                 remark=data['remark']
+                                )
+            cei.save()
+
+        data['creator'] = request.user.id
+        data['einvoice'] = einvoice.id
+        data['seller_identifier'] = einvoice.seller_identifier
+        _post_buyer_identifier = data['buyer_identifier']
+        data['buyer_identifier'] = einvoice.buyer_identifier
+        data['generate_time'] = now()
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        for _ei in EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=einvoice.seller_invoice_track_no.turnkey_web,
+                                           track=einvoice.track,
+                                           no=einvoice.no).order_by('-reverse_void_order'):
+            _ei.increase_reverse_void_order()
+
+
+        _d = {f.name: getattr(einvoice, f.name) for f in EInvoice._meta.fields }
+        del _d['id']
+        del _d['random_number']
+        _d['creator'] = request.user
+        _d['print_mark'] = False
+        data['buyer_identifier'] = _post_buyer_identifier
+
+        if data['mobile_barcode']:
+            _d['carrier_type'] = '3J0002'
+            _d['carrier_id1'] = _d['carrier_id2'] = data['mobile_barcode']
+        elif data['natural_person_barcode']:
+            _d['carrier_type'] = 'CQ0001'
+            _d['carrier_id1'] = _d['carrier_id2'] = data['natural_person_barcode']
+
+        lg = logging.getLogger('taiwan_einvoice')
+        if data['npoban']:
+            _d['npoban'] = data['npoban']
+        elif data['buyer_identifier']:
+            _d['buyer_identifier'] = data['buyer_identifier']
+            try:
+                buyer_legal_entity = LegalEntity.objects.get(identifier=_d['buyer_identifier'])
+            except LegalEntity.DoesNotExist:
+                buyer_legal_entity = LegalEntity(identifier=_d['buyer_identifier'], name=_d['buyer_identifier'])
+                buyer_legal_entity.save()
+            _d["buyer"] = buyer_legal_entity
+            _d["buyer_name"] = buyer_legal_entity.name if buyer_legal_entity else ''
+            _d["buyer_address"] = buyer_legal_entity.address if buyer_legal_entity else ''
+            _d["buyer_person_in_charge"] = buyer_legal_entity.person_in_charge if buyer_legal_entity else ''
+            _d["buyer_telephone_number"] = buyer_legal_entity.telephone_number if buyer_legal_entity else ''
+            _d["buyer_facsimile_number"] = buyer_legal_entity.facsimile_number if buyer_legal_entity else ''
+            _d["buyer_email_address"] = buyer_legal_entity.email_address if buyer_legal_entity else ''
+            _d["buyer_customer_number"] = buyer_legal_entity.customer_number if buyer_legal_entity else ''
+            _d["buyer_role_remark"] = buyer_legal_entity.role_remark if buyer_legal_entity else ''
+
+        new_einvoice = EInvoice(**_d)
+        new_einvoice.save()
+        new_einvoice.set_generate_time(einvoice.generate_time)
+        serializer.instance.set_new_einvoice(new_einvoice)
+        serializer.instance.save()
+        serializer.instance.post_void_einvoice()
+        serializer = VoidEInvoiceSerializer(serializer.instance, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class UploadBatchModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, ), )
+    queryset = UploadBatch.objects.all().order_by('-id')
+    serializer_class = UploadBatchSerializer
+    filter_class = UploadBatchFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(UploadBatchModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+
+class BatchEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, ), )
+    queryset = BatchEInvoice.objects.all().order_by('-id')
+    serializer_class = BatchEInvoiceSerializer
+    filter_class = BatchEInvoiceFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(BatchEInvoiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(batch__turnkey_web__in=turnkey_webs)

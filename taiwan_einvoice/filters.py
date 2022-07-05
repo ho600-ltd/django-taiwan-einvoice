@@ -6,7 +6,21 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
-from taiwan_einvoice.models import TAIPEI_TIMEZONE, StaffProfile, ESCPOSWeb, Seller, LegalEntity, TurnkeyWeb, SellerInvoiceTrackNo, EInvoice, EInvoicePrintLog, CancelEInvoice
+from taiwan_einvoice.models import (
+    TAIPEI_TIMEZONE,
+    StaffProfile,
+    ESCPOSWeb,
+    Seller,
+    LegalEntity,
+    TurnkeyService,
+    SellerInvoiceTrackNo,
+    EInvoice,
+    EInvoicePrintLog,
+    CancelEInvoice,
+    VoidEInvoice,
+    UploadBatch,
+    BatchEInvoice,
+)
 
 
 class UserFilter(filters.FilterSet):
@@ -87,7 +101,7 @@ class SellerFilter(filters.FilterSet):
 
 
 
-class TurnkeyWebFilter(filters.FilterSet):
+class TurnkeyServiceFilter(filters.FilterSet):
     filter_any_words_in_those_fields = (
         'name',
         'hash_key',
@@ -104,7 +118,7 @@ class TurnkeyWebFilter(filters.FilterSet):
 
 
     class Meta:
-        model = TurnkeyWeb
+        model = TurnkeyService
         fields = {
             'on_working': ('exact', ),
         }
@@ -121,7 +135,7 @@ class TurnkeyWebFilter(filters.FilterSet):
 
 
 
-class TurnkeyWebGroupFilter(filters.FilterSet):
+class TurnkeyServiceGroupFilter(filters.FilterSet):
     filter_any_words_in_those_fields = (
         'name',
         'hash_key',
@@ -138,7 +152,7 @@ class TurnkeyWebGroupFilter(filters.FilterSet):
 
 
     class Meta:
-        model = TurnkeyWeb
+        model = TurnkeyService
         fields = {
             'on_working': ('exact', ),
         }
@@ -229,6 +243,7 @@ class EInvoiceFilter(filters.FilterSet):
         fields = {
             'generate_time': ('gte', 'lt', ),
             'print_mark': ('exact', ),
+            'reverse_void_order': ('exact', 'gte', 'gt', 'lte', 'lt'),
         }
 
 
@@ -331,3 +346,128 @@ class EInvoicePrintLogFilter(filters.FilterSet):
         else:
             ids = [id]
         return queryset.filter(id__in=ids)
+
+
+
+class CancelEInvoiceFilter(filters.FilterSet):
+    einvoice__track_no__icontains = filters.CharFilter(method='filter_einvoice__track_no__icontains')
+    einvoice__code39__exact = filters.CharFilter(method='filter_einvoice__code39__exact')
+
+
+
+    class Meta:
+        model = CancelEInvoice
+        fields = {
+            'generate_time': ('gte', 'lt', ),
+        }
+
+
+    def filter_einvoice__code39__exact(self, queryset, name, value):
+        code39_barcode_re = RE_CODE39_BARCODE.search(value)
+        if value and not code39_barcode_re:
+            queryset = queryset.none()
+        else:
+            year, month, track, no, random_number = code39_barcode_re.groups()
+            year = int(year) + 1911
+            month = int(month)
+            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIPEI_TIMEZONE)
+            queryset = queryset.filter(einvoice__seller_invoice_track_no__begin_time__lt=middle_time,
+                                       einvoice__seller_invoice_track_no__end_time__gt=middle_time,
+                                       einvoice__track=track,
+                                       einvoice__no=no,
+                                       einvoice__random_number=random_number)
+        return queryset
+
+
+    def filter_einvoice__track_no__icontains(self, queryset, name, value):
+        if value:
+            alphabet = ''
+            digit = ''
+            re_alphabet_re = RE_ALPHABET.search(value)
+            if re_alphabet_re:
+                alphabet = re_alphabet_re.groups()[0]
+            re_digit_re = RE_DIGIT.search(value)
+            if re_digit_re:
+                digit = re_digit_re.groups()[0]
+
+            if alphabet and digit:
+                queryset = queryset.filter(einvoice__track__iendswith=alphabet, einvoice__no__startswith=digit)
+            else:
+                if digit:
+                    queryset = queryset.filter(einvoice__no__contains=digit)
+                if alphabet:
+                    queryset = queryset.filter(einvoice__track__icontains=alphabet)
+        return queryset
+
+
+class VoidEInvoiceFilter(filters.FilterSet):
+    einvoice__track_no__icontains = filters.CharFilter(method='filter_einvoice__track_no__icontains')
+    einvoice__code39__exact = filters.CharFilter(method='filter_einvoice__code39__exact')
+
+
+
+    class Meta:
+        model = VoidEInvoice
+        fields = {
+            'generate_time': ('gte', 'lt', ),
+        }
+
+
+    def filter_einvoice__code39__exact(self, queryset, name, value):
+        code39_barcode_re = RE_CODE39_BARCODE.search(value)
+        if value and not code39_barcode_re:
+            queryset = queryset.none()
+        else:
+            year, month, track, no, random_number = code39_barcode_re.groups()
+            year = int(year) + 1911
+            month = int(month)
+            middle_time = datetime.datetime(year, month, 1, tzinfo=TAIPEI_TIMEZONE)
+            queryset = queryset.filter(einvoice__seller_invoice_track_no__begin_time__lt=middle_time,
+                                       einvoice__seller_invoice_track_no__end_time__gt=middle_time,
+                                       einvoice__track=track,
+                                       einvoice__no=no,
+                                       einvoice__random_number=random_number)
+        return queryset
+
+
+    def filter_einvoice__track_no__icontains(self, queryset, name, value):
+        if value:
+            alphabet = ''
+            digit = ''
+            re_alphabet_re = RE_ALPHABET.search(value)
+            if re_alphabet_re:
+                alphabet = re_alphabet_re.groups()[0]
+            re_digit_re = RE_DIGIT.search(value)
+            if re_digit_re:
+                digit = re_digit_re.groups()[0]
+
+            if alphabet and digit:
+                queryset = queryset.filter(einvoice__track__iendswith=alphabet, einvoice__no__startswith=digit)
+            else:
+                if digit:
+                    queryset = queryset.filter(einvoice__no__contains=digit)
+                if alphabet:
+                    queryset = queryset.filter(einvoice__track__icontains=alphabet)
+        return queryset
+
+
+
+class UploadBatchFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = UploadBatch
+        fields = {
+        }
+
+
+
+class BatchEInvoiceFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = BatchEInvoice
+        fields = {
+        }

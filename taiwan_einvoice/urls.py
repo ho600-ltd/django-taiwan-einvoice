@@ -38,12 +38,15 @@ router.register('escposweb', views.ESCPOSWebModelViewSet, basename="escposweb")
 router.register('escposweboperator', views.ESCPOSWebOperatorModelViewSet, basename="escposweboperator")
 router.register('legalentity', views.LegalEntityModelViewSet, basename="legalentity")
 router.register('seller', views.SellerModelViewSet, basename="seller")
-router.register('turnkeyweb', views.TurnkeyWebModelViewSet, basename="turnkeyweb")
-router.register('turnkeywebgroup', views.TurnkeyWebGroupModelViewSet, basename="turnkeywebgroup")
+router.register('turnkeyservice', views.TurnkeyServiceModelViewSet, basename="turnkeyservice")
+router.register('turnkeyservicegroup', views.TurnkeyServiceGroupModelViewSet, basename="turnkeyservicegroup")
 router.register('sellerinvoicetrackno', views.SellerInvoiceTrackNoModelViewSet, basename="sellerinvoicetrackno")
 router.register('einvoice', views.EInvoiceModelViewSet, basename="einvoice")
 router.register('einvoiceprintlog', views.EInvoicePrintLogModelViewSet, basename="einvoiceprintlog")
 router.register('canceleinvoice', views.CancelEInvoiceModelViewSet, basename="canceleinvoice")
+router.register('voideinvoice', views.VoidEInvoiceModelViewSet, basename="voideinvoice")
+router.register('uploadbatch', views.UploadBatchModelViewSet, basename="uploadbatch")
+router.register('batcheinvoice', views.BatchEInvoiceModelViewSet, basename="batcheinvoice")
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [

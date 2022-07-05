@@ -11,18 +11,18 @@ print(dir)
 sys.path.append(dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "escpos_web.settings")
 django.setup()
-from escpos_printer.models import TEWeb, Printer, Receipt, ReceiptLog
+from escpos_printer.models import TEAWeb, Printer, Receipt, ReceiptLog
 
 logging.basicConfig()
 lg = logging.getLogger(__name__)
 lg.setLevel('INFO')
 
-async def connect_and_print_receipt(te_web):
-    token_auth = te_web.generate_token_auth()
-    url = "{}{}/".format(te_web.url, token_auth)
+async def connect_and_print_receipt(tea_web):
+    token_auth = tea_web.generate_token_auth()
+    url = "{}{}/".format(tea_web.url, token_auth)
     async with websockets.connect(url, ssl=SSL) as websocket:
         i = 0
-        await database_sync_to_async(print_receipt)(te_web.id, i, '', '')
+        await database_sync_to_async(print_receipt)(tea_web.id, i, '', '')
         while True:
             boot_seed = get_boot_seed()
             data_json = await websocket.recv()
@@ -46,12 +46,12 @@ async def connect_and_print_receipt(te_web):
                               "status": False,
                               "status_message": "通行碼(Pass Key {})錯誤".format(pass_key)}
                 else:
-                    result = await database_sync_to_async(print_receipt)(te_web.id,
+                    result = await database_sync_to_async(print_receipt)(tea_web.id,
                                                                          data['serial_number'],
                                                                          data['unixtimestamp'],
                                                                          data['invoice_json'])
-            token_auth = te_web.generate_token_auth()
-            url = "{}print_result/{}/".format(te_web.url, token_auth)
+            token_auth = tea_web.generate_token_auth()
+            url = "{}print_result/{}/".format(tea_web.url, token_auth)
             lg.info("url: {}".format(url))
             lg.info("ssl: {}".format(SSL))
             lg.info("result: {}".format(result))
@@ -61,8 +61,8 @@ async def connect_and_print_receipt(te_web):
             lg.info("print order: {}".format(i))
 
         
-def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
-    lg.info("te_web_id: {}".format(te_web_id))
+def print_receipt(tea_web_id, serial_number, unixtimestamp, invoice_json):
+    lg.info("tea_web_id: {}".format(tea_web_id))
     lg.info("serial_number: {}".format(serial_number))
     lg.info("unixtimestamp: {}".format(unixtimestamp))
     lg.info("type: {} => should be str".format(type(invoice_json)))
@@ -81,8 +81,8 @@ def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
         extra_content = json.loads(invoice_json).get('details_content', [])
     else:
         extra_content = []
-    te_web = TEWeb.objects.get(id=te_web_id)
-    r = Receipt.create_receipt(te_web, invoice_json, re_print_original_copy=re_print_original_copy)
+    tea_web = TEAWeb.objects.get(id=tea_web_id)
+    r = Receipt.create_receipt(tea_web, invoice_json, re_print_original_copy=re_print_original_copy)
     try:
         p1 = Printer.objects.get(serial_number=serial_number)
     except Printer.DoesNotExist:
@@ -109,11 +109,11 @@ def print_receipt(te_web_id, serial_number, unixtimestamp, invoice_json):
     return result
 
 
-async def connect_and_check_print_status(te_web):
+async def connect_and_check_print_status(tea_web):
     interval_seconds = 1.7
     while_order = 0
-    token_auth = te_web.generate_token_auth()
-    url = "{}status/{}/".format(te_web.url, token_auth)
+    token_auth = tea_web.generate_token_auth()
+    url = "{}status/{}/".format(tea_web.url, token_auth)
     async with websockets.connect(url, ssl=SSL) as websocket:
         while True:
             try:
@@ -143,9 +143,9 @@ if '__main__' == __name__:
     SSL = True if args[1] == 'ssl=true' else False
 
     if 'print_receipt' == method:
-        te_web = TEWeb.objects.get(url=url)
-        asyncio.get_event_loop().run_until_complete(connect_and_print_receipt(te_web))
+        tea_web = TEAWeb.objects.get(url=url)
+        asyncio.get_event_loop().run_until_complete(connect_and_print_receipt(tea_web))
     elif 'check_printer_status' == method:
-        te_web = TEWeb.objects.get(url=url)
-        asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(te_web))
+        tea_web = TEAWeb.objects.get(url=url)
+        asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(tea_web))
 

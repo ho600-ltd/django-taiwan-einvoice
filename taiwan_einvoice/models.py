@@ -4,12 +4,13 @@ from base64 import b64encode, b64decode
 from binascii import unhexlify 
 from Crypto.Cipher import AES
 from hashlib import sha1
-from random import random, randint
+from random import random, randint, choice
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
-from django.db.models import Max
+from django.db.models import Max, F
 from django.contrib.auth.models import User, Group
+from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext, pgettext
@@ -72,14 +73,14 @@ class StaffProfile(models.Model):
         return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()
     @property
     def groups(self):
-        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        ct_id = ContentType.objects.get_for_model(TurnkeyService).id
         groups = {}
         for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)).order_by('name'):
-            turnkeyweb_id = g.name.split(':')[1]
-            turnkeyweb = TurnkeyWeb.objects.get(id=turnkeyweb_id)
+            turnkeyservice_id = g.name.split(':')[1]
+            turnkeyservice = TurnkeyService.objects.get(id=turnkeyservice_id)
             g.display_name = ''.join(g.name.split(':')[2:])
             is_member = self.user.groups.filter(id=g.id).exists()
-            groups.setdefault(turnkeyweb.name, []).append({"id": g.id,
+            groups.setdefault(turnkeyservice.name, []).append({"id": g.id,
                                                            "display_name": g.display_name,
                                                            "is_member": is_member})
         return groups
@@ -292,7 +293,12 @@ class MobileBarcodeDoesNotExist(Exception):
 
 
 
-class NPOBnDoesNotExist(Exception):
+class NPOBanDoesNotExist(Exception):
+    pass
+
+
+
+class NatualPersonBarcodeFormatError(Exception):
     pass
 
 
@@ -456,7 +462,7 @@ class IdentifierRule(object):
 
 
 class LegalEntity(models.Model, IdentifierRule):
-    GENERAL_CONSUMER_IDENTIFIER = '0000000000'
+    GENERAL_CONSUMER_IDENTIFIER = 10 * '0'
     identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     name = models.CharField(max_length=60, default='', db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
@@ -500,12 +506,17 @@ class Seller(models.Model):
 
 
 
+class ContentObjectError(Exception):
+    pass
+
+
+
 class ForbiddenAboveAmountError(Exception):
     pass
 
 
 
-class TurnkeyWeb(models.Model):
+class TurnkeyService(models.Model):
     on_working = models.BooleanField(default=True)
     in_production = models.BooleanField(default=False)
     seller = models.ForeignKey(Seller, on_delete=models.DO_NOTHING)
@@ -520,10 +531,24 @@ class TurnkeyWeb(models.Model):
     epl_base_set = models.CharField(max_length=64, default='')
     warning_above_amount = models.IntegerField(default=10000)
     forbidden_above_amount = models.IntegerField(default=20000)
+    auto_upload_c0401_einvoice = models.BooleanField(default=False)
+    upload_cronjob_format_choices = (
+      ("*/5 * * * *", _("once per 5 minutes")),
+      ("*/10 * * * *", _("once per 10 minutes")),
+      ("*/15 * * * *", _("once per 15 minutes")),
+      ("*/20 * * * *", _("once per 20 minutes")),
+      ("*/30 * * * *", _("once per 30 minutes")),
+      ("*/60 * * * *", _("once per 60 minutes")),
+    )
+    upload_cronjob_format = models.CharField(max_length=128, default="*/15 * * * *", choices=upload_cronjob_format_choices, db_index=True)
+    @property
+    def upload_cronjob_format__display(self):
+        return self.get_upload_cronjob_format_display()
+    tkw_endpoint = models.TextField()
     history = HistoricalRecords()
     @property
     def groups(self):
-        ct_id = ContentType.objects.get_for_model(TurnkeyWeb).id
+        ct_id = ContentType.objects.get_for_model(TurnkeyService).id
         return Group.objects.filter(name__startswith="ct{ct_id}:{id}:".format(ct_id=ct_id, id=self.id)).order_by('name')
     @property
     def groups_permissions(self):
@@ -560,8 +585,6 @@ class TurnkeyWeb(models.Model):
     @property
     def mask_epl_base_set(self):
         return self.epl_base_set[:4] + '*'*(len(self.epl_base_set)-8) + self.epl_base_set[-4:]
-
-
     note = models.TextField()
 
 
@@ -576,14 +599,14 @@ class TurnkeyWeb(models.Model):
         if not self.hash_key:
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
             
-        super(TurnkeyWeb, self).save(*args, **kwargs)
+        super(TurnkeyService, self).save(*args, **kwargs)
 
 
 
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
-            ("edit_te_turnkeywebgroup", "Edit the groups of TurnkeyWebnn"),
+            ("edit_te_turnkeyservicegroup", "Edit the groups of TurnkeyService"),
 
             ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No"),
             ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
@@ -594,32 +617,35 @@ class TurnkeyWeb(models.Model):
             ("view_te_canceleinvoice", "View Cancel E-Invoice"),
             ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
 
+            ("view_te_voideinvoice", "View Void E-Invoice"),
+            ("add_te_voideinvoice", "Add Void E-Invoice"),
+
             ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
         )
     
 
 
 class SellerInvoiceTrackNo(models.Model):
-    turnkey_web = models.ForeignKey(TurnkeyWeb, on_delete=models.DO_NOTHING)
+    turnkey_web = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     type_choices = (
         ('07', _('General')),
         ('08', _('Special')),
     )
-    type = models.CharField(max_length=2, default='07', choices=type_choices)
+    type = models.CharField(max_length=2, default='07', choices=type_choices, db_index=True)
     @property
     def type__display(self):
         return self.get_type_display()
-    begin_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    begin_time = models.DateTimeField(db_index=True)
+    end_time = models.DateTimeField(db_index=True)
     @property
     def year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
-    track = models.CharField(max_length=2)
-    begin_no = models.IntegerField()
-    end_no = models.IntegerField()
+    track = models.CharField(max_length=2, db_index=True)
+    begin_no = models.IntegerField(db_index=True)
+    end_no = models.IntegerField(db_index=True)
 
 
 
@@ -710,21 +736,62 @@ class SellerInvoiceTrackNo(models.Model):
 
 
 
+
+
+
+class EInvoiceMIG(models.Model):
+    no_choices = (
+        ('A0101', _('B2B Exchange Invoice')),
+        ('A0102', _('B2B Exchange Invoice Confirm')),
+        ('B0101', _('B2B Exchange Allowance')),
+        ('B0102', _('B2B Exchange Allowance Confirm')),
+        ('A0201', _('B2B Exchange Cancel Invoice')),
+        ('A0202', _('B2B Exchange Cancel Invoice Confirm')),
+        ('B0201', _('B2B Exchange Cancel Allowance')),
+        ('B0202', _('B2B Exchange Cancel Allowance Confirm')),
+        ('A0301', _('B2B Exchange Reject Invoice')),
+        ('A0302', _('B2B Exchange Reject Invoice Confirm')),
+
+        ('A0401', _('B2B Certificate Invoice')),
+        ('B0401', _('B2B Certificate Allowance')),
+        ('A0501', _('B2B Certificate Cancel Invoice')),
+        ('B0501', _('B2B Certificate Cancel Allowance')),
+        ('A0601', _('B2B Certificate Reject Invoice')),
+
+        ('C0401', _('B2C Certificate Invoice')),
+        ('C0501', _('B2C Certificate Cancel Invoice')),
+        ('C0701', _('B2C Certificate Void Invoice')),
+        ('D0401', _('B2C Certificate Allowance')),
+        ('D0501', _('B2C Certificate Cancel Allowance')),
+
+        ('E0401', _('Branch Track')),
+        ('E0402', _('Branch Track Blank')),
+        ('E0501', _('Invoice Assign No')),
+    )
+    no = models.CharField(max_length=5, choices=no_choices, unique=True)
+
+
+
+
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark']
+    only_fields_can_update = ['print_mark', 'ei_synced', 'generate_time']
+    ei_synced = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
-    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices)
+    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices, db_index=True)
     track = models.CharField(max_length=2, db_index=True)
-    no = models.CharField(max_length=8)
+    no = models.CharField(max_length=8, db_index=True)
     @property
     def track_no(self):
         return "{}{}".format(self.track, self.no)
     @property
     def track_no_(self):
         return "{}-{}".format(self.track, self.no)
+    reverse_void_order = models.SmallIntegerField(default=0) #INFO: only E-Invoice with reverse_void_order=0 is the normal E-Invoice, others are the voided E-Invoice
     carrier_type_choices = (
         ('3J0002', _('Mobile barcode')),
+        ('CQ0001', _('Natural person barcode')),
     )
     carrier_type = models.CharField(max_length=6, default='', choices=carrier_type_choices, db_index=True)
     @property
@@ -743,8 +810,8 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    generate_no = models.CharField(max_length=40, default='')
-    generate_no_sha1 = models.CharField(max_length=10, default='')
+    generate_no = models.CharField(max_length=40, default='', db_index=True)
+    generate_no_sha1 = models.CharField(max_length=10, default='', db_index=True)
     batch_id = models.SmallIntegerField(default=0)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
@@ -797,7 +864,39 @@ class EInvoice(models.Model):
         else:
             return None
     @property
+    def can_cancel(self):
+        if self.is_canceled:
+            return False
+        elif self.is_voided and self.voideinvoice_set.filter(new_einvoice__isnull=False).exists():
+            return False
+        else:
+            return True
+    @property
+    def is_voided(self):
+        return self.voideinvoice_set.exists()
+    @property
+    def voided_time(self):
+        if self.is_voided:
+            vei = self.voideinvoice_set.get()
+            return vei.generate_time
+        else:
+            return None
+    @property
+    def can_void(self):
+        if self.is_voided:
+            return False
+        elif self.is_canceled and self.canceleinvoice_set.filter(new_einvoice__isnull=False).exists():
+            return False
+        elif self.is_canceled:
+            #INFO: Logically, a normal flow can be C0401 > C0501 > C0701 > C0401
+            #But in the general case, an E-Invoice state is from C0401 to C0501 and has no new C0401 means "Return Order"
+            #So the "E-Invoice depends on the return order" does not need another C0701
+            return False
+        else:
+            return True
+    @property
     def related_einvoices(self):
+        #TODO: how put "voided-einvoice" in here?
         einvoice = self
         related_einvoices = []
         while True:
@@ -817,7 +916,7 @@ class EInvoice(models.Model):
 
 
     class Meta:
-        unique_together = (('seller_invoice_track_no', 'track', 'no'), )
+        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
     
 
     @property
@@ -845,37 +944,8 @@ class EInvoice(models.Model):
         def _hex_amount(amount):
             a = hex(int(amount))[2:]
             return '0' * (8 - len(a)) + a
-        if '' != self.carrier_type:
-            carrier_id1 = self.carrier_id1
-            if carrier_id1 == self.carrier_id2:
-                carrier_id2 = ''
-            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
-                carrier_type=self.get_carrier_type_display(),
-                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
-            )
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
-            ]
-        elif '' != self.npoban:
-            message = _("Donate to NPO( {npoban} )").format(
-                npoban=self.npoban,
-            )
-            return [
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
-            ]
-        elif self.is_canceled:
+        print_original_copy = False
+        if self.is_canceled:
             cancel_einvoice = self.canceleinvoice_set.get()
             cancel_note = pgettext("canceleinvoice", "Canceled at {} {}").format(cancel_einvoice.cancel_date, cancel_einvoice.cancel_time)
             cancel_reason = pgettext("canceleinvoice", "Reason: {}").format(cancel_einvoice.reason)
@@ -903,7 +973,70 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
                 ]
             return res
+        elif self.is_voided:
+            void_einvoice = self.voideinvoice_set.get()
+            void_note = pgettext("voideinvoice", "voided at {} {}").format(void_einvoice.void_date, void_einvoice.void_time)
+            void_reason = pgettext("voideinvoice", "Reason: {}").format(void_einvoice.reason)
+            res = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "註  銷  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": void_note},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": void_reason},
+            ]
+            if void_einvoice.remark:
+                message2 = pgettext("voideinvoice", "Remark: {}").format(void_einvoice.remark)
+                res += [
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message2},
+                ]
+            return res
+        elif "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+            print_original_copy = True
+        elif '' != self.carrier_type:
+            carrier_id1 = self.carrier_id1
+            if carrier_id1 == self.carrier_id2:
+                carrier_id2 = ''
+            message = _("Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}").format(
+                carrier_type=self.get_carrier_type_display(),
+                carrier_id1=carrier_id1, carrier_id2=carrier_id2,
+            )
+            _result = [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
+            if '' != self.npoban:
+                message = _("Donate to NPO( {npoban} )").format(npoban=self.npoban)
+                _result += [{"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message}]
+            elif LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+                _result += [{"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "買方 "+self.buyer_identifier}]
+            return _result
+        elif '' != self.npoban:
+            message = _("Donate to NPO( {npoban} )").format(
+                npoban=self.npoban,
+            )
+            return [
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
+            ]
         else:
+            print_original_copy = True
+        
+        if print_original_copy:
             details = self.details
             amounts = self.amounts
             chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -936,7 +1069,7 @@ class EInvoice(models.Model):
                             random_number=self.random_number,
                             sales_amount=sales_amount_str,
                             total_amount=total_amount_str,
-                            buyer_identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier,
+                            buyer_identifier=(LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier)[:8],
                             seller_identifier=self.seller_identifier,
                             generate_no_sha1=self.generate_no_sha1,
                             qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
@@ -979,25 +1112,59 @@ class EInvoice(models.Model):
         return _d
 
 
+    def check_before_cancel_einvoice(self):
+        return self.content_object.check_before_cancel_einvoice()
+
+
+    def set_generate_time(self, generate_time):
+        if 'generate_time' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(generate_time=generate_time)
+
+
+    def set_ei_synced_true(self):
+        if 'ei_synced' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
     def set_print_mark_true(self, einvoice_print_log=None):
-        if '' != self.carrier_type or '' != self.npoban:
+        if self.is_canceled:
+            return False
+        elif self.is_voided:
+            return False
+        elif "3J0002" == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
             pass
-        elif 'print_mark' in self.only_fields_can_update:
+        elif '' != self.carrier_type:
+            return False
+        elif '' != self.npoban:
+            return False
+
+        if 'print_mark' in self.only_fields_can_update:
             if True == self.print_mark:
                 #TODO: CMEC2-324
                 # It is "duplicated original copy"
                 # raise or just log this error?
+                # Now, I prefer "log", because raise error in websocket does not help user.
                 pass
             elif False == self.print_mark:
                 EInvoice.objects.filter(id=self.id).update(print_mark=True)
     
+
+    def increase_reverse_void_order(self):
+        EInvoice.objects.filter(id=self.id).update(reverse_void_order=F('reverse_void_order')+1)
+
 
     def delete(self, *args, **kwargs):
         raise Exception('Can not delete')
 
 
     def save(self, *args, **kwargs):
-        if kwargs.get('force_save', False):
+        if not self.content_object:
+            raise ContentObjectError(_("Content object is not existed"))
+        elif not hasattr(self.content_object, 'check_before_cancel_einvoice'):
+            raise ContentObjectError(_("Content Object: {} has no 'check_before_cancel_einvoice' method").format(self.content_object))
+        elif not hasattr(self.content_object, 'post_cancel_einvoice'):
+            raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
+        elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
         elif not self.pk:
@@ -1016,13 +1183,20 @@ class EInvoice(models.Model):
                     break
                 else:
                     obj = objs[len(objs)-1]
-                    if not self._meta.model.objects.filter(id__gte=obj.id,
-                                                           seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                           random_number=random_number).exists():
+                    if not (self._meta.model.objects.filter(id__gte=obj.id,
+                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                            random_number=random_number).exists()
+                            or self._meta.model.objects.filter(reverse_void_order__gt=0,
+                                                               seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                               track=self.track,
+                                                               no=self.no,
+                                                               random_number=random_number,
+                                                               ).exists()):
                         break
             self.random_number = random_number
             self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
             super().save(*args, **kwargs)
+        UploadBatch.append_to_the_upload_batch(self)
         
 
 
@@ -1030,9 +1204,9 @@ class EInvoicePrintLog(models.Model):
     user = models.ForeignKey(User, default=102, on_delete=models.DO_NOTHING)
     printer = models.ForeignKey(Printer, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    is_original_copy = models.BooleanField(default=True)
-    done_status = models.BooleanField(default=False)
-    print_time = models.DateTimeField(null=True)
+    is_original_copy = models.BooleanField(default=True, db_index=True)
+    done_status = models.BooleanField(default=False, db_index=True)
+    print_time = models.DateTimeField(null=True, db_index=True)
     reason = models.TextField(default='')
 
 
@@ -1056,7 +1230,7 @@ class EInvoicePrintLog(models.Model):
             else:
                 ids.append(id)
         else:
-            for tw in TurnkeyWeb.objects.all():
+            for tw in TurnkeyService.objects.all():
                 try:
                     id = integer_from_customize_hex(hex, base=tw.epl_base_set)
                 except:
@@ -1077,10 +1251,11 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
-        related_name="new_einvoice_cancel_einvoice_set",
+        related_name="new_einvoice_on_cancel_einvoice_set",
         null=True,
         on_delete=models.DO_NOTHING)
     @property
@@ -1088,15 +1263,214 @@ class CancelEInvoice(models.Model):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    generate_time = models.DateTimeField()
+    generate_time = models.DateTimeField(db_index=True)
     @property
     def cancel_date(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
     @property
     def cancel_time(self):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
-    reason = models.CharField(max_length=20, null=False)
-    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True)
+    reason = models.CharField(max_length=20, null=False, db_index=True)
+    return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
+
+    def set_ei_synced_true(self):
+        CancelEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def set_new_einvoice(self, new_einvoice):
+        if not self.new_einvoice:
+            CancelEInvoice.objects.filter(id=self.id).update(new_einvoice=new_einvoice)
+            self.new_einvoice = new_einvoice
+
+
+    def post_cancel_einvoice(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('CancelEInvoice(id:{}) post_cancel_einvoice'.format(self.id))
+        message = ""
+        if self.new_einvoice:
+            message = self.einvoice.content_object.post_cancel_einvoice(self.new_einvoice)
+        return message
+
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
+            super().save(*args, **kwargs)
+        UploadBatch.append_to_the_upload_batch(self)
+
+
+
+class VoidEInvoice(models.Model):
+    ei_synced = models.BooleanField(default=False, db_index=True)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
+    @property
+    def invoice_date(self):
+        return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
+    generate_time = models.DateTimeField(db_index=True)
+    @property
+    def void_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def void_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
+    reason = models.CharField(max_length=20, null=False, db_index=True)
+    remark = models.CharField(max_length=200, default='', null=True, blank=True)
+
+
+    def set_ei_synced_true(self):
+        VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
+
+
+    def set_new_einvoice(self, new_einvoice):
+        if not self.new_einvoice:
+            VoidEInvoice.objects.filter(id=self.id).update(new_einvoice=new_einvoice)
+            self.new_einvoice = new_einvoice
+
+
+    def post_void_einvoice(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('VoidEInvoice(id:{}) post_void_einvoice'.format(self.id))
+        message = self.einvoice.content_object.post_void_einvoice(self.new_einvoice)
+        return message
+
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('force_save', False):
+            del kwargs['force_save']
+            super().save(*args, **kwargs)
+        elif not self.pk:
+            super().save(*args, **kwargs)
+        UploadBatch.append_to_the_upload_batch(self)
+    
+
+
+class UploadBatch(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    update_time = models.DateTimeField(auto_now=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    slug = models.CharField(max_length=14, unique=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, on_delete=models.DO_NOTHING)
+    kind_choices = (
+        ("wp", _("Wait for printed")),
+        ("cp", _("Could print")),
+        ("np", _("No need to print")),
+        ("57", _("Wait for C0501 or C0701")),
+
+        ("w4", _("Wait for C0401")),
+        ("54", _("Wait for C0501 or C0401")),
+    )
+    kind = models.CharField(max_length=2)
+    executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
+    status_choices = (
+        ("0", _("Collecting")),
+        ("1", _("Waiting for trigger(Stop Collecting)")),
+        ("2", _("Noticed to TKW")),
+        ("3", _("Uploading to TKW")),
+        ("4", _("Uploaded to TKW")),
+        ("p", _("Preparing for EI(P)")),
+        ("g", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("e", _("E Error for EI process(E)")),
+        ("i", _("I Error for EI process(I)")),
+        ("c", _("Successful EI process(C)")),
+        ("m", _("Swith to Successful EI process manually(S-C)")),
+    )
+    status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
+
+
+    @classmethod
+    def append_to_the_upload_batch(cls, content_object):
+        ct = ContentType.objects.get_for_model(content_object)
+        if content_object.ei_synced:
+            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='0000').batch
+        elif BatchEInvoice.objects.filter(content_type=ct, object_id=content_object.id, result_code='').exists():
+            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
+
+        if 'einvoice' == content_object._meta.model_name:
+            mig_type = EInvoiceMIG.objects.get(no='C0401')
+            _now = now().astimezone(TAIPEI_TIMEZONE)
+            _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
+            start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
+            end_time = start_time + datetime.timedelta(days=1)
+            if content_object.is_canceled or content_object.is_voided:
+                kind = '57'
+            elif '3J0002' == content_object.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != content_object.buyer_identifier:
+                kind = 'cp'
+            elif "" != content_object.carrier_type:
+                kind = 'np'
+            elif "1" == content_object.donate_mark:
+                kind = 'np'
+            else:
+                kind = 'wp'
+
+            if UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).exists():
+                ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).get()
+            else:
+                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status='0')
+                ub.save()
+            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be.save()
+            return ub
+        elif content_object._meta.model_name in ['canceleinvoice', 'voideinvoice']:
+            if 'canceleinvoice' == content_object._meta.model_name:
+                mig_type = EInvoiceMIG.objects.get(no='C0501')
+                kind = 'w4'
+            elif 'voideinvoice' == content_object._meta.model_name:
+                mig_type = EInvoiceMIG.objects.get(no='C0701')
+                kind = '54'
+            slug_prefix = '{}{}'.format(mig_type.no[2], content_object.track_no)
+            slug = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
+            ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, slug=slug, mig_type=mig_type, kind=kind, status='0')
+            ub.save()
+            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be.save()
+            return ub
+        else:
+            return None
+
+
+    def generate_slug(self):
+        if self.slug:
+            return self.slug
+        _now = now().astimezone(TAIPEI_TIMEZONE)
+        _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
+        start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
+        end_time = start_time + datetime.timedelta(days=1)
+        _no = UploadBatch.objects.filter(create_time__gte=start_time, create_time__lt=end_time).count() + 1
+        no = '{:04d}'.format(_no)
+        return '{}{}{}'.format(no, get_codes(int(_now.strftime('%y%m%d')+no), seed=365724), choice(KEY_CODE_SET))
+        
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_slug()
+        super().save(*args, **kwargs)
+
+
+
+class BatchEInvoice(models.Model):
+    batch = models.ForeignKey(UploadBatch, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    body_json = models.TextField()
+    @property
+    def body(self):
+        if not self.body_json:
+            return {}
+        else:
+            return json.loads(self.body_json)
+    @body.setter
+    def body(self, DICT):
+        self.body_json = json.dumps(DICT)
+        self.save()
+    result_code = models.CharField(max_length=5, default='', db_index=True)
+    pass_if_error = models.BooleanField(default=False)
 

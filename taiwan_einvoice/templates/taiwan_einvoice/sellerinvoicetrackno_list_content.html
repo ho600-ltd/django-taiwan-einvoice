@@ -1,13 +1,13 @@
 {% load i18n %}{% load ho600_tags %}
-{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_add_sellerinvoicetrackno_under_turnkeywebs" %}
-{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.delete_te_sellerinvoicetrackno" as "can_delete_sellerinvoicetrackno_under_turnkeywebs" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_add_sellerinvoicetrackno_under_turnkeyservices" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.delete_te_sellerinvoicetrackno" as "can_delete_sellerinvoicetrackno_under_turnkeyservices" %}
 
 <div class="total_count_row">
     {% with data.count as total_count %}
         {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
     {% endwith %}
 
-    {% if can_add_sellerinvoicetrackno_under_turnkeywebs.exists %}
+    {% if can_add_sellerinvoicetrackno_under_turnkeyservices.exists %}
         <button id="upload_csv_to_multiple_create_modal_button_0"
             class="btn btn-success upload_csv_to_multiple_create_modal" data-toggle="modal">
             {% trans "Create Seller Invoice Track No" %}
@@ -19,7 +19,7 @@
     <thead>
         <tr>
             <th field="no" width="5%">{% trans "No." %}</th>
-            <th field="turnkey_web" width="10%">{% trans "Turnkey Web" %}</th>
+            <th field="turnkey_web" width="10%">{% trans "Turnkey Service" %}</th>
             <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
             <th field="year_month_range" width="10%">{% trans "Year Month Range" %}</th>
             <th field="track" width="10%">{% trans "Track" %}</th>
@@ -41,7 +41,7 @@
                 <td field="end_no">{{ sellerinvoicetrackno.end_no }}</td>
                 <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
                 <td field="button">
-                    {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeywebs.exists %}
+                    {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
                         <button id="delete_iseller_nvoice_track_no_modal_button_0" type="button" class="delete_seller_invoice_track_no_modal btn btn-danger">{% trans "Delete" %}</button></td>
                     {% endif %}
             </tr>
@@ -50,7 +50,7 @@
 </table>
 
 
-{% if can_add_sellerinvoicetrackno_under_turnkeywebs.exists %}
+{% if can_add_sellerinvoicetrackno_under_turnkeyservices.exists %}
 
     <div class="modal fade" id="upload_csv_to_multiple_create_modal" tabindex="-1" role="dialog"
         resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-upload-csv-to-multiple-create' %}"
@@ -66,9 +66,9 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="turnkey_web" class="form-label">{% trans "Turnkey Web" %}</label>
+                        <label for="turnkey_web" class="form-label">{% trans "Turnkey Service" %}</label>
                         <select name="turnkey_web" class="form-control">
-                            {% for two in can_add_sellerinvoicetrackno_under_turnkeywebs %}
+                            {% for two in can_add_sellerinvoicetrackno_under_turnkeyservices %}
                                 <option value="{{ two.id }}">{{ two.name }}</option>
                             {% endfor %}
                         </select>
@@ -128,7 +128,7 @@
 {% endif %}
 
 
-{% if can_delete_sellerinvoicetrackno_under_turnkeywebs.exists %}
+{% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
 
     <div class="modal fade" id="delete_seller_invoice_track_no_modal" tabindex="-1" role="dialog"
         aria-labelledby="delete_seller_invoice_track_no_modal_label" aria-hidden="true">
