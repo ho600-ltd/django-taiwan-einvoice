@@ -81,14 +81,13 @@ DATABASES = {
         'NAME': 'dev_tkw',
         'USER': 'dev_tkw',
         'PASSWORD': 'dev_tkw',
-        'HOST': 'db_host',
+        'HOST': 'dtei-db.ho600.com',
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8',
         }
     },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
