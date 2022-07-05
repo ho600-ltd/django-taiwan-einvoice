@@ -12,11 +12,15 @@
             <th rowspan="2" width="5%">{% trans "No." %}</th>
             <th rowspan="2" width="5%">{% trans "Is on working?" %}</th>
             <th rowspan="2" width="5%">{% trans "Is Production?" %}</th>
-            <th rowspan="2" width="20%">
+            <th rowspan="2" width="10%">
                 {% trans "Seller Identifier" %}<br/>
                 {% trans "Name" %}
             </th>
             <th rowspan="2" width="15%">
+                {% trans "Auto Upload C0401?" %}<br/>
+                {% trans "Cron(execute once per ? minutes" %}
+            </th>
+            <th rowspan="2" width="10%">
                 {% trans "Transport ID" %}<br/>
                 {% trans "Party ID" %}<br/>
                 {% trans "Routing ID" %}
@@ -45,6 +49,22 @@
                 <td>
                     <dv field="identifier">{{ turnkeyservice.seller_dict.legal_entity_dict.identifier }}</div>
                     <div field="name">{{ turnkeyservice.name }}</div>
+                </td>
+                <td>
+                    <dv field="auto_upload_c0401_einvoice">
+                        {% if turnkeyservice.auto_upload_c0401_einvoice %}
+                            {% trans "Yes to C0401" context "auto_upload_c0401_einvoice" %}
+                        {% else %}
+                            {% trans "Manually" context "auto_upload_c0401_einvoice" %}
+                        {% endif %}
+                    </div>
+                    <div field="upload_cronjob_format">
+                        {% if turnkeyservice.auto_upload_c0401_einvoice %}
+                            {{ turnkeyservice.upload_cronjob_format__display }}
+                        {% else %}
+                            {% trans "No Cron" context "upload_cronjob_format" %}
+                        {% endif %}
+                    </div>
                 </td>
                 <td>
                     <div field="transport_id">{{ turnkeyservice.transport_id }}</div>

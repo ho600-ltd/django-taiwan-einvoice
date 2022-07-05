@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-03 11:19+0800\n"
+"POT-Creation-Date: 2022-07-05 12:06+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -99,6 +99,24 @@ msgstr "58mm 電子發票"
 msgid "80mm Receipt"
 msgstr "80mm 收據"
 
+msgid "once per 5 minutes"
+msgstr "每 5 分鐘 1 次"
+
+msgid "once per 10 minutes"
+msgstr "每 10 分鐘 1 次"
+
+msgid "once per 15 minutes"
+msgstr "每 15 分鐘 1 次"
+
+msgid "once per 20 minutes"
+msgstr "每 20 分鐘 1 次"
+
+msgid "once per 30 minutes"
+msgstr "每 30 分鐘 1 次"
+
+msgid "once per 60 minutes"
+msgstr "每 60 分鐘 1 次"
+
 msgid "General"
 msgstr "一般稅額"
 
@@ -116,14 +134,6 @@ msgstr "手機條碼"
 
 msgid "Natural person barcode"
 msgstr "自然人憑證條碼"
-
-#, python-brace-format
-msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
-msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
-
-#, python-brace-format
-msgid "Donate to NPO( {npoban} )"
-msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
 msgctxt "canceleinvoice"
 msgid "Canceled at {} {}"
@@ -153,6 +163,14 @@ msgctxt "voideinvoice"
 msgid "Remark: {}"
 msgstr "備註: {}"
 
+#, python-brace-format
+msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
+msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
+
+#, python-brace-format
+msgid "Donate to NPO( {npoban} )"
+msgstr "捐贈社福團體(捐贈碼 {npoban} )"
+
 msgid "No details"
 msgstr "無明細"
 
@@ -168,6 +186,57 @@ msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
 msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
+
+msgid "Wait for printed"
+msgstr "等待列印紙本"
+
+msgid "Could print"
+msgstr "可能需要列印"
+
+msgid "No need to print"
+msgstr "無需列印紙本"
+
+msgid "Wait for C0501 or C0701"
+msgstr "等待C0501或C0701"
+
+msgid "Wait for C0401"
+msgstr "等待C0401"
+
+msgid "Wait for C0501 or C0401"
+msgstr "等待C0501或C0401"
+
+msgid "Collecting"
+msgstr "收集中"
+
+msgid "Waiting for trigger(Stop Collecting)"
+msgstr "等待觸發(停止收集)"
+
+msgid "Noticed to TKW"
+msgstr "已通知 TKW"
+
+msgid "Uploading to TKW"
+msgstr "上傳到 TKW 中"
+
+msgid "Uploaded to TKW"
+msgstr "已上傳到 TKW"
+
+msgid "Preparing for EI(P)"
+msgstr "準備上傳到 EI(P)"
+
+msgid "Uploaded to EI or Downloaded from EI(G)"
+msgstr "已上傳到 EI 或已從 EI 下載(G)"
+
+msgid "E Error for EI process(E)"
+msgstr "EI 回傳 E 錯誤(E)"
+
+msgid "I Error for EI process(I)"
+msgstr "EI 回傳 I 錯誤(I)"
+
+msgid "Successful EI process(C)"
+msgstr "成功完成 EI 程序(C)"
+
+msgid "Swith to Successful EI process manually(S-C)"
+msgstr "手動切成「成功的 EI 完成程序」(S-C)"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -890,23 +959,29 @@ msgstr "是否商用?"
 msgid "Seller Identifier"
 msgstr "賣方統編"
 
+msgid "Auto Upload C0401?"
+msgstr "自動上傳 C0401?"
+
+msgid "Cron(execute once per ? minutes"
+msgstr "排程(每 ? 分鐘執行 1 次)"
+
 msgid "Transport ID"
-msgstr ""
+msgstr "傳送帳號"
 
 msgid "Party ID"
-msgstr ""
+msgstr "送方統編"
 
 msgid "Routing ID"
-msgstr ""
+msgstr "繞送代碼"
 
 msgid "Qrcode Seed"
-msgstr ""
+msgstr "Qrcode 種子"
 
 msgid "Turnkey Seed"
-msgstr ""
+msgstr "Turnkey 種子"
 
 msgid "Download Seed"
-msgstr ""
+msgstr "下載清冊種子"
 
 msgid "Remaining Count of the current period"
 msgstr "當期剩餘張數"
@@ -927,6 +1002,18 @@ msgstr "商用"
 
 msgid "Test"
 msgstr "測試"
+
+msgctxt "auto_upload_c0401_einvoice"
+msgid "Yes to C0401"
+msgstr "自動上傳 C0401"
+
+msgctxt "auto_upload_c0401_einvoice"
+msgid "Manually"
+msgstr "手動"
+
+msgctxt "upload_cronjob_format"
+msgid "No Cron"
+msgstr "無排程"
 
 #, python-format
 msgid "%(name)s's Staff Group"
@@ -1081,6 +1168,9 @@ msgstr "工作人員群組名稱已存在"
 msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
 
+msgid "Year Month Range Error"
+msgstr "期別錯誤"
+
 msgid ""
 "{} has error: \n"
 "\n"
@@ -1091,6 +1181,26 @@ msgstr ""
 "\n"
 "\n"
 "{}"
+
+msgid "Begin Time Error"
+msgstr "開始時間錯誤"
+
+msgid ""
+"{} has error: \n"
+"Too early to import."
+msgstr ""
+"{} 有誤: \n"
+"太早匯入。"
+
+msgid "End Time Error"
+msgstr "結束期間錯誤"
+
+msgid ""
+"{} has error: \n"
+"Too late to import."
+msgstr ""
+"{} 有誤: \n"
+"太晚匯入。"
 
 msgid ""
 "{} has error: \n"
@@ -1116,6 +1226,12 @@ msgstr ""
 
 msgid "{} exists"
 msgstr "{} 已存在"
+
+msgid "Identifier Error"
+msgstr "統編錯誤"
+
+msgid "Identifier does not match the seller identifier of the TurnkeyService."
+msgstr "統編無法對應 Turnkey 服務的賣方統編。"
 
 msgid ""
 "{} ~ {} has error: \n"
@@ -1184,6 +1300,10 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
+
+#~ msgctxt "auto_upload_c0401_einvoice"
+#~ msgid "Yes"
+#~ msgstr "自動上傳"
 
 #~ msgid "E-Invoice({}) was already canceled and has created the new one!"
 #~ msgstr "電子發票({})已被作廢且另有開立!"

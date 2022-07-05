@@ -531,6 +531,20 @@ class TurnkeyService(models.Model):
     epl_base_set = models.CharField(max_length=64, default='')
     warning_above_amount = models.IntegerField(default=10000)
     forbidden_above_amount = models.IntegerField(default=20000)
+    auto_upload_c0401_einvoice = models.BooleanField(default=False)
+    upload_cronjob_format_choices = (
+      ("*/5 * * * *", _("once per 5 minutes")),
+      ("*/10 * * * *", _("once per 10 minutes")),
+      ("*/15 * * * *", _("once per 15 minutes")),
+      ("*/20 * * * *", _("once per 20 minutes")),
+      ("*/30 * * * *", _("once per 30 minutes")),
+      ("*/60 * * * *", _("once per 60 minutes")),
+    )
+    upload_cronjob_format = models.CharField(max_length=128, default="*/15 * * * *", choices=upload_cronjob_format_choices, db_index=True)
+    @property
+    def upload_cronjob_format__display(self):
+        return self.get_upload_cronjob_format_display()
+    tkw_endpoint = models.TextField()
     history = HistoricalRecords()
     @property
     def groups(self):
@@ -571,8 +585,6 @@ class TurnkeyService(models.Model):
     @property
     def mask_epl_base_set(self):
         return self.epl_base_set[:4] + '*'*(len(self.epl_base_set)-8) + self.epl_base_set[-4:]
-
-
     note = models.TextField()
 
 
@@ -1360,8 +1372,9 @@ class UploadBatch(models.Model):
     status_choices = (
         ("0", _("Collecting")),
         ("1", _("Waiting for trigger(Stop Collecting)")),
-        ("2", _("Uploading to TKW")),
-        ("3", _("Uploaded to TKW")),
+        ("2", _("Noticed to TKW")),
+        ("3", _("Uploading to TKW")),
+        ("4", _("Uploaded to TKW")),
         ("p", _("Preparing for EI(P)")),
         ("g", _("Uploaded to EI or Downloaded from EI(G)")),
         ("e", _("E Error for EI process(E)")),

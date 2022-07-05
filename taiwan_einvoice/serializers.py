@@ -183,6 +183,7 @@ class TurnkeyServiceSerializer(ModelSerializer):
     mask_turnkey_seed = CharField(read_only=True)
     mask_download_seed = CharField(read_only=True)
     mask_epl_base_set = CharField(read_only=True)
+    upload_cronjob_format__display = CharField(read_only=True)
 
 
 
@@ -203,6 +204,9 @@ class TurnkeyServiceSerializer(ModelSerializer):
             'mask_turnkey_seed',
             'mask_download_seed',
             'mask_epl_base_set',
+            'auto_upload_c0401_einvoice',
+            'upload_cronjob_format__display',
+            'tkw_endpoint',
             'qrcode_seed',
             'turnkey_seed',
             'download_seed',
