@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'turnkey_wrapper',
 ]
 
 MIDDLEWARE = [
@@ -76,17 +78,13 @@ WSGI_APPLICATION = 'turnkey_web.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tkw',
-        'USER': 'tkw',
-        'PASSWORD': 'tkw',
+        'NAME': 'dev_tkw',
+        'USER': 'dev_tkw',
+        'PASSWORD': 'dev_tkw',
         'HOST': 'db_host',
         'PORT': '3306',
         'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': 'SET NAMES utf8mb4; SET character_set_client = utf8mb4',},
-        'TEST': {
-        'CHARSET': 'utf8mb4',
-        'COLLATION': 'utf8mb4_unicode_ci',
+            'charset': 'utf8',
         }
     },
 }
@@ -115,6 +113,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
+
+LANGUAGES = (
+    ('zh-hant', u'\u6b63\u9ad4\u4e2d\u6587(Taiwan, R.O.C.)'),
+    ('en-us', 'English(United States)'),
+)
 
 TIME_ZONE = 'UTC'
 

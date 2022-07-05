@@ -17,17 +17,39 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 #. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，可多個 Turnkey 系統置於同一 Linux 的不同資料夾中，也可各自裝在獨立的 Linux OS
 #. TKW 是以檔案系統與 Turnkey 系統互動，所以多個 Turnkey 系統置於一 Linux 中，可只安裝一個 TKW ，若裝在不同 Linux ，則每個 Linux 至少都裝一個 TKW
 
+基本函式庫安裝:
+
+.. code-block:: sh
+
+    $ sudo yum install cjkuni-uming-fonts.noarch google-noto-sans-traditional-chinese-fonts.noarch java-1.8.0-openjdk
+
 創建 PostgreSQL 資料庫:
+
+安裝指令: sudo yum install postgresql
 
 .. code-block:: sql 
 
-    # create database dtei Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
-    # create  user dtei with password 'dtei';
-    # alter database dtei owner to dtei;
+    # create database tkw Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
+    # create  user tkw with password 'tkw';
+    # alter database tkw owner to tkw;
 
 .. code-block:: sh 
 
-    $ psql -h 127.0.0.1 -U dtei -W dtei < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
+    $ psql -h dtei-db.ho600.com -U dtei -W dtei < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
+
+創建 MariaDB 資料庫:
+
+安裝指令: sudo yum install mariadb
+
+.. code-block:: sql 
+
+    # CREATE DATABASE tkw CHARACTER SET = 'utf8' COLLATE = 'utf8_unicode_ci';
+    # CREATE USER tkw@'%' identified by 'tkw';
+    # GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, REFERENCES, INDEX, ALTER, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, EVENT, TRIGGER on tkw.* to tkw@'%' identified by 'tkw';
+
+.. code-block:: sh 
+
+    $ psql -h dtei-db.ho600.com -U dtei -W dtei < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
 
 設定 Turnkey 所需基本參數:
 
@@ -56,14 +78,36 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
     Turnkey UI
 
+設定軟體憑證、傳送帳號、送方管理
+-------------------------------------------------------------------------------
+
+請先準備好「軟體憑證.pfx」及大平台所開立的「傳送帳號、密碼、繞送代碼」。
+
+.. figure:: install_tkw_in_linux/TK-000.png
+
+    在選單上，依序執行「1 憑證管理」、「2 傳送帳號管理」、「3 送方管理」
+
+.. figure:: install_tkw_in_linux/TK-001.png
+
+    自定憑證代碼，填先前設定的憑證密碼、選擇軟體憑證
+
+.. figure:: install_tkw_in_linux/TK-002.png
+
+    填入大平台開立的傳送帳號、密碼
+
+.. figure:: install_tkw_in_linux/TK-003.png
+
+    選擇「憑證、帳號」，填入統編及大平台開立的繞送代碼
+
 安裝 TKW 伺服器
 -------------------------------------------------------------------------------
 
 .. code-block:: sh
 
-    $ sudo yum install python3-dev python-virtualenv git zsh util-linux-user jq mysql-devel
+    $ sudo yum install python3-dev python-virtualenv git zsh util-linux-user jq mariadb-devel
         * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
+    $ sudo yum install make glibc-devel gcc patch python3-devel
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
     $ pip install --upgrade pip
@@ -71,6 +115,12 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
     $ pip install ipython
     $ cd Django-taiwan-einvoice/turnkey_web/
     $ ./manage.py migrate
+    $ ./manage.py createsuperuser
+    Username (leave blank to use 'XXX'): 
+    Email address: XXX@ho600.com
+    Password: 
+    Password (again): 
+    Superuser created successfully.
     $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TEA service
     $ cp -rf Django-taiwan-einvoice/turnkey_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
     $ sudo apt install supervisor
