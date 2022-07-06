@@ -11,6 +11,9 @@ class FROM_CONFIG(models.Model):
     SIGN_ID = models.CharField(db_column='SIGN_ID', max_length=4, blank=True, null=True)
     SUBSTITUTE_PARTY_ID = models.CharField(db_column='SUBSTITUTE_PARTY_ID', max_length=10, blank=True, null=True, db_index=True)
 
+    def __str__(self):
+        return "{} {}".format(self.PARTY_ID, self.ROUTING_ID)
+
     class Meta:
         managed = False
         db_table = 'FROM_CONFIG'
