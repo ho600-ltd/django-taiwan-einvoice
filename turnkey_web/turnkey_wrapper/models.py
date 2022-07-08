@@ -16,6 +16,8 @@ class FROM_CONFIG(models.Model):
 
     class Meta:
         managed = False
+        verbose_name = 'FROM_CONFIG'
+        verbose_name_plural = 'FROM_CONFIG'
         db_table = 'FROM_CONFIG'
 
 
@@ -28,8 +30,14 @@ class SCHEDULE_CONFIG(models.Model):
     SCHEDULE_PERIOD = models.CharField(db_column='SCHEDULE_PERIOD', max_length=10, blank=True, null=True)
     SCHEDULE_RANGE = models.CharField(db_column='SCHEDULE_RANGE', max_length=15, blank=True, null=True)
 
+    def __str__(self):
+        return "{} {}".format(self.TASK, self.ENABLE)
+
+
     class Meta:
         managed = False
+        verbose_name = 'SCHEDULE_CONFIG'
+        verbose_name_plural = 'SCHEDULE_CONFIG'
         db_table = 'SCHEDULE_CONFIG'
 
 
@@ -39,12 +47,20 @@ class SIGN_CONFIG(models.Model):
     PFX_PATH = models.CharField(db_column='PFX_PATH', max_length=100, blank=True, null=True)
     SIGN_PASSWORD = models.CharField(db_column='SIGN_PASSWORD', max_length=60, blank=True, null=True)
 
+
+    def __str__(self):
+        return "{} {}".format(self.SIGN_ID, self.SIGN_TYPE)
+
+
     class Meta:
         managed = False
+        verbose_name = 'SIGN_CONFIG'
+        verbose_name_plural = 'SIGN_CONFIG'
         db_table = 'SIGN_CONFIG'
 
 
 class TASK_CONFIG(models.Model):
+    # add id field manually: ALTER TABLE TASK_CONFIG ADD id INT NOT NULL AUTO_INCREMENT;
     CATEGORY_TYPE = models.CharField(db_column='CATEGORY_TYPE', max_length=5, null=False)
     PROCESS_TYPE = models.CharField(db_column='PROCESS_TYPE', max_length=10, null=False)
     TASK = models.CharField(db_column='TASK', max_length=30, null=False)
@@ -55,8 +71,15 @@ class TASK_CONFIG(models.Model):
     ENCODING = models.CharField(db_column='ENCODING', max_length=15, blank=True, null=True)
     TRANS_CHINESE_DATE = models.CharField(db_column='TRANS_CHINESE_DATE', max_length=1, blank=True, null=True)
 
+
+    def __str__(self):
+        return "{} {} {}".format(self.CATEGORY_TYPE, self.PROCESS_TYPE, self.TASK)
+
+
     class Meta:
         managed = False
+        verbose_name = 'TASK_CONFIG'
+        verbose_name_plural = 'TASK_CONFIG'
         db_table = 'TASK_CONFIG'
         unique_together = (('CATEGORY_TYPE', 'PROCESS_TYPE', 'TASK'),)
 
@@ -68,8 +91,15 @@ class TO_CONFIG(models.Model):
     ROUTING_DESCRIPTION = models.CharField(db_column='ROUTING_DESCRIPTION', max_length=200, blank=True, null=True)
     FROM_PARTY_ID = models.CharField(db_column='FROM_PARTY_ID', max_length=10)
 
+
+    def __str__(self):
+        return "{} {}".format(self.FROM_PARTY_ID, self.PARTY_ID)
+
+
     class Meta:
         managed = False
+        verbose_name = 'TO_CONFIG'
+        verbose_name_plural = 'TO_CONFIG'
         db_table = 'TO_CONFIG'
         unique_together = (('FROM_PARTY_ID', 'PARTY_ID'),)
 
@@ -91,8 +121,14 @@ class TURNKEY_MESSAGE_LOG(models.Model):
     TO_ROUTING_ID = models.CharField(db_column='TO_ROUTING_ID', max_length=39, blank=True, null=True)
     INVOICE_IDENTIFIER = models.CharField(db_column='INVOICE_IDENTIFIER', max_length=30, blank=True, null=True)
 
+    def __str__(self):
+        return "{} {}".format(self.SEQNO, self.SUBSEQNO)
+
+
     class Meta:
         managed = False
+        verbose_name = 'TURNKEY_MESSAGE_LOG'
+        verbose_name_plural = 'TURNKEY_MESSAGE_LOG'
         db_table = 'TURNKEY_MESSAGE_LOG'
         unique_together = (('SEQNO', 'SUBSEQNO'),)
 
@@ -106,8 +142,14 @@ class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
     FILENAME = models.CharField(db_column='FILENAME', max_length=255, blank=True, null=True, db_index=True)
     UUID = models.CharField(db_column='UUID', max_length=40, blank=True, null=True)
 
+    def __str__(self):
+        return "{} {} {}".format(self.SEQNO, self.SUBSEQNO, self.TASK)
+
+
     class Meta:
         managed = False
+        verbose_name = 'TURNKEY_MESSAGE_LOG_DETAIL'
+        verbose_name_plural = 'TURNKEY_MESSAGE_LOG_DETAIL'
         db_table = 'TURNKEY_MESSAGE_LOG_DETAIL'
         unique_together = (('SEQNO', 'SUBSEQNO', 'TASK'),)
 
@@ -115,8 +157,14 @@ class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
 class TURNKEY_SEQUENCE(models.Model):
     SEQUENCE = models.CharField(db_column='SEQUENCE', primary_key=True, max_length=8)
 
+    def __str__(self):
+        return self.SEQUENCE
+
+
     class Meta:
         managed = False
+        verbose_name = 'TURNKEY_SEQUENCE'
+        verbose_name_plural = 'TURNKEY_SEQUENCE'
         db_table = 'TURNKEY_SEQUENCE'
 
 
@@ -137,8 +185,14 @@ class TURNKEY_SYSEVENT_LOG(models.Model):
     MESSAGE5 = models.CharField(db_column='MESSAGE5', max_length=100, blank=True, null=True)
     MESSAGE6 = models.CharField(db_column='MESSAGE6', max_length=100, blank=True, null=True)
 
+    def __str__(self):
+        return "{} {}".format(self.SEQNO, self.SUBSEQNO)
+
+
     class Meta:
         managed = False
+        verbose_name = 'TURNKEY_SYSEVENT_LOG'
+        verbose_name_plural = 'TURNKEY_SYSEVENT_LOG'
         db_table = 'TURNKEY_SYSEVENT_LOG'
         index_together = (("SEQNO", "SUBSEQNO"),)
 
@@ -147,8 +201,14 @@ class TURNKEY_TRANSPORT_CONFIG(models.Model):
     TRANSPORT_ID = models.CharField(db_column='TRANSPORT_ID', primary_key=True, max_length=10)
     TRANSPORT_PASSWORD = models.CharField(db_column='TRANSPORT_PASSWORD', max_length=60)
 
+    def __str__(self):
+        return self.TRANSPORT_ID
+
+
     class Meta:
         managed = False
+        verbose_name = 'TURNKEY_TRANSPORT_CONFIG'
+        verbose_name_plural = 'TURNKEY_TRANSPORT_CONFIG'
         db_table = 'TURNKEY_TRANSPORT_CONFIG'
 
 
@@ -157,6 +217,12 @@ class TURNKEY_USER_PROFILE(models.Model):
     USER_PASSWORD = models.CharField(db_column='USER_PASSWORD', max_length=100, blank=True, null=True)
     USER_ROLE = models.CharField(db_column='USER_ROLE', max_length=2, blank=True, null=True)
 
+    def __str__(self):
+        return self.USER_ID
+
+
     class Meta:
         managed = False
+        verbose_name = 'TURNKEY_USER_PROFILE'
+        verbose_name_plural = 'TURNKEY_USER_PROFILE'
         db_table = 'TURNKEY_USER_PROFILE'
