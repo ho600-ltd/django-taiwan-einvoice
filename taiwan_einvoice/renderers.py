@@ -9,7 +9,51 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
-from ho600_lib.models import _get_template_name
+
+
+def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
+    """ finding order: (sub_dir, langs) > (sub_dir) > (langs) > ()
+    """
+    from django.conf import settings
+
+    if not lang: lang = get_language()
+    if not template_name.endswith('.html'): template_name += '.html'
+    lg = logging.getLogger('info')
+
+    _langs = [lang] + [l[0] for l in settings.LANGUAGES[:]]
+    langs = []
+    for _lang in _langs:
+        if _lang and _lang not in langs: langs.append(_lang)
+    lg.debug(langs)
+
+    orders = [
+        [[sub_dir], langs],
+        [[sub_dir]],
+        [langs],
+        [],
+    ]
+    t = None
+    for order in orders:
+        lg.debug(order)
+        _L = list(itertools.product(*order))
+        for _l in _L:
+            _l = list(_l) + [template_name]
+            lg.debug("_l: {}".format(_l))
+            _path = os.path.join(*_l)
+            lg.debug("_path: {}".format(_path))
+            try:
+                temp_template = get_template(_path)
+            except (TemplateDoesNotExist, TypeError):
+                continue
+            else:
+                t = os.path.join(_path)
+                break
+        if t:
+            break
+    if show_template_filename:
+        lg.info('Use template: "%s"' % t)
+
+    return t
 
 
 
