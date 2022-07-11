@@ -9,16 +9,20 @@ from rest_framework.viewsets import ModelViewSet
 from turnkey_wrapper.permissions import IsSuperUser
 from turnkey_wrapper.models import (
     FROM_CONFIG,
+    TASK_CONFIG,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
+    TASK_CONFIGSerializer,
 )
 from turnkey_wrapper.filters import (
     FROM_CONFIGFilter,
+    TASK_CONFIGFilter,
 )
 from turnkey_wrapper.renderers import (
     TKWBrowsableAPIRenderer,
     FROM_CONFIGHtmlRenderer,
+    TASK_CONFIGHtmlRenderer,
 )
 
 
@@ -37,4 +41,15 @@ class FROM_CONFIGModelViewSet(ModelViewSet):
     serializer_class = FROM_CONFIGSerializer
     filter_class = FROM_CONFIGFilter
     renderer_classes = (FROM_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get',)
+
+
+
+class TASK_CONFIGModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = TASK_CONFIG.objects.all()
+    serializer_class = TASK_CONFIGSerializer
+    filter_class = TASK_CONFIGFilter
+    renderer_classes = (TASK_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get',)

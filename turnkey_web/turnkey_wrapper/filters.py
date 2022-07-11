@@ -8,6 +8,7 @@ from django.utils.translation import ugettext as _
 
 from turnkey_wrapper.models import (
     FROM_CONFIG,
+    TASK_CONFIG,
 )
 
 
@@ -16,4 +17,13 @@ class FROM_CONFIGFilter(filters.FilterSet):
         model = FROM_CONFIG
         fields = {
             'PARTY_ID': ('icontains', ),
+        }
+
+
+
+class TASK_CONFIGFilter(filters.FilterSet):
+    class Meta:
+        model = TASK_CONFIG
+        fields = {
+            'TASK': ('icontains', ),
         }

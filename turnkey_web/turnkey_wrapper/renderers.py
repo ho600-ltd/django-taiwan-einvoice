@@ -91,3 +91,9 @@ class FROM_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
     pass
 
 
+
+class TASK_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TASK_CONFIG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TASK_CONFIG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+

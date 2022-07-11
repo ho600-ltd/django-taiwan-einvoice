@@ -37,6 +37,7 @@ class TurnkeyWrapperRouter(routers.DefaultRouter):
 
 router = TurnkeyWrapperRouter()
 router.register('FROM_CONFIG', views.FROM_CONFIGModelViewSet, basename="fromconfig")
+router.register('TASK_CONFIG', views.TASK_CONFIGModelViewSet, basename="taskconfig")
 
 app_name = 'turnkey_web'
 urlpatterns = [

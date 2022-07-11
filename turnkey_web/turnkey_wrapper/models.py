@@ -60,7 +60,9 @@ class SIGN_CONFIG(models.Model):
 
 
 class TASK_CONFIG(models.Model):
-    # add id field manually: ALTER TABLE TASK_CONFIG ADD id INT NOT NULL AUTO_INCREMENT;
+    # CREATE VIEW TASK_CONFIG_V as 
+    # SELECT concat(CATEGORY_TYPE, '-', CATEGORY_TYPE, '-', TASK) as CATEGORY_TYPE_CATEGORY_TYPE_TASK, CATEGORY_TYPE, PROCESS_TYPE, TASK, SRC_PATH, TARGET_PATH, FILE_FORMAT, VERSION, ENCODING, TRANS_CHINESE_DATE from TASK_CONFIG;
+    CATEGORY_TYPE_CATEGORY_TYPE_TASK = models.CharField(db_column='CATEGORY_TYPE_CATEGORY_TYPE_TASK', primary_key=True, max_length=45)
     CATEGORY_TYPE = models.CharField(db_column='CATEGORY_TYPE', max_length=5, null=False)
     PROCESS_TYPE = models.CharField(db_column='PROCESS_TYPE', max_length=10, null=False)
     TASK = models.CharField(db_column='TASK', max_length=30, null=False)
@@ -73,14 +75,14 @@ class TASK_CONFIG(models.Model):
 
 
     def __str__(self):
-        return "{} {} {}".format(self.CATEGORY_TYPE, self.PROCESS_TYPE, self.TASK)
+        return self.CATEGORY_TYPE_CATEGORY_TYPE_TASK
 
 
     class Meta:
         managed = False
         verbose_name = 'TASK_CONFIG'
         verbose_name_plural = 'TASK_CONFIG'
-        db_table = 'TASK_CONFIG'
+        db_table = 'TASK_CONFIG_V'
         unique_together = (('CATEGORY_TYPE', 'PROCESS_TYPE', 'TASK'),)
 
 
