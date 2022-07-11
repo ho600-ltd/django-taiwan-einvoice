@@ -1,0 +1,38 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>TRANSPORT_ID </th>
+            <th>TRANSPORT_PASSWORD </th>
+            <th>PARTY_ID </th>
+            <th>PARTY_DESCRIPTION </th>
+            <th>ROUTING_ID </th>
+            <th>ROUTING_DESCRIPTION </th>
+            <th>SIGN_ID </th>
+            <th>SUBSTITUTE_PARTY_ID</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr escposweb_id="{{ escposweb.id }}">
+                <td field="no">{{ forloop.counter }}.</td>
+                <th field="TRANSPORT_ID">{{ obj.TRANSPORT_ID }}</th>
+                <th field="TRANSPORT_PASSWORD">{{ obj.TRANSPORT_PASSWORD }}</th>
+                <th field="PARTY_ID">{{ obj.PARTY_ID }}</th>
+                <th field="PARTY_DESCRIPTION">{{ obj.PARTY_DESCRIPTION }}</th>
+                <th field="ROUTING_ID">{{ obj.ROUTING_ID }}</th>
+                <th field="ROUTING_DESCRIPTION">{{ obj.ROUTING_DESCRIPTION }}</th>
+                <th field="SIGN_ID">{{ obj.SIGN_ID }}</th>
+                <th field="SUBSTITUTE_PARTY_ID">{{ obj.SUBSTITUTE_PARTY_ID }}</th>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

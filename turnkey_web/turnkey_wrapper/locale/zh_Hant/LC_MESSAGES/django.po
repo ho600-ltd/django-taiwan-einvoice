@@ -1,0 +1,108 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-07-11 10:25+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Name contains"
+msgstr ""
+
+msgid "Slug contains"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Set the default ESC/POS Web"
+msgstr ""
+
+msgid "Pass Key"
+msgstr ""
+
+msgid ""
+"\n"
+"                    Please get the \"Pass Key\" from the LCD of ESC/POS Web.\n"
+"                    <span class=\"text-danger\">Notice! The pass key is case-sensitive.</span>\n"
+"                "
+msgstr ""
+
+msgid "Configure"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr ""
+
+msgid "No."
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Slug"
+msgstr ""
+
+msgid "Hash Key"
+msgstr ""
+
+msgctxt "taiwan_einvoice:escposweb"
+msgid "Usage"
+msgstr ""
+
+msgid "Button"
+msgstr ""
+
+msgid "Set default"
+msgstr ""
+
+msgid "Turnkey Wrapper Api"
+msgstr ""
+
+msgid "Turnkey Management"
+msgstr "Turnkey 管理"
+
+msgid "Toggle navigation"
+msgstr ""
+
+msgid "Original Turnkey DB"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "change language to your choice"
+msgstr ""
+
+msgid "Change"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+#, python-format
+msgid ""
+"\n"
+"            Deploy Date: %(build_date)s\n"
+"            Deploy Number: %(build_number)s\n"
+"            Build Version: %(build_version)s"
+msgstr ""
+
+msgid "System Build Version"
+msgstr ""
