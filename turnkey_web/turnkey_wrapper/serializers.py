@@ -22,7 +22,16 @@ from rest_framework.serializers import ValidationError, SerializerMethodField
 from rest_framework.exceptions import PermissionDenied
 from turnkey_wrapper.models import (
     FROM_CONFIG,
+    SCHEDULE_CONFIG,
+    SIGN_CONFIG,
     TASK_CONFIG,
+    TO_CONFIG,
+    TURNKEY_MESSAGE_LOG,
+    TURNKEY_MESSAGE_LOG_DETAIL,
+    TURNKEY_SEQUENCE,
+    TURNKEY_SYSEVENT_LOG,
+    TURNKEY_TRANSPORT_CONFIG,
+    TURNKEY_USER_PROFILE,
 )
 
 
@@ -36,7 +45,7 @@ class FROM_CONFIGSerializer(ModelSerializer):
 
 
 class SCHEDULE_CONFIGSerializer(ModelSerializer):
-    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:scheduleconfig-detail")
     
 
 

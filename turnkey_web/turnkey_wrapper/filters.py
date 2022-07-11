@@ -8,7 +8,16 @@ from django.utils.translation import ugettext as _
 
 from turnkey_wrapper.models import (
     FROM_CONFIG,
+    SCHEDULE_CONFIG,
+    SIGN_CONFIG,
     TASK_CONFIG,
+    TO_CONFIG,
+    TURNKEY_MESSAGE_LOG,
+    TURNKEY_MESSAGE_LOG_DETAIL,
+    TURNKEY_SEQUENCE,
+    TURNKEY_SYSEVENT_LOG,
+    TURNKEY_TRANSPORT_CONFIG,
+    TURNKEY_USER_PROFILE,
 )
 
 
