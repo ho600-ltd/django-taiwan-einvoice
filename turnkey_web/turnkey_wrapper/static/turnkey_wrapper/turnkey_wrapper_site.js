@@ -1,6 +1,6 @@
 $(function () {
 
-    var TURNKEY_WRAPPER_SITE = function (name, configure) {
+    var turnkey_wrapper_site = function (name, configure) {
         if ('https:' == window.location.protocol) {
             this.WS_PROTOCOL = 'wss://' + window.location.host;
         } else {
@@ -37,7 +37,7 @@ $(function () {
 
     };
 
-    TURNKEY_WRAPPER_SITE.prototype.convert_tastypie_datetime = function (s) {
+    turnkey_wrapper_site.prototype.convert_tastypie_datetime = function (s) {
         var $self = this;
         var re = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.?[0-9]*)$');
         var list = re.exec(s);
@@ -50,7 +50,7 @@ $(function () {
         }
     };
 
-    TURNKEY_WRAPPER_SITE.prototype.convert_time_from_utc_str = function (time_str, second_offset, display_format) {
+    turnkey_wrapper_site.prototype.convert_time_from_utc_str = function (time_str, second_offset, display_format) {
         function in_02d (d) {
             if (d >= 0 && d <= 9) {
                 return '0'+String(d);
@@ -83,7 +83,7 @@ $(function () {
                             .replace('D', D).replace('M', M).replace('A', A);
     };
 
-    TURNKEY_WRAPPER_SITE.prototype.get_second_offset_by_timezone_id_value = function ($self) {
+    turnkey_wrapper_site.prototype.get_second_offset_by_timezone_id_value = function ($self) {
         var timezone = $('#timezone').attr('value');
         var second_offset = 0;
         if (timezone == 'Asia/Taipei'){
@@ -94,7 +94,7 @@ $(function () {
         return second_offset;
     };
 
-    TURNKEY_WRAPPER_SITE.prototype.convert_class_datetime = function ($self) {
+    turnkey_wrapper_site.prototype.convert_class_datetime = function ($self) {
         return function() {
             var $span = $(this);
             var second_offset = $self.get_second_offset_by_timezone_id_value($self);
@@ -119,7 +119,7 @@ $(function () {
         };
     };
 
-    TURNKEY_WRAPPER_SITE.prototype.show_modal = function ($modal, title, body) {
+    turnkey_wrapper_site.prototype.show_modal = function ($modal, title, body) {
         $('.modal-title', $modal).html(title);
         body = body.replace(/\n/g, "<br/>");
         $('.modal-body', $modal).html(body);
@@ -127,7 +127,7 @@ $(function () {
     };
 
 
-    TURNKEY_WRAPPER_SITE.prototype.choose_all_check_in_the_same_td = function($self) {
+    turnkey_wrapper_site.prototype.choose_all_check_in_the_same_td = function($self) {
         return function () {
             var $i = $(this);
             var $table = $i.parents('table');
@@ -139,7 +139,7 @@ $(function () {
     };
 
 
-    TURNKEY_WRAPPER_SITE.prototype.lock_or_unlock_delete = function ($self) {
+    turnkey_wrapper_site.prototype.lock_or_unlock_delete = function ($self) {
         return function () {
             var $i = $(this);
             var $button = $('button.delete_modal', $i.parent());
@@ -156,7 +156,7 @@ $(function () {
     };
 
 
-    TURNKEY_WRAPPER_SITE.prototype.after_document_ready = function () {
+    turnkey_wrapper_site.prototype.after_document_ready = function () {
         var $self = this;
         $('.datetime').each($self.convert_class_datetime($self));
         $.ajaxSetup({
@@ -186,22 +186,8 @@ $(function () {
         }
 
         var string_kind_params = [
-            'name__icontains',
-            'nickname__icontains',
-            'user__username__icontains',
-            'slug__icontains',
-            'track_no__icontains',
-            'details__description__icontains',
-            'code39__exact',
-            'any_words__icontains',
-            'einvoice__code39__exact',
-            'id',
-            'id_or_hex',
-            'einvoice__track_no__icontains',
-            'einvoice__any_words__icontains',
-            'identifier__icontains',
-            'seller__legal_entity__identifier__icontains',
-            'track__icontains'
+            'TRANSPORT_ID__icontains',
+            'PARTY_ID__icontains',
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);
@@ -272,7 +258,7 @@ $(function () {
         });
     }
 
-    TURNKEY_WRAPPER_SITE.prototype.rest_error = function ($self, dialog_id) {
+    turnkey_wrapper_site.prototype.rest_error = function ($self, dialog_id) {
         return function (xhr, ajaxOptions, thrownError) {
             dialog_id = dialog_id ? dialog_id : 'error_dialog';
             var $modal = $('#' + dialog_id);
@@ -331,6 +317,6 @@ $(function () {
         };
     };
 
-    window.TURNKEY_WRAPPER_SITE = TURNKEY_WRAPPER_SITE;
+    window.turnkey_wrapper_site = turnkey_wrapper_site;
 
 });

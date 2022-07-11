@@ -17,19 +17,27 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="name__icontains">{% trans "Name contains" %}</label>
-                    <div class="input-group" id="name__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="name__icontains" id="id_name__icontains" />
+                    <label for="CATEGORY_TYPE__icontains">{% trans "CATEGORY_TYPE contains" %}</label>
+                    <div class="input-group" id="CATEGORY_TYPE__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="CATEGORY_TYPE__icontains" id="id_CATEGORY_TYPE__icontains" />
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="slug__icontains">{% trans "Slug contains" %}</label>
-                    <div class="input-group" id="slug__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                    <label for="PROCESS_TYPE__icontains">{% trans "PROCESS_TYPE contains" %}</label>
+                    <div class="input-group" id="PROCESS_TYPE__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="PROCESS_TYPE__icontains" id="id_PROCESS_TYPE__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="TASK__icontains">{% trans "TASK contains" %}</label>
+                    <div class="input-group" id="TASK__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="TASK__icontains" id="id_TASK__icontains" />
                     </div>
                 </div>
             </div>

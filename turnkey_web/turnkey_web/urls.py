@@ -42,6 +42,7 @@ router.register('TASK_CONFIG', views.TASK_CONFIGModelViewSet, basename="taskconf
 app_name = 'turnkey_web'
 urlpatterns = [
     path('__admin__/', admin.site.urls),
+    re_path(r'^api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path(r'^api/{}/'.format(TurnkeyWrapperAPIRootView.version),
         include((router.urls, "turnkeywrapperapi"), namespace="turnkeywrapperapi")),
     path('i18n/', include('django.conf.urls.i18n'), name='i18n'),

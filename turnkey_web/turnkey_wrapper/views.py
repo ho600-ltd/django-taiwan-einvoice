@@ -41,7 +41,7 @@ class FROM_CONFIGModelViewSet(ModelViewSet):
     serializer_class = FROM_CONFIGSerializer
     filter_class = FROM_CONFIGFilter
     renderer_classes = (FROM_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
-    http_method_names = ('get',)
+    http_method_names = ('get', )
 
 
 
@@ -52,4 +52,4 @@ class TASK_CONFIGModelViewSet(ModelViewSet):
     serializer_class = TASK_CONFIGSerializer
     filter_class = TASK_CONFIGFilter
     renderer_classes = (TASK_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
-    http_method_names = ('get',)
+    http_method_names = ('get', )

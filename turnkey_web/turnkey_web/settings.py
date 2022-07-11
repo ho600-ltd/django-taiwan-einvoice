@@ -41,6 +41,8 @@ INSTALLED_APPS = [
 
     'django_extensions',
     'rest_framework',
+    'rest_framework_filters',
+    'django_filters',
     'compressor',
     'turnkey_wrapper',
 ]
@@ -153,3 +155,12 @@ STATICFILES_FINDERS = (
 
 # compressor
 COMPRESS_ENABLED = False # DEBUG
+
+# django-restframework
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer', ),
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework_filters.backends.RestFrameworkFilterBackend', ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'PAGE_SIZE': 10,
+}

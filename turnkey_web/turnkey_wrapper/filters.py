@@ -16,6 +16,7 @@ class FROM_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = FROM_CONFIG
         fields = {
+            'TRANSPORT_ID': ('icontains', ),
             'PARTY_ID': ('icontains', ),
         }
 
@@ -25,5 +26,7 @@ class TASK_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = TASK_CONFIG
         fields = {
+            'CATEGORY_TYPE': ('icontains', ),
+            'PROCESS_TYPE': ('icontains', ),
             'TASK': ('icontains', ),
         }

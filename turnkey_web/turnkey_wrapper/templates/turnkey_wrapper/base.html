@@ -22,6 +22,7 @@
         <link rel="stylesheet" href="{% static "turnkey_wrapper/assets/Navigation-Clean.css" %}" type="text/css" charset="utf-8">
         <link rel="stylesheet" href="{% static "turnkey_wrapper/assets/bootstrap-multiselect.css" %}" type="text/css" charset="utf-8">
         <link rel="stylesheet" href="{% static "turnkey_wrapper/turnkey_wrapper_base.css" %}" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{% static "turnkey_wrapper/turnkey_wrapper_form_and_list.css" %}" type="text/css" charset="utf-8">
     {% endcompress %}
     {% block css %}
     {% endblock %}
@@ -64,10 +65,9 @@
                 <button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1">
                     <span class="sr-only">{% trans "Toggle navigation" %}</span><span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse"
-                    id="navcol-1">
+                <div class="collapse navbar-collapse" id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
-                        <li class="dropdown nav-item nav_permission">
+                        <li class="dropdown nav-item nav_original_turnkey_db">
                             <a data-toggle="dropdown"
                                 aria-expanded="false"
                                 class="dropdown-toggle nav-link"
@@ -77,10 +77,14 @@
                                     href="{% url 'turnkeywrapperapi:fromconfig-list' %}">
                                     FROM_CONFIG
                                 </a>
+                                <a role="presentation" class="dropdown-item nav_TASK_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:taskconfig-list' %}">
+                                    TASK_CONFIG
+                                </a>
                             </div>
                         </li>
-                        <li class="nav-item nav_escposweb" role="presentation">
-                            <a class="nav-link" href="{% url 'turnkeywrapperapi:fromconfig-list' %}">FROM_CONFIG</a>
+                        <li class="nav-item nav_XXX" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:fromconfig-list' %}">XXX</a>
                         </li>
                         <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"
