@@ -37,7 +37,16 @@ class TurnkeyWrapperRouter(routers.DefaultRouter):
 
 router = TurnkeyWrapperRouter()
 router.register('FROM_CONFIG', views.FROM_CONFIGModelViewSet, basename="fromconfig")
+router.register('SCHEDULE_CONFIG', views.SCHEDULE_CONFIGModelViewSet, basename="scheduleconfig")
+router.register('SIGN_CONFIG', views.SIGN_CONFIGModelViewSet, basename="signconfig")
 router.register('TASK_CONFIG', views.TASK_CONFIGModelViewSet, basename="taskconfig")
+router.register('TO_CONFIG', views.TO_CONFIGModelViewSet, basename="toconfig")
+router.register('TURNKEY_MESSAGE_LOG', views.TURNKEY_MESSAGE_LOGModelViewSet, basename="turnkeymessagelog")
+router.register('TURNKEY_MESSAGE_LOG_DETAIL', views.TURNKEY_MESSAGE_LOG_DETAILModelViewSet, basename="turnkeymessagelogdetail")
+router.register('TURNKEY_SEQUENCE', views.TURNKEY_SEQUENCEModelViewSet, basename="turnkeysequence")
+router.register('TURNKEY_SYSEVENT_LOG', views.TURNKEY_SYSEVENT_LOGModelViewSet, basename="turnkeysyseventlog")
+router.register('TURNKEY_TRANSPORT_CONFIG', views.TURNKEY_TRANSPORT_CONFIGModelViewSet, basename="turnkeytransportconfig")
+router.register('TURNKEY_USER_PROFILE', views.TURNKEY_USER_PROFILEModelViewSet, basename="turnkeyuserprofile")
 
 app_name = 'turnkey_web'
 urlpatterns = [

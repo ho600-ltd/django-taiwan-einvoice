@@ -35,6 +35,28 @@ class FROM_CONFIGSerializer(ModelSerializer):
 
 
 
+class SCHEDULE_CONFIGSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = SCHEDULE_CONFIG
+        fields = '__all__'
+
+
+
+class SIGN_CONFIGSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = SIGN_CONFIG
+        fields = '__all__'
+
+
+
 class TASK_CONFIGSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
     
@@ -42,6 +64,83 @@ class TASK_CONFIGSerializer(ModelSerializer):
 
     class Meta:
         model = TASK_CONFIG
+        fields = '__all__'
+
+
+
+class TO_CONFIGSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TO_CONFIG
+        fields = '__all__'
+
+
+
+class TURNKEY_MESSAGE_LOGSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TURNKEY_MESSAGE_LOG
+        fields = '__all__'
+
+
+
+class TURNKEY_MESSAGE_LOG_DETAILSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TURNKEY_MESSAGE_LOG_DETAIL
+        fields = '__all__'
+
+
+
+class TURNKEY_SEQUENCESerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TURNKEY_SEQUENCE
+        fields = '__all__'
+
+
+
+class TURNKEY_SYSEVENT_LOGSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TURNKEY_SYSEVENT_LOG
+        fields = '__all__'
+
+
+
+class TURNKEY_TRANSPORT_CONFIGSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TURNKEY_TRANSPORT_CONFIG
+        fields = '__all__'
+
+
+
+class TURNKEY_USER_PROFILESerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    
+
+
+    class Meta:
+        model = TURNKEY_USER_PROFILE
         fields = '__all__'
 
 

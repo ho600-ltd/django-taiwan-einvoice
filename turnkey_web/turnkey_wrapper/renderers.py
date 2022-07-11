@@ -92,8 +92,60 @@ class FROM_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
 
 
 
+class SCHEDULE_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('SCHEDULE_CONFIG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('SCHEDULE_CONFIG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class SIGN_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('SIGN_CONFIG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('SIGN_CONFIG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
 class TASK_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
     template = _get_template_name('TASK_CONFIG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
     content_template = _get_template_name('TASK_CONFIG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
 
 
+
+class TO_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TO_CONFIG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TO_CONFIG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class TURNKEY_MESSAGE_LOGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TURNKEY_MESSAGE_LOG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TURNKEY_MESSAGE_LOG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TURNKEY_MESSAGE_LOG_DETAIL_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TURNKEY_MESSAGE_LOG_DETAIL_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class TURNKEY_SEQUENCEHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TURNKEY_SEQUENCE_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TURNKEY_SEQUENCE_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class TURNKEY_SYSEVENT_LOGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TURNKEY_SYSEVENT_LOG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TURNKEY_SYSEVENT_LOG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class TURNKEY_TRANSPORT_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TURNKEY_TRANSPORT_CONFIG_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TURNKEY_TRANSPORT_CONFIG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class TURNKEY_USER_PROFILEHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('TURNKEY_USER_PROFILE_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('TURNKEY_USER_PROFILE_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)

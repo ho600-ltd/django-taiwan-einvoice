@@ -22,6 +22,22 @@ class FROM_CONFIGFilter(filters.FilterSet):
 
 
 
+class SCHEDULE_CONFIGFilter(filters.FilterSet):
+    class Meta:
+        model = SCHEDULE_CONFIG
+        fields = {
+        }
+
+
+
+class SIGN_CONFIGFilter(filters.FilterSet):
+    class Meta:
+        model = SIGN_CONFIG
+        fields = {
+        }
+
+
+
 class TASK_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = TASK_CONFIG
@@ -29,4 +45,60 @@ class TASK_CONFIGFilter(filters.FilterSet):
             'CATEGORY_TYPE': ('icontains', ),
             'PROCESS_TYPE': ('icontains', ),
             'TASK': ('icontains', ),
+        }
+
+
+
+class TO_CONFIGFilter(filters.FilterSet):
+    class Meta:
+        model = TO_CONFIG
+        fields = {
+        }
+
+
+
+class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
+    class Meta:
+        model = TURNKEY_MESSAGE_LOG
+        fields = {
+        }
+
+
+
+class TURNKEY_MESSAGE_LOG_DETAILFilter(filters.FilterSet):
+    class Meta:
+        model = TURNKEY_MESSAGE_LOG_DETAIL
+        fields = {
+        }
+
+
+
+class TURNKEY_SEQUENCEFilter(filters.FilterSet):
+    class Meta:
+        model = TURNKEY_SEQUENCE
+        fields = {
+        }
+
+
+
+class TURNKEY_SYSEVENT_LOGFilter(filters.FilterSet):
+    class Meta:
+        model = TURNKEY_SYSEVENT_LOG
+        fields = {
+        }
+
+
+
+class TURNKEY_TRANSPORT_CONFIGFilter(filters.FilterSet):
+    class Meta:
+        model = TURNKEY_TRANSPORT_CONFIG
+        fields = {
+        }
+
+
+
+class TURNKEY_USER_PROFILEFilter(filters.FilterSet):
+    class Meta:
+        model = TURNKEY_USER_PROFILE
+        fields = {
         }
