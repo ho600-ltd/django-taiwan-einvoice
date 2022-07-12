@@ -24,14 +24,14 @@
         {% for obj in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
-                <th field="TRANSPORT_ID">{{ obj.TRANSPORT_ID }}</th>
-                <th field="TRANSPORT_PASSWORD">{{ obj.TRANSPORT_PASSWORD }}</th>
-                <th field="PARTY_ID">{{ obj.PARTY_ID }}</th>
-                <th field="PARTY_DESCRIPTION">{{ obj.PARTY_DESCRIPTION }}</th>
-                <th field="ROUTING_ID">{{ obj.ROUTING_ID }}</th>
-                <th field="ROUTING_DESCRIPTION">{{ obj.ROUTING_DESCRIPTION }}</th>
-                <th field="SIGN_ID">{{ obj.SIGN_ID }}</th>
-                <th field="SUBSTITUTE_PARTY_ID">{{ obj.SUBSTITUTE_PARTY_ID }}</th>
+                <td field="TRANSPORT_ID">{{ obj.TRANSPORT_ID }}</td>
+                <td field="TRANSPORT_PASSWORD">{{ obj.TRANSPORT_PASSWORD }}</td>
+                <td field="PARTY_ID">{{ obj.PARTY_ID }}</td>
+                <td field="PARTY_DESCRIPTION">{{ obj.PARTY_DESCRIPTION }}</td>
+                <td field="ROUTING_ID">{{ obj.ROUTING_ID }}</td>
+                <td field="ROUTING_DESCRIPTION">{{ obj.ROUTING_DESCRIPTION }}</td>
+                <td field="SIGN_ID">{{ obj.SIGN_ID }}</td>
+                <td field="SUBSTITUTE_PARTY_ID">{{ obj.SUBSTITUTE_PARTY_ID }}</td>
             </tr>
         {% endfor %}
     </tbody>

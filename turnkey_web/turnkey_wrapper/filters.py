@@ -35,6 +35,8 @@ class SCHEDULE_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = SCHEDULE_CONFIG
         fields = {
+            "TASK": ('icontains', ),
+            "ENABLE": ('icontains', ),
         }
 
 

@@ -10,28 +10,25 @@
     <thead>
         <tr>
             <th>No.</th>
-            <th>TRANSPORT_ID </th>
-            <th>TRANSPORT_PASSWORD </th>
-            <th>PARTY_ID </th>
-            <th>PARTY_DESCRIPTION </th>
-            <th>ROUTING_ID </th>
-            <th>ROUTING_DESCRIPTION </th>
-            <th>SIGN_ID </th>
-            <th>SUBSTITUTE_PARTY_ID</th>
+            <th>TASK</th>
+            <th>ENABLE</th>
+            <th>SCHEDULE_TYPE</th>
+            <th>SCHEDULE_WEEK</th>
+            <th>SCHEDULE_TIME</th>
+            <th>SCHEDULE_PERIOD</th>
+            <th>SCHEDULE_RANGE</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
-                <td field="no">{{ forloop.counter }}.</td>
-                <th field="TRANSPORT_ID">{{ obj.TRANSPORT_ID }}</th>
-                <th field="TRANSPORT_PASSWORD">{{ obj.TRANSPORT_PASSWORD }}</th>
-                <th field="PARTY_ID">{{ obj.PARTY_ID }}</th>
-                <th field="PARTY_DESCRIPTION">{{ obj.PARTY_DESCRIPTION }}</th>
-                <th field="ROUTING_ID">{{ obj.ROUTING_ID }}</th>
-                <th field="ROUTING_DESCRIPTION">{{ obj.ROUTING_DESCRIPTION }}</th>
-                <th field="SIGN_ID">{{ obj.SIGN_ID }}</th>
-                <th field="SUBSTITUTE_PARTY_ID">{{ obj.SUBSTITUTE_PARTY_ID }}</th>
+                <td field="TASK">{{ obj.TASK }}</td>
+                <td field="ENABLE">{{ obj.ENABLE }}</td>
+                <td field="SCHEDULE_TYPE">{{ obj.SCHEDULE_TYPE }}</td>
+                <td field="SCHEDULE_WEEK">{{ obj.SCHEDULE_WEEK }}</td>
+                <td field="SCHEDULE_TIME">{{ obj.SCHEDULE_TIME }}</td>
+                <td field="SCHEDULE_PERIOD">{{ obj.SCHEDULE_PERIOD }}</td>
+                <td field="SCHEDULE_RANGE">{{ obj.SCHEDULE_RANGE }}</td>
             </tr>
         {% endfor %}
     </tbody>

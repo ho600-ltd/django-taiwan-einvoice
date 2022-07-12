@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-11 10:25+0800\n"
+"POT-Creation-Date: 2022-07-12 10:18+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,58 +18,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "Name contains"
+msgid "TRANSPORT_ID contains"
 msgstr ""
 
-msgid "Slug contains"
+msgid "PARTY_ID contains"
 msgstr ""
 
 msgid "Search"
-msgstr ""
-
-msgid "Set the default ESC/POS Web"
-msgstr ""
-
-msgid "Pass Key"
-msgstr ""
-
-msgid ""
-"\n"
-"                    Please get the \"Pass Key\" from the LCD of ESC/POS Web.\n"
-"                    <span class=\"text-danger\">Notice! The pass key is case-sensitive.</span>\n"
-"                "
-msgstr ""
-
-msgid "Configure"
-msgstr ""
-
-msgid "Cancel"
-msgstr ""
+msgstr "搜尋"
 
 #, python-format
 msgid "%(total_count)s records"
+msgstr "%(total_count)s 筆"
+
+msgid "TASK contains"
 msgstr ""
 
-msgid "No."
+msgid "ENABLE contains"
 msgstr ""
 
-msgid "Name"
+msgid "CATEGORY_TYPE contains"
 msgstr ""
 
-msgid "Slug"
-msgstr ""
-
-msgid "Hash Key"
-msgstr ""
-
-msgctxt "taiwan_einvoice:escposweb"
-msgid "Usage"
-msgstr ""
-
-msgid "Button"
-msgstr ""
-
-msgid "Set default"
+msgid "PROCESS_TYPE contains"
 msgstr ""
 
 msgid "Turnkey Wrapper Api"
@@ -79,22 +50,22 @@ msgid "Turnkey Management"
 msgstr "Turnkey 管理"
 
 msgid "Toggle navigation"
-msgstr ""
+msgstr "切換"
 
-msgid "Original Turnkey DB"
-msgstr ""
+msgid "RAW Turnkey DB"
+msgstr "原始 Turnkey 資料庫"
 
 msgid "Logout"
-msgstr ""
+msgstr "登出"
 
 msgid "change language to your choice"
-msgstr ""
+msgstr "調整語系"
 
 msgid "Change"
-msgstr ""
+msgstr "調整"
 
 msgid "Close"
-msgstr ""
+msgstr "關閉"
 
 #, python-format
 msgid ""
@@ -103,6 +74,10 @@ msgid ""
 "            Deploy Number: %(build_number)s\n"
 "            Build Version: %(build_version)s"
 msgstr ""
+"\n"
+"發佈日期: %(build_date)s\n"
+"發佈編號: %(build_number)s\n"
+"發佈版本: %(build_version)s"
 
 msgid "System Build Version"
-msgstr ""
+msgstr "系統發佈版本"

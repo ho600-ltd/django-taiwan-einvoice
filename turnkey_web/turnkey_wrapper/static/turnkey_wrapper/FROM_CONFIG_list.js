@@ -1,5 +1,5 @@
 $(function () {
-    $(".nav_original_turnkey_db").addClass("nav_active");
+    $(".nav_raw_turnkey_db").addClass("nav_active");
     $('.dropdown-menu a').removeClass('active');
     $(".nav_FROM_CONFIG").addClass("active");
 
