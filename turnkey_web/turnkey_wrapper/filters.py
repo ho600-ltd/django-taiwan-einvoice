@@ -116,6 +116,7 @@ class TURNKEY_TRANSPORT_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = TURNKEY_TRANSPORT_CONFIG
         fields = {
+            "TRANSPORT_ID": ("icontains", ),
         }
 
 
