@@ -97,6 +97,7 @@ class TURNKEY_SEQUENCEFilter(filters.FilterSet):
     class Meta:
         model = TURNKEY_SEQUENCE
         fields = {
+            "SEQUENCE": ("icontains", ),
         }
 
 

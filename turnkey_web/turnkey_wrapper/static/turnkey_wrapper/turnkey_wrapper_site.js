@@ -194,6 +194,7 @@ $(function () {
             'ROUTING_ID__icontains',
             'SEQNO__icontains',
             'SUBSEQNO__icontains',
+            'SEQUENCE__icontains',
             'TRANSPORT_ID__icontains',
             'PARTY_ID__icontains'
         ];
