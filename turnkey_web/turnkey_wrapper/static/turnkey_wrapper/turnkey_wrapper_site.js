@@ -192,6 +192,8 @@ $(function () {
             'SIGN_TYPE__icontains',
             'FROM_PARTY_ID_PARTY_ID__icontains',
             'ROUTING_ID__icontains',
+            'SEQNO__icontains',
+            'SUBSEQNO__icontains',
             'TRANSPORT_ID__icontains',
             'PARTY_ID__icontains'
         ];

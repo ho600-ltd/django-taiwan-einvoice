@@ -76,6 +76,8 @@ class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
     class Meta:
         model = TURNKEY_MESSAGE_LOG
         fields = {
+            "SEQNO": ("icontains", ),
+            "SUBSEQNO": ("icontains", ),
         }
 
 
