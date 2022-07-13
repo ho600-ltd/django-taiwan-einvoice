@@ -195,6 +195,7 @@ $(function () {
             'SEQNO__icontains',
             'SUBSEQNO__icontains',
             'SEQUENCE__icontains',
+            'USER_ID__icontains',
             'TRANSPORT_ID__icontains',
             'PARTY_ID__icontains'
         ];

@@ -10,30 +10,18 @@
     <thead>
         <tr>
             <th>No.</th>
-            <th>CATEGORY_TYPE</th> 
-            <th>PROCESS_TYPE</th> 
-            <th>TASK</th> 
-            <th>SRC_PATH</th> 
-            <th>TARGET_PATH</th> 
-            <th>FILE_FORMAT</th> 
-            <th>VERSION</th> 
-            <th>ENCODING</th> 
-            <th>TRANS_CHINESE_DATE</th>
+            <th>USER_ID</th>
+            <th>USER_PASSWORD</th>
+            <th>USER_ROLE</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
-                <th field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</th>
-                <th field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</th>
-                <th field="TASK">{{ obj.TASK }}</th>
-                <th field="SRC_PATH">{{ obj.SRC_PATH }}</th>
-                <th field="TARGET_PATH">{{ obj.TARGET_PATH }}</th>
-                <th field="FILE_FORMAT">{{ obj.FILE_FORMAT }}</th>
-                <th field="VERSION">{{ obj.VERSION }}</th>
-                <th field="ENCODING">{{ obj.ENCODING }}</th>
-                <th field="TRANS_CHINESE_DATE">{{ obj.TRANS_CHINESE_DATE }}</th>
+                <td field="USER_ID">{{ obj.USER_ID }}</td>
+                <td field="USER_PASSWORD">{{ obj.USER_PASSWORD }}</td>
+                <td field="USER_ROLE">{{ obj.USER_ROLE }}</td>
             </tr>
         {% endfor %}
     </tbody>

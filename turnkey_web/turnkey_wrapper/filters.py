@@ -125,4 +125,5 @@ class TURNKEY_USER_PROFILEFilter(filters.FilterSet):
     class Meta:
         model = TURNKEY_USER_PROFILE
         fields = {
+            "USER_ID": ("icontains", ),
         }
