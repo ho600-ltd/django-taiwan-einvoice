@@ -106,6 +106,8 @@ class TURNKEY_SYSEVENT_LOGFilter(filters.FilterSet):
     class Meta:
         model = TURNKEY_SYSEVENT_LOG
         fields = {
+            "SEQNO": ("icontains", ),
+            "SUBSEQNO": ("icontains", ),
         }
 
 

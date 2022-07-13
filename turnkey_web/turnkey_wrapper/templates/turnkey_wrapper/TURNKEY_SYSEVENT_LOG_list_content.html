@@ -10,30 +10,42 @@
     <thead>
         <tr>
             <th>No.</th>
-            <th>CATEGORY_TYPE</th> 
-            <th>PROCESS_TYPE</th> 
-            <th>TASK</th> 
-            <th>SRC_PATH</th> 
-            <th>TARGET_PATH</th> 
-            <th>FILE_FORMAT</th> 
-            <th>VERSION</th> 
-            <th>ENCODING</th> 
-            <th>TRANS_CHINESE_DATE</th>
+            <th>EVENTDTS</th>
+            <th>PARTY_ID</th>
+            <th>SEQNO</th>
+            <th>SUBSEQNO</th>
+            <th>ERRORCODE</th>
+            <th>UUID</th>
+            <th>INFORMATION1</th>
+            <th>INFORMATION2</th>
+            <th>INFORMATION3</th>
+            <th>MESSAGE1</th>
+            <th>MESSAGE2</th>
+            <th>MESSAGE3</th>
+            <th>MESSAGE4</th>
+            <th>MESSAGE5</th>
+            <th>MESSAGE6</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
-                <th field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</th>
-                <th field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</th>
-                <th field="TASK">{{ obj.TASK }}</th>
-                <th field="SRC_PATH">{{ obj.SRC_PATH }}</th>
-                <th field="TARGET_PATH">{{ obj.TARGET_PATH }}</th>
-                <th field="FILE_FORMAT">{{ obj.FILE_FORMAT }}</th>
-                <th field="VERSION">{{ obj.VERSION }}</th>
-                <th field="ENCODING">{{ obj.ENCODING }}</th>
-                <th field="TRANS_CHINESE_DATE">{{ obj.TRANS_CHINESE_DATE }}</th>
+                <td field="EVENTDTS">{{ obj.EVENTDTS }}</td>
+                <td field="PARTY_ID">{{ obj.PARTY_ID }}</td>
+                <td field="SEQNO">{{ obj.SEQNO }}</td>
+                <td field="SUBSEQNO">{{ obj.SUBSEQNO }}</td>
+                <td field="ERRORCODE">{{ obj.ERRORCODE }}</td>
+                <td field="UUID">{{ obj.UUID }}</td>
+                <td field="INFORMATION1">{{ obj.INFORMATION1 }}</td>
+                <td field="INFORMATION2">{{ obj.INFORMATION2 }}</td>
+                <td field="INFORMATION3">{{ obj.INFORMATION3 }}</td>
+                <td field="MESSAGE1">{{ obj.MESSAGE1 }}</td>
+                <td field="MESSAGE2">{{ obj.MESSAGE2 }}</td>
+                <td field="MESSAGE3">{{ obj.MESSAGE3 }}</td>
+                <td field="MESSAGE4">{{ obj.MESSAGE4 }}</td>
+                <td field="MESSAGE5">{{ obj.MESSAGE5 }}</td>
+                <td field="MESSAGE6">{{ obj.MESSAGE6 }}</td>
             </tr>
         {% endfor %}
     </tbody>
