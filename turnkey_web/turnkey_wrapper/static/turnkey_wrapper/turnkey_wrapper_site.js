@@ -190,6 +190,8 @@ $(function () {
             'ENABLE__icontains',
             'SIGN_ID__icontains',
             'SIGN_TYPE__icontains',
+            'FROM_PARTY_ID_PARTY_ID__icontains',
+            'ROUTING_ID__icontains',
             'TRANSPORT_ID__icontains',
             'PARTY_ID__icontains'
         ];

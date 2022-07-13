@@ -66,6 +66,8 @@ class TO_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = TO_CONFIG
         fields = {
+            "FROM_PARTY_ID_PARTY_ID": ("icontains", ),
+            "ROUTING_ID": ("icontains", ),
         }
 
 
