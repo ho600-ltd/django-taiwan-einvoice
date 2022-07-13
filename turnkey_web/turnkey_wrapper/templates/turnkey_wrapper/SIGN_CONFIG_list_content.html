@@ -19,6 +19,7 @@
     <tbody>
         {% for obj in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
+                <td field="no">{{ forloop.counter }}.</td>
                 <td field="SIGN_ID">{{ obj.SIGN_ID }}</td>
                 <td field="SIGN_TYPE">{{ obj.SIGN_TYPE }}</td>
                 <td field="PFX_PATH">{{ obj.PFX_PATH }}</td>
