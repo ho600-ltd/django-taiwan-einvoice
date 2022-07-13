@@ -186,8 +186,12 @@ $(function () {
         }
 
         var string_kind_params = [
+            'TASK__icontains',
+            'ENABLE__icontains',
+            'SIGN_ID__icontains',
+            'SIGN_TYPE__icontains',
             'TRANSPORT_ID__icontains',
-            'PARTY_ID__icontains',
+            'PARTY_ID__icontains'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);

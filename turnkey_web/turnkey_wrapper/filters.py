@@ -45,6 +45,8 @@ class SIGN_CONFIGFilter(filters.FilterSet):
     class Meta:
         model = SIGN_CONFIG
         fields = {
+            "SIGN_ID": ('icontains', ),
+            "SIGN_TYPE": ('icontains', ),
         }
 
 
