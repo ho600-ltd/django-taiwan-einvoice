@@ -6,7 +6,7 @@
 
 {% block js %}
     {% compress js %}
-        <script src="{% static "turnkey_wrapper/TASK_CONFIG_list.js" %}"></script>
+        <script src="{% static "turnkey_wrapper/TURNKEY_MESSAGE_LOG_DETAIL_list.js" %}"></script>
     {% endcompress %}
 {% endblock %}
 
@@ -19,17 +19,17 @@
         <div class="row">
             <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="CATEGORY_TYPE__icontains">{% trans "CATEGORY_TYPE contains" %}</label>
-                    <div class="input-group" id="CATEGORY_TYPE__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="CATEGORY_TYPE__icontains" id="id_CATEGORY_TYPE__icontains" />
+                    <label for="SEQNO__icontains">{% trans "SEQNO contains" %}</label>
+                    <div class="input-group" id="SEQNO__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="SEQNO__icontains" id="id_SEQNO__icontains" />
                     </div>
                 </div>
             </div>
             <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="PROCESS_TYPE__icontains">{% trans "PROCESS_TYPE contains" %}</label>
-                    <div class="input-group" id="PROCESS_TYPE__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="PROCESS_TYPE__icontains" id="id_PROCESS_TYPE__icontains" />
+                    <label for="SUBSEQNO__icontains">{% trans "SUBSEQNO contains" %}</label>
+                    <div class="input-group" id="SUBSEQNO__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="SUBSEQNO__icontains" id="id_SUBSEQNO__icontains" />
                     </div>
                 </div>
             </div>

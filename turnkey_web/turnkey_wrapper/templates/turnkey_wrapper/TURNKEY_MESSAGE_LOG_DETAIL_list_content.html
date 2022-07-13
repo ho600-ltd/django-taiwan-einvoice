@@ -10,30 +10,27 @@
     <thead>
         <tr>
             <th>No.</th>
-            <th>CATEGORY_TYPE</th> 
-            <th>PROCESS_TYPE</th> 
-            <th>TASK</th> 
-            <th>SRC_PATH</th> 
-            <th>TARGET_PATH</th> 
-            <th>FILE_FORMAT</th> 
-            <th>VERSION</th> 
-            <th>ENCODING</th> 
-            <th>TRANS_CHINESE_DATE</th>
+            <th>SEQNO_SUBSEQNO_TASK</th>
+            <th>SEQNO</th>
+            <th>SUBSEQNO</th>
+            <th>PROCESS_DTS</th>
+            <th>TASK</th>
+            <th>STATUS</th>
+            <th>FILENAME</th>
+            <th>UUID</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
-                <td field="no">{{ forloop.counter }}.</td>
-                <th field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</th>
-                <th field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</th>
-                <th field="TASK">{{ obj.TASK }}</th>
-                <th field="SRC_PATH">{{ obj.SRC_PATH }}</th>
-                <th field="TARGET_PATH">{{ obj.TARGET_PATH }}</th>
-                <th field="FILE_FORMAT">{{ obj.FILE_FORMAT }}</th>
-                <th field="VERSION">{{ obj.VERSION }}</th>
-                <th field="ENCODING">{{ obj.ENCODING }}</th>
-                <th field="TRANS_CHINESE_DATE">{{ obj.TRANS_CHINESE_DATE }}</th>
+                <td field="SEQNO_SUBSEQNO_TASK">{{ obj.SEQNO_SUBSEQNO_TASK }}</td>
+                <td field="SEQNO">{{ obj.SEQNO }}</td>
+                <td field="SUBSEQNO">{{ obj.SUBSEQNO }}</td>
+                <td field="PROCESS_DTS">{{ obj.PROCESS_DTS }}</td>
+                <td field="TASK">{{ obj.TASK }}</td>
+                <td field="STATUS">{{ obj.STATUS }}</td>
+                <td field="FILENAME">{{ obj.FILENAME }}</td>
+                <td field="UUID">{{ obj.UUID }}</td>
             </tr>
         {% endfor %}
     </tbody>
