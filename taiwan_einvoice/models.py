@@ -1388,7 +1388,7 @@ class UploadBatch(models.Model):
     @classmethod
     def status_check(cls, statuss=[]):
         for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
-            getattr(ub, 'check_in_{}_status_then_update_to_the_next{}'.format(ub.status))()
+            getattr(ub, 'check_in_{}_status_then_update_to_the_next'.format(ub.status))()
 
 
     def update_to_new_status(self, new_status):
