@@ -1359,13 +1359,13 @@ class UploadBatch(models.Model):
     slug = models.CharField(max_length=14, unique=True)
     mig_type = models.ForeignKey(EInvoiceMIG, on_delete=models.DO_NOTHING)
     kind_choices = (
-        ("wp", _("Wait for printed")),
-        ("cp", _("Could print")),
-        ("np", _("No need to print")),
-        ("57", _("Wait for C0501 or C0701")),
+        ("wp", _("Wait for printed")),          # to EInvoice
+        ("cp", _("Could print")),               # to EInvoice
+        ("np", _("No need to print")),          # to EInvoice
+        ("57", _("Wait for C0501 or C0701")),   # to EInvoice
 
-        ("w4", _("Wait for C0401")),
-        ("54", _("Wait for C0501 or C0401")),
+        ("w4", _("Wait for C0401")),            # to CancelEInvoice or VoidEInvoice
+        ("54", _("Wait for C0501 or C0401")),   # to VoidEInvoice
     )
     kind = models.CharField(max_length=2)
     executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
@@ -1386,6 +1386,68 @@ class UploadBatch(models.Model):
 
 
     @classmethod
+    def status_check(cls, statuss=[]):
+        for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
+            getattr(ub, 'check_in_{}_status_then_update_to_the_next{}'.format(ub.status))()
+
+
+    def update_to_new_status(self, new_status):
+        status_list = [_i[0] for _i in self.status_choices]
+        if 1 == status_list.index(new_status) - status_list.index(self.status):
+            self.status = new_status
+            self.save()
+        else:
+            raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
+
+
+    def check_in_0_status_then_update_to_the_next(self):
+        ids = [_i['id'] for _i in self.batcheinvoice_set.all().values('id')]
+        eis = EInvoice.objects.filter(id__in=ids)
+        COULD_PRINT_TIME_MARGIN_SECONDS = 1200
+        NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS = 600
+        # ("54", _("Wait for C0501 or C0401")),
+        if 'wp' == self.kind and not  eis.filter(print_mark=False).exists():
+            self.update_to_new_status('1')
+        elif ('cp' == self.kind
+            and (not eis.filter(print_mark=False).exists()
+                or not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=COULD_PRINT_TIME_MARGIN_SECONDS)).exists())
+            ):
+            self.update_to_new_status('1')
+        elif ('np' == self.kind
+            and not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS)).exists()):
+            self.update_to_new_status('1')
+        elif '57' == self.kind:
+            content_object = eis.get()
+            check_C0501 = False
+            check_C0701 = False
+            if (not content_object.new_einvoice_on_cancel_einvoice_set.exists()
+                or content_object.new_einvoice_on_cancel_einvoice_set.get().ei_synced):
+                check_C0501 = True
+
+            if (not content_object.new_einvoice_on_void_einvoice_set.exists()
+                or content_object.new_einvoice_on_void_einvoice_set.get().ei_synced):
+                check_C0701 = True
+            
+            if check_C0501 and check_C0701:
+                self.update_to_new_status('1')
+        elif 'w4' == self.kind and eis.get().einvoice.ei_synced:
+            self.update_to_new_status('1')
+        elif '54' == self.kind:
+            content_object = eis.get()
+            check_C0401 = False
+            check_C0501 = False
+            if content_object.einvoice.ei_synced:
+                check_C0401 = True
+            
+            if (not content_object.einvoice.new_einvoice_on_cancel_einvoice_set.exists()
+                or content_object.einvoice.new_einvoice_on_cancel_einvoice_set.get().ei_synced):
+                check_C0501 = True
+            
+            if check_C0401 and check_C0501:
+                self.update_to_new_status('1')
+
+
+    @classmethod
     def append_to_the_upload_batch(cls, content_object):
         ct = ContentType.objects.get_for_model(content_object)
         if content_object.ei_synced:
@@ -1399,7 +1461,7 @@ class UploadBatch(models.Model):
             _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
             start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
             end_time = start_time + datetime.timedelta(days=1)
-            if content_object.is_canceled or content_object.is_voided:
+            if content_object.new_einvoice_on_cancel_einvoice_set.exists() or content_object.new_einvoice_on_void_einvoice_set.exists():
                 kind = '57'
             elif '3J0002' == content_object.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != content_object.buyer_identifier:
                 kind = 'cp'
