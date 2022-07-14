@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 
 class FROM_CONFIG(models.Model):
@@ -229,3 +230,77 @@ class TURNKEY_USER_PROFILE(models.Model):
         verbose_name = 'TURNKEY_USER_PROFILE'
         verbose_name_plural = 'TURNKEY_USER_PROFILE'
         db_table = 'TURNKEY_USER_PROFILE'
+
+
+
+class EITurnkey(models.Model):
+    execute_abspath = models.CharField(max_length=755)
+    data_abspath = models.CharField(max_length=755)
+    hash_key = models.CharField(max_length=40)
+    transport_id = models.CharField(max_length=10)
+    party_id = models.CharField(max_length=10)
+    routing_id = models.CharField(max_length=39)
+    tea_turnkey_service_endpoint = models.CharField(max_length=755)
+    allow_ips = models.JSONField(null=True)
+    endpoint = models.CharField(max_length=755, null=True)
+
+
+
+class EITurnkeyBatch(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    update_time = models.DateTimeField(auto_now=True, db_index=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
+    slug = models.CharField(max_length=14, unique=True)
+    mig_choices = (
+        ('A0101', _('B2B Exchange Invoice')),
+        ('A0102', _('B2B Exchange Invoice Confirm')),
+        ('B0101', _('B2B Exchange Allowance')),
+        ('B0102', _('B2B Exchange Allowance Confirm')),
+        ('A0201', _('B2B Exchange Cancel Invoice')),
+        ('A0202', _('B2B Exchange Cancel Invoice Confirm')),
+        ('B0201', _('B2B Exchange Cancel Allowance')),
+        ('B0202', _('B2B Exchange Cancel Allowance Confirm')),
+        ('A0301', _('B2B Exchange Reject Invoice')),
+        ('A0302', _('B2B Exchange Reject Invoice Confirm')),
+
+        ('A0401', _('B2B Certificate Invoice')),
+        ('B0401', _('B2B Certificate Allowance')),
+        ('A0501', _('B2B Certificate Cancel Invoice')),
+        ('B0501', _('B2B Certificate Cancel Allowance')),
+        ('A0601', _('B2B Certificate Reject Invoice')),
+
+        ('C0401', _('B2C Certificate Invoice')),
+        ('C0501', _('B2C Certificate Cancel Invoice')),
+        ('C0701', _('B2C Certificate Void Invoice')),
+        ('D0401', _('B2C Certificate Allowance')),
+        ('D0501', _('B2C Certificate Cancel Allowance')),
+
+        ('E0401', _('Branch Track')),
+        ('E0402', _('Branch Track Blank')),
+        ('E0501', _('Invoice Assign No')),
+    )
+    mig = models.CharField(max_length=5, choices=mig_choices, default='C0401')
+    version_choices = (
+        ('3.2.1', _('3.2.1')),
+    )
+    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2.1')
+    status_choices = (
+        ("8", _("Download from TEA")),
+        ("9", _("Export to Data/")),
+        ("P", _("Preparing for EI(P)")),
+        ("G", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("E", _("E Error for EI process(E)")),
+        ("I", _("I Error for EI process(I)")),
+        ("C", _("Successful EI process(C)")),
+        ("M", _("Swith to Successful EI process manually(S-C)")),
+    )
+    status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
+
+
+
+class EITurnkeyBatchEInvoice(models.Model):
+    batch = models.ForeignKey(EITurnkeyBatch, on_delete=models.DO_NOTHING)
+    body = models.JSONField()
+    result_code = models.CharField(max_length=5, default='', db_index=True)
+    pass_if_error = models.BooleanField(default=False)
+
