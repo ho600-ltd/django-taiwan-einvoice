@@ -285,6 +285,7 @@ class EITurnkeyBatch(models.Model):
     )
     turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2.1')
     status_choices = (
+        ("7", _("Just created")),
         ("8", _("Download from TEA")),
         ("9", _("Export to Data/")),
         ("P", _("Preparing for EI(P)")),
@@ -294,7 +295,7 @@ class EITurnkeyBatch(models.Model):
         ("C", _("Successful EI process(C)")),
         ("M", _("Swith to Successful EI process manually(S-C)")),
     )
-    status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
+    status = models.CharField(max_length=1, default='7', choices=status_choices, db_index=True)
 
 
 

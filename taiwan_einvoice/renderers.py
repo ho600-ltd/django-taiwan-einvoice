@@ -14,7 +14,10 @@ from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
     """ finding order: (sub_dir, langs) > (sub_dir) > (langs) > ()
     """
+    import os, itertools
     from django.conf import settings
+    from django.utils.translation import get_language
+    from django.template import TemplateDoesNotExist
 
     if not lang: lang = get_language()
     if not template_name.endswith('.html'): template_name += '.html'
