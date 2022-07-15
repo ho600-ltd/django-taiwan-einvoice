@@ -1401,12 +1401,17 @@ class UploadBatch(models.Model):
 
 
     def check_in_0_status_then_update_to_the_next(self):
-        ids = [_i['id'] for _i in self.batcheinvoice_set.all().values('id')]
-        eis = EInvoice.objects.filter(id__in=ids)
+        if self.kind in ['wp', 'cp', 'np']:
+            object_ids = self.batcheinvoice_set.all().values('object_id')
+            ids = [_i['object_id'] for _i in object_ids]
+            eis = EInvoice.objects.filter(id__in=ids)
+            if len(object_ids) != eis.count():
+                raise Exception('Some E-Invoices disappear')
+        else:
+            content_object = self.batcheinvoice_set.get().content_object
         COULD_PRINT_TIME_MARGIN_SECONDS = 1200
         NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS = 600
-        # ("54", _("Wait for C0501 or C0401")),
-        if 'wp' == self.kind and not  eis.filter(print_mark=False).exists():
+        if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
             self.update_to_new_status('1')
         elif ('cp' == self.kind
             and (not eis.filter(print_mark=False).exists()
@@ -1417,7 +1422,6 @@ class UploadBatch(models.Model):
             and not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS)).exists()):
             self.update_to_new_status('1')
         elif '57' == self.kind:
-            content_object = eis.get()
             check_C0501 = False
             check_C0701 = False
             if (not content_object.new_einvoice_on_cancel_einvoice_set.exists()
@@ -1430,10 +1434,9 @@ class UploadBatch(models.Model):
             
             if check_C0501 and check_C0701:
                 self.update_to_new_status('1')
-        elif 'w4' == self.kind and eis.get().einvoice.ei_synced:
+        elif 'w4' == self.kind and content_object.einvoice.ei_synced:
             self.update_to_new_status('1')
         elif '54' == self.kind:
-            content_object = eis.get()
             check_C0401 = False
             check_C0501 = False
             if content_object.einvoice.ei_synced:
