@@ -771,6 +771,9 @@ class EInvoiceMIG(models.Model):
     no = models.CharField(max_length=5, choices=no_choices, unique=True)
 
 
+    def __str__(self):
+        return self.no
+
 
 
 class EInvoice(models.Model):
@@ -1385,10 +1388,21 @@ class UploadBatch(models.Model):
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
 
 
+    def __str__(self):
+        return "{}-{}@{}".format(self.slug, self.mig_type, self.kind)
+
+
     @classmethod
     def status_check(cls, statuss=[]):
+        ubs = []
         for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
-            getattr(ub, 'check_in_{}_status_then_update_to_the_next'.format(ub.status))()
+            function_name = 'check_in_{}_status_then_update_to_the_next'.format(ub.status)
+            pair = [ub, function_name, ub.status]
+            if hasattr(ub, function_name):
+                getattr(*pair[:2])()
+                pair.append(ub.status)
+                ubs.append(pair)
+        return ubs
 
 
     def update_to_new_status(self, new_status):
