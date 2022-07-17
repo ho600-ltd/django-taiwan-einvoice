@@ -48,6 +48,8 @@ router.register('TURNKEY_SYSEVENT_LOG', views.TURNKEY_SYSEVENT_LOGModelViewSet, 
 router.register('TURNKEY_TRANSPORT_CONFIG', views.TURNKEY_TRANSPORT_CONFIGModelViewSet, basename="turnkeytransportconfig")
 router.register('TURNKEY_USER_PROFILE', views.TURNKEY_USER_PROFILEModelViewSet, basename="turnkeyuserprofile")
 
+router.register('EITurnkey', views.EITurnkeyModelViewSet, basename="eiturnkey")
+
 app_name = 'turnkey_web'
 urlpatterns = [
     path('__admin__/', admin.site.urls),

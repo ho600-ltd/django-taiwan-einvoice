@@ -5,8 +5,10 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from ho600_lib.permissions import FalsePermission, Or
 
-from turnkey_wrapper.permissions import IsSuperUser
+
+from turnkey_wrapper.permissions import IsSuperUser, CounterBasedOTPinRowForEITurnkeyPermission
 from turnkey_wrapper.models import (
     FROM_CONFIG,
     SCHEDULE_CONFIG,
@@ -19,6 +21,8 @@ from turnkey_wrapper.models import (
     TURNKEY_SYSEVENT_LOG,
     TURNKEY_TRANSPORT_CONFIG,
     TURNKEY_USER_PROFILE,
+
+    EITurnkey,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
@@ -32,6 +36,8 @@ from turnkey_wrapper.serializers import (
     TURNKEY_SYSEVENT_LOGSerializer,
     TURNKEY_TRANSPORT_CONFIGSerializer,
     TURNKEY_USER_PROFILESerializer,
+
+    EITurnkeySerializer,
 )
 from turnkey_wrapper.filters import (
     FROM_CONFIGFilter,
@@ -45,6 +51,8 @@ from turnkey_wrapper.filters import (
     TURNKEY_SYSEVENT_LOGFilter,
     TURNKEY_TRANSPORT_CONFIGFilter,
     TURNKEY_USER_PROFILEFilter,
+
+    EITurnkeyFilter,
 )
 from turnkey_wrapper.renderers import (
     TKWBrowsableAPIRenderer,
@@ -59,6 +67,8 @@ from turnkey_wrapper.renderers import (
     TURNKEY_SYSEVENT_LOGHtmlRenderer,
     TURNKEY_TRANSPORT_CONFIGHtmlRenderer,
     TURNKEY_USER_PROFILEHtmlRenderer,
+
+    EITurnkeyHtmlRenderer,
 )
 
 
@@ -186,3 +196,21 @@ class TURNKEY_USER_PROFILEModelViewSet(ModelViewSet):
     filter_class = TURNKEY_USER_PROFILEFilter
     renderer_classes = (TURNKEY_USER_PROFILEHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
+
+
+
+class EITurnkeyModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkey.objects.all()
+    serializer_class = EITurnkeySerializer
+    filter_class = EITurnkeyFilter
+    renderer_classes = (EITurnkeyHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', 'post')
+
+
+
+    def get_permissions(self):
+        if CounterBasedOTPinRowForEITurnkeyPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
+            self.permission_classes = (Or(IsSuperUser, CounterBasedOTPinRowForEITurnkeyPermission), )
+        return super(self.__class__, self).get_permissions()

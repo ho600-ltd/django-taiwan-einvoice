@@ -32,6 +32,8 @@ from turnkey_wrapper.models import (
     TURNKEY_SYSEVENT_LOG,
     TURNKEY_TRANSPORT_CONFIG,
     TURNKEY_USER_PROFILE,
+
+    EITurnkey,
 )
 
 
@@ -151,5 +153,29 @@ class TURNKEY_USER_PROFILESerializer(ModelSerializer):
     class Meta:
         model = TURNKEY_USER_PROFILE
         fields = '__all__'
+
+
+
+class EITurnkeySerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkey-detail")
+    mask_hash_key = CharField(read_only=True)
+    
+
+
+    class Meta:
+        model = EITurnkey
+        fields = [
+            "id",
+            "resource_uri",
+            "execute_abspath",
+            "data_abspath",
+            "mask_hash_key",
+            "transport_id",
+            "party_id",
+            "routing_id",
+            "tea_turnkey_service_endpoint",
+            "allow_ips",
+            "endpoint",
+        ]
 
 

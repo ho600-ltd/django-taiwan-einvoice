@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, urllib3, logging
+import pytz, datetime, hmac, requests, logging
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -18,6 +18,7 @@ from simple_history.models import HistoricalRecords
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
 from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
+from taiwan_einvoice.libs import CounterBasedOTPinRow
 
 
 def _pad(byte_array):
@@ -586,7 +587,7 @@ class TurnkeyService(models.Model):
     def mask_epl_base_set(self):
         return self.epl_base_set[:4] + '*'*(len(self.epl_base_set)-8) + self.epl_base_set[-4:]
     note = models.TextField()
-
+    
 
     def __str__(self):
         return "{}({}:{}:{})".format(self.name,
@@ -600,6 +601,13 @@ class TurnkeyService(models.Model):
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
             
         super(TurnkeyService, self).save(*args, **kwargs)
+
+
+    def generate_counter_based_otp_in_row(self):
+        n_times_in_a_row = 3
+        key = '{}-{}-{}-{}'.format(self.routing_id, self.hash_key, self.transport_id, self.party_id)
+        cbotpr = CounterBasedOTPinRow(SECRET=key.encode('utf-8'), N_TIMES_IN_A_ROW=n_times_in_a_row)
+        return cbotpr.generate_otps()
 
 
 
@@ -1412,6 +1420,17 @@ class UploadBatch(models.Model):
             self.save()
         else:
             raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
+
+
+    def check_in_1_status_then_update_to_the_next(self):
+        url = self.turnkey_service.tkw_endpoint
+        counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
+        payload = {"format": "api"}
+        response = requests.get(url,
+                                params=payload,
+                                headers={"x-counter-based-otp-in-row": counter_based_otp_in_row})
+        return response
+
 
 
     def check_in_0_status_then_update_to_the_next(self):

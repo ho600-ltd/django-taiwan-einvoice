@@ -1,6 +1,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from taiwan_einvoice.libs import CounterBasedOTPinRow
+
+
 
 class FROM_CONFIG(models.Model):
     TRANSPORT_ID = models.CharField(db_column='TRANSPORT_ID', max_length=10, blank=True, null=True)
@@ -244,6 +247,17 @@ class EITurnkey(models.Model):
     allow_ips = models.JSONField(null=True)
     endpoint = models.CharField(max_length=755, null=True)
 
+
+    @property
+    def mask_hash_key(self):
+        return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+
+    
+    def verify_counter_based_otp_in_row(self, otps):
+        n_times_in_a_row = 3
+        key = '{}-{}-{}-{}'.format(self.routing_id, self.hash_key, self.transport_id, self.party_id)
+        cbotpr = CounterBasedOTPinRow(SECRET=key.encode('utf-8'), N_TIMES_IN_A_ROW=n_times_in_a_row)
+        return cbotpr.verify_otps(otps)
 
 
 class EITurnkeyBatch(models.Model):

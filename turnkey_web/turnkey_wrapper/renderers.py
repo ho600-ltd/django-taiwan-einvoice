@@ -149,3 +149,9 @@ class TURNKEY_TRANSPORT_CONFIGHtmlRenderer(TKWOriginHTMLRenderer):
 class TURNKEY_USER_PROFILEHtmlRenderer(TKWOriginHTMLRenderer):
     template = _get_template_name('TURNKEY_USER_PROFILE_list', sub_dir='turnkey_wrapper', show_template_filename=True)
     content_template = _get_template_name('TURNKEY_USER_PROFILE_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+class EITurnkeyHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('EITurnkey_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('EITurnkey_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)

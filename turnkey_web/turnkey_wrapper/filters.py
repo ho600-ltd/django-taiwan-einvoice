@@ -18,6 +18,8 @@ from turnkey_wrapper.models import (
     TURNKEY_SYSEVENT_LOG,
     TURNKEY_TRANSPORT_CONFIG,
     TURNKEY_USER_PROFILE,
+
+    EITurnkey,
 )
 
 
@@ -126,4 +128,15 @@ class TURNKEY_USER_PROFILEFilter(filters.FilterSet):
         model = TURNKEY_USER_PROFILE
         fields = {
             "USER_ID": ("icontains", ),
+        }
+
+
+
+class EITurnkeyFilter(filters.FilterSet):
+    class Meta:
+        model = EITurnkey
+        fields = {
+            "transport_id": ("icontains", ),
+            "party_id": ("icontains", ),
+            "routing_id": ("icontains", ),
         }

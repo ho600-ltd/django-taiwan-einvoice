@@ -197,7 +197,10 @@ $(function () {
             'SEQUENCE__icontains',
             'USER_ID__icontains',
             'TRANSPORT_ID__icontains',
-            'PARTY_ID__icontains'
+            'PARTY_ID__icontains',
+            'transport_id__icontains',
+            'party_id__icontains',
+            'routing_id__icontains'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);
