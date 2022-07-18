@@ -1423,12 +1423,14 @@ class UploadBatch(models.Model):
 
 
     def check_in_1_status_then_update_to_the_next(self):
-        url = self.turnkey_service.tkw_endpoint
+        url = self.turnkey_service.tkw_endpoint + '{action}/'.format(action="create_eiturnkey_batch")
         counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
-        payload = {"format": "api"}
-        response = requests.get(url,
-                                params=payload,
-                                headers={"x-counter-based-otp-in-row": counter_based_otp_in_row})
+        payload = {"format": "json"}
+        data = {}
+        response = requests.post(url,
+                                 params=payload,
+                                 data=data,
+                                 headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
         return response
 
 
@@ -1558,17 +1560,28 @@ class BatchEInvoice(models.Model):
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
     content_object = GenericForeignKey('content_type', 'object_id')
-    body_json = models.TextField()
-    @property
-    def body(self):
-        if not self.body_json:
-            return {}
-        else:
-            return json.loads(self.body_json)
-    @body.setter
-    def body(self, DICT):
-        self.body_json = json.dumps(DICT)
-        self.save()
+    body = models.JSONField()
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
 
+
+
+class AuditType(models.Model):
+    name_choices = (
+        ("TEA_CEC_PROCESSING", "TEA/CEC Processing"),
+        ("UPLOAD_TO_EITURNKEY", "Upload to EITurnkey"),
+        ("EITURNKEY_PROCESSING", "EITurnkey Processing"),
+        ("EI_PROCESSING", "EI Processing"),
+    )
+    name = models.CharField(max_length=32, choices=name_choices, unique=True)
+
+
+
+class AuditLog(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    type = models.ForeignKey(AuditType, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    log = models.JSONField()
