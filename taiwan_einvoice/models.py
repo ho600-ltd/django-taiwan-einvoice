@@ -1549,9 +1549,25 @@ class UploadBatch(models.Model):
                 kind = 'wp'
 
             if UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).exists():
-                ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).get()
+                _ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                                 mig_type=mig_type,
+                                                 kind=kind,
+                                                 status="0",
+                                                 create_time__gte=start_time,
+                                                 create_time__lt=end_time).order_by('-id')[0]
+                if _ub.batcheinvoice_set.count() < 1000:
+                    ub = _ub
+                else:
+                    ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                     mig_type=mig_type,
+                                     kind=kind,
+                                     status='0')
+                    ub.save()
             else:
-                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status='0')
+                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                 mig_type=mig_type,
+                                 kind=kind,
+                                 status='0')
                 ub.save()
             be = BatchEInvoice(batch=ub, content_object=content_object)
             be.save()
