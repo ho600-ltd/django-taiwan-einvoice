@@ -158,9 +158,15 @@ LOGGING = {
         },
     },
     'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
         'turnkey_web': {
             'handlers': ['console', ],
-            'level': os.environ.get('MY_LOCAL_DEVELOP', 'INFO'),
+            'level': os.environ.get('TURNKEY_WEB_LOG_LEVEL', 'INFO'),
+            'propagate': False,
         },
     }
 }
