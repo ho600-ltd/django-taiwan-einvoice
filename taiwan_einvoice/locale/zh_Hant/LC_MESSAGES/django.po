@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-18 13:59+0800\n"
+"POT-Creation-Date: 2022-07-18 15:46+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1339,6 +1339,11 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
+
+#, fuzzy
+#~| msgid "Turnkey Seed"
+#~ msgid "TurnkeyWebReturnCode"
+#~ msgstr "Turnkey 種子"
 
 #~ msgctxt "auto_upload_c0401_einvoice"
 #~ msgid "Yes"

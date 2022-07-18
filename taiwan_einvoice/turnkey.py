@@ -1,4 +1,4 @@
-class TurnkeyError(object):
+class TurnkeyReturnCode(object):
     _ERRORS = {
         "00000": ["", ""],
         "00000": ["訊息存證成功", "訊息存證成功"],
@@ -14,6 +14,20 @@ class TurnkeyError(object):
     }
 
 
-    def __init__(self, error_no):
-        self.no = error_no
-        self.message, self.solution = self._ERRORS.get(error_no, ["未紀錄", "未載明"])
+    def __init__(self, return_code):
+        self.return_code = return_code
+        self.message, self.solution = self._ERRORS.get(return_code, ["未紀錄", "未載明"])
+
+
+class TurnkeyWebReturnCode(object):
+    _ERRORS = {
+        "0": ["成功"],
+        "001": ["儲存 EITurnkeyBatch 失敗"],
+        "999": ["未知失敗"],
+    }
+    
+
+
+    def __init__(self, return_code):
+        self.return_code = return_code
+        self.message = self._ERRORS.get(return_code, self._ERRORS["999"])[0]

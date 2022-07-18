@@ -1423,10 +1423,13 @@ class UploadBatch(models.Model):
 
 
     def check_in_1_status_then_update_to_the_next(self, NEXT_STATUS='2'):
+        if '1' != self.status: return
+
         audit_type = AuditType.objects.get(name="TEA_CEC_PROCESSING")
         audit_log = AuditLog(
             creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
             type=audit_type,
+            turnkey_service=self.turnkey_service,
             content_object=self,
             is_error=False,
         )
@@ -1458,13 +1461,19 @@ class UploadBatch(models.Model):
             audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
             audit_log.type = audit_type
             result_json = response.json()
-            if 200 == response.status_code and "0" == result_json['return_code']:
-                self.update_to_new_status(NEXT_STATUS)
             audit_log.log = result_json
-            audit_log.save()
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                audit_log.is_error = False
+                audit_log.save()
+                self.update_to_new_status(NEXT_STATUS)
+            else:
+                audit_log.is_error = True
+                audit_log.save()
 
 
     def check_in_0_status_then_update_to_the_next(self, NEXT_STATUS='1'):
+        if '0' != self.status: return
+
         if self.kind in ['wp', 'cp', 'np']:
             object_ids = self.batcheinvoice_set.all().values('object_id')
             ids = [_i['object_id'] for _i in object_ids]

@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from ho600_lib.permissions import FalsePermission, Or
+from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
 
 
 from turnkey_wrapper.permissions import IsSuperUser, CounterBasedOTPinRowForEITurnkeyPermission
@@ -24,6 +25,7 @@ from turnkey_wrapper.models import (
     TURNKEY_USER_PROFILE,
 
     EITurnkey,
+    EITurnkeyBatch,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
@@ -228,6 +230,25 @@ class EITurnkeyModelViewSet(ModelViewSet):
         lg.debug("slug: {}".format(slug))
         lg.debug("mig: {}".format(mig))
 
-        return Response({'return_code': '0',
-                         'return_code_message': 'SUCCESS',
-                         'eiturnkey_id': ''})
+        eitb = EITurnkeyBatch(ei_turnkey=eit,
+                              slug=slug,
+                              mig=mig
+                             )
+        try:
+            eitb.save()
+        except Exception as e:
+            twrc = TurnkeyWebReturnCode("001")
+            result = {
+                "return_code": twrc.return_code,
+                "return_code_message": twrc.message,
+                "message_detail": str(e),
+                "eiturnkey_id": eitb.id,
+            }
+        else:
+            twrc = TurnkeyWebReturnCode("0")
+            result = {
+                "return_code": twrc.return_code,
+                "return_code_message": twrc.message,
+                "eiturnkey_id": eitb.id,
+            }
+        return Response(result)
