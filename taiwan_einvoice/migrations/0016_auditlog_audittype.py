@@ -74,7 +74,9 @@ class Migration(migrations.Migration):
                 ('log', models.JSONField()),
                 ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='contenttypes.contenttype')),
                 ('creator', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to=settings.AUTH_USER_MODEL)),
+                ('turnkey_service', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='taiwan_einvoice.turnkeyservice')),
                 ('type', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='taiwan_einvoice.audittype')),
+                ('is_error', models.BooleanField(default=False)),
             ],
         ),
         migrations.RunPython(

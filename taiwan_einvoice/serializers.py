@@ -36,6 +36,8 @@ from taiwan_einvoice.models import (
     VoidEInvoice,
     UploadBatch,
     BatchEInvoice,
+    AuditType,
+    AuditLog,
 )
 
 
@@ -394,6 +396,7 @@ class VoidEInvoiceSerializer(ModelSerializer):
 class UploadBatchSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
 
 
 
@@ -402,6 +405,9 @@ class UploadBatchSerializer(ModelSerializer):
         fields = '__all__'
 
 
+
+    def get_str_name(self, instance):
+        return str(instance)
 
 class BatchEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
@@ -412,3 +418,34 @@ class BatchEInvoiceSerializer(ModelSerializer):
     class Meta:
         model = BatchEInvoice
         fields = '__all__'
+
+
+
+class AuditTypeSerializer(ModelSerializer):
+    class Meta:
+        model = AuditType
+        fields = '__all__'
+
+
+
+class AuditLogSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:auditlog-detail", lookup_field='pk')
+    creator_dict = UserSerializer(source='creator', read_only=True)
+    type_dict = AuditTypeSerializer(source='type', read_only=True)
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    content_object_dict = SerializerMethodField()
+
+
+
+    class Meta:
+        model = AuditLog
+        fields = '__all__'
+
+
+
+    def get_content_object_dict(self, instance):
+        request = self.context.get('request', None)
+        return {
+            "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request})
+        }[instance.content_type.model].data

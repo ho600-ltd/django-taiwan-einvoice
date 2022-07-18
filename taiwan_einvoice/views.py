@@ -33,6 +33,7 @@ from taiwan_einvoice.permissions import (
     CanEntryVoidEInvoice,
     CanViewLegalEntity,
     CanViewTurnkeyService,
+    CanViewAuditLog,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -47,6 +48,7 @@ from taiwan_einvoice.renderers import (
     EInvoicePrintLogHtmlRenderer,
     CancelEInvoiceHtmlRenderer,
     VoidEInvoiceHtmlRenderer,
+    AuditLogHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -63,6 +65,7 @@ from taiwan_einvoice.models import (
     EInvoiceSellerAPI,
     UploadBatch,
     BatchEInvoice,
+    AuditLog,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -81,6 +84,7 @@ from taiwan_einvoice.serializers import (
     VoidEInvoiceSerializer,
     UploadBatchSerializer,
     BatchEInvoiceSerializer,
+    AuditLogSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -95,6 +99,7 @@ from taiwan_einvoice.filters import (
     VoidEInvoiceFilter,
     UploadBatchFilter,
     BatchEInvoiceFilter,
+    AuditLogFilter,
 )
 
 
@@ -893,3 +898,13 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
             permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(batch__turnkey_web__in=turnkey_webs)
+
+
+
+class AuditLogModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    queryset = AuditLog.objects.all().order_by('-id')
+    serializer_class = AuditLogSerializer
+    filter_class = AuditLogFilter
+    renderer_classes = (AuditLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )

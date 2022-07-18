@@ -20,6 +20,7 @@ from taiwan_einvoice.models import (
     VoidEInvoice,
     UploadBatch,
     BatchEInvoice,
+    AuditLog,
 )
 
 
@@ -470,4 +471,16 @@ class BatchEInvoiceFilter(filters.FilterSet):
     class Meta:
         model = BatchEInvoice
         fields = {
+        }
+
+
+
+class AuditLogFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = AuditLog
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt"),
         }

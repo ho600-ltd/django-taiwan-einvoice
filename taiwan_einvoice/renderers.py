@@ -175,3 +175,9 @@ class VoidEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('voideinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+
+class AuditLogHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('auditlog_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('auditlog_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+

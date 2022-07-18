@@ -1415,27 +1415,56 @@ class UploadBatch(models.Model):
 
     def update_to_new_status(self, new_status):
         status_list = [_i[0] for _i in self.status_choices]
-        if 1 == status_list.index(new_status) - status_list.index(self.status):
+        if new_status and 1 == status_list.index(new_status) - status_list.index(self.status):
             self.status = new_status
             self.save()
         else:
             raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
 
 
-    def check_in_1_status_then_update_to_the_next(self):
+    def check_in_1_status_then_update_to_the_next(self, NEXT_STATUS='2'):
+        audit_type = AuditType.objects.get(name="TEA_CEC_PROCESSING")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            content_object=self,
+            is_error=False,
+        )
         url = self.turnkey_service.tkw_endpoint + '{action}/'.format(action="create_eiturnkey_batch")
         counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
         payload = {"format": "json"}
-        data = {}
-        response = requests.post(url,
-                                 params=payload,
-                                 data=data,
-                                 headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
-        return response
+        data = {
+            "slug": self.slug,
+            "mig": self.mig_type.no,
+        }
+        try:
+            response = requests.post(url,
+                                     params=payload,
+                                     data=data,
+                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "UploadBatch.check_in_1_status_then_update_to_the_next",
+                "url": url,
+                "position at": "requests.post(...)",
+                "params": payload,
+                "data": data,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+            audit_log.type = audit_type
+            result_json = response.json()
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                self.update_to_new_status(NEXT_STATUS)
+            audit_log.log = result_json
+            audit_log.save()
 
 
-
-    def check_in_0_status_then_update_to_the_next(self):
+    def check_in_0_status_then_update_to_the_next(self, NEXT_STATUS='1'):
         if self.kind in ['wp', 'cp', 'np']:
             object_ids = self.batcheinvoice_set.all().values('object_id')
             ids = [_i['object_id'] for _i in object_ids]
@@ -1447,15 +1476,15 @@ class UploadBatch(models.Model):
         COULD_PRINT_TIME_MARGIN_SECONDS = 1200
         NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS = 600
         if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
-            self.update_to_new_status('1')
+            self.update_to_new_status(NEXT_STATUS)
         elif ('cp' == self.kind
             and (not eis.filter(print_mark=False).exists()
                 or not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=COULD_PRINT_TIME_MARGIN_SECONDS)).exists())
             ):
-            self.update_to_new_status('1')
+            self.update_to_new_status(NEXT_STATUS)
         elif ('np' == self.kind
             and not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS)).exists()):
-            self.update_to_new_status('1')
+            self.update_to_new_status(NEXT_STATUS)
         elif '57' == self.kind:
             check_C0501 = False
             check_C0701 = False
@@ -1468,9 +1497,9 @@ class UploadBatch(models.Model):
                 check_C0701 = True
             
             if check_C0501 and check_C0701:
-                self.update_to_new_status('1')
+                self.update_to_new_status(NEXT_STATUS)
         elif 'w4' == self.kind and content_object.einvoice.ei_synced:
-            self.update_to_new_status('1')
+            self.update_to_new_status(NEXT_STATUS)
         elif '54' == self.kind:
             check_C0401 = False
             check_C0501 = False
@@ -1482,7 +1511,7 @@ class UploadBatch(models.Model):
                 check_C0501 = True
             
             if check_C0401 and check_C0501:
-                self.update_to_new_status('1')
+                self.update_to_new_status(NEXT_STATUS)
 
 
     @classmethod
@@ -1581,7 +1610,9 @@ class AuditLog(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     type = models.ForeignKey(AuditType, on_delete=models.DO_NOTHING)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
     content_object = GenericForeignKey('content_type', 'object_id')
+    is_error = models.BooleanField(default=False)
     log = models.JSONField()

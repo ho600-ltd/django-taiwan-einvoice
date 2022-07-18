@@ -1,0 +1,36 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th rowspan="2" width="5%">{% trans "No." %}</th>
+            <th>{% trans "Create Time" %}</th>
+            <th>{% trans "Creator" %}</th>
+            <th>{% trans "Type" context "auditlog" %}</th>
+            <th>{% trans "Turnkey Service" %}</th>
+            <th>{% trans "Content Object" context "auditlog" %}</th>
+            <th>{% trans "Is error?" %}</th>
+            <th>{% trans "Log" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr auditlog_id="{{ obj.id }}">
+                <td>{{ forloop.counter }}.</td>
+                <td class="datetime" field="create_time" value="{{ obj.create_time }}" format="Y-m-d AH:i:s"></td>
+                <td field="creator">{{ obj.creator_dict.first_name }}</td>
+                <td field="type">{{ obj.type_dict.name }}</td>
+                <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
+                <td field="content_object">{{ obj.content_object_dict.str_name }}</td>
+                <td field="is_error">{{ obj.is_error }}</td>
+                <td field="log">{{ obj.log }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

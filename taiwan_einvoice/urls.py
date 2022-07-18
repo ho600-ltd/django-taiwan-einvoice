@@ -47,6 +47,7 @@ router.register('canceleinvoice', views.CancelEInvoiceModelViewSet, basename="ca
 router.register('voideinvoice', views.VoidEInvoiceModelViewSet, basename="voideinvoice")
 router.register('uploadbatch', views.UploadBatchModelViewSet, basename="uploadbatch")
 router.register('batcheinvoice', views.BatchEInvoiceModelViewSet, basename="batcheinvoice")
+router.register('auditlog', views.AuditLogModelViewSet, basename="auditlog")
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [

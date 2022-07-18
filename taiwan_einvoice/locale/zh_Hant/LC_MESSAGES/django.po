@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-05 12:06+0800\n"
+"POT-Creation-Date: 2022-07-18 13:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,16 @@ msgstr ""
 
 msgid "Print Serial No.:{}"
 msgstr "列印序號: {}"
+
+msgid "There is no alarm in polling_upload_batch, just logging"
+msgstr ""
+
+msgid "Executed polling_upload_batch"
+msgstr ""
+
+#, python-brace-format
+msgid "Title: {title}"
+msgstr ""
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -247,6 +257,45 @@ msgstr "已經登出"
 msgid "Taiwan EInvoice Api"
 msgstr "臺灣電子發票 Api"
 
+msgid "Create time later than"
+msgstr "創建時間晚於"
+
+msgid "Create time earlier than"
+msgstr "創建時間早於"
+
+msgid "Search"
+msgstr "搜尋"
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr "共 %(total_count)s 筆"
+
+msgid "No."
+msgstr "No."
+
+msgid "Create Time"
+msgstr "創建時間"
+
+msgid "Creator"
+msgstr "創建者"
+
+msgctxt "auditlog"
+msgid "Type"
+msgstr "稽核類別"
+
+msgid "Turnkey Service"
+msgstr "Turnkey 服務"
+
+msgctxt "auditlog"
+msgid "Content Object"
+msgstr "內容物件"
+
+msgid "Is error?"
+msgstr "是否錯誤?"
+
+msgid "Log"
+msgstr "Log"
+
 msgid "Taiwan E-Invoice Management"
 msgstr "臺灣電子發票管理"
 
@@ -287,14 +336,14 @@ msgstr "註銷發票"
 msgid "Accounter Audit"
 msgstr "會計查驗"
 
+msgid "Audit Log"
+msgstr "稽核 Log"
+
 msgid "Print Log"
 msgstr "列印紀錄"
 
 msgid "Legal Entity"
 msgstr "買受人"
-
-msgid "Turnkey Service"
-msgstr "Turnkey 服務"
 
 msgid "Timezone"
 msgstr "時區"
@@ -342,9 +391,6 @@ msgstr "作廢時間晚於"
 msgid "Cancel time earlier than"
 msgstr "作廢時間早於"
 
-msgid "Search"
-msgstr "搜尋"
-
 msgid "Cancel E-Invoice"
 msgstr "作廢電子發票"
 
@@ -387,9 +433,6 @@ msgstr "備註(選填)"
 msgid "Limit to 200 words"
 msgstr "上限200個字"
 
-msgid "No."
-msgstr "No."
-
 msgctxt "taiwan_einvoice"
 msgid "Year Month Range"
 msgstr "期別"
@@ -423,10 +466,6 @@ msgstr ""
 "\n"
 "作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
 "            "
-
-#, python-format
-msgid "%(total_count)s records"
-msgstr "共 %(total_count)s 筆"
 
 msgid "Canceled Track No."
 msgstr "作廢發票的字軌號碼"

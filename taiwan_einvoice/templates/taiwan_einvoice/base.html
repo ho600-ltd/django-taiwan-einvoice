@@ -141,8 +141,9 @@
                                         <a role="presentation" class="dropdown-item nav_voideinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-list' %}?format=html">{% trans "Void EI." %}</a>
                                     {% endif %}
                                     {% if notready_TODO %}
-                                        <a role="presentation" class="dropdown-item nav_accounter_audit" href="#">{% trans "Accounter Audit" %}</a>
+                                        <a role="presentation" class="dropdown-item nav_accounteraudit" href="#">{% trans "Accounter Audit" %}</a>
                                     {% endif %}
+                                    <a role="presentation" class="dropdown-item nav_auditlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:auditlog-list' %}?format=html">{% trans "Audit Log" %}</a>
                                     {% if can_view_einvoiceprintlog_under_turnkeyservices.exists %}
                                         <a role="presentation" class="dropdown-item nav_einvoiceprintlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-list' %}?format=html">{% trans "Print Log" %}</a>
                                     {% endif %}

@@ -153,5 +153,5 @@ class TURNKEY_USER_PROFILEHtmlRenderer(TKWOriginHTMLRenderer):
 
 
 class EITurnkeyHtmlRenderer(TKWOriginHTMLRenderer):
-    template = _get_template_name('EITurnkey_list', sub_dir='turnkey_wrapper', show_template_filename=True)
-    content_template = _get_template_name('EITurnkey_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+    template = _get_template_name('eiturnkey_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('eiturnkey_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)

@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -214,3 +215,19 @@ class EITurnkeyModelViewSet(ModelViewSet):
         if CounterBasedOTPinRowForEITurnkeyPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
             self.permission_classes = (Or(IsSuperUser, CounterBasedOTPinRowForEITurnkeyPermission), )
         return super(self.__class__, self).get_permissions()
+
+    
+
+    @action(detail=True, methods=['post'])
+    def create_eiturnkey_batch(self, request, pk=None):
+        lg = logging.getLogger('turnkey_web')
+        eit = EITurnkey.objects.get(id=pk)
+        slug = request.data.get('slug', '')
+        mig = request.data.get('mig', '')
+        lg.debug("EITurnkey: {}".format(eit))
+        lg.debug("slug: {}".format(slug))
+        lg.debug("mig: {}".format(mig))
+
+        return Response({'return_code': '0',
+                         'return_code_message': 'SUCCESS',
+                         'eiturnkey_id': ''})
