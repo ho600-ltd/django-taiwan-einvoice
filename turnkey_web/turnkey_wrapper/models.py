@@ -264,7 +264,7 @@ class EITurnkeyBatch(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     update_time = models.DateTimeField(auto_now=True, db_index=True)
     ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
-    slug = models.CharField(max_length=14, unique=True)
+    slug = models.CharField(max_length=14)
     mig_choices = (
         ('A0101', _('B2B Exchange Invoice')),
         ('A0102', _('B2B Exchange Invoice Confirm')),
@@ -310,6 +310,11 @@ class EITurnkeyBatch(models.Model):
         ("M", _("Swith to Successful EI process manually(S-C)")),
     )
     status = models.CharField(max_length=1, default='7', choices=status_choices, db_index=True)
+
+
+    
+    class Meta:
+        unique_together = (('ei_turnkey', 'slug', ), )
 
 
 
