@@ -274,6 +274,7 @@ class EITurnkeyModelViewSet(ModelViewSet):
                     }
                     return Response(result)
 
+        eit_batch.update_to_new_status('8')
         twrc = TurnkeyWebReturnCode("0")
         result = {
             "return_code": twrc.return_code,

@@ -300,8 +300,8 @@ class EITurnkeyBatch(models.Model):
     turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2.1')
     status_choices = (
         ("7", _("Just created")),
-        ("8", _("Download from TEA")),
-        ("9", _("Export to Data/")),
+        ("8", _("Downloaded from TEA")),
+        ("9", _("Exported to Data/")),
         ("P", _("Preparing for EI(P)")),
         ("G", _("Uploaded to EI or Downloaded from EI(G)")),
         ("E", _("E Error for EI process(E)")),
@@ -315,6 +315,15 @@ class EITurnkeyBatch(models.Model):
     
     class Meta:
         unique_together = (('ei_turnkey', 'slug', ), )
+
+
+    def update_to_new_status(self, new_status):
+        status_list = [_i[0] for _i in self.status_choices]
+        if new_status and 1 == status_list.index(new_status) - status_list.index(self.status):
+            self.status = new_status
+            self.save()
+        else:
+            raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
 
 
 
