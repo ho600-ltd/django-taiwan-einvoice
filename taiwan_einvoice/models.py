@@ -821,6 +821,12 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    @property
+    def invoice_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def invoice_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     generate_no = models.CharField(max_length=40, default='', db_index=True)
     generate_no_sha1 = models.CharField(max_length=10, default='', db_index=True)
     batch_id = models.SmallIntegerField(default=0)
@@ -1123,6 +1129,49 @@ class EInvoice(models.Model):
         return _d
 
 
+    def export_json_for_mig(self):
+        er_field_d = {
+            "identifier": "Identifier",
+            "name": "Name",
+            "address": "Address",
+            "person_in_charge": "PersonInCharge",
+            "telephone_number": "TelephoneNumber",
+            "facsimile_number": "FacsimileNumber",
+            "email_address": "EmailAddress",
+            "customer_number": "CustomerNumber",
+            "role_remark": "RoleRemark"
+        }
+        er_j = {"seller": {}, "buyer": {}}
+        for er in ["seller", "buyer"]:
+            for k, json_k in er_field_d.items():
+                v = getattr(self, "{}_{}".format(er, k))
+                if v:
+                    er_j[er][json_k] = v
+        J = {self.mig_type.no: {
+                "Main": {
+                    "InvoiceNumber": self.track_no,
+                    "InvoiceDate": self.invoice_date,
+                    "InvoiceTime": self.invoice_time,
+                    "Seller": er_j["seller"],
+                    "Buyer": er_j["buyer"],
+                    "InvoiceType": self.seller_invoice_track_no.type,
+                    "DonateMark": self.donate_mark,
+                    "PrintMark": 'Y' if self.print_mark else 'N',
+                    "RandomNumber": self.random_number,
+                },
+                "Details": self.details,
+                "Amount": self.amounts,
+            }
+        }
+        if '1' == J[self.mig_type.no]["Main"]["DonateMark"]:
+            J[self.mig_type.no]["Main"]["NPOBAN"] = self.npoban
+        if self.carrier_type:
+            J[self.mig_type.no]["Main"]["CarrierType"] = self.carrier_type
+            J[self.mig_type.no]["Main"]["CarrierId1"] = self.carrier_id1
+            J[self.mig_type.no]["Main"]["CarrierId2"] = self.carrier_id2
+        return J
+
+
     def check_before_cancel_einvoice(self):
         return self.content_object.check_before_cancel_einvoice()
 
@@ -1384,7 +1433,7 @@ class UploadBatch(models.Model):
         ("0", _("Collecting")),
         ("1", _("Waiting for trigger(Stop Collecting)")),
         ("2", _("Noticed to TKW")),
-        ("3", _("Uploading to TKW")),
+        ("3", _("Exporting E-Invoice Body")),
         ("4", _("Uploaded to TKW")),
         ("p", _("Preparing for EI(P)")),
         ("g", _("Uploaded to EI or Downloaded from EI(G)")),
@@ -1404,12 +1453,15 @@ class UploadBatch(models.Model):
     def status_check(cls, statuss=[]):
         ubs = []
         for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
-            function_name = 'check_in_{}_status_then_update_to_the_next'.format(ub.status)
-            pair = [ub, function_name, ub.status]
-            if hasattr(ub, function_name):
-                getattr(*pair[:2])()
-                pair.append(ub.status)
-                ubs.append(pair)
+            while True:
+                function_name = 'check_in_{}_status_then_update_to_the_next'.format(ub.status)
+                pair = [ub, function_name, ub.status]
+                if hasattr(ub, function_name):
+                    getattr(*pair[:2])()
+                    pair.append(ub.status)
+                    ubs.append(pair)
+                if 3 == len(pair) or pair[2] == pair[3]:
+                    break
         return ubs
 
 
@@ -1420,6 +1472,80 @@ class UploadBatch(models.Model):
             self.save()
         else:
             raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
+
+
+#    def check_in_3_status_then_update_to_the_next(self, NEXT_STATUS='4'):
+#        if '3' != self.status: return
+#
+#        audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+#        audit_log = AuditLog(
+#            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+#            type=audit_type,
+#            turnkey_service=self.turnkey_service,
+#            content_object=self,
+#            is_error=False,
+#        )
+#
+#        bei_saved = []
+#        for bei in self.batcheinvoice_set.filter(body='').order_by('object_id'):
+#            bei.body = bei.content_object.export_json_for_mig()
+#            try:
+#                bei.save()
+#            except:
+#                audit_log.is_error = True
+#                audit_log.log = {
+#                    "function": "UploadBatch.check_in_2_status_then_update_to_the_next",
+#                    "position at": "bei.save()",
+#                    "problem bei": str(bei),
+#                    "exception": str(e)
+#                }
+#                audit_log.save()
+#                return
+#            else:
+#                bei_saved.append(str(bei))
+#        audit_log.log = {
+#            "saved_count": len(bei_saved),
+#            "objects": bei_saved,
+#        }
+#        audit_log.save()
+#        self.update_to_new_status(NEXT_STATUS)
+#
+#
+    def check_in_2_status_then_update_to_the_next(self, NEXT_STATUS='3'):
+        if '2' != self.status: return
+
+        audit_type = AuditType.objects.get(name="TEA_CEC_PROCESSING")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+
+        bei_saved = []
+        for bei in self.batcheinvoice_set.filter(body='').order_by('object_id'):
+            bei.body = bei.content_object.export_json_for_mig()
+            try:
+                bei.save()
+            except:
+                audit_log.is_error = True
+                audit_log.log = {
+                    "function": "UploadBatch.check_in_2_status_then_update_to_the_next",
+                    "position at": "bei.save()",
+                    "problem bei": str(bei),
+                    "exception": str(e)
+                }
+                audit_log.save()
+                return
+            else:
+                bei_saved.append(str(bei))
+        audit_log.log = {
+            "saved_count": len(bei_saved),
+            "objects": bei_saved,
+        }
+        audit_log.save()
+        self.update_to_new_status(NEXT_STATUS)
 
 
     def check_in_1_status_then_update_to_the_next(self, NEXT_STATUS='2'):
@@ -1617,6 +1743,10 @@ class BatchEInvoice(models.Model):
     body = models.JSONField()
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return "BatchEInvoice {}. {}".format(self.id, self.content_object)
 
 
 

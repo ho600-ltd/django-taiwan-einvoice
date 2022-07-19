@@ -18,6 +18,7 @@ class CounterBasedOTPinRowForEITurnkeyPermission(BasePermission):
     ACTION_PERMISSION_MAPPING = {
         "retrieve": (True, ),
         "create_eiturnkey_batch": (True, ),
+        "upload_eiturnkey_batch_einvoice_bodys": (True, ),
     }
 
 

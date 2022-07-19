@@ -221,6 +221,39 @@ class EITurnkeyModelViewSet(ModelViewSet):
     
 
     @action(detail=True, methods=['post'])
+    def upload_eiturnkey_batch_einvoice_bodys(self, request, pk=None):
+        lg = logging.getLogger('turnkey_web')
+        eit = EITurnkey.objects.get(id=pk)
+
+        bodys = request.data.get('bodys', '')
+        lg.debug("EITurnkey: {}".format(eit))
+        lg.debug("body: {}".format(body))
+
+        # eitb = EITurnkeyBatch(ei_turnkey=eit,
+        #                       slug=slug,
+        #                       mig=mig
+        #                      )
+        # try:
+        #     eitb.save()
+        # except Exception as e:
+        #     twrc = TurnkeyWebReturnCode("001")
+        #     result = {
+        #         "return_code": twrc.return_code,
+        #         "return_code_message": twrc.message,
+        #         "message_detail": str(e),
+        #         "eiturnkey_id": eitb.id,
+        #     }
+        # else:
+        #     twrc = TurnkeyWebReturnCode("0")
+        #     result = {
+        #         "return_code": twrc.return_code,
+        #         "return_code_message": twrc.message,
+        #         "eiturnkey_id": eitb.id,
+        #     }
+        # return Response(result)
+    
+
+    @action(detail=True, methods=['post'])
     def create_eiturnkey_batch(self, request, pk=None):
         lg = logging.getLogger('turnkey_web')
         eit = EITurnkey.objects.get(id=pk)
