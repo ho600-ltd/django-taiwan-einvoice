@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, logging
+import pytz, datetime, hmac, requests, logging, zlib, json
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -1474,43 +1474,57 @@ class UploadBatch(models.Model):
             raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
 
 
-#    def check_in_3_status_then_update_to_the_next(self, NEXT_STATUS='4'):
-#        if '3' != self.status: return
-#
-#        audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
-#        audit_log = AuditLog(
-#            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
-#            type=audit_type,
-#            turnkey_service=self.turnkey_service,
-#            content_object=self,
-#            is_error=False,
-#        )
-#
-#        bei_saved = []
-#        for bei in self.batcheinvoice_set.filter(body='').order_by('object_id'):
-#            bei.body = bei.content_object.export_json_for_mig()
-#            try:
-#                bei.save()
-#            except:
-#                audit_log.is_error = True
-#                audit_log.log = {
-#                    "function": "UploadBatch.check_in_2_status_then_update_to_the_next",
-#                    "position at": "bei.save()",
-#                    "problem bei": str(bei),
-#                    "exception": str(e)
-#                }
-#                audit_log.save()
-#                return
-#            else:
-#                bei_saved.append(str(bei))
-#        audit_log.log = {
-#            "saved_count": len(bei_saved),
-#            "objects": bei_saved,
-#        }
-#        audit_log.save()
-#        self.update_to_new_status(NEXT_STATUS)
-#
-#
+    def check_in_3_status_then_update_to_the_next(self, NEXT_STATUS='4'):
+        if '3' != self.status: return
+
+        audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+
+        bodys = [(bei.id, bei.body) for bei in self.batcheinvoice_set.order_by('object_id')]
+        gz_bodys = zlib.compress(json.dumps(bodys).encode('utf-8'))
+        url = self.turnkey_service.tkw_endpoint + '{action}/'.format(action="upload_eiturnkey_batch_einvoice_bodys")
+        counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+        data = {"slug": self.slug}
+        files = {"gz_bodys": gz_bodys}
+        try:
+            response = requests.post(url,
+                                     params=payload,
+                                     data=data,
+                                     files=files,
+                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "UploadBatch.check_in_3_status_then_update_to_the_next",
+                "url": url,
+                "position at": "requests.post(...)",
+                "params": payload,
+                "data": data,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+            audit_log.type = audit_type
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                audit_log.is_error = False
+                audit_log.save()
+                self.update_to_new_status(NEXT_STATUS)
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
+
     def check_in_2_status_then_update_to_the_next(self, NEXT_STATUS='3'):
         if '2' != self.status: return
 

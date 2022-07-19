@@ -23,6 +23,8 @@ class TurnkeyWebReturnCode(object):
     _ERRORS = {
         "0": ["成功"],
         "001": ["儲存 EITurnkeyBatch 失敗"],
+        "002": ["解析 gz_bodys 失敗"],
+        "003": ["儲存 EITurnkeyBatchEInvoice 失敗"],
         "999": ["未知失敗"],
     }
     

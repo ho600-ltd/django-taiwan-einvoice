@@ -1,4 +1,4 @@
-import logging
+import logging, json, zlib
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -26,6 +26,7 @@ from turnkey_wrapper.models import (
 
     EITurnkey,
     EITurnkeyBatch,
+    EITurnkeyBatchEInvoice,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
@@ -225,32 +226,60 @@ class EITurnkeyModelViewSet(ModelViewSet):
         lg = logging.getLogger('turnkey_web')
         eit = EITurnkey.objects.get(id=pk)
 
-        bodys = request.data.get('bodys', '')
-        lg.debug("EITurnkey: {}".format(eit))
-        lg.debug("body: {}".format(body))
+        slug = request.data.get('slug', '')
+        lg.debug("slug: {}".format(slug))
+        parse_bodys = True
+        try:
+            bodys = json.loads(zlib.decompress(request.data['gz_bodys'].read()))
+        except:
+            parse_bodys = False
+        else:
+            if 0 >= len(bodys):
+                parse_bodys = False
+        lg.debug("bodys count: {}".format(len(bodys)))
+        if not parse_bodys:
+            twrc = TurnkeyWebReturnCode("002")
+            result = {
+                "return_code": twrc.return_code,
+                "return_code_message": twrc.message,
+                "slug": slug,
+            }
+            return Response(result)
 
-        # eitb = EITurnkeyBatch(ei_turnkey=eit,
-        #                       slug=slug,
-        #                       mig=mig
-        #                      )
-        # try:
-        #     eitb.save()
-        # except Exception as e:
-        #     twrc = TurnkeyWebReturnCode("001")
-        #     result = {
-        #         "return_code": twrc.return_code,
-        #         "return_code_message": twrc.message,
-        #         "message_detail": str(e),
-        #         "eiturnkey_id": eitb.id,
-        #     }
-        # else:
-        #     twrc = TurnkeyWebReturnCode("0")
-        #     result = {
-        #         "return_code": twrc.return_code,
-        #         "return_code_message": twrc.message,
-        #         "eiturnkey_id": eitb.id,
-        #     }
-        # return Response(result)
+        eit_batch = eit.eiturnkeybatch_set.get(slug=slug)
+        for batch_einvoice_id_body in bodys:
+            batch_einvoice_id, body = batch_einvoice_id_body
+            lg.debug("batch_einvoice_id, body: {} {}".format(batch_einvoice_id, body))
+            try:
+                eitbei = eit_batch.eiturnkeybatcheinvoice_set.get(batch_einvoice_id=batch_einvoice_id)
+            except EITurnkeyBatchEInvoice.DoesNotExist:
+                eitbei = EITurnkeyBatchEInvoice(
+                    ei_turnkey_batch=eit_batch,
+                    batch_einvoice_id=batch_einvoice_id,
+                )
+            if eitbei.result_code:
+                pass
+            else:
+                eitbei.body = body
+                try:
+                    eitbei.save()
+                except Exception as e:
+                    twrc = TurnkeyWebReturnCode("003")
+                    result = {
+                        "return_code": twrc.return_code,
+                        "return_code_message": twrc.message,
+                        "slug": slug,
+                        "batch_einvoice_id": batch_einvoice_id,
+                        "message_detail": str(e),
+                    }
+                    return Response(result)
+
+        twrc = TurnkeyWebReturnCode("0")
+        result = {
+            "return_code": twrc.return_code,
+            "return_code_message": twrc.message,
+        }
+        return Response(result)
     
 
     @action(detail=True, methods=['post'])
