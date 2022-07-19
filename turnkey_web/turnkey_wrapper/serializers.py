@@ -34,6 +34,8 @@ from turnkey_wrapper.models import (
     TURNKEY_USER_PROFILE,
 
     EITurnkey,
+    EITurnkeyBatch,
+    EITurnkeyBatchEInvoice,
 )
 
 
@@ -179,3 +181,26 @@ class EITurnkeySerializer(ModelSerializer):
         ]
 
 
+
+class EITurnkeyBatchSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeybatch-detail")
+    ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
+    count = IntegerField(read_only=True)
+    
+
+
+    class Meta:
+        model = EITurnkeyBatch
+        fields = '__all__'
+
+
+
+class EITurnkeyBatchEInvoiceSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeybatcheinvoice-detail")
+    ei_turnkey_batch_dict = EITurnkeyBatchSerializer(read_only=True, source="ei_turnkey_batch")
+    
+
+
+    class Meta:
+        model = EITurnkeyBatchEInvoice
+        fields = '__all__'

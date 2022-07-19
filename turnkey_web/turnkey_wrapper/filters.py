@@ -20,6 +20,8 @@ from turnkey_wrapper.models import (
     TURNKEY_USER_PROFILE,
 
     EITurnkey,
+    EITurnkeyBatch,
+    EITurnkeyBatchEInvoice,
 )
 
 
@@ -140,3 +142,46 @@ class EITurnkeyFilter(filters.FilterSet):
             "party_id": ("icontains", ),
             "routing_id": ("icontains", ),
         }
+
+
+
+class EITurnkeyBatchFilter(filters.FilterSet):
+    class Meta:
+        model = EITurnkeyBatch
+        fields = {
+            "slug": ("icontains", ),
+            "mig": ("exact", ),
+            "turnkey_version": ("exact", ),
+            "status": ("exact", ),
+        }
+
+
+
+class EITurnkeyBatchEInvoiceFilter(filters.FilterSet):
+    ei_turnkey_batch__slug__icontains = filters.CharFilter(method='filter_ei_turnkey_batch__slug__icontains')
+    ei_turnkey_batch__mig = filters.CharFilter(method='filter_ei_turnkey_batch__mig')
+    invoice_number_in_body = filters.CharFilter(method='filter_invoice_number_in_body')
+    class Meta:
+        model = EITurnkeyBatchEInvoice
+        fields = {
+            "ei_turnkey_batch": ("exact", ),
+            "batch_einvoice_id": ("exact", ),
+        }
+    
+
+
+    def filter_ei_turnkey_batch__slug__icontains(self, queryset, name, value):
+        return queryset.filter(ei_turnkey_batch__slug__icontains=value)
+    
+
+    def filter_ei_turnkey_batch__mig(self, queryset, name, value):
+        return queryset.filter(ei_turnkey_batch__mig=value)
+    
+
+    def filter_invoice_number_in_body(self, queryset, name, value):
+        querys = [Q(**{"body__{}__Main__InvoiceNumber__icontains".format(field): value})
+                  for field in ["C0401", "C0501", "C0701"]]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)

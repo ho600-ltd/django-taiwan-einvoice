@@ -21,7 +21,7 @@
     </thead>
     <tbody>
         {% for obj in data.results %}
-            <tr escposweb_id="{{ escposweb.id }}">
+            <tr obj_id="{{ obj.id }}">
                 <td field="TASK">{{ obj.TASK }}</td>
                 <td field="ENABLE">{{ obj.ENABLE }}</td>
                 <td field="SCHEDULE_TYPE">{{ obj.SCHEDULE_TYPE }}</td>

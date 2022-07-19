@@ -200,7 +200,10 @@ $(function () {
             'PARTY_ID__icontains',
             'transport_id__icontains',
             'party_id__icontains',
-            'routing_id__icontains'
+            'routing_id__icontains',
+            'slug__icontains',
+            'ei_turnkey_batch__slug__icontains',
+            'invoice_number_in_body'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);
@@ -212,7 +215,11 @@ $(function () {
             'is_original_copy',
             'is_active',
             'print_mark',
-            'cancel_einvoice_type'
+            'cancel_einvoice_type',
+            'mig',
+            'turnkey_version',
+            'status',
+            'ei_turnkey_batch__mig'
         ];
         for (var param of select_kind_params) {
             var select_kind_param = url.searchParams.get(param);

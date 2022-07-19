@@ -29,7 +29,7 @@
     </thead>
     <tbody>
         {% for obj in data.results %}
-            <tr escposweb_id="{{ escposweb.id }}">
+            <tr obj_id="{{ obj.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
                 <td field="EVENTDTS">{{ obj.EVENTDTS }}</td>
                 <td field="PARTY_ID">{{ obj.PARTY_ID }}</td>

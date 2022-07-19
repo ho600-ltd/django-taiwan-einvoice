@@ -310,6 +310,9 @@ class EITurnkeyBatch(models.Model):
         ("M", _("Swith to Successful EI process manually(S-C)")),
     )
     status = models.CharField(max_length=1, default='7', choices=status_choices, db_index=True)
+    @property
+    def count(self):
+        return self.eiturnkeybatcheinvoice_set.count()
 
 
     

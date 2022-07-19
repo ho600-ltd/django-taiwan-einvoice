@@ -42,6 +42,8 @@ from turnkey_wrapper.serializers import (
     TURNKEY_USER_PROFILESerializer,
 
     EITurnkeySerializer,
+    EITurnkeyBatchSerializer,
+    EITurnkeyBatchEInvoiceSerializer,
 )
 from turnkey_wrapper.filters import (
     FROM_CONFIGFilter,
@@ -57,6 +59,8 @@ from turnkey_wrapper.filters import (
     TURNKEY_USER_PROFILEFilter,
 
     EITurnkeyFilter,
+    EITurnkeyBatchFilter,
+    EITurnkeyBatchEInvoiceFilter,
 )
 from turnkey_wrapper.renderers import (
     TKWBrowsableAPIRenderer,
@@ -73,6 +77,8 @@ from turnkey_wrapper.renderers import (
     TURNKEY_USER_PROFILEHtmlRenderer,
 
     EITurnkeyHtmlRenderer,
+    EITurnkeyBatchHtmlRenderer,
+    EITurnkeyBatchEInvoiceHtmlRenderer,
 )
 
 
@@ -315,3 +321,27 @@ class EITurnkeyModelViewSet(ModelViewSet):
                 "eiturnkey_id": eitb.id,
             }
         return Response(result)
+
+
+
+class EITurnkeyBatchModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyBatch.objects.all().order_by('-id')
+    serializer_class = EITurnkeyBatchSerializer
+    filter_class = EITurnkeyBatchFilter
+    renderer_classes = (EITurnkeyBatchHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+
+
+class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUser, )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyBatchEInvoice.objects.all().order_by('-id')
+    serializer_class = EITurnkeyBatchEInvoiceSerializer
+    filter_class = EITurnkeyBatchEInvoiceFilter
+    renderer_classes = (EITurnkeyBatchEInvoiceHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+

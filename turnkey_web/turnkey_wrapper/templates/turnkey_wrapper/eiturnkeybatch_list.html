@@ -1,0 +1,104 @@
+{% extends 'turnkey_wrapper/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{% static "turnkey_wrapper/eiturnkeybatch_list.js" %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="slug__icontains">{% trans "slug contains" %}</label>
+                    <div class="input-group" id="slug__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="mig">{% trans "MIG" %}</label>
+                    <div class="input-group" id="mig" data-target-input="nearest">
+                        <select class="form-control" data-target="#mig" name="mig" id="id_mig">
+                            <option value=""></option>
+                            <option value="C0401">C0401</option>
+                            <option value="C0501">C0501</option>
+                            <option value="C0701">C0701</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_version">{% trans "Turnkey MIG Version" %}</label>
+                    <div class="input-group" id="turnkey_version" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_version" name="turnkey_version" id="id_turnkey_version">
+                            <option value="3.2.1">3.2.1</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="status">{% trans "Status" %}</label>
+                    <div class="input-group" id="status" data-target-input="nearest">
+                        <select class="form-control" data-target="#status" name="status" id="id_status">
+                            <option value="7">{% trans "Just created" %}</option>
+                            <option value="8">{% trans "Downloaded from TEA" %}</option>
+                            <option value="9">{% trans "Exported to Data/" %}</option>
+                        {% comment %}
+        ("P", _("Preparing for EI(P)")),
+        ("G", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("E", _("E Error for EI process(E)")),
+        ("I", _("I Error for EI process(I)")),
+        ("C", _("Successful EI process(C)")),
+        ("M", _("Swith to Successful EI process manually(S-C)")),
+                        {% endcomment %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}

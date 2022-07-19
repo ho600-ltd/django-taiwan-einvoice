@@ -1,0 +1,32 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>ei_turnkey_batch</th>
+            <th>batch_einvoice_id</th>
+            <th>body</th>
+            <th>result_code</th>
+            <th>pass_if_error</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no">{{ forloop.counter }}.</td>
+                <td field="ei_turnkey_batch">{{ obj.ei_turnkey_batch_dict.slug }}</td>
+                <td field="batch_einvoice_id">{{ obj.batch_einvoice_id }}</td>
+                <td field="body"><pre>{{ obj.body | pprint }}</pre></td>
+                <td field="result_code">{{ obj.result_code }}</td>
+                <td field="pass_if_error">{{ obj.pass_if_error }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

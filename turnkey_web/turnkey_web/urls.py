@@ -49,8 +49,8 @@ router.register('TURNKEY_TRANSPORT_CONFIG', views.TURNKEY_TRANSPORT_CONFIGModelV
 router.register('TURNKEY_USER_PROFILE', views.TURNKEY_USER_PROFILEModelViewSet, basename="turnkeyuserprofile")
 
 router.register('EITurnkey', views.EITurnkeyModelViewSet, basename="eiturnkey")
-# router.register('EITurnkeyBatch', views.EITurnkeyBatchModelViewSet, basename="eiturnkeybatch")
-# router.register('EITurnkeyBatchEInvoice', views.EITurnkeyBatchEInvoiceModelViewSet, basename="eiturnkeybatcheinvoice")
+router.register('EITurnkeyBatch', views.EITurnkeyBatchModelViewSet, basename="eiturnkeybatch")
+router.register('EITurnkeyBatchEInvoice', views.EITurnkeyBatchEInvoiceModelViewSet, basename="eiturnkeybatcheinvoice")
 
 app_name = 'turnkey_web'
 urlpatterns = [
