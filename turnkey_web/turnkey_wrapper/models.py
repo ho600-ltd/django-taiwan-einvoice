@@ -1,9 +1,10 @@
-import os, re
+import os, re, logging, datetime, pathlib, shutil, glob
 from json2xml import json2xml
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from taiwan_einvoice.libs import CounterBasedOTPinRow
+from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
 
 
 
@@ -253,8 +254,23 @@ class EITurnkey(models.Model):
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    
+
+    @property
+    def B2BExchangeUpCastSRC(self):
+        return os.path.join(self.data_abspath, "UpCast", "B2BEXCHANGE", "{mig}", "SRC")
 
     
+    @property
+    def B2BStorageUpCastSRC(self):
+        return os.path.join(self.data_abspath, "UpCast", "B2BSTORAGE", "{mig}", "SRC")
+
+    
+    @property
+    def B2CStorageUpCastSRC(self):
+        return os.path.join(self.data_abspath, "UpCast", "B2CSTORAGE", "{mig}", "SRC")
+
+
     def verify_counter_based_otp_in_row(self, otps):
         n_times_in_a_row = 3
         key = '{}-{}-{}-{}'.format(self.routing_id, self.hash_key, self.transport_id, self.party_id)
@@ -305,7 +321,7 @@ class EITurnkeyBatch(models.Model):
     )
     mig = models.CharField(max_length=5, choices=mig_choices, default='C0401')
     version_choices = (
-        ('3.2', _('3.2')),
+        ('3.2', 'v32'),
     )
     turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2')
     status_choices = (
@@ -337,6 +353,89 @@ class EITurnkeyBatch(models.Model):
             self.save()
         else:
             raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
+        return self.status
+    
+
+    def update_einvoice_bodys(self, bodys):
+        if "7" != self.status:
+            return False
+        else:
+            NEXT_STATUS_IN_GOOD = '8'
+
+        lg = logging.getLogger('turnkey_web')
+        for line in bodys:
+            lg.debug("line: {}".format(line))
+            batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body = line
+            lg.debug("batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body: {} {}".format(batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body))
+            try:
+                eitbei = self.eiturnkeybatcheinvoice_set.get(batch_einvoice_id=batch_einvoice_id)
+            except EITurnkeyBatchEInvoice.DoesNotExist:
+                eitbei = EITurnkeyBatchEInvoice(
+                    ei_turnkey_batch=self,
+                    batch_einvoice_id=batch_einvoice_id,
+                )
+            if eitbei.body != "" or eitbei.result_code or eitbei.pass_if_error:
+                pass
+            else:
+                try:
+                    eitbei.batch_einvoice_begin_time = datetime.datetime.strptime(batch_einvoice_begin_time, "%Y-%m-%d %H:%M:%S%z")
+                    eitbei.batch_einvoice_end_time = datetime.datetime.strptime(batch_einvoice_end_time, "%Y-%m-%d %H:%M:%S%z")
+                except Exception as e:
+                    twrc = TurnkeyWebReturnCode("003")
+                    result = {
+                        "return_code": twrc.return_code,
+                        "return_code_message": twrc.message,
+                        "slug": self.slug,
+                        "batch_einvoice_id": batch_einvoice_id,
+                        "message_detail": str(e),
+                    }
+                    return result
+                eitbei.batch_einvoice_track_no = batch_einvoice_track_no
+                eitbei.body = body
+                try:
+                    eitbei.save()
+                except Exception as e:
+                    twrc = TurnkeyWebReturnCode("004")
+                    result = {
+                        "return_code": twrc.return_code,
+                        "return_code_message": twrc.message,
+                        "slug": self.slug,
+                        "batch_einvoice_id": batch_einvoice_id,
+                        "message_detail": str(e),
+                    }
+                    return result
+        
+        self.update_to_new_status(NEXT_STATUS_IN_GOOD)
+        twrc = TurnkeyWebReturnCode("0")
+        result = {
+            "return_code": twrc.return_code,
+            "return_code_message": twrc.message,
+        }
+        return result
+
+
+    def export_to_data_abspath(self):
+        if "8" != self.status:
+            return False
+        else:
+            NEXT_STATUS_IN_GOOD = '9'
+
+        tmp_data_path = os.path.join(self.ei_turnkey.tmpdata_abspath, self.slug)
+        pathlib.Path(tmp_data_path).mkdir(parents=True, exist_ok=True)
+        for eitbei in self.eiturnkeybatcheinvoice_set.filter(result_code='', pass_if_error=False):
+            tmp_file_path = os.path.join(tmp_data_path,
+                "{routing_id}_{mig}_{version}_{track_no}.xml".format(routing_id=self.ei_turnkey.routing_id,
+                                                                     mig=self.mig,
+                                                                     version=self.get_turnkey_version_display(),
+                                                                     track_no=eitbei.batch_einvoice_track_no))
+            f = open(tmp_file_path, 'w')
+            f.write(eitbei.mig_xml)
+            f.close()
+        for f in glob.glob(os.path.join(tmp_data_path, "*")):
+            shutil.move(f, self.ei_turnkey.B2CStorageUpCastSRC.format(mig=self.mig))
+        
+        self.update_to_new_status(NEXT_STATUS_IN_GOOD)
+        return True
 
 
 
@@ -351,6 +450,19 @@ class EITurnkeyBatchEInvoice(models.Model):
     pass_if_error = models.BooleanField(default=False)
 
 
+    @property
+    def mig_xml(self):
+        for k, v in self.body.items():
+            if 'C0401' == k:
+                j2mx = C0401JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            elif 'C0501' == k:
+                j2mx = C0501JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            elif 'C0701' == k:
+                j2mx = C0701JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            return j2mx.export_xml()
+
+
+
 
 XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
 class C0401JSON2MIGXMl(object):
@@ -358,14 +470,6 @@ class C0401JSON2MIGXMl(object):
     base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:{version} C0401.xsd">
     {xml_body}
 </Invoice>"""
-    xml_body_template = """
-<Main>
-</Main>
-<Details>
-</Details>
-<Amounts>
-</Amounts>
-"""
 
 
     def __init__(self, json_data, version="3.2"):

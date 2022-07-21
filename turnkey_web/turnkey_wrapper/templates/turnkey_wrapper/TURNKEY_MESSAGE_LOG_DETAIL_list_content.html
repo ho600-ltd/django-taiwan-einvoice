@@ -23,6 +23,7 @@
     <tbody>
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
+                <td field="no">{{ forloop.counter }}.</td>
                 <td field="SEQNO_SUBSEQNO_TASK">{{ obj.SEQNO_SUBSEQNO_TASK }}</td>
                 <td field="SEQNO">{{ obj.SEQNO }}</td>
                 <td field="SUBSEQNO">{{ obj.SUBSEQNO }}</td>
