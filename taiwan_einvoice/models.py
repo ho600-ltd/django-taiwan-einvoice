@@ -284,6 +284,11 @@ class GenerateTimeNotFollowNoOrderError(Exception):
 
 
 
+class EInvoiceDetailsError(Exception):
+    pass
+
+
+
 class EInvoiceFieldError(Exception):
     pass
 
@@ -740,6 +745,8 @@ class SellerInvoiceTrackNo(models.Model):
             ei.save()
         except IntegrityError:
             raise GenerateTimeNotFollowNoOrderError("Duplicated no: {}".format(data['no']))
+        except EInvoiceDetailsError as e:
+            raise e
         return ei
 
 
@@ -1224,6 +1231,8 @@ class EInvoice(models.Model):
             raise ContentObjectError(_("Content Object: {} has no 'check_before_cancel_einvoice' method").format(self.content_object))
         elif not hasattr(self.content_object, 'post_cancel_einvoice'):
             raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
+        elif 999 <= len(self.details):
+            raise EInvoiceDetailsError(_("Max records in details is 999"))
         elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
