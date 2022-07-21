@@ -169,7 +169,7 @@ class EITurnkeySerializer(ModelSerializer):
         fields = [
             "id",
             "resource_uri",
-            "execute_abspath",
+            "tmpdata_abspath",
             "data_abspath",
             "mask_hash_key",
             "transport_id",

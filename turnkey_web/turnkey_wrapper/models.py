@@ -1,3 +1,5 @@
+import os, re
+from json2xml import json2xml
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -237,7 +239,7 @@ class TURNKEY_USER_PROFILE(models.Model):
 
 
 class EITurnkey(models.Model):
-    execute_abspath = models.CharField(max_length=755)
+    tmpdata_abspath = models.CharField(max_length=755)
     data_abspath = models.CharField(max_length=755)
     hash_key = models.CharField(max_length=40)
     transport_id = models.CharField(max_length=10)
@@ -258,6 +260,14 @@ class EITurnkey(models.Model):
         key = '{}-{}-{}-{}'.format(self.routing_id, self.hash_key, self.transport_id, self.party_id)
         cbotpr = CounterBasedOTPinRow(SECRET=key.encode('utf-8'), N_TIMES_IN_A_ROW=n_times_in_a_row)
         return cbotpr.verify_otps(otps)
+    
+
+    def save(self, *args, **kwargs):
+        if not os.access(self.data_abspath, os.W_OK):
+            raise Exception("data_abspath({}) can not be writeable".format(self.data_abspath))
+        elif not os.access(self.tmpdata_abspath, os.W_OK):
+            raise Exception("tmpdata_abspath({}) can not be writeable".format(self.tmpdata_abspath))
+        return super(EITurnkey, self).save(*args, **kwargs)
 
 
 class EITurnkeyBatch(models.Model):
@@ -295,9 +305,9 @@ class EITurnkeyBatch(models.Model):
     )
     mig = models.CharField(max_length=5, choices=mig_choices, default='C0401')
     version_choices = (
-        ('3.2.1', _('3.2.1')),
+        ('3.2', _('3.2')),
     )
-    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2.1')
+    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2')
     status_choices = (
         ("7", _("Just created")),
         ("8", _("Downloaded from TEA")),
@@ -340,3 +350,68 @@ class EITurnkeyBatchEInvoice(models.Model):
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
 
+
+
+XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
+class C0401JSON2MIGXMl(object):
+    versions = ["3.2"]
+    base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:{version} C0401.xsd">
+    {xml_body}
+</Invoice>"""
+    xml_body_template = """
+<Main>
+</Main>
+<Details>
+</Details>
+<Amounts>
+</Amounts>
+"""
+
+
+    def __init__(self, json_data, version="3.2"):
+        if version not in self.versions:
+            raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
+        self.version = version
+        self.json_data = self.regulate_json_data(json_data)
+    
+
+    def regulate_json_data(self, json_data):
+        def _append_sequence_number(index0, d):
+            d["SequenceNumber"] = "{:03d}".format(index0+1)
+            return d
+        json_data["Details"] = [{"ProductItem": _append_sequence_number(_i, _pi)}
+            for _i, _pi in enumerate(json_data["Details"])
+        ]
+
+        if "FreeTaxSalesAmount" not in json_data["Amount"]:
+            json_data["Amount"]["FreeTaxSalesAmount"] = '0'
+        if "ZeroTaxSalesAmount" not in json_data["Amount"]:
+            json_data["Amount"]["ZeroTaxSalesAmount"] = '0'
+        return json_data
+    
+
+    def export_xml(self):
+        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
+
+    
+    def get_xml_body(self):
+        xml_body = ''
+        for elm in ["Main", "Details", "Amount"]:
+            xml = json2xml.Json2xml(self.json_data[elm], wrapper=elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+            xml_body += XML_VERSION_RE.sub("", xml.decode('utf-8'))
+        return xml_body
+
+
+class C0501JSON2MIGXMl(object):
+    """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:C0501:3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0501:3.1 C0501.xsd">
+</CancelInvoice>"""
+    def __init__(self, json_data):
+        pass
+
+
+
+class C0701JSON2MIGXMl(object):
+    """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:C0701:3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0701:3.1 C0701.xsd">
+</VoidInvoice>"""
+    def __init__(self, json_data):
+        pass

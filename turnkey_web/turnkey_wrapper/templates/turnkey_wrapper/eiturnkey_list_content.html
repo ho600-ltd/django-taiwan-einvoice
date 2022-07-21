@@ -10,7 +10,7 @@
     <thead>
         <tr>
             <th>No.</th>
-            <th>execute_abspath</th>
+            <th>tmpdata_abspath</th>
             <th>data_abspath</th>
             <th>hash_key</th>
             <th>transport_id</th>
@@ -25,7 +25,7 @@
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
-                <td field="execute_abspath">{{ obj.execute_abspath }}</td>
+                <td field="tmpdata_abspath">{{ obj.tmpdata_abspath }}</td>
                 <td field="data_abspath">{{ obj.data_abspath }}</td>
                 <td field="mask_hash_key">{{ obj.mask_hash_key }}</td>
                 <td field="transport_id">{{ obj.transport_id }}</td>
