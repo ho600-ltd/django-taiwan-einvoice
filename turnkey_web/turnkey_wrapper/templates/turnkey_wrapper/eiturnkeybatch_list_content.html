@@ -24,8 +24,8 @@
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
                 <td field="no">{{ forloop.counter }}.</td>
-                <td field="create_time">{{ obj.create_time }}</td>
-                <td field="update_time">{{ obj.update_time }}</td>
+                <td class="datetime" field="create_time" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
+                <td class="datetime" field="update_time" value="{{ obj.update_time }}" format="Y-m-d H:i:s"></td>
                 <td field="ei_turnkey">
                     <div>{{ obj.ei_turnkey_dict.transport_id }}</div>
                     <div>{{ obj.ei_turnkey_dict.party_id }}</div>

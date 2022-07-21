@@ -24,7 +24,8 @@ class TurnkeyWebReturnCode(object):
         "0": ["成功"],
         "001": ["儲存 EITurnkeyBatch 失敗"],
         "002": ["解析 gz_bodys 失敗"],
-        "003": ["儲存 EITurnkeyBatchEInvoice 失敗"],
+        "003": ["解析 batch_einvoice_begin_time 或 batch_einvoice_begin_time 失敗"],
+        "004": ["儲存 EITurnkeyBatchEInvoice 失敗"],
         "999": ["未知失敗"],
     }
     

@@ -333,6 +333,9 @@ class EITurnkeyBatch(models.Model):
 class EITurnkeyBatchEInvoice(models.Model):
     ei_turnkey_batch = models.ForeignKey(EITurnkeyBatch, on_delete=models.DO_NOTHING)
     batch_einvoice_id = models.PositiveIntegerField(default=0)
+    batch_einvoice_begin_time = models.DateTimeField()
+    batch_einvoice_end_time = models.DateTimeField()
+    batch_einvoice_track_no = models.CharField(max_length=10)
     body = models.JSONField(default="")
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)

@@ -119,14 +119,25 @@
                                 </a>
                             </div>
                         </li>
-                        <li class="nav-item nav_EITurnkey" role="presentation">
-                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkey-list' %}">EITurnkey</a>
-                        </li>
-                        <li class="nav-item nav_EITurnkeyBatch" role="presentation">
-                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatch-list' %}">EITurnkeyBatch</a>
-                        </li>
-                        <li class="nav-item nav_EITurnkeyBatchEInvoice" role="presentation">
-                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}">EITurnkeyBatchEInvoice</a>
+                        <li class="dropdown nav-item nav_operation">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{% trans "Operation" %}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_EITurnkey"
+                                    href="{% url 'turnkeywrapperapi:eiturnkey-list' %}">
+                                    {% trans "EI Turnkey" %}
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_EITurnkeyBatch"
+                                    href="{% url 'turnkeywrapperapi:eiturnkeybatch-list' %}">
+                                    {% trans "EI Turnkey Batch" %}
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_EITurnkeyBatchEInvoice"
+                                    href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}">
+                                    {% trans "EI Turnkey BatchE Invoice" %}
+                                </a>
+                            </div>
                         </li>
                         <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"

@@ -649,7 +649,7 @@ class SellerInvoiceTrackNo(models.Model):
     def year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
-        end_month = begin_month + 1
+        end_month = self.end_time.astimezone(TAIPEI_TIMEZONE).month
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track = models.CharField(max_length=2, db_index=True)
     begin_no = models.IntegerField(db_index=True)
@@ -1486,7 +1486,11 @@ class UploadBatch(models.Model):
             is_error=False,
         )
 
-        bodys = [(bei.id, bei.body) for bei in self.batcheinvoice_set.order_by('object_id')]
+        bodys = [(bei.id,
+                  bei.begin_time.strftime("%Y-%m-%d %H:%M:%S%z"),
+                  bei.end_time.strftime("%Y-%m-%d %H:%M:%S%z"),
+                  bei.track_no,
+                  bei.body) for bei in self.batcheinvoice_set.order_by('object_id')]
         gz_bodys = zlib.compress(json.dumps(bodys).encode('utf-8'))
         url = self.turnkey_service.tkw_endpoint + '{action}/'.format(action="upload_eiturnkey_batch_einvoice_bodys")
         counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
@@ -1754,6 +1758,9 @@ class BatchEInvoice(models.Model):
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
     content_object = GenericForeignKey('content_type', 'object_id')
+    begin_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    track_no = models.CharField(max_length=10)
     body = models.JSONField()
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)

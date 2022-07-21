@@ -1,5 +1,8 @@
 $(function () {
-    $(".nav_EITurnkeyBatch").addClass("nav_active");
+    $(".nav_operation").addClass("nav_active");
+    $('.dropdown-menu a').removeClass('active');
+    $(".nav_EITurnkeyBatch").addClass("active");
+
 
     turnkey_wrapper_site = new turnkey_wrapper_site('turnkey_wrapper_site', {
         $SUCCESS_MODAL: $('#success_modal'),

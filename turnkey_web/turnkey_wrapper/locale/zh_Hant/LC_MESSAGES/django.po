@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-12 10:18+0800\n"
+"POT-Creation-Date: 2022-07-21 08:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,105 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "B2B Exchange Invoice"
+msgstr ""
+
+msgid "B2B Exchange Invoice Confirm"
+msgstr ""
+
+msgid "B2B Exchange Allowance"
+msgstr ""
+
+msgid "B2B Exchange Allowance Confirm"
+msgstr ""
+
+msgid "B2B Exchange Cancel Invoice"
+msgstr ""
+
+msgid "B2B Exchange Cancel Invoice Confirm"
+msgstr ""
+
+msgid "B2B Exchange Cancel Allowance"
+msgstr ""
+
+msgid "B2B Exchange Cancel Allowance Confirm"
+msgstr ""
+
+msgid "B2B Exchange Reject Invoice"
+msgstr ""
+
+msgid "B2B Exchange Reject Invoice Confirm"
+msgstr ""
+
+msgid "B2B Certificate Invoice"
+msgstr ""
+
+msgid "B2B Certificate Allowance"
+msgstr ""
+
+msgid "B2B Certificate Cancel Invoice"
+msgstr ""
+
+msgid "B2B Certificate Cancel Allowance"
+msgstr ""
+
+msgid "B2B Certificate Reject Invoice"
+msgstr ""
+
+msgid "B2C Certificate Invoice"
+msgstr ""
+
+msgid "B2C Certificate Cancel Invoice"
+msgstr ""
+
+msgid "B2C Certificate Void Invoice"
+msgstr ""
+
+msgid "B2C Certificate Allowance"
+msgstr ""
+
+msgid "B2C Certificate Cancel Allowance"
+msgstr ""
+
+msgid "Branch Track"
+msgstr ""
+
+msgid "Branch Track Blank"
+msgstr ""
+
+msgid "Invoice Assign No"
+msgstr ""
+
+msgid "3.2.1"
+msgstr ""
+
+msgid "Just created"
+msgstr ""
+
+msgid "Downloaded from TEA"
+msgstr ""
+
+msgid "Exported to Data/"
+msgstr ""
+
+msgid "Preparing for EI(P)"
+msgstr ""
+
+msgid "Uploaded to EI or Downloaded from EI(G)"
+msgstr ""
+
+msgid "E Error for EI process(E)"
+msgstr ""
+
+msgid "I Error for EI process(I)"
+msgstr ""
+
+msgid "Successful EI process(C)"
+msgstr ""
+
+msgid "Swith to Successful EI process manually(S-C)"
+msgstr ""
 
 msgid "TRANSPORT_ID contains"
 msgstr ""
@@ -37,10 +136,34 @@ msgstr ""
 msgid "ENABLE contains"
 msgstr ""
 
+msgid "SIGN_ID contains"
+msgstr ""
+
+msgid "SIGN_TYPE contains"
+msgstr ""
+
 msgid "CATEGORY_TYPE contains"
 msgstr ""
 
 msgid "PROCESS_TYPE contains"
+msgstr ""
+
+msgid "FROM_PARTY_ID_PARTY_ID contains"
+msgstr ""
+
+msgid "ROUTING_ID contains"
+msgstr ""
+
+msgid "SEQNO contains"
+msgstr ""
+
+msgid "SUBSEQNO contains"
+msgstr ""
+
+msgid "SEQUENCE contains"
+msgstr ""
+
+msgid "USER_ID contains"
 msgstr ""
 
 msgid "Turnkey Wrapper Api"
@@ -54,6 +177,18 @@ msgstr "切換"
 
 msgid "RAW Turnkey DB"
 msgstr "原始 Turnkey 資料庫"
+
+msgid "Operation"
+msgstr "作業"
+
+msgid "EI Turnkey"
+msgstr "EI Turnkey"
+
+msgid "EI Turnkey Batch"
+msgstr "EI Turnkey 批次"
+
+msgid "EI Turnkey BatchE Invoice"
+msgstr "EI Turnkey 批次發票"
 
 msgid "Logout"
 msgstr "登出"
@@ -81,3 +216,30 @@ msgstr ""
 
 msgid "System Build Version"
 msgstr "系統發佈版本"
+
+msgid "transport_id contains"
+msgstr ""
+
+msgid "party_id contains"
+msgstr ""
+
+msgid "routing_id contains"
+msgstr ""
+
+msgid "slug contains"
+msgstr ""
+
+msgid "MIG"
+msgstr ""
+
+msgid "Turnkey MIG Version"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Batch Slug contains"
+msgstr ""
+
+msgid "Track No."
+msgstr ""
