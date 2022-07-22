@@ -10,7 +10,11 @@ from ho600_lib.permissions import FalsePermission, Or
 from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
 
 
-from turnkey_wrapper.permissions import IsSuperUser, CounterBasedOTPinRowForEITurnkeyPermission
+from turnkey_wrapper.permissions import (
+    IsSuperUser,
+    CounterBasedOTPinRowForEITurnkeyPermission,
+    CounterBasedOTPinRowForEITurnkeyBatchPermission,
+)
 from turnkey_wrapper.models import (
     FROM_CONFIG,
     SCHEDULE_CONFIG,
@@ -300,6 +304,20 @@ class EITurnkeyBatchModelViewSet(ModelViewSet):
     filter_class = EITurnkeyBatchFilter
     renderer_classes = (EITurnkeyBatchHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
+
+
+    def get_permissions(self):
+        if CounterBasedOTPinRowForEITurnkeyBatchPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
+            self.permission_classes = (Or(IsSuperUser, CounterBasedOTPinRowForEITurnkeyBatchPermission), )
+        return super(self.__class__, self).get_permissions()
+
+    
+
+    @action(detail=True, methods=['get'])
+    def get_batch_einvoice_id_status_result_code_set_from_ei_turnkey_batch_einvoices(self, request, pk=None):
+        result = EITurnkeyBatch.objects.get(id=pk).get_batch_einvoice_id_status_result_code_set_from_ei_turnkey_batch_einvoices()
+        result['return_code'] = "0"
+        return Response(result)
 
 
 

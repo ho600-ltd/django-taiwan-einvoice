@@ -1,6 +1,7 @@
 import os, re, logging, datetime, pathlib, shutil, glob, pytz
 from json2xml import json2xml
 from django.db import models
+from django.db.models import Count
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -473,6 +474,42 @@ class EITurnkeyBatch(models.Model):
         
         self.update_to_new_status(NEXT_STATUS_IN_GOOD)
         return True
+
+
+
+    def get_batch_einvoice_id_status_result_code_set_from_ei_turnkey_batch_einvoices(self):
+        statuss = []
+        max_count_on_status = ''
+        max_count = 0
+        for d in self.eiturnkeybatcheinvoice_set.values('status').annotate(status_count=Count('status')):
+            if d['status_count'] > max_count:
+                max_count = d['status_count']
+                max_count_on_status = d['status']
+            statuss.append(d['status'])
+        
+        status_d = {}
+        for status in statuss:
+            if status != max_count_on_status:
+                status_d[status] = self.eiturnkeybatcheinvoice_set.filter(status=status
+                                                                         ).values_list('batch_einvoice_id',
+                                                                                       named=False,
+                                                                                       flat=True)
+            else:
+                status_d['__else__'] = max_count_on_status
+        
+        result_code_d = {}
+        for d in self.eiturnkeybatcheinvoice_set.exclude(result_code=''
+                                                        ).values('result_code'
+                                                                ).annotate(result_code_count=Count('result_code')):
+            result_code_d[d['result_code']] = self.eiturnkeybatcheinvoice_set.filter(result_code=d['result_code']
+                                                                                    ).values_list('batch_einvoice_id',
+                                                                                                  named=False,
+                                                                                                  flat=True)
+
+        return {
+            "status": status_d,
+            "result_code": result_code_d,
+        }
 
 
 

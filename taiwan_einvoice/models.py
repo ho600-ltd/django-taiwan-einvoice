@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, logging, zlib, json
+import pytz, datetime, hmac, requests, logging, zlib, json, re
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -59,6 +59,11 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
+
+
+
+class BatchEInvoiceIDsError(Exception):
+    pass
 
 
 
@@ -1420,6 +1425,7 @@ class VoidEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
     
 
+EITurnkeyBatchEndpoint_SUB_RE = re.compile("/EITurnkey/[0-9]+/")
 
 class UploadBatch(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -1444,12 +1450,7 @@ class UploadBatch(models.Model):
         ("2", _("Noticed to TKW")),
         ("3", _("Exporting E-Invoice Body")),
         ("4", _("Uploaded to TKW")),
-        ("p", _("Preparing for EI(P)")),
-        ("g", _("Uploaded to EI or Downloaded from EI(G)")),
-        ("e", _("E Error for EI process(E)")),
-        ("i", _("I Error for EI process(I)")),
-        ("c", _("Successful EI process(C)")),
-        ("m", _("Swith to Successful EI process manually(S-C)")),
+        ("f", _("Finish")),
     )
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
     ei_turnkey_batch_id = models.PositiveBigIntegerField(default=0)
@@ -1482,6 +1483,57 @@ class UploadBatch(models.Model):
             self.save()
         else:
             raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
+
+
+    def check_in_4_status_then_update_to_the_next(self, NEXT_STATUS='f'):
+        if '4' != self.status: return
+
+        audit_type = AuditType.objects.get(name="EI_PROCESSING")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+        url = (EITurnkeyBatchEndpoint_SUB_RE.sub("/EITurnkeyBatch/{}/".format(self.ei_turnkey_batch_id),
+                                                self.turnkey_service.tkw_endpoint)
+                + '{action}/'.format(action="get_batch_einvoice_id_status_result_code_set_from_ei_turnkey_batch_einvoices")
+        )
+        counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+        try:
+            response = requests.get(url,
+                                    params=payload,
+                                    headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "UploadBatch.check_in_4_status_then_update_to_the_next",
+                "url": url,
+                "position at": "requests.get(...)",
+                "params": payload,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                is_finish = self.update_batch_einvoice_status_result_code(
+                   status=result_json['status'],
+                   result_code=result_json['result_code'],
+                )
+                if is_finish:
+                    self.update_to_new_status(NEXT_STATUS)
+                    audit_type = AuditType.objects.get(name="EI_PROCESSED")
+                    audit_log.type = audit_type
+                audit_log.is_error = False
+                audit_log.save()
+            else:
+                audit_log.is_error = True
+                audit_log.save()
 
 
     def check_in_3_status_then_update_to_the_next(self, NEXT_STATUS='4'):
@@ -1748,6 +1800,42 @@ class UploadBatch(models.Model):
             return None
 
 
+    def update_batch_einvoice_status_result_code(self, status={}, result_code={}):
+        for rc, ids in result_code.items():
+            beteis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beteis.count():
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+            else:
+                beteis.update(result_code=rc)
+        
+        status['__else__'] = status['__else__'].lower()
+        finish_status = ['i','e', 'c']
+        is_finish = True
+        exclude_ids = []
+        for s, ids in status.items():
+            s = s.lower()
+            if "__else__" == s:
+                continue
+            beteis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beteis.count():
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+            else:
+                beteis.update(status=s)
+
+            exclude_ids.extend(ids)
+            if s not in finish_status:
+                is_finish = False
+        beteis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
+        if beteis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
+            raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
+        else:
+            beteis.update(status=status['__else__'])
+
+        if status['__else__'] not in finish_status:
+            is_finish = False
+        return is_finish
+
+
     def generate_slug(self):
         if self.slug:
             return self.slug
@@ -1776,6 +1864,15 @@ class BatchEInvoice(models.Model):
     end_time = models.DateTimeField()
     track_no = models.CharField(max_length=10)
     body = models.JSONField()
+    status_choices = (
+        ("", _("Waiting")),
+        ("p", _("Preparing for EI(P)")),
+        ("g", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("e", _("E Error for EI process(E)")),
+        ("i", _("I Error for EI process(I)")),
+        ("c", _("Successful EI process(C)")),
+    )
+    status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
 
@@ -1791,6 +1888,7 @@ class AuditType(models.Model):
         ("UPLOAD_TO_EITURNKEY", "Upload to EITurnkey"),
         ("EITURNKEY_PROCESSING", "EITurnkey Processing"),
         ("EI_PROCESSING", "EI Processing"),
+        ("EI_PROCESSED", "EI Processed"),
     )
     name = models.CharField(max_length=32, choices=name_choices, unique=True)
 
