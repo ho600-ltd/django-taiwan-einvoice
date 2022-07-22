@@ -10,4 +10,5 @@ requests>=2.26,<2.27
 json2xml>=3.19,<3.20
 
 #https://github.com/ho600-ltd/django-taiwan-einvoice/archive/refs/heads/master.zip
+#git+ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/django-crontab-monitor
 #git+ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/django-ho600_lib2

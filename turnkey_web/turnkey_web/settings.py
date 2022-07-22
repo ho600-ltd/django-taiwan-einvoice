@@ -48,6 +48,10 @@ INSTALLED_APPS = [
     'rest_framework_filters',
     'django_filters',
     'compressor',
+
+    'guardian',
+
+    'crontab_monitor',
     'turnkey_wrapper',
 ]
 
@@ -202,3 +206,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'PAGE_SIZE': 10,
 }
+
+# django-guardian
+ANONYMOUS_USER_ID = -1
+
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)

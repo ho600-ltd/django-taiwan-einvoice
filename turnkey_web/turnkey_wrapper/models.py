@@ -1,10 +1,14 @@
-import os, re, logging, datetime, pathlib, shutil, glob
+import os, re, logging, datetime, pathlib, shutil, glob, pytz
 from json2xml import json2xml
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.timezone import now
 
 from taiwan_einvoice.libs import CounterBasedOTPinRow
 from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
+
+
+TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
@@ -328,12 +332,7 @@ class EITurnkeyBatch(models.Model):
         ("7", _("Just created")),
         ("8", _("Downloaded from TEA")),
         ("9", _("Exported to Data/")),
-        ("P", _("Preparing for EI(P)")),
-        ("G", _("Uploaded to EI or Downloaded from EI(G)")),
-        ("E", _("E Error for EI process(E)")),
-        ("I", _("I Error for EI process(I)")),
-        ("C", _("Successful EI process(C)")),
-        ("M", _("Swith to Successful EI process manually(S-C)")),
+        ("F", _("Finish")),
     )
     status = models.CharField(max_length=1, default='7', choices=status_choices, db_index=True)
     @property
@@ -344,6 +343,43 @@ class EITurnkeyBatch(models.Model):
     
     class Meta:
         unique_together = (('ei_turnkey', 'slug', ), )
+
+
+    @classmethod
+    def status_check(cls, statuss=[]):
+        eitbs = []
+        for eitb in cls.objects.exclude(status__in=['7', 'F']).filter(status__in=statuss).order_by('id'):
+            while True:
+                function_name = 'check_in_{}_status_then_update_to_the_next'.format(eitb.status)
+                pair = [eitb, function_name, eitb.status]
+                if hasattr(eitb, function_name):
+                    getattr(*pair[:2])()
+                    pair.append(eitb.status)
+                    eitbs.append(pair)
+                if 3 == len(pair) or pair[2] == pair[3]:
+                    break
+        return eitbs
+
+
+    def check_in_8_status_then_update_to_the_next(self):
+        self.export_to_data_abspath()
+
+
+    def check_in_9_status_then_update_to_the_next(self):
+        self.check_status_of_ei_turnkey_batch_einvoices()
+    
+
+    def check_status_of_ei_turnkey_batch_einvoices(self):
+        if "9" != self.status:
+            return False
+        else:
+            NEXT_STATUS_IN_GOOD = 'F'
+        
+        for eitbei in self.eiturnkeybatcheinvoice_set.filter(status__in=["", "P", "G"]):
+            eitbei.check_status_from_ei()
+        
+        if not self.eiturnkeybatcheinvoice_set.exclude(status__in=["I", "E", "C"]).exists():
+            seld.update_to_new_status(NEXT_STATUS_IN_GOOD)
 
 
     def update_to_new_status(self, new_status):
@@ -374,7 +410,7 @@ class EITurnkeyBatch(models.Model):
                     ei_turnkey_batch=self,
                     batch_einvoice_id=batch_einvoice_id,
                 )
-            if eitbei.body != "" or eitbei.result_code or eitbei.pass_if_error:
+            if "" != eitbei.body or "" != eitbei.status or "" != eitbei.result_code:
                 pass
             else:
                 try:
@@ -391,6 +427,7 @@ class EITurnkeyBatch(models.Model):
                     }
                     return result
                 eitbei.batch_einvoice_track_no = batch_einvoice_track_no
+                eitbei.save_body_time = now()
                 eitbei.body = body
                 try:
                     eitbei.save()
@@ -445,9 +482,18 @@ class EITurnkeyBatchEInvoice(models.Model):
     batch_einvoice_begin_time = models.DateTimeField()
     batch_einvoice_end_time = models.DateTimeField()
     batch_einvoice_track_no = models.CharField(max_length=10)
+    status_choices = (
+        ("", _("Waiting")),
+        ("P", _("Preparing for EI(P)")),
+        ("G", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("E", _("E Error for EI process(E)")),
+        ("I", _("I Error for EI process(I)")),
+        ("C", _("Successful EI process(C)")),
+    )
+    status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
+    save_body_time = models.DateTimeField()
     body = models.JSONField(default="")
-    result_code = models.CharField(max_length=5, default='', db_index=True)
-    pass_if_error = models.BooleanField(default=False)
+    result_code = models.CharField(max_length=5, default="", db_index=True)
 
 
     @property
@@ -461,6 +507,33 @@ class EITurnkeyBatchEInvoice(models.Model):
                 j2mx = C0701JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
             return j2mx.export_xml()
 
+
+    def check_status_from_ei(self):
+        invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
+            mig=self.ei_turnkey_batch.mig,
+            batch_einvoice_track_no=self.batch_einvoice_track_no,
+            InvoiceDate=self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"],
+        )
+        SAVE_BODY_TIME_DTS = self.save_body_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d%H%M%S000')
+        try:
+            nearest_TURNKEY_MESSAGE_LOG = TURNKEY_MESSAGE_LOG.objects.filter(INVOICE_IDENTIFIER=invoice_identifier,
+                                                                             MESSAGE_DTS__gte=SAVE_BODY_TIME_DTS
+                                                                            ).order_by('MESSAGE_DTS')[0]
+        except IndexError:
+            return
+        else:
+            if "" == nearest_TURNKEY_MESSAGE_LOG.STATUS:
+                return
+            elif nearest_TURNKEY_MESSAGE_LOG.STATUS in ["P", "G", "C"]:
+                self.status = nearest_TURNKEY_MESSAGE_LOG.STATUS
+            elif nearest_TURNKEY_MESSAGE_LOG.STATUS.startswith('E'):
+                self.status = 'E'
+                self.result_code = nearest_TURNKEY_MESSAGE_LOG.STATUS
+            else:
+                self.status = 'I'
+                self.result_code = nearest_TURNKEY_MESSAGE_LOG.STATUS
+            self.save()
+            return self.status
 
 
 

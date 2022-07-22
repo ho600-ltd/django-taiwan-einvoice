@@ -58,6 +58,7 @@ urlpatterns = [
     re_path(r'^api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path(r'^api/{}/'.format(TurnkeyWrapperAPIRootView.version),
         include((router.urls, "turnkeywrapperapi"), namespace="turnkeywrapperapi")),
+    path('crontab_monitor/', include('crontab_monitor.urls'), name='crontab_monitor'),
     path('i18n/', include('django.conf.urls.i18n'), name='i18n'),
     path('jsi18n.js', JavaScriptCatalog.as_view(), name='javascript-catalog'),
 ]

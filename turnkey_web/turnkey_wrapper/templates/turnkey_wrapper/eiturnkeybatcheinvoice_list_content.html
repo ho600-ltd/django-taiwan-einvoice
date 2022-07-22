@@ -13,8 +13,7 @@
             <th>ei_turnkey_batch</th>
             <th>batch_einvoice infos</th>
             <th>body</th>
-            <th>result_code</th>
-            <th>pass_if_error</th>
+            <th>status<br/>&amp;result_code</th>
         </tr>
     </thead>
     <tbody>
@@ -28,9 +27,11 @@
                     <div class="datetime" field="batch_einvoice_end_time" value="{{ obj.batch_einvoice_end_time }}" format="Y-m-d H:i:s"></div>
                     <div field="batch_einvoice_track_no">{{ obj.batch_einvoice_track_no }}</div>
                 </td>
-                <td field="body"><pre>{{ obj.body | pprint }}</pre></td>
-                <td field="result_code">{{ obj.result_code }}</td>
-                <td field="pass_if_error">{{ obj.pass_if_error }}</td>
+                <td field="body"><pre style="max-width: 600px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
+                <td field="status_and_result_code">
+                    <div field="status">{{ obj.status }}</div>
+                    <div field="result_code">{{ obj.result_code }}</div>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
