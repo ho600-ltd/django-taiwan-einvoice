@@ -1452,6 +1452,7 @@ class UploadBatch(models.Model):
         ("m", _("Swith to Successful EI process manually(S-C)")),
     )
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
+    ei_turnkey_batch_id = models.PositiveBigIntegerField(default=0)
 
 
     def __str__(self):
@@ -1622,6 +1623,10 @@ class UploadBatch(models.Model):
             else:
                 audit_log.is_error = True
                 audit_log.save()
+
+            if 'ei_turnkey_batch_id' in result_json and result_json['ei_turnkey_batch_id']:
+                self.ei_turnkey_batch_id = result_json['ei_turnkey_batch_id']
+                self.save()
 
 
     def check_in_0_status_then_update_to_the_next(self, NEXT_STATUS='1'):

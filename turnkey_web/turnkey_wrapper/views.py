@@ -279,14 +279,14 @@ class EITurnkeyModelViewSet(ModelViewSet):
                 "return_code": twrc.return_code,
                 "return_code_message": twrc.message,
                 "message_detail": str(e),
-                "eiturnkey_id": eitb.id,
+                "ei_turnkey_batch_id": eitb.id,
             }
         else:
             twrc = TurnkeyWebReturnCode("0")
             result = {
                 "return_code": twrc.return_code,
                 "return_code_message": twrc.message,
-                "eiturnkey_id": eitb.id,
+                "ei_turnkey_batch_id": eitb.id,
             }
         return Response(result)
 
