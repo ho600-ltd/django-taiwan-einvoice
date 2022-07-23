@@ -289,6 +289,11 @@ class EITurnkey(models.Model):
         elif not os.access(self.tmpdata_abspath, os.W_OK):
             raise Exception("tmpdata_abspath({}) can not be writeable".format(self.tmpdata_abspath))
         return super(EITurnkey, self).save(*args, **kwargs)
+    
+
+    def get_the_current_year_month_exist_track_nos(self):
+        pass
+
 
 
 class EITurnkeyBatch(models.Model):
