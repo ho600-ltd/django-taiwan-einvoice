@@ -403,31 +403,49 @@ class EITurnkeyBatch(models.Model):
         for line in bodys:
             lg.debug("line: {}".format(line))
             batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body = line
-            lg.debug("batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body: {} {}".format(batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body))
+            lg.debug("batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body: {} {}".format(
+                batch_einvoice_id, batch_einvoice_begin_time, batch_einvoice_end_time, batch_einvoice_track_no, body
+                ))
+            try:
+                batch_einvoice_begin_time = datetime.datetime.strptime(batch_einvoice_begin_time, "%Y-%m-%d %H:%M:%S%z")
+                batch_einvoice_end_time = datetime.datetime.strptime(batch_einvoice_end_time, "%Y-%m-%d %H:%M:%S%z")
+            except Exception as e:
+                twrc = TurnkeyWebReturnCode("003")
+                result = {
+                    "return_code": twrc.return_code,
+                    "return_code_message": twrc.message,
+                    "slug": self.slug,
+                    "batch_einvoice_id": batch_einvoice_id,
+                    "message_detail": str(e),
+                }
+                return result
             try:
                 eitbei = self.eiturnkeybatcheinvoice_set.get(batch_einvoice_id=batch_einvoice_id)
             except EITurnkeyBatchEInvoice.DoesNotExist:
-                eitbei = EITurnkeyBatchEInvoice(
-                    ei_turnkey_batch=self,
-                    batch_einvoice_id=batch_einvoice_id,
-                )
-            if "" != eitbei.body or "" != eitbei.status or "" != eitbei.result_code:
-                pass
-            else:
-                try:
-                    eitbei.batch_einvoice_begin_time = datetime.datetime.strptime(batch_einvoice_begin_time, "%Y-%m-%d %H:%M:%S%z")
-                    eitbei.batch_einvoice_end_time = datetime.datetime.strptime(batch_einvoice_end_time, "%Y-%m-%d %H:%M:%S%z")
-                except Exception as e:
-                    twrc = TurnkeyWebReturnCode("003")
+                if EITurnkeyBatchEInvoice.objects.filter(status__in=["G", "C"],
+                                                         batch_einvoice_begin_time=batch_einvoice_begin_time,
+                                                         batch_einvoice_end_time=batch_einvoice_end_time,
+                                                         batch_einvoice_track_no=batch_einvoice_track_no,
+                                                        ).exists():
+                    twrc = TurnkeyWebReturnCode("005")
                     result = {
                         "return_code": twrc.return_code,
                         "return_code_message": twrc.message,
                         "slug": self.slug,
                         "batch_einvoice_id": batch_einvoice_id,
-                        "message_detail": str(e),
                     }
                     return result
+                else:
+                    eitbei = EITurnkeyBatchEInvoice(
+                        ei_turnkey_batch=self,
+                        batch_einvoice_id=batch_einvoice_id,
+                    )
+            if "" != eitbei.body or "" != eitbei.status or "" != eitbei.result_code:
+                pass
+            else:
                 eitbei.batch_einvoice_track_no = batch_einvoice_track_no
+                eitbei.batch_einvoice_begin_time = batch_einvoice_begin_time
+                eitbei.batch_einvoice_end_time = batch_einvoice_end_time
                 eitbei.save_body_time = now()
                 eitbei.body = body
                 try:
