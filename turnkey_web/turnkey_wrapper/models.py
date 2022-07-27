@@ -468,7 +468,7 @@ class EITurnkeyBatch(models.Model):
             eitbei.check_status_from_ei()
         
         if not self.eiturnkeybatcheinvoice_set.exclude(status__in=["I", "E", "C"]).exists():
-            seld.update_to_new_status(NEXT_STATUS_IN_GOOD)
+            self.update_to_new_status(NEXT_STATUS_IN_GOOD)
 
 
     def update_to_new_status(self, new_status):
