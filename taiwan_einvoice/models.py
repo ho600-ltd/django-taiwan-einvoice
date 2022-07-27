@@ -659,7 +659,7 @@ class SellerInvoiceTrackNo(models.Model):
     def year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
-        end_month = self.end_time.astimezone(TAIPEI_TIMEZONE).month
+        end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track = models.CharField(max_length=2, db_index=True)
     begin_no = models.IntegerField(db_index=True)
