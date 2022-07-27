@@ -1801,6 +1801,7 @@ class UploadBatch(models.Model):
 
 
     def update_batch_einvoice_status_result_code(self, status={}, result_code={}):
+        lg = logging.getLogger("taiwan_einvoice")
         for rc, ids in result_code.items():
             beteis = self.batcheinvoice_set.filter(id__in=ids)
             if len(ids) != beteis.count():
@@ -1808,11 +1809,15 @@ class UploadBatch(models.Model):
             else:
                 beteis.update(result_code=rc)
         
+        ids_in_c = []
         status['__else__'] = status['__else__'].lower()
         finish_status = ['i','e', 'c']
         is_finish = True
         exclude_ids = []
+        lg.debug("status: {}".format(status))
         for s, ids in status.items():
+            lg.debug("UploadBatch.update_batch_einvoice_status_result_code {}: {}".format(s, ids))
+
             s = s.lower()
             if "__else__" == s:
                 continue
@@ -1821,6 +1826,8 @@ class UploadBatch(models.Model):
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
                 beteis.update(status=s)
+                if 'c' == s and not ids_in_c:
+                    ids_in_c = ids
 
             exclude_ids.extend(ids)
             if s not in finish_status:
@@ -1830,6 +1837,18 @@ class UploadBatch(models.Model):
             raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
         else:
             beteis.update(status=status['__else__'])
+            if 'c' == status['__else__']:
+                ids_in_c = beteis.values_list('id', named=False, flat=True)
+
+        if ids_in_c:
+            bei = self.batcheinvoice_set.get(id=ids_in_c[0])
+            content_model = bei.content_type.model_class()
+            content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c
+                                                      ).values_list('object_id',
+                                                                    named=False,
+                                                                    flat=True)
+            lg.debug("content_ids: {}".format(content_ids))
+            content_model.objects.filter(id__in=content_ids).update(ei_synced=True)
 
         if status['__else__'] not in finish_status:
             is_finish = False
