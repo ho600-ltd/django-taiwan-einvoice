@@ -62,6 +62,16 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
+class CancelEInvoiceMIGError(Exception):
+    pass
+
+
+
+class VoidEInvoiceMIGError(Exception):
+    pass
+
+
+
 class BatchEInvoiceIDsError(Exception):
     pass
 
@@ -1377,6 +1387,28 @@ class CancelEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
 
 
+    def export_json_for_mig(self):
+        no = self.einvoice.mig_type.no
+        if "C0401" == no:
+            mig = "C0501"
+        else:
+            raise CancelEInvoiceMIGError("MIG for {} is not set".format(no))
+        J = {mig: {
+            "CancelInvoiceNumber": self.einvoice.track_no,
+            "InvoiceDate": self.einvoice.invoice_date,
+            "BuyerId": self.buyer_identifier,
+            "SellerId": self.seller_identifier,
+            "CancelDate": self.cancel_date,
+            "CancelTime": self.cancel_time,
+            "CancelReason": self.reason,
+            }}
+        if self.return_tax_document_number:
+            J[mig]['ReturnTaxDocumentNumber'] = self.return_tax_document_number
+        if self.remark:
+            J[mig]['Remark'] = self.remark
+        return J
+
+
 
 class VoidEInvoice(models.Model):
     ei_synced = models.BooleanField(default=False, db_index=True)
@@ -1424,6 +1456,27 @@ class VoidEInvoice(models.Model):
             super().save(*args, **kwargs)
         UploadBatch.append_to_the_upload_batch(self)
     
+    
+    def export_json_for_mig(self):
+        no = self.einvoice.mig_type.no
+        if "C0401" == no:
+            mig = "C0701"
+        else:
+            raise VoidEInvoiceMIGError("MIG for {} is not set".format(no))
+        J = {mig: {
+            "VoidInvoiceNumber": self.einvoice.track_no,
+            "InvoiceDate": self.einvoice.invoice_date,
+            "BuyerId": self.buyer_identifier,
+            "SellerId": self.seller_identifier,
+            "VoidDate": self.void_date,
+            "VoidTime": self.void_time,
+            "VoidReason": self.reason,
+            }}
+        if self.remark:
+            J[mig]['Remark'] = self.remark
+        return J
+
+
 
 EITurnkeyBatchEndpoint_SUB_RE = re.compile("/EITurnkey/[0-9]+/")
 
@@ -1779,7 +1832,13 @@ class UploadBatch(models.Model):
                                  kind=kind,
                                  status='0')
                 ub.save()
-            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be = BatchEInvoice(batch=ub,
+                               content_object=content_object,
+                               begin_time=content_object.seller_invoice_track_no.begin_time,
+                               end_time=content_object.seller_invoice_track_no.end_time,
+                               track_no=content_object.track_no,
+                               body="",
+                               )
             be.save()
             return ub
         elif content_object._meta.model_name in ['canceleinvoice', 'voideinvoice']:
@@ -1789,11 +1848,22 @@ class UploadBatch(models.Model):
             elif 'voideinvoice' == content_object._meta.model_name:
                 mig_type = EInvoiceMIG.objects.get(no='C0701')
                 kind = '54'
-            slug_prefix = '{}{}'.format(mig_type.no[2], content_object.track_no)
-            slug = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
-            ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, slug=slug, mig_type=mig_type, kind=kind, status='0')
+            slug_prefix = '{}{}'.format(mig_type.no[2], content_object.einvoice.track_no)
+            index = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
+            slug = "{}{}".format(slug_prefix, index)
+            ub = UploadBatch(turnkey_service=content_object.einvoice.seller_invoice_track_no.turnkey_web,
+                             slug=slug,
+                             mig_type=mig_type,
+                             kind=kind,
+                             status='0')
             ub.save()
-            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be = BatchEInvoice(batch=ub,
+                               content_object=content_object,
+                               begin_time=content_object.einvoice.seller_invoice_track_no.begin_time,
+                               end_time=content_object.einvoice.seller_invoice_track_no.end_time,
+                               track_no=content_object.einvoice.track_no,
+                               body="",
+                               )
             be.save()
             return ub
         else:

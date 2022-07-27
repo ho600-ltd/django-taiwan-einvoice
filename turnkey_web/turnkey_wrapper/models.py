@@ -507,13 +507,16 @@ class EITurnkeyBatch(models.Model):
                     "message_detail": str(e),
                 }
                 return result
+            mig_no, json_body = body.popitem()
             try:
                 eitbei = self.eiturnkeybatcheinvoice_set.get(batch_einvoice_id=batch_einvoice_id)
             except EITurnkeyBatchEInvoice.DoesNotExist:
+                _kwargs = {"body__{}__isnull".format(mig_no): False}
                 if EITurnkeyBatchEInvoice.objects.filter(status__in=["G", "C"],
                                                          batch_einvoice_begin_time=batch_einvoice_begin_time,
                                                          batch_einvoice_end_time=batch_einvoice_end_time,
                                                          batch_einvoice_track_no=batch_einvoice_track_no,
+                                                         **_kwargs,
                                                         ).exists():
                     twrc = TurnkeyWebReturnCode("005")
                     result = {
@@ -528,14 +531,14 @@ class EITurnkeyBatch(models.Model):
                         ei_turnkey_batch=self,
                         batch_einvoice_id=batch_einvoice_id,
                     )
-            if "" != eitbei.body or "" != eitbei.status or "" != eitbei.result_code:
+            if eitbei.body not in ["", {}] or "" != eitbei.status or "" != eitbei.result_code:
                 pass
             else:
                 eitbei.batch_einvoice_track_no = batch_einvoice_track_no
                 eitbei.batch_einvoice_begin_time = batch_einvoice_begin_time
                 eitbei.batch_einvoice_end_time = batch_einvoice_end_time
                 eitbei.save_body_time = now()
-                eitbei.body = body
+                eitbei.body = {mig_no: json_body}
                 try:
                     eitbei.save()
                 except Exception as e:
@@ -681,6 +684,7 @@ class EITurnkeyBatchEInvoice(models.Model):
 
 
 XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
+WILL_REMOVE_DFAJDLFZX_RE = re.compile('</?will_remove_dfajdlfzx>', re.I)
 class C0401JSON2MIGXMl(object):
     versions = ["3.2"]
     base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:{version} C0401.xsd">
@@ -695,6 +699,10 @@ class C0401JSON2MIGXMl(object):
         self.json_data = self.regulate_json_data(json_data)
     
 
+    def export_xml(self):
+        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
+
+    
     def regulate_json_data(self, json_data):
         def _append_sequence_number(index0, d):
             d["SequenceNumber"] = "{:03d}".format(index0+1)
@@ -710,10 +718,6 @@ class C0401JSON2MIGXMl(object):
         return json_data
     
 
-    def export_xml(self):
-        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
-
-    
     def get_xml_body(self):
         xml_body = ''
         for elm in ["Main", "Details", "Amount"]:
@@ -722,16 +726,35 @@ class C0401JSON2MIGXMl(object):
         return xml_body
 
 
-class C0501JSON2MIGXMl(object):
-    """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:C0501:3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0501:3.1 C0501.xsd">
+
+class C0501JSON2MIGXMl(C0401JSON2MIGXMl):
+    base_xml = """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:C0501:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0501:{version} C0501.xsd">
+    {xml_body}
 </CancelInvoice>"""
-    def __init__(self, json_data):
-        pass
+
+
+    def __init__(self, json_data, version="3.2"):
+        super().__init__(json_data, version=version)
+
+
+    def export_xml(self):
+        return super().export_xml()
+
+
+    def regulate_json_data(self, json_data):
+        return json_data
+
+
+    def get_xml_body(self):
+        remove_elm = "will_remove_dfajdlfzx"
+        _xml_body = json2xml.Json2xml(self.json_data, wrapper=remove_elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+        _xml_body = XML_VERSION_RE.sub("", _xml_body.decode('utf-8'))
+        xml_body = WILL_REMOVE_DFAJDLFZX_RE.sub("", _xml_body)
+        return xml_body
 
 
 
-class C0701JSON2MIGXMl(object):
-    """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:C0701:3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0701:3.1 C0701.xsd">
+class C0701JSON2MIGXMl(C0501JSON2MIGXMl):
+    base_xml = """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:C0701:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0701:{version} C0701.xsd">
+    {xml_body}
 </VoidInvoice>"""
-    def __init__(self, json_data):
-        pass
