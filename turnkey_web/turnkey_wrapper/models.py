@@ -13,6 +13,11 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
+class EITurnkeyConfigurationError(Exception):
+    pass
+
+
+
 class FROM_CONFIG(models.Model):
     TRANSPORT_ID = models.CharField(db_column='TRANSPORT_ID', max_length=10, blank=True, null=True)
     TRANSPORT_PASSWORD = models.CharField(db_column='TRANSPORT_PASSWORD', max_length=45, blank=True, null=True)
@@ -365,6 +370,84 @@ class EITurnkeyBatch(models.Model):
                 if 3 == len(pair) or pair[2] == pair[3]:
                     break
         return eitbs
+
+
+    def save(self, *args, **kwargs):
+        data_abspath = self.ei_turnkey.data_abspath
+        file_format = "XML"
+        version = self.get_turnkey_version_display()
+        encoding = "utf-8"
+        task_config_objects = TASK_CONFIG.objects.filter(SRC_PATH__startswith=data_abspath,
+                                                         FILE_FORMAT=file_format,
+                                                         VERSION=version,
+                                                         ENCODING=encoding)
+
+        if not task_config_objects.filter(TASK="ReceiveFile").exists():
+            raise EITurnkeyConfigurationError(_("ReceiveFile directory does not exist!"))
+
+        TASK_D = {
+            ("B2C", "STORAGE"): ("UpCast", "SendFile", "Pack", ),
+            ("B2B", "EXCHANGE"): ("UpCast", "Unpack", "SendFile", "ReceiveFile", "Pack", "DownCast", ),
+            ("B2B", "STORAGE"): ("UpCast", "SendFile", "Pack", ),
+            ("B2P", "MESSAGE"): ("UpCast", "SendFile", "Pack", ),
+        }
+
+        if self.mig in [
+            'C0401',
+            'C0501',
+            'C0701',
+            'D0401',
+            'D0501',
+            ]:
+            category_type = "B2C"
+            process_type = "STORAGE"
+        elif self.mig in [
+            'A0101',
+            'A0102',
+            'B0101',
+            'B0102',
+            'A0201',
+            'A0202',
+            'B0201',
+            'B0202',
+            'A0301',
+            'A0302',
+            ]:
+            category_type = "B2B"
+            process_type = "EXCHANGE"
+        elif self.mig in [
+            'A0401',
+            'B0401',
+            'A0501',
+            'B0501',
+            'A0601',
+            ]:
+            category_type = "B2B"
+            process_type = "STORAGE"
+        elif self.mig in [
+            'E0401',
+            'E0402',
+            'E0501',
+            ]:
+            category_type = "B2P"
+            process_type = "MESSAGE"
+        else:
+            raise EITurnkeyConfigurationError(_("MIG Type does not match any TASK record"))
+    
+        tasks = TASK_D[(category_type, process_type)]
+        tasks_count = len(tasks)
+
+        
+        if tasks_count != task_config_objects.filter(CATEGORY_TYPE=category_type,
+                                                     PROCESS_TYPE=process_type,
+                                                     TASK__in=tasks).count():
+            raise EITurnkeyConfigurationError(_("The count of directories for {} {} do not match {}!".format(
+                    category_type,
+                    process_type,
+                    tasks_count,
+                    )))
+
+        return super().save(*args, **kwargs)
 
 
     def check_in_8_status_then_update_to_the_next(self):
