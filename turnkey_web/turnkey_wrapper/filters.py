@@ -7,6 +7,8 @@ from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 
 from turnkey_wrapper.models import (
+    TAIPEI_TIMEZONE,
+
     FROM_CONFIG,
     SCHEDULE_CONFIG,
     SIGN_CONFIG,
@@ -77,6 +79,10 @@ class TO_CONFIGFilter(filters.FilterSet):
 
 
 class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
+    MESSAGE_DTS__gte = filters.DateTimeFilter(method='filter_MESSAGE_DTS__gte')
+    MESSAGE_DTS__lte = filters.DateTimeFilter(method='filter_MESSAGE_DTS__lte')
+
+
     class Meta:
         model = TURNKEY_MESSAGE_LOG
         fields = {
@@ -84,6 +90,17 @@ class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
             "SUBSEQNO": ("icontains", ),
         }
 
+
+    def filter_MESSAGE_DTS__gte(self, queryset, name, value):
+        value_str = value.astimezone(TAIPEI_TIMEZONE).strftime("%Y%m%d%H%M%S000")
+        return queryset.filter(MESSAGE_DTS__gte=value_str)
+    
+
+
+    def filter_MESSAGE_DTS__lte(self, queryset, name, value):
+        value_str = value.astimezone(TAIPEI_TIMEZONE).strftime("%Y%m%d%H%M%S999")
+        return queryset.filter(MESSAGE_DTS__lte=value_str)
+    
 
 
 class TURNKEY_MESSAGE_LOG_DETAILFilter(filters.FilterSet):

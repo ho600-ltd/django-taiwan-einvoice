@@ -17,7 +17,31 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="MESSAGE_DTS__gte">{% trans "MESSAGE_DTS greater than" %}</label>
+                    <div class="input-group date" id="MESSAGE_DTS__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#MESSAGE_DTS__gte"
+                            name="MESSAGE_DTS__gte" id="id_MESSAGE_DTS__gte" />
+                        <div class="input-group-append" data-target="#MESSAGE_DTS__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="MESSAGE_DTS__lte">{% trans "MESSAGE_DTS less than" %}</label>
+                    <div class="input-group date" id="MESSAGE_DTS__lte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#MESSAGE_DTS__lte"
+                            name="MESSAGE_DTS__lte" id="id_MESSAGE_DTS__lte" />
+                        <div class="input-group-append" data-target="#MESSAGE_DTS__lte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="SEQNO__icontains">{% trans "SEQNO contains" %}</label>
                     <div class="input-group" id="SEQNO__icontains" data-target-input="nearest">
@@ -25,7 +49,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="SUBSEQNO__icontains">{% trans "SUBSEQNO contains" %}</label>
                     <div class="input-group" id="SUBSEQNO__icontains" data-target-input="nearest">

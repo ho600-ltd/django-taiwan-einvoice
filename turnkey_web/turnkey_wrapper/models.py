@@ -13,6 +13,11 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 
 
 
+class MIGConfigurationError(Exception):
+    pass
+
+
+
 class EITurnkeyConfigurationError(Exception):
     pass
 
@@ -569,7 +574,7 @@ class EITurnkeyBatch(models.Model):
 
         tmp_data_path = os.path.join(self.ei_turnkey.tmpdata_abspath, self.slug)
         pathlib.Path(tmp_data_path).mkdir(parents=True, exist_ok=True)
-        for eitbei in self.eiturnkeybatcheinvoice_set.filter(result_code='', pass_if_error=False):
+        for eitbei in self.eiturnkeybatcheinvoice_set.filter(result_code=''):
             tmp_file_path = os.path.join(tmp_data_path,
                 "{routing_id}_{mig}_{version}_{track_no}.xml".format(routing_id=self.ei_turnkey.routing_id,
                                                                      mig=self.mig,
@@ -655,12 +660,26 @@ class EITurnkeyBatchEInvoice(models.Model):
 
 
     def check_status_from_ei(self):
+        lg = logging.getLogger("turnkey_web")
+        mig = self.ei_turnkey_batch.mig
+        if "C0401" == mig:
+            invoice_date = self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"]
+        elif "C0501" == mig:
+            invoice_date = self.body[self.ei_turnkey_batch.mig]["CancelDate"]
+        elif "C0701" == mig:
+            invoice_date = self.body[self.ei_turnkey_batch.mig]["VoidDate"]
+        else:
+            raise MIGConfigurationError(_("There is no setting for {}").format(mig))
+
         invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
-            mig=self.ei_turnkey_batch.mig,
+            mig=mig,
             batch_einvoice_track_no=self.batch_einvoice_track_no,
-            InvoiceDate=self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"],
+            InvoiceDate=invoice_date,
         )
+        lg.debug("invoice_identifier: {}".format(invoice_identifier))
+        
         SAVE_BODY_TIME_DTS = self.save_body_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d%H%M%S000')
+        lg.debug("SAVE_BODY_TIME_DTS: {}".format(SAVE_BODY_TIME_DTS))
         try:
             nearest_TURNKEY_MESSAGE_LOG = TURNKEY_MESSAGE_LOG.objects.filter(INVOICE_IDENTIFIER=invoice_identifier,
                                                                              MESSAGE_DTS__gte=SAVE_BODY_TIME_DTS

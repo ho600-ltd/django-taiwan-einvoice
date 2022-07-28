@@ -169,6 +169,7 @@ $(function () {
             'update_time__gte', 'update_time__lt',
             'generate_time__gte', 'generate_time__lt',
             'print_time__gte', 'print_time__lt',
+            'MESSAGE_DTS__gte', 'MESSAGE_DTS__lte',
             'date_in_year_month_range'
         ];
         for (var param of datetime_kind_params) {
