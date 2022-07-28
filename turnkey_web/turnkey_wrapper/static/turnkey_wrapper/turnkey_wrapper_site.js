@@ -276,6 +276,12 @@ $(function () {
             var result_url = url_parts[0] + '?' + params.toString();
             window.location.href = result_url;
         });
+
+        $('td.record_order_no').each(function(){
+            var $td = $(this);
+            var init_page_no = $td.parents('table').attr('init_page_no');
+            $td.text(parseInt(init_page_no) - parseInt($td.attr('counter0')));
+        });
     }
 
     turnkey_wrapper_site.prototype.rest_error = function ($self, dialog_id) {

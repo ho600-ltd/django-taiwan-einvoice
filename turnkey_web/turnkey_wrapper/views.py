@@ -8,6 +8,10 @@ from rest_framework.viewsets import ModelViewSet
 
 from ho600_lib.permissions import FalsePermission, Or
 from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
+from taiwan_einvoice.paginations import (
+    Default30PerPagePagination,
+    TenTo1000PerPagePagination,
+)
 
 
 from turnkey_wrapper.permissions import (
@@ -84,13 +88,6 @@ from turnkey_wrapper.renderers import (
     EITurnkeyBatchHtmlRenderer,
     EITurnkeyBatchEInvoiceHtmlRenderer,
 )
-
-
-
-class TenTo1000PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 10
-    max_page_size = 1000
 
 
 

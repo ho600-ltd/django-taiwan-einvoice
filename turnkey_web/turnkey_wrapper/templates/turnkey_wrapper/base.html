@@ -146,6 +146,9 @@
                                 href="#">{% if user.last_name or user.first_name %}{{ user.last_name }}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
                             <div role="menu" class="dropdown-menu">
                                 <a role="presentation" class="dropdown-item nav_selfstaffprofile" href="#" >{{ user.email }}</a>
+                                <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
+                                    {% trans "Timezone" %}: {% trans "Asia/Taipei" %}
+                                </span>
                                 <a role="presentation" class="dropdown-item" href='{% url "admin:logout" %}'>{% trans "Logout" %}</a>
                             </div>
                         </li>

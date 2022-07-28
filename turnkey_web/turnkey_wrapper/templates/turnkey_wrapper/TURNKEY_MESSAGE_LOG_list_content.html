@@ -6,48 +6,46 @@
     {% endwith %}
 </div>
 
-<table class="table">
+<table class="table" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th>No.</th>
-            <th>SEQNO_SUBSEQNO</th>
             <th>SEQNO</th>
             <th>SUBSEQNO</th>
-            <th>UUID</th>
+            <th>STATUS</th>
+            <th>MESSAGE_DTS</th>
             <th>MESSAGE_TYPE</th>
             <th>CATEGORY_TYPE</th>
             <th>PROCESS_TYPE</th>
             <th>FROM_PARTY_ID</th>
             <th>TO_PARTY_ID</th>
-            <th>MESSAGE_DTS</th>
-            <th>CHARACTER_COUNT</th>
-            <th>STATUS</th>
-            <th>IN_OUT_BOUND</th>
             <th>FROM_ROUTING_ID</th>
-            <th>TO_ROUTING_ID</th>
             <th>INVOICE_IDENTIFIER</th>
+            <th>UUID</th>
+            <th>CHARACTER_COUNT</th>
+            <th>IN_OUT_BOUND</th>
+            <th>TO_ROUTING_ID</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
-                <td field="no">{{ forloop.counter }}.</td>
-                <td field="SEQNO_SUBSEQNO">{{ obj.SEQNO_SUBSEQNO }}</td>
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
                 <td field="SEQNO">{{ obj.SEQNO }}</td>
                 <td field="SUBSEQNO">{{ obj.SUBSEQNO }}</td>
-                <td field="UUID">{{ obj.UUID }}</td>
+                <td field="STATUS">{{ obj.STATUS }}</td>
+                <td field="MESSAGE_DTS">{{ obj.MESSAGE_DTS }}</td>
                 <td field="MESSAGE_TYPE">{{ obj.MESSAGE_TYPE }}</td>
                 <td field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</td>
                 <td field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</td>
                 <td field="FROM_PARTY_ID">{{ obj.FROM_PARTY_ID }}</td>
                 <td field="TO_PARTY_ID">{{ obj.TO_PARTY_ID }}</td>
-                <td field="MESSAGE_DTS">{{ obj.MESSAGE_DTS }}</td>
-                <td field="CHARACTER_COUNT">{{ obj.CHARACTER_COUNT }}</td>
-                <td field="STATUS">{{ obj.STATUS }}</td>
-                <td field="IN_OUT_BOUND">{{ obj.IN_OUT_BOUND }}</td>
                 <td field="FROM_ROUTING_ID">{{ obj.FROM_ROUTING_ID }}</td>
-                <td field="TO_ROUTING_ID">{{ obj.TO_ROUTING_ID }}</td>
                 <td field="INVOICE_IDENTIFIER">{{ obj.INVOICE_IDENTIFIER }}</td>
+                <td field="UUID">{{ obj.UUID }}</td>
+                <td field="CHARACTER_COUNT">{{ obj.CHARACTER_COUNT }}</td>
+                <td field="IN_OUT_BOUND">{{ obj.IN_OUT_BOUND }}</td>
+                <td field="TO_ROUTING_ID">{{ obj.TO_ROUTING_ID }}</td>
             </tr>
         {% endfor %}
     </tbody>

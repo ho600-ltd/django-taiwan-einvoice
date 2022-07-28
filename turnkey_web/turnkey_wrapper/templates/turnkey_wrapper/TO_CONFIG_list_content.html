@@ -6,7 +6,10 @@
     {% endwith %}
 </div>
 
-<table class="table">
+class TenTo1000PerPagePagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    page_size = 10
+    max_page_size = 1000<table class="table" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th>No.</th>
@@ -21,7 +24,7 @@
     <tbody>
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
-                <td field="no">{{ forloop.counter }}.</td>
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
                 <td field="FROM_PARTY_ID_PARTY_ID">{{ obj.FROM_PARTY_ID_PARTY_ID }}</td>
                 <td field="PARTY_ID">{{ obj.PARTY_ID }}</td>
                 <td field="PARTY_DESCRIPTION">{{ obj.PARTY_DESCRIPTION }}</td>

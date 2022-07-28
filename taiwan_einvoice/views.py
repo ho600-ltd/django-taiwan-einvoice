@@ -12,7 +12,6 @@ from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_p
 
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -101,18 +100,10 @@ from taiwan_einvoice.filters import (
     BatchEInvoiceFilter,
     AuditLogFilter,
 )
-
-
-class Default30PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 30
-    max_page_size = 30
-
-
-class TenTo1000PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 10
-    max_page_size = 1000
+from taiwan_einvoice.paginations import (
+    Default30PerPagePagination,
+    TenTo1000PerPagePagination,
+)
 
 
 def index(request):
