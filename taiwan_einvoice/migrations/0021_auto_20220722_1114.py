@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='uploadbatch',
             name='status',
-            field=models.CharField(choices=[('0', 'Collecting'), ('1', 'Waiting for trigger(Stop Collecting)'), ('2', 'Noticed to TKW'), ('3', 'Exporting E-Invoice Body'), ('4', 'Uploaded to TKW'), ('f', 'Finish')], db_index=True, default='0', max_length=1),
+            field=models.CharField(choices=[('0', 'Collecting'), ('1', 'Waiting for trigger(Stop Collecting)'), ('2', 'Noticed to TKW'), ('3', 'Exporting E-Invoice JSON'), ('4', 'Uploaded to TKW'), ('f', 'Finish')], db_index=True, default='0', max_length=1),
         ),
         migrations.RunPython(
             add_audittype, remove_audittype

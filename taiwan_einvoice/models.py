@@ -950,7 +950,7 @@ class EInvoice(models.Model):
 
 
     def __str__(self):
-        return self.track_no_
+        return "{}@{}".format(self.track_no, self.mig_type.no)
 
 
 
@@ -1359,6 +1359,10 @@ class CancelEInvoice(models.Model):
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
+    def __str__(self):
+        return "{}@{}".format(self.einvoice.track_no, self.get_mig_no())
+
+
     def set_ei_synced_true(self):
         CancelEInvoice.objects.filter(id=self.id).update(ei_synced=True)
 
@@ -1387,12 +1391,17 @@ class CancelEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
 
 
-    def export_json_for_mig(self):
+    def get_mig_no(self):
         no = self.einvoice.mig_type.no
         if "C0401" == no:
             mig = "C0501"
         else:
             raise CancelEInvoiceMIGError("MIG for {} is not set".format(no))
+        return mig
+
+
+    def export_json_for_mig(self):
+        mig = self.get_mig_no()
         J = {mig: {
             "CancelInvoiceNumber": self.einvoice.track_no,
             "InvoiceDate": self.einvoice.invoice_date,
@@ -1431,6 +1440,10 @@ class VoidEInvoice(models.Model):
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
 
 
+    def __str__(self):
+        return "{}@{}".format(self.einvoice.track_no, self.get_mig_no())
+
+
     def set_ei_synced_true(self):
         VoidEInvoice.objects.filter(id=self.id).update(ei_synced=True)
 
@@ -1457,12 +1470,17 @@ class VoidEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
     
     
-    def export_json_for_mig(self):
+    def get_mig_no(self):
         no = self.einvoice.mig_type.no
         if "C0401" == no:
             mig = "C0701"
         else:
             raise VoidEInvoiceMIGError("MIG for {} is not set".format(no))
+        return mig
+
+
+    def export_json_for_mig(self):
+        mig = self.get_mig_no()
         J = {mig: {
             "VoidInvoiceNumber": self.einvoice.track_no,
             "InvoiceDate": self.einvoice.invoice_date,
@@ -1495,18 +1513,21 @@ class UploadBatch(models.Model):
         ("w4", _("Wait for C0401")),            # to CancelEInvoice or VoidEInvoice
         ("54", _("Wait for C0501 or C0401")),   # to VoidEInvoice
     )
-    kind = models.CharField(max_length=2)
+    kind = models.CharField(max_length=2, choices=kind_choices)
     executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
     status_choices = (
         ("0", _("Collecting")),
         ("1", _("Waiting for trigger(Stop Collecting)")),
         ("2", _("Noticed to TKW")),
-        ("3", _("Exporting E-Invoice Body")),
+        ("3", _("Exporting E-Invoice JSON")),
         ("4", _("Uploaded to TKW")),
         ("f", _("Finish")),
     )
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
     ei_turnkey_batch_id = models.PositiveBigIntegerField(default=0)
+    @property
+    def batch_einvoice_count(self):
+        return self.batcheinvoice_set.count()
 
 
     def __str__(self):
@@ -1955,6 +1976,12 @@ class BatchEInvoice(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     begin_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    @property
+    def year_month_range(self):
+        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
+        end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
+        return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track_no = models.CharField(max_length=10)
     body = models.JSONField()
     status_choices = (

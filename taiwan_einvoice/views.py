@@ -689,6 +689,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             del _d['random_number']
             del _d['generate_time']
             _d['creator'] = request.user
+            _d['ei_synced'] = False
             _d['print_mark'] = False
             new_einvoice = EInvoice(**_d)
             new_einvoice.save()
@@ -818,6 +819,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         del _d['id']
         del _d['random_number']
         _d['creator'] = request.user
+        _d['ei_synced'] = False
         _d['print_mark'] = False
         data['buyer_identifier'] = _post_buyer_identifier
 
