@@ -1,7 +1,7 @@
 import os, re, logging, datetime, pathlib, shutil, glob, pytz
 from json2xml import json2xml
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
 
@@ -518,13 +518,23 @@ class EITurnkeyBatch(models.Model):
             try:
                 eitbei = self.eiturnkeybatcheinvoice_set.get(batch_einvoice_id=batch_einvoice_id)
             except EITurnkeyBatchEInvoice.DoesNotExist:
-                _kwargs = {"body__{}__isnull".format(mig_no): False}
-                if EITurnkeyBatchEInvoice.objects.filter(status__in=EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS,
-                                                         batch_einvoice_begin_time=batch_einvoice_begin_time,
-                                                         batch_einvoice_end_time=batch_einvoice_end_time,
-                                                         batch_einvoice_track_no=batch_einvoice_track_no,
-                                                         **_kwargs,
-                                                        ).exists():
+                error_005 = True
+                _same_eitbeis = EITurnkeyBatchEInvoice.objects.filter(status__in=EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS,
+                                                                      batch_einvoice_begin_time=batch_einvoice_begin_time,
+                                                                      batch_einvoice_end_time=batch_einvoice_end_time,
+                                                                      batch_einvoice_track_no=batch_einvoice_track_no)
+                same_eitbeis = _same_eitbeis.filter(**{"body__{}__isnull".format(mig_no): False})
+                if not same_eitbeis.exists():
+                    error_005 = False
+                elif mig_no in ["C0401", "C0701"]:
+                    same_eitbeis_47 = _same_eitbeis.order_by('-id')[0]
+                    k, v = same_eitbeis_47.body.popitem()
+                    if "C0401" == mig_no and "C" == same_eitbeis_47.status and "C0701" == k and v:
+                        error_005 = False
+                    elif "C0701" == mig_no and "C" == same_eitbeis_47.status and "C0401" == k and v:
+                        error_005 = False
+
+                if error_005:
                     twrc = TurnkeyWebReturnCode("005")
                     result = {
                         "return_code": twrc.return_code,
