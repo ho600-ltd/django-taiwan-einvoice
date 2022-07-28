@@ -10,6 +10,8 @@ from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
+EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS = ["G", "C"]
+EI_WELL_STATUSS = ["P", "G", "C"]
 
 
 
@@ -517,7 +519,7 @@ class EITurnkeyBatch(models.Model):
                 eitbei = self.eiturnkeybatcheinvoice_set.get(batch_einvoice_id=batch_einvoice_id)
             except EITurnkeyBatchEInvoice.DoesNotExist:
                 _kwargs = {"body__{}__isnull".format(mig_no): False}
-                if EITurnkeyBatchEInvoice.objects.filter(status__in=["G", "C"],
+                if EITurnkeyBatchEInvoice.objects.filter(status__in=EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS,
                                                          batch_einvoice_begin_time=batch_einvoice_begin_time,
                                                          batch_einvoice_end_time=batch_einvoice_end_time,
                                                          batch_einvoice_track_no=batch_einvoice_track_no,
@@ -689,7 +691,7 @@ class EITurnkeyBatchEInvoice(models.Model):
         else:
             if "" == nearest_TURNKEY_MESSAGE_LOG.STATUS:
                 return
-            elif nearest_TURNKEY_MESSAGE_LOG.STATUS in ["P", "G", "C"]:
+            elif nearest_TURNKEY_MESSAGE_LOG.STATUS in EI_WELL_STATUSS:
                 self.status = nearest_TURNKEY_MESSAGE_LOG.STATUS
             elif nearest_TURNKEY_MESSAGE_LOG.STATUS.startswith('E'):
                 self.status = 'E'
