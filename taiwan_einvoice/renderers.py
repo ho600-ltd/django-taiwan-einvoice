@@ -181,3 +181,15 @@ class AuditLogHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('auditlog_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+
+class UploadBatchHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('uploadbatch_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('uploadbatch_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
+class BatchEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('batcheinvoice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('batcheinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+

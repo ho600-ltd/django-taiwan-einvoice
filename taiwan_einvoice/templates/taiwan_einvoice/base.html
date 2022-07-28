@@ -143,10 +143,12 @@
                                     {% if notready_TODO %}
                                         <a role="presentation" class="dropdown-item nav_accounteraudit" href="#">{% trans "Accounter Audit" %}</a>
                                     {% endif %}
-                                    <a role="presentation" class="dropdown-item nav_auditlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:auditlog-list' %}?format=html">{% trans "Audit Log" %}</a>
                                     {% if can_view_einvoiceprintlog_under_turnkeyservices.exists %}
                                         <a role="presentation" class="dropdown-item nav_einvoiceprintlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-list' %}?format=html">{% trans "Print Log" %}</a>
                                     {% endif %}
+                                    <a role="presentation" class="dropdown-item nav_uploadbatch" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-list' %}?format=html">{% trans "Upload Batch" %}</a>
+                                    <a role="presentation" class="dropdown-item nav_batcheinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html">{% trans "Batch E-Invoice" %}</a>
+                                    <a role="presentation" class="dropdown-item nav_auditlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:auditlog-list' %}?format=html">{% trans "Audit Log" %}</a>
                                     {% if perms.taiwan_einvoice.view_legalentity %}
                                         <a role="presentation" class="dropdown-item nav_legalentity" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:legalentity-list' %}?format=html">{% trans "Legal Entity" %}</a>
                                     {% endif %}

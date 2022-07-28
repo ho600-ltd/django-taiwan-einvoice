@@ -1,0 +1,42 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>{% trans "No." %}</th>
+            <th>{% trans "Create Time" %}</th>
+            <th>{% trans "Update Time" %}</th>
+            <th>{% trans "Turnkey Service" %}</th>
+            <th>{% trans "Slug" %}</th>
+            <th>{% trans "MIG Type" %}</th>
+            <th>{% trans "Kind" %}</th>
+            <th>{% trans "Executor" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "EI Turnkey Batch ID" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                <td field="create_time" class="datetime" value="{{ obj.create_time }}"></td>
+                <td field="update_time" class="datetime" value="{{ obj.update_time }}"></td>
+                <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
+                <td field="slug">{{ obj.slug }}</td>
+                <td field="mig_type">{{ obj.mig_type_dict.no }}</td>
+                <td field="kind">{{ obj.get_kind_display }}</td>
+                <td field="executor">
+                    {% if obj.executor %}{{ obj.executor }}{% endif %}
+                </td>
+                <td field="status" title="{{ obj.status }}">{{ obj.get_status_display }}</td>
+                <td field="ei_turnkey_batch_id">{{ obj.ei_turnkey_batch_id }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

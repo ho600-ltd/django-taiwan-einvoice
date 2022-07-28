@@ -23,6 +23,7 @@ from rest_framework.exceptions import PermissionDenied
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     NotEnoughNumberError,
+    EInvoiceMIG,
     StaffProfile,
     ESCPOSWeb,
     Printer,
@@ -48,6 +49,11 @@ class UserSerializer(ModelSerializer):
             'id', 'last_name', 'first_name', 'email', 'username',
         )
 
+
+class EInvoiceMIGSerializer(ModelSerializer):
+    class Meta:
+        model = EInvoiceMIG
+        fields = '__all__'
 
 
 class StaffProfileSerializer(ModelSerializer):
@@ -330,6 +336,7 @@ class EInvoiceSimpleSerializer(ModelSerializer):
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     creator_dict = UserSerializer(source='creator', read_only=True)
     seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
     track_no = CharField(read_only=True)
@@ -345,9 +352,16 @@ class EInvoiceSerializer(ModelSerializer):
     canceled_time = DateTimeField(read_only=True)
     related_einvoices = EInvoiceSimpleSerializer(read_only=True, many=True)
 
+
+
     class Meta:
         model = EInvoice
         fields = '__all__'
+
+    
+
+    def get_str_name(self, instance):
+        return str(instance)
 
 
 
@@ -367,6 +381,7 @@ class EInvoicePrintLogSerializer(ModelSerializer):
 class CancelEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     creator_dict = UserSerializer(source='creator', read_only=True)
     einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
     new_einvoice_dict = EInvoiceSerializer(source='new_einvoice', read_only=True)
@@ -379,9 +394,15 @@ class CancelEInvoiceSerializer(ModelSerializer):
 
 
 
+    def get_str_name(self, instance):
+        return str(instance)
+
+
+
 class VoidEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     creator_dict = UserSerializer(source='creator', read_only=True)
     einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
     new_einvoice_dict = EInvoiceSerializer(source='new_einvoice', read_only=True)
@@ -393,10 +414,20 @@ class VoidEInvoiceSerializer(ModelSerializer):
         fields = '__all__'
 
 
+
+    def get_str_name(self, instance):
+        return str(instance)
+
+
 class UploadBatchSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-detail", lookup_field='pk')
     str_name = SerializerMethodField()
+    mig_type_dict = EInvoiceMIGSerializer(source="mig_type", read_only=True)
+    batch_einvoice_count = IntegerField(read_only=True)
+    turnkey_service_dict = TurnkeyServiceSerializer(source="turnkey_service", read_only=True)
+    get_kind_display = CharField(read_only=True)
+    get_status_display = CharField(read_only=True)
 
 
 
@@ -409,15 +440,31 @@ class UploadBatchSerializer(ModelSerializer):
     def get_str_name(self, instance):
         return str(instance)
 
+
+
 class BatchEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-detail", lookup_field='pk')
+    batch_dict = UploadBatchSerializer(source="batch", read_only=True)
+    year_month_range = CharField(read_only=True)
+    content_object_dict = SerializerMethodField()
 
 
 
     class Meta:
         model = BatchEInvoice
         fields = '__all__'
+
+    
+
+    def get_content_object_dict(self, instance):
+        request = self.context.get('request', None)
+        return {
+            "einvoice": EInvoiceSerializer(instance.content_object, context={"request": request}),
+            "canceleinvoice": CancelEInvoiceSerializer(instance.content_object, context={"request": request}),
+            "voideinvoice": VoidEInvoiceSerializer(instance.content_object, context={"request": request}),
+        }[instance.content_type.model].data
+
 
 
 

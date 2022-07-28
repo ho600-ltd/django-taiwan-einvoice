@@ -201,6 +201,7 @@ $(function () {
             'einvoice__any_words__icontains',
             'identifier__icontains',
             'seller__legal_entity__identifier__icontains',
+            'batch__slug__icontains',
             'track__icontains'
         ];
         for (var param of string_kind_params) {

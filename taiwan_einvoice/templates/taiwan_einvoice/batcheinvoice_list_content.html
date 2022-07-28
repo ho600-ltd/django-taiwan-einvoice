@@ -1,0 +1,40 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>{% trans "No." %}</th>
+            <th>{% trans "Batch slug" %}</th>
+            <th>{% trans "Content Object" %}</th>
+            <th>{% trans "Year Month Range" %}</th>
+            <th>{% trans "Track no." %}</th>
+            <th>{% trans "Body" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Result Code" %}</th>
+            <th>{% trans "Pass if error" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                <td field="batch">{{ obj.batch_dict.slug }}</td>
+                <td field="content_object_dict">{{ obj.content_object_dict.str_name }}</td>
+                <td field="year_month_range">{{ obj.year_month_range }}</td>
+                <td field="track_no">{{ obj.track_no }}</td>
+                <td field="body"><pre style="max-width: 300px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
+                <td field="status">{{ obj.status }}</td>
+                <td field="result_code">{{ obj.result_code }}</td>
+                <td field="pass_if_error">
+                    {% if obj.pass_if_error %}{{ obj.pass_if_error }}{% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -48,6 +48,8 @@ from taiwan_einvoice.renderers import (
     CancelEInvoiceHtmlRenderer,
     VoidEInvoiceHtmlRenderer,
     AuditLogHtmlRenderer,
+    UploadBatchHtmlRenderer,
+    BatchEInvoiceHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -863,7 +865,7 @@ class UploadBatchModelViewSet(ModelViewSet):
     queryset = UploadBatch.objects.all().order_by('-id')
     serializer_class = UploadBatchSerializer
     filter_class = UploadBatchFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (UploadBatchHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
 
@@ -887,7 +889,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
     queryset = BatchEInvoice.objects.all().order_by('-id')
     serializer_class = BatchEInvoiceSerializer
     filter_class = BatchEInvoiceFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (BatchEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
 

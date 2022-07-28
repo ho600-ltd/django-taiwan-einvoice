@@ -460,17 +460,21 @@ class UploadBatchFilter(filters.FilterSet):
     class Meta:
         model = UploadBatch
         fields = {
+            "slug": ("exact", "icontains", ),
+            "create_time": ("gte", "lt", ),
         }
 
 
 
 class BatchEInvoiceFilter(filters.FilterSet):
+    batch = filters.RelatedFilter(UploadBatchFilter, field_name='batch', queryset=UploadBatch.objects.all())
 
 
 
     class Meta:
         model = BatchEInvoice
         fields = {
+            "track_no": ("icontains", ),
         }
 
 

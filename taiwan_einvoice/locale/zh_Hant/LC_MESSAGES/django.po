@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-18 15:46+0800\n"
+"POT-Creation-Date: 2022-07-28 16:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,14 +22,14 @@ msgid "Print Serial No.:{}"
 msgstr "列印序號: {}"
 
 msgid "There is no alarm in polling_upload_batch, just logging"
-msgstr ""
+msgstr "polling_upload_batch 並無警示，單純紀錄"
 
 msgid "Executed polling_upload_batch"
-msgstr ""
+msgstr "已執行 polling_upload_batch"
 
 #, python-brace-format
 msgid "Title: {title}"
-msgstr ""
+msgstr "標題: {title}"
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -193,6 +193,9 @@ msgstr "內容物件: {} 無「check_before_cancel_einvoice」方法"
 msgid "Content Object: {} has no 'post_cancel_einvoice' method"
 msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
+msgid "Max records in details is 999"
+msgstr "明細最多只能有 999 筆紀錄"
+
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
 msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
@@ -224,11 +227,17 @@ msgstr "等待觸發(停止收集)"
 msgid "Noticed to TKW"
 msgstr "已通知 TKW"
 
-msgid "Uploading to TKW"
-msgstr "上傳到 TKW 中"
+msgid "Exporting E-Invoice JSON"
+msgstr "製作電子發票 JSON"
 
 msgid "Uploaded to TKW"
 msgstr "已上傳到 TKW"
+
+msgid "Finish"
+msgstr "完成"
+
+msgid "Waiting"
+msgstr "等待中"
 
 msgid "Preparing for EI(P)"
 msgstr "準備上傳到 EI(P)"
@@ -244,9 +253,6 @@ msgstr "EI 回傳 I 錯誤(I)"
 
 msgid "Successful EI process(C)"
 msgstr "成功完成 EI 程序(C)"
-
-msgid "Swith to Successful EI process manually(S-C)"
-msgstr "手動切成「成功的 EI 完成程序」(S-C)"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -336,11 +342,17 @@ msgstr "註銷發票"
 msgid "Accounter Audit"
 msgstr "會計查驗"
 
-msgid "Audit Log"
-msgstr "稽核 Log"
-
 msgid "Print Log"
 msgstr "列印紀錄"
+
+msgid "Upload Batch"
+msgstr "上傳批次"
+
+msgid "Batch E-Invoice"
+msgstr "批次電子發票"
+
+msgid "Audit Log"
+msgstr "稽核 Log"
 
 msgid "Legal Entity"
 msgstr "買受人"
@@ -377,6 +389,36 @@ msgstr ""
 
 msgid "System Build Version"
 msgstr "系統編譯版面"
+
+msgid "Batch Slug contains"
+msgstr "批次代號包含"
+
+msgid "Track No. contains"
+msgstr "字軌號碼包含"
+
+msgid "Batch slug"
+msgstr "批次代號"
+
+msgid "Content Object"
+msgstr "內容物件"
+
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Track no."
+msgstr "字軌號碼"
+
+msgid "Body"
+msgstr "Body"
+
+msgid "Status"
+msgstr "狀態"
+
+msgid "Result Code"
+msgstr "結果碼"
+
+msgid "Pass if error"
+msgstr "略過錯誤"
 
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Canceled E-Invoice"
@@ -487,9 +529,6 @@ msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode"
 msgstr "一維條碼"
 
-msgid "Track No. contains"
-msgstr "字軌號碼包含"
-
 msgctxt "taiwan_einvoice"
 msgid "Product Details contains"
 msgstr "商品明細包含"
@@ -571,9 +610,6 @@ msgstr "30秒"
 msgid "Print Mark"
 msgstr "正本已列印"
 
-msgid "Status"
-msgstr "狀態"
-
 msgid "Print"
 msgstr "列印"
 
@@ -587,9 +623,6 @@ msgstr "隨機碼"
 
 msgid "Generating Time"
 msgstr "開立時間"
-
-msgid "Year Month Range"
-msgstr "期別"
 
 msgid "Seller identifier"
 msgstr "賣方統編"
@@ -1096,6 +1129,21 @@ msgstr "工作人員群組名稱"
 msgid "Staffs"
 msgstr "工作人員"
 
+msgid "Update Time"
+msgstr "更新時間"
+
+msgid "MIG Type"
+msgstr "MIG類型"
+
+msgid "Kind"
+msgstr "類別"
+
+msgid "Executor"
+msgstr "執行者"
+
+msgid "EI Turnkey Batch ID"
+msgstr "EI Turnkey 批次 ID"
+
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Voided E-Invoice"
 msgstr "被註銷發票的一維條碼"
@@ -1339,15 +1387,3 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
-
-#, fuzzy
-#~| msgid "Turnkey Seed"
-#~ msgid "TurnkeyWebReturnCode"
-#~ msgstr "Turnkey 種子"
-
-#~ msgctxt "auto_upload_c0401_einvoice"
-#~ msgid "Yes"
-#~ msgstr "自動上傳"
-
-#~ msgid "E-Invoice({}) was already canceled and has created the new one!"
-#~ msgstr "電子發票({})已被作廢且另有開立!"
