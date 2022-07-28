@@ -1778,8 +1778,8 @@ class UploadBatch(models.Model):
             if content_object.einvoice.ei_synced:
                 check_C0401 = True
             
-            if (not content_object.einvoice.new_einvoice_on_cancel_einvoice_set.exists()
-                or content_object.einvoice.new_einvoice_on_cancel_einvoice_set.get().ei_synced):
+            if (not content_object.einvoice.canceleinvoice_set.exists()
+                or content_object.einvoice.canceleinvoice_set.get().ei_synced):
                 check_C0501 = True
             
             if check_C0401 and check_C0501:
@@ -1790,7 +1790,7 @@ class UploadBatch(models.Model):
     def append_to_the_upload_batch(cls, content_object):
         ct = ContentType.objects.get_for_model(content_object)
         if content_object.ei_synced:
-            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='0000').batch
+            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, status='c').batch
         elif BatchEInvoice.objects.filter(content_type=ct, object_id=content_object.id, result_code='').exists():
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
 
