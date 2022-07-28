@@ -1811,7 +1811,11 @@ class UploadBatch(models.Model):
             else:
                 kind = 'wp'
 
-            if UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).exists():
+            if kind in ["wp", "cp", "np"] and UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                                                         mig_type=mig_type,
+                                                                         kind=kind,
+                                                                         status="0",
+                                                                         create_time__gte=start_time, create_time__lt=end_time).exists():
                 _ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
                                                  mig_type=mig_type,
                                                  kind=kind,
