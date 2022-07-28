@@ -6,7 +6,7 @@
     {% endwith %}
 </div>
 
-<table class="table">
+<table class="table" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th rowspan="2" width="5%">{% trans "No." %}</th>
@@ -22,7 +22,7 @@
     <tbody>
         {% for obj in data.results %}
             <tr auditlog_id="{{ obj.id }}">
-                <td>{{ forloop.counter }}.</td>
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}.</td>
                 <td class="datetime" field="create_time" value="{{ obj.create_time }}" format="Y-m-d AH:i:s"></td>
                 <td field="creator">{{ obj.creator_dict.first_name }}</td>
                 <td field="type">{{ obj.type_dict.name }}</td>

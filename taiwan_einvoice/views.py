@@ -102,6 +102,7 @@ from taiwan_einvoice.filters import (
 )
 from taiwan_einvoice.paginations import (
     Default30PerPagePagination,
+    TenTo100PerPagePagination,
     TenTo1000PerPagePagination,
 )
 
@@ -183,6 +184,7 @@ class StaffProfileModelViewSet(ModelViewSet):
 
 class ESCPOSWebModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator, CanOperateESCPOSWebOperator), )
+    pagination_class = TenTo100PerPagePagination
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
@@ -215,6 +217,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
 
 class ESCPOSWebOperatorModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
+    pagination_class = TenTo100PerPagePagination
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebOperatorSerializer
     filter_class = ESCPOSWebFilter
@@ -272,6 +275,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
 
 class LegalEntityModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanViewLegalEntity), )
+    pagination_class = TenTo100PerPagePagination
     queryset = LegalEntity.objects.all().order_by('-id')
     serializer_class = None
     filter_class = LegalEntityFilter
@@ -287,6 +291,7 @@ class LegalEntityModelViewSet(ModelViewSet):
 
 class SellerModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
+    pagination_class = TenTo100PerPagePagination
     queryset = Seller.objects.all().order_by('-id')
     serializer_class = SellerSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
@@ -296,6 +301,7 @@ class SellerModelViewSet(ModelViewSet):
 
 class TurnkeyServiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    pagination_class = TenTo100PerPagePagination
     queryset = TurnkeyService.objects.all().order_by('-id')
     serializer_class = TurnkeyServiceSerializer
     filter_class = TurnkeyServiceFilter
@@ -373,6 +379,7 @@ class TurnkeyServiceGroupModelViewSet(ModelViewSet):
 
 class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNo, ), )
+    pagination_class = TenTo100PerPagePagination
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-type', '-begin_time', '-track', '-begin_no')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
@@ -526,6 +533,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 class EInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
     filter_class = EInvoiceFilter
@@ -569,6 +577,7 @@ class EInvoiceModelViewSet(ModelViewSet):
 
 class EInvoicePrintLogModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryEInvoicePrintLog), )
+    pagination_class = TenTo100PerPagePagination
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
     filter_class = EInvoicePrintLogFilter
@@ -592,6 +601,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
 
 class CancelEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryCancelEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
     filter_class = CancelEInvoiceFilter
@@ -689,6 +699,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
 
 class VoidEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryVoidEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = VoidEInvoice.objects.all().order_by('-id')
     serializer_class = VoidEInvoiceSerializer
     filter_class = VoidEInvoiceFilter
@@ -848,6 +859,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
 class UploadBatchModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, ), )
+    pagination_class = TenTo100PerPagePagination
     queryset = UploadBatch.objects.all().order_by('-id')
     serializer_class = UploadBatchSerializer
     filter_class = UploadBatchFilter
@@ -871,6 +883,7 @@ class UploadBatchModelViewSet(ModelViewSet):
 
 class BatchEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, ), )
+    pagination_class = TenTo100PerPagePagination
     queryset = BatchEInvoice.objects.all().order_by('-id')
     serializer_class = BatchEInvoiceSerializer
     filter_class = BatchEInvoiceFilter
@@ -894,6 +907,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
 
 class AuditLogModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    pagination_class = TenTo100PerPagePagination
     queryset = AuditLog.objects.all().order_by('-id')
     serializer_class = AuditLogSerializer
     filter_class = AuditLogFilter

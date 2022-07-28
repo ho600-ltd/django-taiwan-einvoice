@@ -2,17 +2,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 
-class Default30PerPagePagination(PageNumberPagination):
+class TaiwanEInvoicePageNumberPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
-    page_size = 30
-    max_page_size = 30
-
-
-
-class TenTo1000PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 10
-    max_page_size = 1000
 
 
     def get_paginated_response(self, data):
@@ -28,4 +19,20 @@ class TenTo1000PerPagePagination(PageNumberPagination):
             'results': data,
         })
 
+
+
+class Default30PerPagePagination(TaiwanEInvoicePageNumberPagination):
+    page_size = 30
+    max_page_size = 30
+
+
+
+class TenTo100PerPagePagination(TaiwanEInvoicePageNumberPagination):
+    page_size = 10
+    max_page_size = 100
+
+
+class TenTo1000PerPagePagination(TaiwanEInvoicePageNumberPagination):
+    page_size = 10
+    max_page_size = 1000
 

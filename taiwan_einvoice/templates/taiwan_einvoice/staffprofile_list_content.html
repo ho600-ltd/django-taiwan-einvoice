@@ -15,7 +15,7 @@
     {% endif %}
 </div>
 
-<table class="table search_result">
+<table class="table search_result" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th width="5%" field="no">{% trans "No." %}</th>
@@ -72,7 +72,7 @@
         {% endwith %}{% else %}{% for staffprofile in data.results %}
             <tr staffprofile_id="{{ staffprofile.id }}"
                 resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=staffprofile.id %}">
-                <td>{{ forloop.counter }}.</td>
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
                 <td field="user.username">
                     {% if perms.taiwan_einvoice.change_staffprofile %}
                         <button class="btn btn-primary update_staffprofile_modal">

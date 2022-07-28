@@ -29,7 +29,7 @@
         {% endwith %}
     </div>
 
-    <table class="table search_result">
+    <table class="table search_result" init_page_no="{{ data.init_page_no }}">
         <thead>
             <tr>
                 <th field="no" width="5%">{% trans "No." %}</th>
@@ -50,7 +50,7 @@
             {% for voideinvoice in data.results %}
                 {% with voideinvoice.id as einvoice_id %}
                     <tr voideinvoice_id="{{ voideinvoice.id }}" >
-                        <td field="no">{{ forloop.counter }}.</td>
+                        <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
                         <td field="year_month_range">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
                         <td field="track_no_">{{ voideinvoice.einvoice_dict.track_no_ }}</td>
                         <td field="einvoice_dict.random_number">{{ voideinvoice.einvoice_dict.random_number }}</td>
