@@ -40,12 +40,46 @@
             </div>
             <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="invoice_number_in_body">{% trans "Track No." %}</label>
-                    <div class="input-group" id="invoice_number_in_body" data-target-input="nearest">
-                        <input type="text" class="form-control" name="invoice_number_in_body" id="id_invoice_number_in_body" />
+                    <label for="batch_einvoice_track_no__icontains">{% trans "Track No." %}</label>
+                    <div class="input-group" id="batch_einvoice_track_no__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="batch_einvoice_track_no__icontains" id="id_batch_einvoice_track_no__icontains" />
                     </div>
                 </div>
             </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="status">{% trans "Status" %}</label>
+                    <div class="input-group" id="status" data-target-input="nearest">
+                        <select class="form-control" name="status" id="id_status">
+                            <option value=""></option>
+                            {% for sc in status_choices %}
+                                <option value="{{ sc.0 }}">{{ sc.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="result_code__icontains">{% trans "Result Code contains" %}</label>
+                    <div class="input-group" id="result_code__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="result_code__icontains" id="id_result_code__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="in_year_month_range_time">{% trans "Time in the Year Month Range" %}</label>
+                    <div class="input-group date" id="in_year_month_range_time" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#in_year_month_range_time"
+                            name="in_year_month_range_time" id="in_year_month_range_time" />
+                        <div class="input-group-append" data-target="#in_year_month_range_time" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="search_button_row">

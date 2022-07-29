@@ -80,7 +80,7 @@ class TO_CONFIGFilter(filters.FilterSet):
 
 class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
     MESSAGE_DTS__gte = filters.DateTimeFilter(method='filter_MESSAGE_DTS__gte')
-    MESSAGE_DTS__lte = filters.DateTimeFilter(method='filter_MESSAGE_DTS__lte')
+    MESSAGE_DTS__lt = filters.DateTimeFilter(method='filter_MESSAGE_DTS__lt')
 
 
     class Meta:
@@ -100,15 +100,15 @@ class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
     
 
 
-    def filter_MESSAGE_DTS__lte(self, queryset, name, value):
+    def filter_MESSAGE_DTS__lt(self, queryset, name, value):
         value_str = value.astimezone(TAIPEI_TIMEZONE).strftime("%Y%m%d%H%M%S999")
-        return queryset.filter(MESSAGE_DTS__lte=value_str)
+        return queryset.filter(MESSAGE_DTS__lt=value_str)
     
 
 
 class TURNKEY_MESSAGE_LOG_DETAILFilter(filters.FilterSet):
     PROCESS_DTS__gte = filters.DateTimeFilter(method='filter_PROCESS_DTS__gte')
-    PROCESS_DTS__lte = filters.DateTimeFilter(method='filter_PROCESS_DTS__lte')
+    PROCESS_DTS__lt = filters.DateTimeFilter(method='filter_PROCESS_DTS__lt')
     class Meta:
         model = TURNKEY_MESSAGE_LOG_DETAIL
         fields = {
@@ -125,9 +125,9 @@ class TURNKEY_MESSAGE_LOG_DETAILFilter(filters.FilterSet):
     
 
 
-    def filter_PROCESS_DTS__lte(self, queryset, name, value):
+    def filter_PROCESS_DTS__lt(self, queryset, name, value):
         value_str = value.astimezone(TAIPEI_TIMEZONE).strftime("%Y%m%d%H%M%S999")
-        return queryset.filter(PROCESS_DTS__lte=value_str)
+        return queryset.filter(PROCESS_DTS__lt=value_str)
     
 
 
@@ -187,6 +187,8 @@ class EITurnkeyBatchFilter(filters.FilterSet):
             "mig": ("exact", ),
             "turnkey_version": ("exact", ),
             "status": ("exact", ),
+            "create_time": ("gte", "gt", "lte", "lt", ),
+            "update_time": ("gte", "gt", "lte", "lt", ),
         }
 
 
@@ -194,12 +196,17 @@ class EITurnkeyBatchFilter(filters.FilterSet):
 class EITurnkeyBatchEInvoiceFilter(filters.FilterSet):
     ei_turnkey_batch__slug__icontains = filters.CharFilter(method='filter_ei_turnkey_batch__slug__icontains')
     ei_turnkey_batch__mig = filters.CharFilter(method='filter_ei_turnkey_batch__mig')
-    invoice_number_in_body = filters.CharFilter(method='filter_invoice_number_in_body')
+    in_year_month_range_time = filters.DateTimeFilter(method='filter_in_year_month_range_time')
+    
+
+
     class Meta:
         model = EITurnkeyBatchEInvoice
         fields = {
             "ei_turnkey_batch": ("exact", ),
             "batch_einvoice_id": ("exact", ),
+            "batch_einvoice_track_no": ("exact", "icontains", ),
+            "result_code": ("exact", "icontains", ),
         }
     
 
@@ -212,10 +219,7 @@ class EITurnkeyBatchEInvoiceFilter(filters.FilterSet):
         return queryset.filter(ei_turnkey_batch__mig=value)
     
 
-    def filter_invoice_number_in_body(self, queryset, name, value):
-        querys = [Q(**{"body__{}__Main__InvoiceNumber__icontains".format(field): value})
-                  for field in ["C0401", "C0501", "C0701"]]
-        query = querys.pop()
-        for q in querys:
-            query |= q
-        return queryset.filter(query)
+    def filter_in_year_month_range_time(self, queryset, name, value):
+        return queryset.filter(batch_einvoice_begin_time__lte=value,
+                               batch_einvoice_end_time__gt=value,
+                              )

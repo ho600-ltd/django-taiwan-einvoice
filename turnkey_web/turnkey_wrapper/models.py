@@ -250,6 +250,9 @@ class TURNKEY_TRANSPORT_CONFIG(models.Model):
 class TURNKEY_USER_PROFILE(models.Model):
     USER_ID = models.CharField(db_column='USER_ID', primary_key=True, max_length=10)
     USER_PASSWORD = models.CharField(db_column='USER_PASSWORD', max_length=100, blank=True, null=True)
+    @property
+    def mask_USER_PASSWORD(self):
+        return self.USER_PASSWORD[:1] + '********************************' + self.USER_PASSWORD[-1:]
     USER_ROLE = models.CharField(db_column='USER_ROLE', max_length=2, blank=True, null=True)
 
     def __str__(self):
@@ -652,6 +655,9 @@ class EITurnkeyBatchEInvoice(models.Model):
     batch_einvoice_id = models.PositiveIntegerField(default=0)
     batch_einvoice_begin_time = models.DateTimeField()
     batch_einvoice_end_time = models.DateTimeField()
+    @property
+    def batch_einvoice_end_time_minus_1_second(self):
+        return self.batch_einvoice_end_time - datetime.timedelta(seconds=1)
     batch_einvoice_track_no = models.CharField(max_length=10)
     status_choices = (
         ("", _("Waiting")),

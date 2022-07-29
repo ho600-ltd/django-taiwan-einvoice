@@ -151,12 +151,18 @@ class TURNKEY_TRANSPORT_CONFIGSerializer(ModelSerializer):
 
 class TURNKEY_USER_PROFILESerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
+    mask_USER_PASSWORD = CharField(read_only=True)
     
 
 
     class Meta:
         model = TURNKEY_USER_PROFILE
-        fields = '__all__'
+        fields = [
+            "resource_uri",
+            "USER_ID",
+            "mask_USER_PASSWORD",
+            "USER_ROLE",
+        ]
 
 
 
@@ -199,6 +205,7 @@ class EITurnkeyBatchSerializer(ModelSerializer):
 
 class EITurnkeyBatchEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeybatcheinvoice-detail")
+    batch_einvoice_end_time_minus_1_second = DateTimeField(read_only=True)
     ei_turnkey_batch_dict = EITurnkeyBatchSerializer(read_only=True, source="ei_turnkey_batch")
     
 

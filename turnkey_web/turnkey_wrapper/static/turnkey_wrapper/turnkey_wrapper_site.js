@@ -191,8 +191,9 @@ $(function () {
             'update_time__gte', 'update_time__lt',
             'generate_time__gte', 'generate_time__lt',
             'print_time__gte', 'print_time__lt',
-            'MESSAGE_DTS__gte', 'MESSAGE_DTS__lte',
-            'PROCESS_DTS__gte', 'PROCESS_DTS__lte',
+            'MESSAGE_DTS__gte', 'MESSAGE_DTS__lt',
+            'PROCESS_DTS__gte', 'PROCESS_DTS__lt',
+            'in_year_month_range_time',
             'date_in_year_month_range'
         ];
         for (var param of datetime_kind_params) {
@@ -227,6 +228,8 @@ $(function () {
             'routing_id__icontains',
             'slug__icontains',
             'ei_turnkey_batch__slug__icontains',
+            'result_code__icontains',
+            'batch_einvoice_track_no__icontains',
             'INVOICE_IDENTIFIER__icontains',
             'invoice_number_in_body'
         ];

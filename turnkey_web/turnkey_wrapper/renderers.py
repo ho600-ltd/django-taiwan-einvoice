@@ -11,7 +11,7 @@ from django.utils.translation import pgettext_lazy
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
 
-from turnkey_wrapper.models import EI_STATUSS, MIG_NOS, FROM_CONFIG
+from turnkey_wrapper.models import EI_STATUSS, MIG_NOS, FROM_CONFIG, EITurnkeyBatch, EITurnkeyBatchEInvoice
 
 
 def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
@@ -180,9 +180,23 @@ class EITurnkeyBatchHtmlRenderer(TKWOriginHTMLRenderer):
     content_template = _get_template_name('eiturnkeybatch_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['status_choices'] = EITurnkeyBatch.status_choices
+        return  res
+
+
+
 
 class EITurnkeyBatchEInvoiceHtmlRenderer(TKWOriginHTMLRenderer):
     template = _get_template_name('eiturnkeybatcheinvoice_list', sub_dir='turnkey_wrapper', show_template_filename=True)
     content_template = _get_template_name('eiturnkeybatcheinvoice_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['status_choices'] = EITurnkeyBatchEInvoice.status_choices
+        return  res
 
 

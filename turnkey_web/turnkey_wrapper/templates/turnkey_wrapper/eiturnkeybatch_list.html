@@ -54,18 +54,58 @@
                     <div class="input-group" id="status" data-target-input="nearest">
                         <select class="form-control" data-target="#status" name="status" id="id_status">
                             <option value=""></option>
-                            <option value="7">{% trans "Just created" %}</option>
-                            <option value="8">{% trans "Downloaded from TEA" %}</option>
-                            <option value="9">{% trans "Exported to Data/" %}</option>
-                        {% comment %}
-        ("P", _("Preparing for EI(P)")),
-        ("G", _("Uploaded to EI or Downloaded from EI(G)")),
-        ("E", _("E Error for EI process(E)")),
-        ("I", _("I Error for EI process(I)")),
-        ("C", _("Successful EI process(C)")),
-        ("M", _("Swith to Successful EI process manually(S-C)")),
-                        {% endcomment %}
+                            {% for sc in status_choices %}
+                                <option value="{{ sc.0 }}">{{ sc.0 }}. {{ sc.1 }}</option>
+                            {% endfor %}
                         </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__gte">{% trans "Create Time greater than" %}</label>
+                    <div class="input-group date" id="create_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
+                            name="create_time__gte" id="id_create_time__gte" />
+                        <div class="input-group-append" data-target="#create_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__lt">{% trans "Create Time less than" %}</label>
+                    <div class="input-group date" id="create_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
+                            name="create_time__lt" id="id_create_time__lt" />
+                        <div class="input-group-append" data-target="#create_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="update_time__gte">{% trans "Update Time greater than" %}</label>
+                    <div class="input-group date" id="update_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#update_time__gte"
+                            name="update_time__gte" id="id_update_time__gte" />
+                        <div class="input-group-append" data-target="#update_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="update_time__lt">{% trans "Update Time less than" %}</label>
+                    <div class="input-group date" id="update_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#update_time__lt"
+                            name="update_time__lt" id="id_update_time__lt" />
+                        <div class="input-group-append" data-target="#update_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
                     </div>
                 </div>
             </div>

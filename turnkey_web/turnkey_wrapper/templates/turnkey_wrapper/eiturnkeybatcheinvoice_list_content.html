@@ -12,8 +12,8 @@
             <th>No.</th>
             <th>ei_turnkey_batch</th>
             <th>batch_einvoice infos</th>
-            <th>body</th>
             <th>status<br/>&amp;result_code</th>
+            <th>body</th>
         </tr>
     </thead>
     <tbody>
@@ -23,15 +23,23 @@
                 <td field="ei_turnkey_batch">{{ obj.ei_turnkey_batch_dict.slug }}</td>
                 <td field="batch_einvoice_infos">
                     <div field="batch_einvoice_id">{{ obj.batch_einvoice_id }}</div>
-                    <div class="datetime" field="batch_einvoice_begin_time" value="{{ obj.batch_einvoice_begin_time }}" format="Y-m-d H:i:s"></div> ~
-                    <div class="datetime" field="batch_einvoice_end_time" value="{{ obj.batch_einvoice_end_time }}" format="Y-m-d H:i:s"></div>
+                    <div class="datetime" field="batch_einvoice_begin_time" value="{{ obj.batch_einvoice_begin_time }}" format="Y-m-d"></div> ~
+                    <div class="datetime" field="batch_einvoice_end_time_minus_1_second" value="{{ obj.batch_einvoice_end_time_minus_1_second }}" format="Y-m-d"></div>
                     <div field="batch_einvoice_track_no">{{ obj.batch_einvoice_track_no }}</div>
                 </td>
-                <td field="body"><pre style="max-width: 600px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
                 <td field="status_and_result_code">
-                    <div field="status">{{ obj.status }}</div>
+                    <div field="status" class="font-weight-bold {% ifequal "C" obj.status %}
+                            text-dark
+                        {% else %}{% ifequal "G" obj.status %}
+                            text-light
+                        {% else %}
+                            text-danger
+                        {% endifequal %}{% endifequal %}
+                        ">{{ obj.status }}
+                    </div>
                     <div field="result_code">{{ obj.result_code }}</div>
                 </td>
+                <td field="body"><pre style="max-width: 600px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
             </tr>
         {% endfor %}
     </tbody>

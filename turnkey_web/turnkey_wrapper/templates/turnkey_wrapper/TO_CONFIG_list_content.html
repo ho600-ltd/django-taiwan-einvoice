@@ -6,10 +6,7 @@
     {% endwith %}
 </div>
 
-class TenTo1000PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 10
-    max_page_size = 1000<table class="table" init_page_no="{{ data.init_page_no }}">
+<table class="table" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th>No.</th>
