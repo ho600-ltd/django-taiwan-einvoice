@@ -14,7 +14,7 @@ class IsSuperUserInLocalhost(IsAdminUser):
 
 
 
-class CounterBasedOTPinRowForEITurnkeyPermission(BasePermission):
+class CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission(BasePermission):
     ACTION_PERMISSION_MAPPING = {
         "retrieve": (True, ),
         "create_eiturnkey_batch": (True, ),
@@ -35,7 +35,7 @@ class CounterBasedOTPinRowForEITurnkeyPermission(BasePermission):
         else:
             return False
         result = obj.verify_counter_based_otp_in_row(otps.split(','))
-        if result:
+        if result and (not obj.allow_ips or request.META['REMOTE_ADDR'] in obj.allow_ips):
             lg = logging.getLogger('turnkey_web')
             lg.debug("CounterBasedOTPinRowForEITurnkeyPermission:\n\notps: {}\nverify_otps: {}".format(otps, result))
             return True
@@ -44,7 +44,7 @@ class CounterBasedOTPinRowForEITurnkeyPermission(BasePermission):
 
 
 
-class CounterBasedOTPinRowForEITurnkeyBatchPermission(BasePermission):
+class CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission(BasePermission):
     ACTION_PERMISSION_MAPPING = {
         "get_batch_einvoice_id_status_result_code_set_from_ei_turnkey_batch_einvoices": (True, ),
     }
@@ -63,7 +63,7 @@ class CounterBasedOTPinRowForEITurnkeyBatchPermission(BasePermission):
         else:
             return False
         result = obj.ei_turnkey.verify_counter_based_otp_in_row(otps.split(','))
-        if result:
+        if result and (not obj.allow_ips or request.META['REMOTE_ADDR'] in obj.allow_ips):
             lg = logging.getLogger('turnkey_web')
             lg.debug("CounterBasedOTPinRowForEITurnkeyBatchPermission:\n\notps: {}\nverify_otps: {}".format(otps, result))
             return True

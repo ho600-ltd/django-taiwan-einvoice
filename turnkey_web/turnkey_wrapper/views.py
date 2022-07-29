@@ -16,8 +16,8 @@ from taiwan_einvoice.paginations import (
 
 from turnkey_wrapper.permissions import (
     IsSuperUserInLocalhost,
-    CounterBasedOTPinRowForEITurnkeyPermission,
-    CounterBasedOTPinRowForEITurnkeyBatchPermission,
+    CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission,
+    CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission,
 )
 from turnkey_wrapper.models import (
     FROM_CONFIG,
@@ -222,8 +222,8 @@ class EITurnkeyModelViewSet(ModelViewSet):
 
 
     def get_permissions(self):
-        if CounterBasedOTPinRowForEITurnkeyPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
-            self.permission_classes = (Or(IsSuperUserInLocalhost, CounterBasedOTPinRowForEITurnkeyPermission), )
+        if CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
+            self.permission_classes = (Or(IsSuperUserInLocalhost, CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission), )
         return super(self.__class__, self).get_permissions()
 
     
@@ -304,8 +304,8 @@ class EITurnkeyBatchModelViewSet(ModelViewSet):
 
 
     def get_permissions(self):
-        if CounterBasedOTPinRowForEITurnkeyBatchPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
-            self.permission_classes = (Or(IsSuperUserInLocalhost, CounterBasedOTPinRowForEITurnkeyBatchPermission), )
+        if CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
+            self.permission_classes = (Or(IsSuperUserInLocalhost, CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission), )
         return super(self.__class__, self).get_permissions()
 
     
