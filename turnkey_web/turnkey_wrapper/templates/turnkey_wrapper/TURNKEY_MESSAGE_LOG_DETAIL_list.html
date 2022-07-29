@@ -41,6 +41,43 @@
                     </div>
                 </div>
             </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="PROCESS_DTS__gte">{% trans "PROCESS_DTS greater than" %}</label>
+                    <div class="input-group date" id="PROCESS_DTS__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#PROCESS_DTS__gte"
+                            name="PROCESS_DTS__gte" id="id_PROCESS_DTS__gte" />
+                        <div class="input-group-append" data-target="#PROCESS_DTS__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="PROCESS_DTS__lte">{% trans "PROCESS_DTS less than" %}</label>
+                    <div class="input-group date" id="PROCESS_DTS__lte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#PROCESS_DTS__lte"
+                            name="PROCESS_DTS__lte" id="id_PROCESS_DTS__lte" />
+                        <div class="input-group-append" data-target="#PROCESS_DTS__lte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="STATUS">{% trans "STATUS" %}</label>
+                    <div class="input-group" id="STATUS" data-target-input="nearest">
+                        <select class="form-control" name="STATUS" id="id_STATUS">
+                            <option value=""></option>
+                            {% for sc in ei_statuss %}
+                                <option value="{{ sc }}">{{ sc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="search_button_row">

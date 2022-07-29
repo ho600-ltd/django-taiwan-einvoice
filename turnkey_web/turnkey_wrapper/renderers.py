@@ -11,6 +11,9 @@ from django.utils.translation import pgettext_lazy
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
 
+from turnkey_wrapper.models import EI_STATUSS, MIG_NOS, FROM_CONFIG
+
+
 def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
     """ finding order: (sub_dir, langs) > (sub_dir) > (langs) > ()
     """
@@ -121,10 +124,24 @@ class TURNKEY_MESSAGE_LOGHtmlRenderer(TKWOriginHTMLRenderer):
     content_template = _get_template_name('TURNKEY_MESSAGE_LOG_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['ei_statuss'] = EI_STATUSS
+        res['mig_nos'] = MIG_NOS
+        res['from_configs'] = FROM_CONFIG.objects.all().order_by('ROUTING_ID')
+        return  res
+
+
 
 class TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer(TKWOriginHTMLRenderer):
     template = _get_template_name('TURNKEY_MESSAGE_LOG_DETAIL_list', sub_dir='turnkey_wrapper', show_template_filename=True)
     content_template = _get_template_name('TURNKEY_MESSAGE_LOG_DETAIL_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['ei_statuss'] = EI_STATUSS
+        return  res
 
 
 

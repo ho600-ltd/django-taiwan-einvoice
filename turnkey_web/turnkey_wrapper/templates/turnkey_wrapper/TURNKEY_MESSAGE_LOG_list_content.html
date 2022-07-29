@@ -10,42 +10,74 @@
     <thead>
         <tr>
             <th>No.</th>
-            <th>SEQNO</th>
-            <th>SUBSEQNO</th>
+            <th>SEQNO-SUBSEQNO</th>
             <th>STATUS</th>
             <th>MESSAGE_DTS</th>
-            <th>MESSAGE_TYPE</th>
-            <th>CATEGORY_TYPE</th>
-            <th>PROCESS_TYPE</th>
-            <th>FROM_PARTY_ID</th>
-            <th>TO_PARTY_ID</th>
-            <th>FROM_ROUTING_ID</th>
-            <th>INVOICE_IDENTIFIER</th>
-            <th>UUID</th>
-            <th>CHARACTER_COUNT</th>
-            <th>IN_OUT_BOUND</th>
-            <th>TO_ROUTING_ID</th>
+            <th>
+                <div>MESSAGE_TYPE</div>
+                <div>CATEGORY_TYPE</div>
+                <div>PROCESS_TYPE</div>
+            </th>
+            <th>
+                <div>FROM_PARTY_ID</div>
+                <div>TO_PARTY_ID</div>
+                <div>FROM_ROUTING_ID</div>
+            </th>
+            <th>
+                <div>INVOICE_IDENTIFIER</div>
+                <div>UUID</div>
+            </th>
+            <th>
+                <div>CHARACTER_COUNT</div>
+                <div>IN_OUT_BOUND</div>
+                <div>TO_ROUTING_ID</div>
+            </th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
                 <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
-                <td field="SEQNO">{{ obj.SEQNO }}</td>
-                <td field="SUBSEQNO">{{ obj.SUBSEQNO }}</td>
-                <td field="STATUS">{{ obj.STATUS }}</td>
-                <td field="MESSAGE_DTS">{{ obj.MESSAGE_DTS }}</td>
-                <td field="MESSAGE_TYPE">{{ obj.MESSAGE_TYPE }}</td>
-                <td field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</td>
-                <td field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</td>
-                <td field="FROM_PARTY_ID">{{ obj.FROM_PARTY_ID }}</td>
-                <td field="TO_PARTY_ID">{{ obj.TO_PARTY_ID }}</td>
-                <td field="FROM_ROUTING_ID">{{ obj.FROM_ROUTING_ID }}</td>
-                <td field="INVOICE_IDENTIFIER">{{ obj.INVOICE_IDENTIFIER }}</td>
-                <td field="UUID">{{ obj.UUID }}</td>
-                <td field="CHARACTER_COUNT">{{ obj.CHARACTER_COUNT }}</td>
-                <td field="IN_OUT_BOUND">{{ obj.IN_OUT_BOUND }}</td>
-                <td field="TO_ROUTING_ID">{{ obj.TO_ROUTING_ID }}</td>
+                <td>
+                    <span field="SEQNO">{{ obj.SEQNO }}</span>-<span field="SUBSEQNO">{{ obj.SUBSEQNO }}</span>
+                </td>
+                <td field="STATUS" class="font-weight-bold {% ifequal "C" obj.STATUS %}
+                    text-dark
+                {% else %}{% ifequal "G" obj.STATUS %}
+                    text-light
+                {% else %}
+                    text-danger
+                {% endifequal %}{% endifequal %}
+                ">{{ obj.STATUS }}</td>
+                <td field="MESSAGE_DTS_datetime" class="datetime"
+                    title="{{ obj.MESSAGE_DTS }}"
+                    value="{{ obj.MESSAGE_DTS_datetime }}" format="Y-m-d H:i:s.sss">
+                </td>
+                <td>
+                    <div field="MESSAGE_TYPE" class="font-weight-bold {% ifequal "C0401" obj.MESSAGE_TYPE %}
+                        text-primary
+                    {% else %}{% ifequal "C0501" obj.MESSAGE_TYPE %}
+                        text-success
+                    {% else %}
+                        text-dark
+                    {% endifequal %}{% endifequal %}">{{ obj.MESSAGE_TYPE }}</div>
+                    <div field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</div>
+                    <div field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</div>
+                </td>
+                <td>
+                    <div field="FROM_PARTY_ID">{{ obj.FROM_PARTY_ID }}</div>
+                    <div field="TO_PARTY_ID">{{ obj.TO_PARTY_ID }}</div>
+                    <div field="FROM_ROUTING_ID">{{ obj.FROM_ROUTING_ID }}</div>
+                </td>
+                <td>
+                    <div field="INVOICE_IDENTIFIER" style="font-weight: bold;">{{ obj.INVOICE_IDENTIFIER }}</div>
+                    <div field="UUID">{{ obj.UUID }}</div>
+                </td>
+                <td>
+                    <div field="CHARACTER_COUNT">{{ obj.CHARACTER_COUNT }}</div>
+                    <div field="IN_OUT_BOUND">{{ obj.IN_OUT_BOUND }}</div>
+                    <div field="TO_ROUTING_ID">{{ obj.TO_ROUTING_ID }}</div>
+                </td>
             </tr>
         {% endfor %}
     </tbody>

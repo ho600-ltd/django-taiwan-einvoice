@@ -12,6 +12,8 @@ from taiwan_einvoice.turnkey import TurnkeyWebReturnCode
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS = ["G", "C"]
 EI_WELL_STATUSS = ["P", "G", "C"]
+EI_STATUSS = ["C", "G", "P", "E", "I"]
+MIG_NOS = ["C0401", "C0501", "C0701"]
 
 
 
@@ -140,6 +142,9 @@ class TURNKEY_MESSAGE_LOG(models.Model):
     FROM_PARTY_ID = models.CharField(db_column='FROM_PARTY_ID', max_length=10, blank=True, null=True)
     TO_PARTY_ID = models.CharField(db_column='TO_PARTY_ID', max_length=10, blank=True, null=True)
     MESSAGE_DTS = models.CharField(db_column='MESSAGE_DTS', max_length=17, blank=True, null=True, db_index=True)
+    @property
+    def MESSAGE_DTS_datetime(self):
+        return TAIPEI_TIMEZONE.localize(datetime.datetime.strptime("{}000".format(self.MESSAGE_DTS), "%Y%m%d%H%M%S%f"))
     CHARACTER_COUNT = models.CharField(db_column='CHARACTER_COUNT', max_length=10, blank=True, null=True)
     STATUS = models.CharField(db_column='STATUS', max_length=5, blank=True, null=True)
     IN_OUT_BOUND = models.CharField(db_column='IN_OUT_BOUND', max_length=1, blank=True, null=True)
@@ -164,6 +169,9 @@ class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
     SEQNO = models.CharField(db_column='SEQNO', max_length=8)
     SUBSEQNO = models.CharField(db_column='SUBSEQNO', max_length=5)
     PROCESS_DTS = models.CharField(db_column='PROCESS_DTS', max_length=17, blank=True, null=True)
+    @property
+    def PROCESS_DTS_datetime(self):
+        return TAIPEI_TIMEZONE.localize(datetime.datetime.strptime("{}000".format(self.PROCESS_DTS), "%Y%m%d%H%M%S%f"))
     TASK = models.CharField(db_column='TASK', max_length=30)
     STATUS = models.CharField(db_column='STATUS', max_length=5, blank=True, null=True)
     FILENAME = models.CharField(db_column='FILENAME', max_length=255, blank=True, null=True, db_index=True)

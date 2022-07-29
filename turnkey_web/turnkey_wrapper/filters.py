@@ -88,6 +88,9 @@ class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
         fields = {
             "SEQNO": ("icontains", ),
             "SUBSEQNO": ("icontains", ),
+            "STATUS": ("exact", ),
+            "FROM_ROUTING_ID": ("exact", ),
+            "INVOICE_IDENTIFIER": ("exact", "icontains", ),
         }
 
 
@@ -104,14 +107,28 @@ class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
 
 
 class TURNKEY_MESSAGE_LOG_DETAILFilter(filters.FilterSet):
+    PROCESS_DTS__gte = filters.DateTimeFilter(method='filter_PROCESS_DTS__gte')
+    PROCESS_DTS__lte = filters.DateTimeFilter(method='filter_PROCESS_DTS__lte')
     class Meta:
         model = TURNKEY_MESSAGE_LOG_DETAIL
         fields = {
             "SEQNO": ("icontains", ),
             "SUBSEQNO": ("icontains", ),
             "TASK": ("icontains", ),
+            "STATUS": ("exact", ),
         }
 
+
+    def filter_PROCESS_DTS__gte(self, queryset, name, value):
+        value_str = value.astimezone(TAIPEI_TIMEZONE).strftime("%Y%m%d%H%M%S000")
+        return queryset.filter(PROCESS_DTS__gte=value_str)
+    
+
+
+    def filter_PROCESS_DTS__lte(self, queryset, name, value):
+        value_str = value.astimezone(TAIPEI_TIMEZONE).strftime("%Y%m%d%H%M%S999")
+        return queryset.filter(PROCESS_DTS__lte=value_str)
+    
 
 
 class TURNKEY_SEQUENCEFilter(filters.FilterSet):
