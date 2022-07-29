@@ -4,13 +4,13 @@ from rest_framework.permissions import BasePermission, IsAdminUser
 
 
 
-class IsSuperUser(IsAdminUser):
+class IsSuperUserInLocalhost(IsAdminUser):
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_superuser)
+        return bool(request.user and request.user.is_superuser and '127.0.0.1' == request.META['REMOTE_ADDR'])
 
 
     def has_object_permission(self, request, view, obj):
-        return bool(request.user and request.user.is_superuser)
+        return bool(request.user and request.user.is_superuser and '127.0.0.1' == request.META['REMOTE_ADDR'])
 
 
 

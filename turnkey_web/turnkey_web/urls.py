@@ -7,7 +7,9 @@ from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import JSONRenderer
 from rest_framework.schemas import get_schema_view
+from turnkey_wrapper import permissions
 from turnkey_wrapper.renderers import TKWBrowsableAPIRenderer
+from turnkey_wrapper.permissions import IsSuperUserInLocalhost
 
 from turnkey_wrapper import views
 
@@ -16,6 +18,7 @@ class TurnkeyWrapperAPIRootView(routers.APIRootView):
     """
     version = 'v1'
     renderer_classes = (JSONRenderer, )
+    permission_classes = (IsSuperUserInLocalhost, )
 
 
     def initial(self, request, *args, **kwargs):
