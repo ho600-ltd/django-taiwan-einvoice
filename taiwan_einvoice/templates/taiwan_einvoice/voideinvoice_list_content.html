@@ -38,12 +38,13 @@
                 <th field="einvoice_dict.random_number" width="5%">{% trans "Voided Random Number" %}</th>
                 <th field="new_einvoice_dict.random_number" width="5%">{% trans "New Random Number" %}</th>
                 <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
-                <th field="SalesAmount" width="10%">{% trans "Sales Amount" %}</th>
-                <th field="TaxAmount" width="6%">{% trans "Tax Amount" %}</th>
-                <th field="TotalAmount" width="9%">{% trans "Total Amount" %}</th>
+                <th field="SalesAmount" width="8%">{% trans "Sales Amount" %}</th>
+                <th field="TaxAmount" width="5%">{% trans "Tax Amount" %}</th>
+                <th field="TotalAmount" width="7%">{% trans "Total Amount" %}</th>
                 <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
                 <th field="creator_first_name_id" width="10%">{% trans "Voider" context "taiwan_einvoice" %}</th>
                 <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Void Time" %}</th>
+                <th field="ei_synced" width="5%">{% trans "Synced" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -62,6 +63,9 @@
                         <td field="generate_no">{{ voideinvoice.einvoice_dict.generate_no }}</td>
                         <td field="creator_first_name_id">{{ voideinvoice.creator_dict.first_name }}:{{ voideinvoice.creator_dict.id }}</td>
                         <td class="datetime" field="generate_time" value="{{ voideinvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
+                        <td field="ei_synced">
+                            {% if voideinvoice.ei_synced %}{% trans "Done" %}{% endif %}
+                        </td>
                     </tr>
                 {% endwith %}
             {% endfor %}

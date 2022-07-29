@@ -41,8 +41,9 @@
                 <th field="TotalAmount" width="10%">{% trans "Total Amount" %}</th>
                 <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
                 <th field="creator_first_name_id" width="10%">{% trans "Canceler" context "taiwan_einvoice" %}</th>
-                <th field="generate_time" format="Y-m-d AH:i:s" width="30%">{% trans "Cancel Time" %}</th>
+                <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Cancel Time" %}</th>
                 <th field="new_einvoice__track_no_" width="5%">{% trans "New E-Invoice Track No." %}</th>
+                <th field="ei_synced" width="5%">{% trans "Synced" %}</th>
             </tr>
         </thead>
         <tbody>
@@ -60,6 +61,9 @@
                         <td field="creator_first_name_id">{{ canceleinvoice.creator_dict.first_name }}:{{ canceleinvoice.creator_dict.id }}</td>
                         <td class="datetime" field="generate_time" value="{{ canceleinvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
                         <td field="new_einvoice__track_no_">{{ canceleinvoice.new_einvoice_dict.track_no_ }}</td>
+                        <td field="ei_synced">
+                            {% if canceleinvoice.ei_synced %}{% trans "Done" %}{% endif %}
+                        </td>
                     </tr>
                 {% endwith %}
             {% endfor %}

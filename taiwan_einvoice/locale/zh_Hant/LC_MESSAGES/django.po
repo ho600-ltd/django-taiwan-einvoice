@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-28 16:40+0800\n"
+"POT-Creation-Date: 2022-07-29 15:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -349,7 +349,7 @@ msgid "Upload Batch"
 msgstr "上傳批次"
 
 msgid "Batch E-Invoice"
-msgstr "批次電子發票"
+msgstr "批次上傳電子發票"
 
 msgid "Audit Log"
 msgstr "稽核 Log"
@@ -524,6 +524,12 @@ msgstr "作廢時間"
 
 msgid "New E-Invoice Track No."
 msgstr "另開發票字軌"
+
+msgid "Synced"
+msgstr "同步"
+
+msgid "Done"
+msgstr "完成"
 
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode"
@@ -1143,6 +1149,9 @@ msgstr "執行者"
 
 msgid "EI Turnkey Batch ID"
 msgstr "EI Turnkey 批次 ID"
+
+msgid "Auto-Executed"
+msgstr "自動執行"
 
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Voided E-Invoice"

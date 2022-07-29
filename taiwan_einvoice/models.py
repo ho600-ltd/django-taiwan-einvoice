@@ -808,6 +808,7 @@ class EInvoiceMIG(models.Model):
 
 class EInvoice(models.Model):
     only_fields_can_update = ['print_mark', 'ei_synced', 'generate_time']
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1335,6 +1336,7 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
@@ -1420,6 +1422,7 @@ class CancelEInvoice(models.Model):
 
 
 class VoidEInvoice(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
