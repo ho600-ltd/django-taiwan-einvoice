@@ -8,7 +8,7 @@ $(function () {
         }
         this.name = name ? name : '__none__';
         this.second_offset = 0;
-        this.DEFAULT_DATETIME_RE = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.[0-9]*)?Z?$');
+        this.DEFAULT_DATETIME_RE = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)\.?([0-9]*)?Z?$');
         this.WEEKDAY = {
             0: gettext("Sun"), 1: gettext("Mon"), 2: gettext("Tue"), 3: gettext("Wen"),
             4: gettext("Thu"), 5: gettext("Fri"), 6: gettext("Sat"), 7: gettext("Sun")
@@ -39,10 +39,12 @@ $(function () {
 
     turnkey_wrapper_site.prototype.convert_tastypie_datetime = function (s) {
         var $self = this;
-        var re = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.?[0-9]*)$');
+        var re = $self.DEFAULT_DATETIME_RE;
         var list = re.exec(s);
-        if (list) {
-            return list[1]+'-'+list[2]+'-'+list[3]+' '+list[4]+':'+list[5]+':'+list[6];
+        if ("" != list[7] && list[7]) {
+            return list[1]+'-'+list[2]+'-'+list[3]+' '+list[4]+':'+list[5]+':'+list[6]+'.'+list[7];
+        } else if ("" == list[7] || ! list[7]) {
+            return list[1]+'-'+list[2]+'-'+list[3]+' '+list[4]+':'+list[5]+':'+list[6]+'.000000';
         } else {
             var re = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+)$');
             var list = re.exec(s);
@@ -58,6 +60,15 @@ $(function () {
                 return String(d);
             }
         };
+        function in_03d (d) {
+            if (d >= 0 && d <= 9) {
+                return '00'+String(d);
+            } else if (d >= 10 && d <= 99) {
+                return '0'+String(d);
+            } else {
+                return String(d);
+            }
+        };
         display_format = display_format ? display_format : 'Y-m-d H:i:s';
 
         var $self = this;
@@ -66,8 +77,17 @@ $(function () {
         }
         time_str = $self.convert_tastypie_datetime(time_str.replace(/Z$/, ''));
         var list = $self.DEFAULT_DATETIME_RE.exec(time_str);
+        if (list[7] && 6 == list[7].length) {
+            var list_7 = parseInt(list[7] / 1000000 * 1000);
+        } else if (list[7] && 3 == list[7].length) {
+            var list_7 = parseInt(list[7]);
+        } else {
+            var list_7 = 0;
+        }
         var D = Date.UTC(Number(list[1]), Number(list[2])-1, Number(list[3]),
-                            Number(list[4]), Number(list[5]), Number(list[6]));
+                            Number(list[4]), Number(list[5]), Number(list[6]),
+                            Number(list_7)
+                        );
         var offseted_d = new Date(D + 1000*Number(second_offset));
         var Y = offseted_d.getUTCFullYear();
         var m = in_02d(offseted_d.getUTCMonth() + 1);
@@ -75,11 +95,13 @@ $(function () {
         var H = in_02d(offseted_d.getUTCHours());
         var i = in_02d(offseted_d.getUTCMinutes());
         var s = in_02d(offseted_d.getUTCSeconds());
+        var sss = in_03d(offseted_d.getUTCMilliseconds());
         var D = $self.WEEKDAY[Number(offseted_d.getUTCDay())];
         var M = $self.MONTH[Number(m)];
         var A = H >= 12 ? pgettext('timezone', 'PM') : pgettext('timezone', 'AM');
         return display_format.replace('Y', Y).replace('m', m).replace('d', d)
-                            .replace('H', H).replace('i', i).replace('s', s)
+                            .replace('H', H).replace('i', i)
+                            .replace('sss', sss).replace('s', s)
                             .replace('D', D).replace('M', M).replace('A', A);
     };
 
