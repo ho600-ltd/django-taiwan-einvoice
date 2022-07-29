@@ -669,6 +669,7 @@ class EITurnkeyBatchEInvoice(models.Model):
     )
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     save_body_time = models.DateTimeField()
+    upload_to_ei_time = models.DateTimeField()
     body = models.JSONField(default="")
     result_code = models.CharField(max_length=5, default="", db_index=True)
 
@@ -723,6 +724,7 @@ class EITurnkeyBatchEInvoice(models.Model):
             else:
                 self.status = 'I'
                 self.result_code = nearest_TURNKEY_MESSAGE_LOG.STATUS
+            self.upload_to_ei_time = nearest_TURNKEY_MESSAGE_LOG.MESSAGE_DTS_datetime
             self.save()
             return self.status
 
