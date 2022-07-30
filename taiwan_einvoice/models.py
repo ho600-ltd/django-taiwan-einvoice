@@ -650,6 +650,9 @@ class TurnkeyService(models.Model):
             ("add_te_voideinvoice", "Add Void E-Invoice"),
 
             ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
+            
+            ("view_te_alarm_for_general_user", "View Alarm for the General User"),
+            ("view_te_alarm_for_programmer", "View Alarm for the Programmer"),
         )
     
 
@@ -952,7 +955,7 @@ class EInvoice(models.Model):
 
 
     def __str__(self):
-        return "{}@{}".format(self.track_no, self.mig_type.no)
+        return "{}@{}".format(self.track_no, self.get_mig_no())
 
 
 
@@ -1153,6 +1156,10 @@ class EInvoice(models.Model):
         return _d
 
 
+    def get_mig_no(self):
+        return self.mig_type.no
+
+
     def export_json_for_mig(self):
         er_field_d = {
             "identifier": "Identifier",
@@ -1171,7 +1178,7 @@ class EInvoice(models.Model):
                 v = getattr(self, "{}_{}".format(er, k))
                 if v:
                     er_j[er][json_k] = v
-        J = {self.mig_type.no: {
+        J = {self.get_mig_no(): {
                 "Main": {
                     "InvoiceNumber": self.track_no,
                     "InvoiceDate": self.invoice_date,
@@ -1187,12 +1194,13 @@ class EInvoice(models.Model):
                 "Amount": self.amounts,
             }
         }
-        if '1' == J[self.mig_type.no]["Main"]["DonateMark"]:
-            J[self.mig_type.no]["Main"]["NPOBAN"] = self.npoban
+        no = self.get_mig_no()
+        if '1' == J[no]["Main"]["DonateMark"]:
+            J[no]["Main"]["NPOBAN"] = self.npoban
         if self.carrier_type:
-            J[self.mig_type.no]["Main"]["CarrierType"] = self.carrier_type
-            J[self.mig_type.no]["Main"]["CarrierId1"] = self.carrier_id1
-            J[self.mig_type.no]["Main"]["CarrierId2"] = self.carrier_id2
+            J[no]["Main"]["CarrierType"] = self.carrier_type
+            J[no]["Main"]["CarrierId1"] = self.carrier_id1
+            J[no]["Main"]["CarrierId2"] = self.carrier_id2
         return J
 
 
@@ -1339,6 +1347,7 @@ class EInvoicePrintLog(models.Model):
 class CancelEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice,
@@ -1386,6 +1395,9 @@ class CancelEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
+        if not self.mig_type:
+            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+
         if kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
@@ -1395,7 +1407,7 @@ class CancelEInvoice(models.Model):
 
 
     def get_mig_no(self):
-        no = self.einvoice.mig_type.no
+        no = self.einvoice.get_mig_no()
         if "C0401" == no:
             mig = "C0501"
         else:
@@ -1425,6 +1437,7 @@ class CancelEInvoice(models.Model):
 class VoidEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
     new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
@@ -1466,6 +1479,9 @@ class VoidEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
+        if not self.mig_type:
+            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+
         if kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
@@ -1475,7 +1491,7 @@ class VoidEInvoice(models.Model):
     
     
     def get_mig_no(self):
-        no = self.einvoice.mig_type.no
+        no = self.einvoice.get_mig_no()
         if "C0401" == no:
             mig = "C0701"
         else:
@@ -1723,7 +1739,7 @@ class UploadBatch(models.Model):
         payload = {"format": "json"}
         data = {
             "slug": self.slug,
-            "mig": self.mig_type.no,
+            "mig": self.get_mig_no(),
         }
         try:
             response = requests.post(url,
@@ -2116,7 +2132,34 @@ class SummaryReport(models.Model):
                 begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, 1, 1, 0, 0, 0))
                 _end_time = begin_time + datetime.timedelta(days=540)
                 end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:1], 1, 1))
-            print(report_type, begin_time, end_time)
+
             if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
-                print("IGNORE")
+                cls.generate_report_and_notice(report_type, begin_time, end_time)
+    
+
+    @classmethod
+    def generate_report_and_notice(cls, report_type, begin_time, end_time):
+        mig_no_good_counts = {
+        }
+        mig_no_failed_counts = {
+        }
+        content_type_models = [EInvoice, CancelEInvoice, VoidEInvoice]
             
+
+
+class TEAlarm(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    target_audience_type_choices = (
+        ("g", "General User", ),
+        ("p", "Programmer", ),
+    )
+    target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
+    viewers = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
