@@ -59,6 +59,7 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
+MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
 
 
 
@@ -1531,6 +1532,7 @@ class UploadBatch(models.Model):
     @property
     def batch_einvoice_count(self):
         return self.batcheinvoice_set.count()
+    history = HistoricalRecords()
 
 
     def __str__(self):
@@ -1998,6 +2000,7 @@ class BatchEInvoice(models.Model):
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
+    history = HistoricalRecords()
 
 
     def __str__(self):
@@ -2027,3 +2030,93 @@ class AuditLog(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
     is_error = models.BooleanField(default=False)
     log = models.JSONField()
+
+
+
+class EInvoicesContentType(models.Model):
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    status = models.CharField(max_length=1, default="", choices=BatchEInvoice.status_choices, db_index=True)
+
+
+
+class SummaryReport(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    begin_time = models.DateTimeField(db_index=True)
+    end_time = models.DateTimeField(db_index=True)
+    report_type_choices = (
+        ("h", _("Hour")),
+        ("d", _("Day")),
+        ("w", _("Week")),
+        ("m", _("Month")),
+        ("o", _("Odd month ~ Even month")),
+        ("y", _("Year")),
+        ("E", _("Daily summary from EI")),
+    )
+    report_type = models.CharField(max_length=1, choices=report_type_choices, db_index=True)
+    good_count = models.SmallIntegerField(default=0)
+    failed_count = models.SmallIntegerField(default=0)
+    good_counts = models.JSONField()
+    failed_counts = models.JSONField()
+    good_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_good_object")
+    failed_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_failed_object")
+    is_resolve = models.BooleanField(default=False)
+    resolve_note = models.TextField(default="")
+    resolver = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
+
+
+
+    class Meta:
+        unique_together = (("turnkey_service", "begin_time", "report_type", ), )
+
+
+    
+    @classmethod
+    def auto_generate_report(cls, generate_at_time=None):
+        if not generate_at_time:
+            generate_at_time = now()
+        timedelta_d = {
+            "h": datetime.timedelta(minutes=91),
+            "d": datetime.timedelta(hours=24 + 8),
+            "w": datetime.timedelta(hours=24 * 7 + 9),
+            "m": datetime.timedelta(hours=24 * 31 + 10),
+            "o": datetime.timedelta(hours=24 * 61 + 11),
+            "y": datetime.timedelta(hours=24 * 365 + 12),
+        }
+        for report_type, report_type_str in cls.report_type_choices:
+            if not timedelta_d.get(report_type, None):
+                continue
+            generate_for_time = (generate_at_time - timedelta_d[report_type]).astimezone(TAIPEI_TIMEZONE)
+            _Y, _m, _d, _H, _M, _S = generate_for_time.timetuple()[:6]
+            if "h" == report_type:
+                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, _H, 0, 0))
+                end_time = begin_time + datetime.timedelta(minutes=60)
+            elif "d" == report_type:
+                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                end_time = begin_time + datetime.timedelta(hours=24)
+            elif "w" == report_type:
+                _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                begin_time = _begin_time - datetime.timedelta(days=_begin_time.weekday())
+                end_time = begin_time + datetime.timedelta(days=7)
+            elif "m" == report_type:
+                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
+                _end_time = begin_time + datetime.timedelta(days=45)
+                end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
+            elif "o" == report_type:
+                if 1 == _m % 2:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
+                else:
+                    _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0)) - datetime.timedelta(days=10)
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_begin_time.timetuple()[:2], 1))
+                _end_time = begin_time + datetime.timedelta(days=75)
+                end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
+            elif "y" == report_type:
+                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, 1, 1, 0, 0, 0))
+                _end_time = begin_time + datetime.timedelta(days=540)
+                end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:1], 1, 1))
+            print(report_type, begin_time, end_time)
+            if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
+                print("IGNORE")
+            
