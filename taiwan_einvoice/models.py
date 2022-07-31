@@ -1359,13 +1359,12 @@ class CancelEInvoice(models.Model):
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    new_einvoice = models.ForeignKey(EInvoice,
-        related_name="new_einvoice_on_cancel_einvoice_set",
-        null=True,
-        on_delete=models.DO_NOTHING)
     @property
     def invoice_date(self):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def track_no(self):
+        return self.einvoice.track_no
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(db_index=True)
@@ -1378,6 +1377,10 @@ class CancelEInvoice(models.Model):
     reason = models.CharField(max_length=20, null=False, db_index=True)
     return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    new_einvoice = models.ForeignKey(EInvoice,
+        related_name="new_einvoice_on_cancel_einvoice_set",
+        null=True,
+        on_delete=models.DO_NOTHING)
     @property
     def last_batch_einvoice(self):
         try:
@@ -1458,10 +1461,12 @@ class VoidEInvoice(models.Model):
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
     @property
     def invoice_date(self):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def track_no(self):
+        return self.einvoice.track_no
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(db_index=True)
@@ -1473,6 +1478,7 @@ class VoidEInvoice(models.Model):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     reason = models.CharField(max_length=20, null=False, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
     @property
     def last_batch_einvoice(self):
         try:
@@ -2045,8 +2051,11 @@ class BatchEInvoice(models.Model):
     pass_if_error = models.BooleanField(default=False)
     history = HistoricalRecords()
     @property
-    def last_batch_einvoice_log(self):
-        return self.batcheinvoicelog_set.last()
+    def last_einvoices_content_type(self):
+        return EInvoicesContentType.objects.filter(
+            content_type=self.content_type,
+            object_id=self.object_id,
+        ).last()
 
 
     def __str__(self):
@@ -2079,9 +2088,12 @@ class AuditLog(models.Model):
 
 
 
-class BatchEInvoiceLog(models.Model):
-    batch_einvoice = models.ForeignKey(BatchEInvoice, null=True, on_delete=models.DO_NOTHING)
-    status = models.CharField(max_length=1, default="", choices=BatchEInvoice.status_choices, db_index=True)
+class EInvoicesContentType(models.Model):
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    status_choices = list(BatchEInvoice.status_choices) + [("-", _("BatchEInvoice does exist"))]
+    status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
 
 
 
@@ -2100,7 +2112,7 @@ class SummaryReport(models.Model):
         ("E", _("Daily summary from EI")),
     )
     report_type = models.CharField(max_length=1, choices=report_type_choices, db_index=True)
-    problem_note = models.TextField(default="")
+    problems = models.JSONField()
 
     good_count = models.SmallIntegerField(default=0)
     failed_count = models.SmallIntegerField(default=0)
@@ -2110,9 +2122,9 @@ class SummaryReport(models.Model):
     failed_counts = models.JSONField()
     resolved_counts = models.JSONField()
 
-    good_objects = models.ManyToManyField(BatchEInvoiceLog, related_name="summary_report_set_as_good_object")
-    failed_objects = models.ManyToManyField(BatchEInvoiceLog, related_name="summary_report_set_as_failed_object")
-    resolved_objects = models.ManyToManyField(BatchEInvoiceLog, related_name="summary_report_set_as_resolved_object")
+    good_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_good_object")
+    failed_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_failed_object")
+    resolved_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_resolved_object")
 
     is_resolved = models.BooleanField(default=False)
     resolved_note = models.TextField(default="")
@@ -2127,36 +2139,114 @@ class SummaryReport(models.Model):
     
     @classmethod
     def generate_report_and_notice(cls, turnkey_service, report_type, begin_time, end_time):
+        if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
+            return None
+
+        model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service, 
+                                                 create_time__gte=begin_time,
+                                                 create_time__lt=end_time).order_by('id'),
+                         CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service,
+                                                       create_time__gte=begin_time,
+                                                       create_time__lt=end_time).order_by('id'),
+                         VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service,
+                                                     create_time__gte=begin_time,
+                                                     create_time__lt=end_time).order_by('id')]
+        problems = {}
         good_count = 0
         failed_count = 0
         resolved_count = 0
-        mig_no_good_counts = {}
-        mig_no_failed_counts = {}
-        mig_no_resolved_counts = {}
+        good_counts = {}
+        failed_counts = {}
+        resolved_counts = {}
+        good_objects = []
+        failed_objects = []
+        def dict_value_plus_1(dictionary, key):
+            if key in dictionary: dictionary[key] += 1
+            else: dictionary[key] = 1
+
         try:
-            summary_report = cls.objects.get(turnkey_service=turnkey_service, report_type=report_type, begin_time=begin_time)
+            summary_report = cls.objects.get(turnkey_service=turnkey_service,
+                                             report_type=report_type,
+                                             begin_time=begin_time,
+                                             end_time=end_time)
         except cls.DoesNotExist:
-            summary_report = cls(turnkey_service=turnkey_service, report_type=report_type, begin_time=begin_time)
+            summary_report = cls(turnkey_service=turnkey_service,
+                                 report_type=report_type,
+                                 begin_time=begin_time,
+                                 end_time=end_time)
+            
+            new_creation = True
         else:
-            if (summary_report.failed_count <= 0
-                or summary_report.failed_count + summary_report.resolved_count >= summary_report.good_count
-                or summary_report.is_resolved
-                ):
-                return summary_report
+            new_creation = False
+        if not new_creation and (summary_report.failed_count <= 0
+            or summary_report.is_resolved
+            or summary_report.resolved_count >= summary_report.failed_count
+            ):
+            return summary_report
 
-        model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service),
-                         CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service),
-                         VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service)]
-        for mo in model_objects:
-            mo = mo.filter(create_time__gte=begin_time, create_time__lt=end_time)
-            for d in mo.values('mig_type__no', 'ei_synced').annotate(ei_synced_count=Count('ei_synced')):
-                if d['ei_synced']:
-                    mig_no_good_counts[d['mig_type__no']] = d['ei_synced_count']
-                    good_counts += d['ei_synced_count']
-                else:
-                    mig_no_failed_counts[d['mig_type__no']] = d['ei_synced_count']
-                    failed_counts += d['ei_synced_count']
+        vars_list_for_ei_synced_true_false = {True: {
+                                                    "count_var": good_count,
+                                                    "counts_var": good_counts,
+                                                    "objects_list": good_objects,
+                                              },
+                                              False: {
+                                                    "count_var": failed_count,
+                                                    "counts_var": failed_counts,
+                                                    "objects_list": failed_objects,
+                                              }}
+        for mos in model_objects:
+            if new_creation:
+                for ei_synced, vars in vars_list_for_ei_synced_true_false.items():
+                    for m in mos.filter(ei_synced=ei_synced):
+                        vars["count_var"] += 1
+                        dict_value_plus_1(vars["counts_var"], m.get_mig_no())
+                        last_batch_einvoice = m.last_batch_einvoice
+                        if last_batch_einvoice:
+                            last_einvoices_content_type = last_batch_einvoice.last_einvoices_content_type
+                            if not last_einvoices_content_type:
+                                last_einvoices_content_type = EInvoicesContentType(
+                                    content_type=last_batch_einvoice.content_type,
+                                    object_id=last_batch_einvoice.object_id,
+                                )
+                                last_einvoices_content_type.save()
+                        else:
+                            last_einvoices_content_type = EInvoicesContentType(
+                                content_type=ContentType.objects.get_for_model(m),
+                                object_id=m.id,
+                            )
+                            last_einvoices_content_type.save()
+                            problem_key = "{mig_no}-{track_no}-{einvoices_content_type_id}".format(
+                                mig_no=m.get_mig_no(),
+                                track_no=m.track_no,
+                                einvoices_content_type_id=last_einvoices_content_type.id,
+                            )
+                            problems.setdefault(problem_key, []).append(_("The last Batch E-Invoice does not exist!"))
+                        vars["objects_list"].append(last_einvoices_content_type)
+            else:
+                pass
 
+        if new_creation:
+            good_count = vars_list_for_ei_synced_true_false[True]["count_var"]
+            failed_count = vars_list_for_ei_synced_true_false[False]["count_var"]
+            if 0 >= good_count + failed_count:
+                return None
+            summary_report.problems = problems
+            summary_report.good_count = good_count
+            summary_report.good_counts = vars_list_for_ei_synced_true_false[True]["counts_var"]
+            summary_report.resolved_count = resolved_count
+            summary_report.failed_count = failed_count
+            summary_report.failed_counts = vars_list_for_ei_synced_true_false[False]["counts_var"]
+            summary_report.resolved_counts = resolved_counts
+            summary_report.save()
+            summary_report.good_objects.add(*vars_list_for_ei_synced_true_false[True]["objects_list"])
+            if vars_list_for_ei_synced_true_false[False]["objects_list"]:
+                summary_report.failed_objects.add(*vars_list_for_ei_synced_true_false[False]["objects_list"])
+        else:
+            #TODO
+            #summary_report.save()
+            pass
+
+        return summary_report
 
 
 
@@ -2205,7 +2295,7 @@ class SummaryReport(models.Model):
                     _end_time = begin_time + datetime.timedelta(days=540)
                     end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:1], 1, 1))
 
-                if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
+                if now() - end_time >= MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
                     cls.generate_report_and_notice(turnkey_service, report_type, begin_time, end_time)
     
 
