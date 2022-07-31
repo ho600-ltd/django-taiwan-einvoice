@@ -8,7 +8,7 @@ from random import random, randint, choice
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
-from django.db.models import Max, F
+from django.db.models import Max, F, Count
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.timezone import now
@@ -952,6 +952,15 @@ class EInvoice(models.Model):
             else:
                 break
         return related_einvoices
+    @property
+    def last_batch_einvoice(self):
+        try:
+            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id)
+        except BatchEInvoice.DoesNotExist:
+            return None
+        else:
+            return bei
 
 
     def __str__(self):
@@ -1369,6 +1378,15 @@ class CancelEInvoice(models.Model):
     reason = models.CharField(max_length=20, null=False, db_index=True)
     return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    @property
+    def last_batch_einvoice(self):
+        try:
+            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id)
+        except BatchEInvoice.DoesNotExist:
+            return None
+        else:
+            return bei
 
 
     def __str__(self):
@@ -1455,6 +1473,15 @@ class VoidEInvoice(models.Model):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     reason = models.CharField(max_length=20, null=False, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    @property
+    def last_batch_einvoice(self):
+        try:
+            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id)
+        except BatchEInvoice.DoesNotExist:
+            return None
+        else:
+            return bei
 
 
     def __str__(self):
@@ -2017,6 +2044,9 @@ class BatchEInvoice(models.Model):
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
     history = HistoricalRecords()
+    @property
+    def last_batch_einvoice_log(self):
+        return self.batcheinvoicelog_set.last()
 
 
     def __str__(self):
@@ -2049,10 +2079,8 @@ class AuditLog(models.Model):
 
 
 
-class EInvoicesContentType(models.Model):
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
-    object_id = models.PositiveIntegerField(default=0)
-    content_object = GenericForeignKey('content_type', 'object_id')
+class BatchEInvoiceLog(models.Model):
+    batch_einvoice = models.ForeignKey(BatchEInvoice, null=True, on_delete=models.DO_NOTHING)
     status = models.CharField(max_length=1, default="", choices=BatchEInvoice.status_choices, db_index=True)
 
 
@@ -2072,14 +2100,22 @@ class SummaryReport(models.Model):
         ("E", _("Daily summary from EI")),
     )
     report_type = models.CharField(max_length=1, choices=report_type_choices, db_index=True)
+    problem_note = models.TextField(default="")
+
     good_count = models.SmallIntegerField(default=0)
     failed_count = models.SmallIntegerField(default=0)
+    resolved_count = models.SmallIntegerField(default=0)
+
     good_counts = models.JSONField()
     failed_counts = models.JSONField()
-    good_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_good_object")
-    failed_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_failed_object")
-    is_resolve = models.BooleanField(default=False)
-    resolve_note = models.TextField(default="")
+    resolved_counts = models.JSONField()
+
+    good_objects = models.ManyToManyField(BatchEInvoiceLog, related_name="summary_report_set_as_good_object")
+    failed_objects = models.ManyToManyField(BatchEInvoiceLog, related_name="summary_report_set_as_failed_object")
+    resolved_objects = models.ManyToManyField(BatchEInvoiceLog, related_name="summary_report_set_as_resolved_object")
+
+    is_resolved = models.BooleanField(default=False)
+    resolved_note = models.TextField(default="")
     resolver = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
 
 
@@ -2089,6 +2125,41 @@ class SummaryReport(models.Model):
 
 
     
+    @classmethod
+    def generate_report_and_notice(cls, turnkey_service, report_type, begin_time, end_time):
+        good_count = 0
+        failed_count = 0
+        resolved_count = 0
+        mig_no_good_counts = {}
+        mig_no_failed_counts = {}
+        mig_no_resolved_counts = {}
+        try:
+            summary_report = cls.objects.get(turnkey_service=turnkey_service, report_type=report_type, begin_time=begin_time)
+        except cls.DoesNotExist:
+            summary_report = cls(turnkey_service=turnkey_service, report_type=report_type, begin_time=begin_time)
+        else:
+            if (summary_report.failed_count <= 0
+                or summary_report.failed_count + summary_report.resolved_count >= summary_report.good_count
+                or summary_report.is_resolved
+                ):
+                return summary_report
+
+        model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service),
+                         CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service),
+                         VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service)]
+        for mo in model_objects:
+            mo = mo.filter(create_time__gte=begin_time, create_time__lt=end_time)
+            for d in mo.values('mig_type__no', 'ei_synced').annotate(ei_synced_count=Count('ei_synced')):
+                if d['ei_synced']:
+                    mig_no_good_counts[d['mig_type__no']] = d['ei_synced_count']
+                    good_counts += d['ei_synced_count']
+                else:
+                    mig_no_failed_counts[d['mig_type__no']] = d['ei_synced_count']
+                    failed_counts += d['ei_synced_count']
+
+
+
+
     @classmethod
     def auto_generate_report(cls, generate_at_time=None):
         if not generate_at_time:
@@ -2101,50 +2172,42 @@ class SummaryReport(models.Model):
             "o": datetime.timedelta(hours=24 * 61 + 11),
             "y": datetime.timedelta(hours=24 * 365 + 12),
         }
-        for report_type, report_type_str in cls.report_type_choices:
-            if not timedelta_d.get(report_type, None):
-                continue
-            generate_for_time = (generate_at_time - timedelta_d[report_type]).astimezone(TAIPEI_TIMEZONE)
-            _Y, _m, _d, _H, _M, _S = generate_for_time.timetuple()[:6]
-            if "h" == report_type:
-                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, _H, 0, 0))
-                end_time = begin_time + datetime.timedelta(minutes=60)
-            elif "d" == report_type:
-                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
-                end_time = begin_time + datetime.timedelta(hours=24)
-            elif "w" == report_type:
-                _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
-                begin_time = _begin_time - datetime.timedelta(days=_begin_time.weekday())
-                end_time = begin_time + datetime.timedelta(days=7)
-            elif "m" == report_type:
-                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
-                _end_time = begin_time + datetime.timedelta(days=45)
-                end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
-            elif "o" == report_type:
-                if 1 == _m % 2:
+        for turnkey_service in TurnkeyService.objects.all().order_by('id'):
+            for report_type, report_type_str in cls.report_type_choices:
+                if not timedelta_d.get(report_type, None):
+                    continue
+                generate_for_time = (generate_at_time - timedelta_d[report_type]).astimezone(TAIPEI_TIMEZONE)
+                _Y, _m, _d, _H, _M, _S = generate_for_time.timetuple()[:6]
+                if "h" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, _H, 0, 0))
+                    end_time = begin_time + datetime.timedelta(minutes=60)
+                elif "d" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                    end_time = begin_time + datetime.timedelta(hours=24)
+                elif "w" == report_type:
+                    _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                    begin_time = _begin_time - datetime.timedelta(days=_begin_time.weekday())
+                    end_time = begin_time + datetime.timedelta(days=7)
+                elif "m" == report_type:
                     begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
-                else:
-                    _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0)) - datetime.timedelta(days=10)
-                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_begin_time.timetuple()[:2], 1))
-                _end_time = begin_time + datetime.timedelta(days=75)
-                end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
-            elif "y" == report_type:
-                begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, 1, 1, 0, 0, 0))
-                _end_time = begin_time + datetime.timedelta(days=540)
-                end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:1], 1, 1))
+                    _end_time = begin_time + datetime.timedelta(days=45)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
+                elif "o" == report_type:
+                    if 1 == _m % 2:
+                        begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
+                    else:
+                        _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0)) - datetime.timedelta(days=10)
+                        begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_begin_time.timetuple()[:2], 1))
+                    _end_time = begin_time + datetime.timedelta(days=75)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
+                elif "y" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, 1, 1, 0, 0, 0))
+                    _end_time = begin_time + datetime.timedelta(days=540)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:1], 1, 1))
 
-            if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
-                cls.generate_report_and_notice(report_type, begin_time, end_time)
+                if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
+                    cls.generate_report_and_notice(turnkey_service, report_type, begin_time, end_time)
     
-
-    @classmethod
-    def generate_report_and_notice(cls, report_type, begin_time, end_time):
-        mig_no_good_counts = {
-        }
-        mig_no_failed_counts = {
-        }
-        content_type_models = [EInvoice, CancelEInvoice, VoidEInvoice]
-            
 
 
 class TEAlarm(models.Model):
