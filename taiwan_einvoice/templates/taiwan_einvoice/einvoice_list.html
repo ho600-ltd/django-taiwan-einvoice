@@ -84,20 +84,47 @@
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="carrier_type__regex">{% trans "Carrier Type" %}</label>
+                        <div class="input-group" id="carrier_type__regex" data-target-input="nearest">
+                            <select class="form-control" data-target="#carrier_type__regex"
+                                name="carrier_type__regex" id="id_carrier_type__regex">
+                                <option value=""></option>
+                                <option value="^$">{% trans "None setting" %}</option>
+                                <option value="^3J0002$">{% trans "Mobile barcode" %}</option>
+                                <option value="^CQ0001$">{% trans "Natural person barcode" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="npoban__regex">{% trans "Is Donated?" %}</label>
+                        <div class="input-group" id="npoban__regex" data-target-input="nearest">
+                            <select class="form-control" data-target="#npoban__regex"
+                                name="npoban__regex" id="id_npoban__regex">
+                                <option value=""></option>
+                                <option value="^.+$">{% trans "Yes" context "taiwan_einvoice_donate_mark" %}</option>
+                                <option value="^$">{% trans "No" context "taiwan_einvoice_donate_mark" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
                     <div class="form-group">
                         <label for="print_mark">{% trans "Print Mark?" %}</label>
                         <div class="input-group" id="print_mark" data-target-input="nearest">
                             <select class="form-control" data-target="#print_mark"
                                 name="print_mark" id="id_print_mark">
                                 <option value=""></option>
-                                <option value="ture">{% trans "Yes" context "taiwan_einvoice_print_mark" %}</option>
-                                <option value="false">{% trans "No" context "taiwan_einvoice_print_mark" %}</option>
+                                <option value="1">{% trans "Yes" context "taiwan_einvoice_print_mark" %}</option>
+                                <option value="0">{% trans "No" context "taiwan_einvoice_print_mark" %}</option>
                             </select>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-3">
+                <div class="col-sm-6 col-md-2">
                     <div class="form-group">
                         <label for="cancel_einvoice_type">{% trans "Cancel E-Invoice Type?" %}</label>
                         <div class="input-group" id="cancel_einvoice_type" data-target-input="nearest">
@@ -111,7 +138,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-6 col-md-3">
+                <div class="col-sm-6 col-md-2">
                     <div class="form-group">
                         <label for="void_einvoice_type">{% trans "Void E-Invoice Type?" %}</label>
                         <div class="input-group" id="void_einvoice_type" data-target-input="nearest">
@@ -119,6 +146,19 @@
                                 <option value="reverse_void_order__gte=0"></option>
                                 <option value="reverse_void_order__lte=0">{% trans "Not yet" context "taiwan_einvoice_void_einvoice_type" %}</option>
                                 <option value="reverse_void_order__gt=0">{% trans "Voided" context "taiwan_einvoice_void_einvoice_type" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="ei_synced">{% trans "Is Synced to EI?" %}</label>
+                        <div class="input-group" id="ei_synced" data-target-input="nearest">
+                            <select class="form-control" data-target="#ei_synced"
+                                name="ei_synced" id="id_ei_synced">
+                                <option value=""></option>
+                                <option value="0">{% trans "Not Yet" context "taiwan_einvoice_ei_synced" %}</option>
+                                <option value="1">{% trans "Done" context "taiwan_einvoice_ei_synced" %}</option>
                             </select>
                         </div>
                     </div>

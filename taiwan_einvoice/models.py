@@ -1588,6 +1588,10 @@ class UploadBatch(models.Model):
         return "{}-{}@{}".format(self.slug, self.mig_type, self.kind)
 
 
+    def get_mig_no(self):
+        return self.mig_type.no
+
+
     @classmethod
     def status_check(cls, statuss=[]):
         ubs = []

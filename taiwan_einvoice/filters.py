@@ -244,7 +244,10 @@ class EInvoiceFilter(filters.FilterSet):
         fields = {
             'generate_time': ('gte', 'lt', ),
             'print_mark': ('exact', ),
+            'carrier_type': ('exact', 'regex'),
+            'npoban': ('regex', ),
             'reverse_void_order': ('exact', 'gte', 'gt', 'lte', 'lt'),
+            'ei_synced': ('exact', ),
         }
 
 

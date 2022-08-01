@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-29 15:02+0800\n"
+"POT-Creation-Date: 2022-08-01 13:29+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -253,6 +253,33 @@ msgstr "EI 回傳 I 錯誤(I)"
 
 msgid "Successful EI process(C)"
 msgstr "成功完成 EI 程序(C)"
+
+msgid "BatchEInvoice does exist"
+msgstr "批次上傳電子發票(id: {})不存在!"
+
+msgid "Hour"
+msgstr "每小時"
+
+msgid "Day"
+msgstr "每日"
+
+msgid "Week"
+msgstr "每週"
+
+msgid "Month"
+msgstr "每月"
+
+msgid "Odd month ~ Even month"
+msgstr "單數月~雙數月"
+
+msgid "Year"
+msgstr "每年"
+
+msgid "Daily summary from EI"
+msgstr "EI每日報表"
+
+msgid "The last Batch E-Invoice does not exist!"
+msgstr "最新批次上傳電子發票(id: {})不存在!"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -549,6 +576,23 @@ msgstr "開立時間晚於"
 msgid "Generate time earlier than"
 msgstr "開立時間早於"
 
+msgid "Carrier Type"
+msgstr "載具類別"
+
+msgid "None setting"
+msgstr "無設定"
+
+msgid "Is Donated?"
+msgstr "是否捐贈?"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Yes"
+msgstr "已捐贈"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "No"
+msgstr "無"
+
 msgid "Print Mark?"
 msgstr "正本是否已列印?"
 
@@ -561,7 +605,7 @@ msgid "No"
 msgstr "尚未印出"
 
 msgid "Cancel E-Invoice Type?"
-msgstr "作廢電子發票類型?"
+msgstr "作廢電子發票?"
 
 msgctxt "taiwan_einvoice_cancel_einvoice_type"
 msgid "Not Canceled"
@@ -576,7 +620,7 @@ msgid "Canceled, has new one"
 msgstr "已作廢，且有開立新發票"
 
 msgid "Void E-Invoice Type?"
-msgstr "註銷電子發票類型?"
+msgstr "註銷電子發票?"
 
 msgctxt "taiwan_einvoice_void_einvoice_type"
 msgid "Not yet"
@@ -585,6 +629,17 @@ msgstr "未註銷"
 msgctxt "taiwan_einvoice_void_einvoice_type"
 msgid "Voided"
 msgstr "已註銷"
+
+msgid "Is Synced to EI?"
+msgstr "是否同步至EI?"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Done"
+msgstr "已完成"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Not Yet"
+msgstr "未同步"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -641,9 +696,6 @@ msgstr "捐贈註記"
 
 msgid "NPO Ban"
 msgstr "捐贈碼"
-
-msgid "Carrier Type"
-msgstr "載具類別"
 
 msgid "Carrier ID"
 msgstr "載具ID"

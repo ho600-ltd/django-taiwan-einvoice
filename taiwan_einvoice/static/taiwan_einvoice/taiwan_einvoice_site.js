@@ -214,6 +214,9 @@ $(function () {
             'is_original_copy',
             'is_active',
             'print_mark',
+            'carrier_type__regex',
+            'npoban__regex',
+            'ei_synced',
             'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {
