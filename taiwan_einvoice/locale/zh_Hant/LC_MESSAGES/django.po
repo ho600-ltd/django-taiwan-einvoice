@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-01 13:29+0800\n"
+"POT-Creation-Date: 2022-08-01 15:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -634,12 +634,12 @@ msgid "Is Synced to EI?"
 msgstr "是否同步至EI?"
 
 msgctxt "taiwan_einvoice_ei_synced"
-msgid "Done"
-msgstr "已完成"
-
-msgctxt "taiwan_einvoice_ei_synced"
 msgid "Not Yet"
 msgstr "未同步"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Done"
+msgstr "已完成"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -1165,6 +1165,9 @@ msgstr "瀏覽"
 msgid "Edit"
 msgstr "編輯"
 
+msgid "Resolve"
+msgstr "釋疑"
+
 msgid "Seller Invoice Track No"
 msgstr "字軌號碼"
 
@@ -1173,6 +1176,15 @@ msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
 
 msgid "Void E-Invoice"
 msgstr "註銷電子發票"
+
+msgid "Summary Report"
+msgstr "總結報表"
+
+msgid "Alarm for general user"
+msgstr "使用者警示"
+
+msgid "Alarm for programmer"
+msgstr "開發者警示"
 
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"

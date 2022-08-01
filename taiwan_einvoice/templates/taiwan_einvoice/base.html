@@ -11,6 +11,8 @@
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_canceleinvoice" as "can_view_canceleinvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_voideinvoice" as "can_view_voideinvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoiceprintlog" as "can_view_einvoiceprintlog_under_turnkeyservices" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_alarm_for_general_user" as "can_view_general_user_alarm_under_turnkeyservices" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_alarm_for_programmer" as "can_view_programmer_alarm_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_turnkeyservice" as "can_view_turnkeyservices" %}
 <!DOCTYPE html>
 
@@ -127,7 +129,7 @@
                                 <a class="nav-link" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?format=html&amp;cancel_einvoice_type=n&amp;reverse_void_order__lte=0">{% trans "E-Invoice" %}</a>
                             </li>
                         {% endif %}
-                        {% if perms.taiwan_einvoice.view_legalentity or perms.taiwan_einvoice.view_turnkeyservice or can_view_canceleinvoice_under_turnkeyservices.exists or can_view_voideinvoice_under_turnkeyservices.exists or notready_TODO or can_view_einvoiceprintlog_under_turnkeyservices.exists or can_view_turnkeyservices.exists %}
+                        {% if perms.taiwan_einvoice.view_legalentity or perms.taiwan_einvoice.view_turnkeyservice or can_view_canceleinvoice_under_turnkeyservices.exists or can_view_voideinvoice_under_turnkeyservices.exists or notready_TODO or can_view_einvoiceprintlog_under_turnkeyservices.exists or can_view_programmer_alarm_under_turnkeyservices.exists or perms.taiwan_einvoice.view_legalentity or perms.taiwan_einvoice.view_turnkeyservice or can_view_turnkeyservices.exists %}
                             <li class="dropdown nav-item nav_else">
                                 <a data-toggle="dropdown"
                                     aria-expanded="false"
@@ -146,9 +148,11 @@
                                     {% if can_view_einvoiceprintlog_under_turnkeyservices.exists %}
                                         <a role="presentation" class="dropdown-item nav_einvoiceprintlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoiceprintlog-list' %}?format=html">{% trans "Print Log" %}</a>
                                     {% endif %}
-                                    <a role="presentation" class="dropdown-item nav_uploadbatch" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-list' %}?format=html">{% trans "Upload Batch" %}</a>
-                                    <a role="presentation" class="dropdown-item nav_batcheinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html">{% trans "Batch E-Invoice" %}</a>
-                                    <a role="presentation" class="dropdown-item nav_auditlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:auditlog-list' %}?format=html">{% trans "Audit Log" %}</a>
+                                    {% if can_view_programmer_alarm_under_turnkeyservices.exists %}
+                                        <a role="presentation" class="dropdown-item nav_uploadbatch" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-list' %}?format=html">{% trans "Upload Batch" %}</a>
+                                        <a role="presentation" class="dropdown-item nav_batcheinvoice" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html">{% trans "Batch E-Invoice" %}</a>
+                                        <a role="presentation" class="dropdown-item nav_auditlog" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:auditlog-list' %}?format=html">{% trans "Audit Log" %}</a>
+                                    {% endif %}
                                     {% if perms.taiwan_einvoice.view_legalentity %}
                                         <a role="presentation" class="dropdown-item nav_legalentity" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:legalentity-list' %}?format=html">{% trans "Legal Entity" %}</a>
                                     {% endif %}

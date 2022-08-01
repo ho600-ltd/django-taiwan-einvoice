@@ -437,10 +437,10 @@ class CanViewTurnkeyService(BasePermission):
         return res
 
 
-class CanViewAuditLog(BasePermission):
+class CanViewBatchEInvoice(BasePermission):
     METHOD_PERMISSION_MAPPING = {
         "GET": (
-            "taiwan_einvoice.view_turnkeyservice",
+            "taiwan_einvoice.view_te_alarm_for_programmer",
         ),
     }
 
@@ -449,10 +449,10 @@ class CanViewAuditLog(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            permissions = CanViewAuditLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewAuditLog.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewBatchEInvoice.has_permission with {}: {}".format(request.method, res))
         return res
         
 
@@ -460,11 +460,43 @@ class CanViewAuditLog(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for p in CanViewAuditLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj.batch.turnkey_service):
+                    res = True
+                    break
+        lg.debug("CanViewBatchEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+class CanViewAlarmForProgrammer(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanViewAlarmForProgrammer.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            for p in CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
-        lg.debug("CanViewAuditLog.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewAlarmForProgrammer.has_object_permission with {}: {}".format(request.method, res))
         return res
 

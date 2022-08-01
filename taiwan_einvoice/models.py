@@ -635,24 +635,27 @@ class TurnkeyService(models.Model):
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
-            ("edit_te_turnkeyservicegroup", "Edit the groups of TurnkeyService"),
+            ("edit_te_turnkeyservicegroup", "Edit the groups of the TurnkeyService"),
 
-            ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No"),
-            ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
-            ("delete_te_sellerinvoicetrackno", "Delete Seller Invoice Track No"),
+            ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No of the TurnkeyService"),
+            ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No of the TurnkeyService"),
+            ("delete_te_sellerinvoicetrackno", "Delete Seller Invoice Track No of the TurnkeyService"),
 
-            ("view_te_einvoice", "View E-Invoice"),
+            ("view_te_einvoice", "View E-Invoice of the TurnkeyService"),
 
-            ("view_te_canceleinvoice", "View Cancel E-Invoice"),
-            ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
+            ("view_te_canceleinvoice", "View Cancel E-Invoice of the TurnkeyService"),
+            ("add_te_canceleinvoice", "Add Cancel E-Invoice of the TurnkeyService"),
 
-            ("view_te_voideinvoice", "View Void E-Invoice"),
-            ("add_te_voideinvoice", "Add Void E-Invoice"),
+            ("view_te_voideinvoice", "View Void E-Invoice of the TurnkeyService"),
+            ("add_te_voideinvoice", "Add Void E-Invoice of the TurnkeyService"),
 
-            ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
+            ("view_te_einvoiceprintlog", "View E-Invoice Print Log of the TurnkeyService"),
             
-            ("view_te_alarm_for_general_user", "View Alarm for the General User"),
-            ("view_te_alarm_for_programmer", "View Alarm for the Programmer"),
+            ("view_te_summaryreport", "View Summary Report of the TurnkeyService"),
+            ("resolve_te_summaryreport", "Resolve Summary Report of the TurnkeyService"),
+
+            ("view_te_alarm_for_general_user", "View Alarm for the General User of the TurnkeyService"),
+            ("view_te_alarm_for_programmer", "View Alarm for the Programmer of the TurnkeyService"),
         )
     
 

@@ -32,7 +32,8 @@ from taiwan_einvoice.permissions import (
     CanEntryVoidEInvoice,
     CanViewLegalEntity,
     CanViewTurnkeyService,
-    CanViewAuditLog,
+    CanViewBatchEInvoice,
+    CanViewAlarmForProgrammer,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -862,7 +863,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
 
 class UploadBatchModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, ), )
+    permission_classes = (Or(IsSuperUser, CanViewAlarmForProgrammer), )
     pagination_class = TenTo100PerPagePagination
     queryset = UploadBatch.objects.all().order_by('-id')
     serializer_class = UploadBatchSerializer
@@ -879,14 +880,14 @@ class UploadBatchModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 
 
 
 class BatchEInvoiceModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, ), )
+    permission_classes = (Or(IsSuperUser, CanViewBatchEInvoice), )
     pagination_class = TenTo100PerPagePagination
     queryset = BatchEInvoice.objects.all().order_by('-id')
     serializer_class = BatchEInvoiceSerializer
@@ -903,17 +904,32 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(batch__turnkey_web__in=turnkey_webs)
 
 
 
 class AuditLogModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    permission_classes = (Or(IsSuperUser, CanViewAlarmForProgrammer), )
     pagination_class = TenTo100PerPagePagination
     queryset = AuditLog.objects.all().order_by('-id')
     serializer_class = AuditLogSerializer
     filter_class = AuditLogFilter
     renderer_classes = (AuditLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
+    
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(AuditLogModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
