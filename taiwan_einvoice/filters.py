@@ -21,6 +21,8 @@ from taiwan_einvoice.models import (
     UploadBatch,
     BatchEInvoice,
     AuditLog,
+    SummaryReport,
+    TEAlarm,
 )
 
 
@@ -490,4 +492,41 @@ class AuditLogFilter(filters.FilterSet):
         model = AuditLog
         fields = {
             "create_time": ("gte", "gt", "lte", "lt"),
+        }
+
+
+
+class SummaryReportFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = SummaryReport
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt"),
+            "turnkey_service": ("exact", ),
+            "begin_time": ("gte", "gt", "lte", "lt"),
+            "end_time": ("gte", "gt", "lte", "lt"),
+            "report_type": ("exact", ),
+            "good_count": ("gte", "gt", "lte", "lt"),
+            "failed_count": ("gte", "gt", "lte", "lt"),
+            "resolved_count": ("gte", "gt", "lte", "lt"),
+            "is_resolved": ("exact", ),
+            "resolved_note": ("exact", "icontains"),
+        }
+
+
+
+class TEAlarmFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = TEAlarm
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt"),
+            "turnkey_service": ("exact", ),
+            "target_audience_type": ("exact", ),
+            "title": ("exact", ),
+            "body": ("exact", ),
         }

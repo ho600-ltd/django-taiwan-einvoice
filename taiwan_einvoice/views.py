@@ -33,7 +33,9 @@ from taiwan_einvoice.permissions import (
     CanViewLegalEntity,
     CanViewTurnkeyService,
     CanViewBatchEInvoice,
-    CanViewAlarmForProgrammer,
+    CanViewSummaryReport,
+    CanViewTEAlarmForProgrammer,
+    CanViewTEAlarmForGeneralUser,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -51,6 +53,8 @@ from taiwan_einvoice.renderers import (
     AuditLogHtmlRenderer,
     UploadBatchHtmlRenderer,
     BatchEInvoiceHtmlRenderer,
+    SummaryReportHtmlRenderer,
+    TEAlarmHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -68,6 +72,8 @@ from taiwan_einvoice.models import (
     UploadBatch,
     BatchEInvoice,
     AuditLog,
+    SummaryReport,
+    TEAlarm,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -87,6 +93,8 @@ from taiwan_einvoice.serializers import (
     UploadBatchSerializer,
     BatchEInvoiceSerializer,
     AuditLogSerializer,
+    SummaryReportSerializer,
+    TEAlarmSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -102,6 +110,8 @@ from taiwan_einvoice.filters import (
     UploadBatchFilter,
     BatchEInvoiceFilter,
     AuditLogFilter,
+    SummaryReportFilter,
+    TEAlarmFilter,
 )
 from taiwan_einvoice.paginations import (
     Default30PerPagePagination,
@@ -863,7 +873,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
 
 class UploadBatchModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewAlarmForProgrammer), )
+    permission_classes = (Or(IsSuperUser, CanViewTEAlarmForProgrammer), )
     pagination_class = TenTo100PerPagePagination
     queryset = UploadBatch.objects.all().order_by('-id')
     serializer_class = UploadBatchSerializer
@@ -880,7 +890,7 @@ class UploadBatchModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 
@@ -911,7 +921,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
 
 
 class AuditLogModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewAlarmForProgrammer), )
+    permission_classes = (Or(IsSuperUser, CanViewTEAlarmForProgrammer), )
     pagination_class = TenTo100PerPagePagination
     queryset = AuditLog.objects.all().order_by('-id')
     serializer_class = AuditLogSerializer
@@ -928,8 +938,54 @@ class AuditLogModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 
 
+
+class SummaryReportModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewSummaryReport), )
+    pagination_class = TenTo100PerPagePagination
+    queryset = SummaryReport.objects.all().order_by('-id')
+    serializer_class = SummaryReportSerializer
+    filter_class = SummaryReportFilter
+    renderer_classes = (SummaryReportHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+    
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(SummaryReportModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+
+class TEAlarmModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewTEAlarmForProgrammer, CanViewTEAlarmForGeneralUser), )
+    pagination_class = TenTo100PerPagePagination
+    queryset = TEAlarm.objects.all().order_by('-id')
+    serializer_class = TEAlarmSerializer
+    filter_class = TEAlarmFilter
+    renderer_classes = (TEAlarmHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+    
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(TEAlarmModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewTEAlarm.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)

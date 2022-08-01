@@ -193,3 +193,15 @@ class BatchEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('batcheinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+
+class SummaryReportHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('summaryreport_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('summaryreport_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+
+class TEAlarmHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('tealarm_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('tealarm_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+

@@ -39,6 +39,8 @@ from taiwan_einvoice.models import (
     BatchEInvoice,
     AuditType,
     AuditLog,
+    SummaryReport,
+    TEAlarm,
 )
 
 
@@ -497,3 +499,32 @@ class AuditLogSerializer(ModelSerializer):
         return {
             "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request})
         }[instance.content_type.model].data
+
+
+
+class SummaryReportSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:summaryreport-detail", lookup_field='pk')
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    get_report_type_display = CharField(read_only=True)
+
+
+
+    class Meta:
+        model = SummaryReport
+        fields = '__all__'
+
+
+
+class TEAlarmSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:tealarm-detail", lookup_field='pk')
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+
+
+
+    class Meta:
+        model = TEAlarm
+        fields = '__all__'
+
+

@@ -2315,7 +2315,7 @@ class TEAlarm(models.Model):
         ("p", "Programmer", ),
     )
     target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
-    viewers = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    notified_users = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     title = models.CharField(max_length=255)
     body = models.TextField()
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)

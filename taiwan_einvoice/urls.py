@@ -48,6 +48,8 @@ router.register('voideinvoice', views.VoidEInvoiceModelViewSet, basename="voidei
 router.register('uploadbatch', views.UploadBatchModelViewSet, basename="uploadbatch")
 router.register('batcheinvoice', views.BatchEInvoiceModelViewSet, basename="batcheinvoice")
 router.register('auditlog', views.AuditLogModelViewSet, basename="auditlog")
+router.register('summaryreport', views.SummaryReportModelViewSet, basename="summaryreport")
+router.register('tealarm', views.TEAlarmModelViewSet, basename="tealarm")
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [

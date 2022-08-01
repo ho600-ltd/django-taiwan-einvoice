@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-01 15:26+0800\n"
+"POT-Creation-Date: 2022-08-01 19:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -380,6 +380,12 @@ msgstr "批次上傳電子發票"
 
 msgid "Audit Log"
 msgstr "稽核 Log"
+
+msgid "Summary Report"
+msgstr "總結報表"
+
+msgid "TE Alarm"
+msgstr "TE 警示"
 
 msgid "Legal Entity"
 msgstr "買受人"
@@ -1080,6 +1086,51 @@ msgctxt "in_manager_group"
 msgid "Yes"
 msgstr "是"
 
+msgid "Begin time later than"
+msgstr "開始時間晚於"
+
+msgid "Begin time earlier than"
+msgstr "開始時間早於"
+
+msgid "Begin Time"
+msgstr "開始時間"
+
+msgid "End Time"
+msgstr "結束期間"
+
+msgid "Report Type"
+msgstr "報表類型"
+
+msgid "Good counts"
+msgstr "成功筆數"
+
+msgid "Failed counts"
+msgstr "失敗筆數"
+
+msgid "Resolved counts"
+msgstr "釋疑筆數"
+
+msgid "Total counts"
+msgstr "總筆數"
+
+msgid "Is resolved?"
+msgstr "是否釋疑?"
+
+msgid "Resolved Note"
+msgstr "釋疑說明"
+
+msgid "Resolver"
+msgstr "釋疑者"
+
+msgid "Good"
+msgstr "成功"
+
+msgid "Failed"
+msgstr "失敗"
+
+msgid "Resolved"
+msgstr "釋疑"
+
 msgid "Is on working?"
 msgstr "是否使用中?"
 
@@ -1176,9 +1227,6 @@ msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
 
 msgid "Void E-Invoice"
 msgstr "註銷電子發票"
-
-msgid "Summary Report"
-msgstr "總結報表"
 
 msgid "Alarm for general user"
 msgstr "使用者警示"
