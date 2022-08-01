@@ -669,7 +669,7 @@ class EITurnkeyBatchEInvoice(models.Model):
     )
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     save_body_time = models.DateTimeField()
-    upload_to_ei_time = models.DateTimeField()
+    upload_to_ei_time = models.DateTimeField(null=True)
     body = models.JSONField(default="")
     result_code = models.CharField(max_length=5, default="", db_index=True)
 
