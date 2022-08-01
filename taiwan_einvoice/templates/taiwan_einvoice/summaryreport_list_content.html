@@ -17,8 +17,8 @@
             <th rowspan="2">{% trans "Report Type" %}</th>
             <th rowspan="1" colspan="3"><center>
                 <div>{% trans "Good counts" %}</div>
-                <div>{% trans "Failed counts" %}</div>
-                <div>{% trans "Resolved counts" %}</div>
+                <div class="text-danger">{% trans "Failed counts" %}</div>
+                <div class="text-warning">{% trans "Resolved counts" %}</div>
             </center></th>
             <th rowspan="2">{% trans "Total counts" %}</th>
             <th rowspan="2">{% trans "Is resolved?" %}</th>
@@ -41,24 +41,24 @@
                 <td field="end_time" class="datetime" value="{{ obj.end_time }}" format="Y-m-d H:i:s"></td>
                 <td field="report_type">{{ obj.get_report_type_display }}</td>
                 <td field="C0401_counts" align="right">
-                    <div title='{% trans "Good" %}' class="number" value="{{ obj.good_counts.C0401 }}"></div>
-                    <div title='{% trans "Failed" %}' class="number" value="{{ obj.failed_counts.C0401 }}"></div>
-                    <div title='{% trans "Resolved" %}' class="number" value="{{ obj.resolved_count.C0401  }}"></div>
+                    <div title='{% trans "Good" %}' class="number text-primary" value="{{ obj.good_counts.C0401 }}"></div>
+                    <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0401 }}"></div>
+                    <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count.C0401  }}"></div>
                 </td>
                 <td field="C0501_counts" align="right">
-                    <div title='{% trans "Good" %}' class="number" value="{{ obj.good_counts.C0501  }}"></div>
-                    <div title='{% trans "Failed" %}' class="number" value="{{ obj.failed_counts.C0501  }}"></div>
-                    <div title='{% trans "Resolved" %}' class="number" value="{{ obj.resolved_count.C0501  }}"></div>
+                    <div title='{% trans "Good" %}' class="number text-success" value="{{ obj.good_counts.C0501  }}"></div>
+                    <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0501  }}"></div>
+                    <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count.C0501  }}"></div>
                 </td>
                 <td field="C0701_counts" align="right">
                     <div title='{% trans "Good" %}' class="number" value="{{ obj.good_counts.C0701  }}"></div>
-                    <div title='{% trans "Failed" %}' class="number" value="{{ obj.failed_counts.C0701  }}"></div>
-                    <div title='{% trans "Resolved" %}' class="number" value="{{ obj.resolved_count.C0701  }}"></div>
+                    <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0701  }}"></div>
+                    <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count.C0701  }}"></div>
                 </td>
                 <td field="count" align="right">
-                    <div title='{% trans "Good" %}' class="number" value="{{ obj.good_count }}"></div>
-                    <div title='{% trans "Failed" %}' class="number" value="{{ obj.failed_count }}"></div>
-                    <div title='{% trans "Resolved" %}' class="number" value="{{ obj.resolved_count }}"></div>
+                    <div title='{% trans "Good" %}' class="number font-weight-bold" value="{{ obj.good_count }}"></div>
+                    <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_count }}"></div>
+                    <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count }}"></div>
                 </td>
                 <td field="is_resolved">
                     {% if obj.failed_count > 0 %}
