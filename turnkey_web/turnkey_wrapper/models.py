@@ -1,4 +1,4 @@
-import os, re, logging, datetime, pathlib, shutil, glob, pytz
+import os, re, logging, datetime, pathlib, shutil, glob, pytz, xmltodict
 from json2xml import json2xml
 from django.db import models
 from django.db.models import Count, Q
@@ -268,6 +268,7 @@ class TURNKEY_USER_PROFILE(models.Model):
 
 
 class EITurnkey(models.Model):
+    can_sync_to_ei = models.BooleanField(default=False)
     tmpdata_abspath = models.CharField(max_length=755)
     data_abspath = models.CharField(max_length=755)
     hash_key = models.CharField(max_length=40)
@@ -277,6 +278,31 @@ class EITurnkey(models.Model):
     tea_turnkey_service_endpoint = models.CharField(max_length=755)
     allow_ips = models.JSONField(null=True)
     endpoint = models.CharField(max_length=755, null=True)
+    @classmethod
+    def parse_summary_result_then_create_objects(cls):
+        paths = []
+        for ei_turnkey in cls.objects.all().order_by('routing_id'):
+            if ei_turnkey.SummaryResultUnpackBAK not in paths:
+                paths.append(ei_turnkey.SummaryResultUnpackBAK)
+        for path in paths:
+            for filepath in glob.glob(os.path.join(path, "*", "*", "*")):
+                content = open(filepath, 'r').read()
+                if 'SummaryResult xmlns' not in content:
+                    continue
+                X = xmltodict.parse(content.encode('utf-8'))
+                party_id = X['SummaryResult']['RoutingInfo']['From']['PartyId']
+                routing_id = X['SummaryResult']['RoutingInfo']['FromVAC']['RoutingId']
+                ei_turnkey = cls.objects.get(party_id=party_id, routing_id=routing_id)
+                for message in X['SummaryResult']['DetailList']['Message']:
+                    ids = message['Info']['Id'].split('-')
+                    version = ids[0]
+                    mig_no = ids[1]
+                    report_date = ids[2]
+                    report_time = ids[3]
+                    UUID = "-".join(ids[4:])
+                return X
+
+
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
@@ -296,6 +322,12 @@ class EITurnkey(models.Model):
     def B2CStorageUpCastSRC(self):
         task_config_object = self.get_task_config(category_type='B2C', process_type='STORAGE', task='UpCast')
         return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
+
+
+
+    class Meta:
+        unique_together = (('party_id', 'routing_id', ), )
+
 
 
     def get_task_config(self, category_type='', process_type='', task=''):
@@ -593,6 +625,8 @@ class EITurnkeyBatch(models.Model):
     def export_to_data_abspath(self):
         if "8" != self.status:
             return False
+        elif not self.ei_turnkey.can_sync_to_ei:
+            return False
         else:
             NEXT_STATUS_IN_GOOD = '9'
 
@@ -656,6 +690,7 @@ class EITurnkeyBatchEInvoice(models.Model):
     batch_einvoice_id = models.PositiveIntegerField(default=0)
     batch_einvoice_begin_time = models.DateTimeField()
     batch_einvoice_end_time = models.DateTimeField()
+    invoice_identifier = models.CharField(max_length=23, db_index=True)
     @property
     def batch_einvoice_end_time_minus_1_second(self):
         return self.batch_einvoice_end_time - datetime.timedelta(seconds=1)
@@ -687,29 +722,31 @@ class EITurnkeyBatchEInvoice(models.Model):
             return j2mx.export_xml()
 
 
+    def save(self, *args, **kwargs):
+        if not self.invoice_identifier:
+            mig = self.ei_turnkey_batch.mig
+            if "C0401" == mig:
+                invoice_date = self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"]
+            elif "C0501" == mig:
+                invoice_date = self.body[self.ei_turnkey_batch.mig]["CancelDate"]
+            elif "C0701" == mig:
+                invoice_date = self.body[self.ei_turnkey_batch.mig]["VoidDate"]
+            else:
+                raise MIGConfigurationError(_("There is no setting for {}").format(mig))
+            self.invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
+                mig=mig,
+                batch_einvoice_track_no=self.batch_einvoice_track_no,
+                InvoiceDate=invoice_date,
+            )
+        super().save(*args, **kwargs)
+
+
     def check_status_from_ei(self):
         lg = logging.getLogger("turnkey_web")
-        mig = self.ei_turnkey_batch.mig
-        if "C0401" == mig:
-            invoice_date = self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"]
-        elif "C0501" == mig:
-            invoice_date = self.body[self.ei_turnkey_batch.mig]["CancelDate"]
-        elif "C0701" == mig:
-            invoice_date = self.body[self.ei_turnkey_batch.mig]["VoidDate"]
-        else:
-            raise MIGConfigurationError(_("There is no setting for {}").format(mig))
-
-        invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
-            mig=mig,
-            batch_einvoice_track_no=self.batch_einvoice_track_no,
-            InvoiceDate=invoice_date,
-        )
-        lg.debug("invoice_identifier: {}".format(invoice_identifier))
-        
         SAVE_BODY_TIME_DTS = self.save_body_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d%H%M%S000')
         lg.debug("SAVE_BODY_TIME_DTS: {}".format(SAVE_BODY_TIME_DTS))
         try:
-            nearest_TURNKEY_MESSAGE_LOG = TURNKEY_MESSAGE_LOG.objects.filter(INVOICE_IDENTIFIER=invoice_identifier,
+            nearest_TURNKEY_MESSAGE_LOG = TURNKEY_MESSAGE_LOG.objects.filter(INVOICE_IDENTIFIER=self.invoice_identifier,
                                                                              MESSAGE_DTS__gte=SAVE_BODY_TIME_DTS
                                                                             ).order_by('MESSAGE_DTS')[0]
         except IndexError:
