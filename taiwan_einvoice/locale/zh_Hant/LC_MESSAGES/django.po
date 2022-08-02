@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-01 19:50+0800\n"
+"POT-Creation-Date: 2022-08-02 08:11+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -383,9 +383,6 @@ msgstr "稽核 Log"
 
 msgid "Summary Report"
 msgstr "總結報表"
-
-msgid "TE Alarm"
-msgstr "TE 警示"
 
 msgid "Legal Entity"
 msgstr "買受人"
@@ -1086,20 +1083,26 @@ msgctxt "in_manager_group"
 msgid "Yes"
 msgstr "是"
 
+msgid "Report Type"
+msgstr "報表類型"
+
 msgid "Begin time later than"
 msgstr "開始時間晚於"
 
 msgid "Begin time earlier than"
 msgstr "開始時間早於"
 
+msgid "End time later than"
+msgstr "結束時間晚於"
+
+msgid "End time earlier than"
+msgstr "結束時間早於"
+
 msgid "Begin Time"
 msgstr "開始時間"
 
 msgid "End Time"
 msgstr "結束期間"
-
-msgid "Report Type"
-msgstr "報表類型"
 
 msgid "Good counts"
 msgstr "成功筆數"
@@ -1130,6 +1133,12 @@ msgstr "失敗"
 
 msgid "Resolved"
 msgstr "釋疑"
+
+msgid "Not yet"
+msgstr "尚未"
+
+msgid "Only use in hourly report"
+msgstr "僅用於每小時報表"
 
 msgid "Is on working?"
 msgstr "是否使用中?"
@@ -1508,6 +1517,9 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
+
+#~ msgid "TE Alarm"
+#~ msgstr "TE 警示"
 
 #~ msgid "Alarm for programmer"
 #~ msgstr "開發者警示"

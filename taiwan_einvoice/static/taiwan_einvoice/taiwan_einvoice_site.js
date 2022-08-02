@@ -245,6 +245,8 @@ $(function () {
             'carrier_type__regex',
             'npoban__regex',
             'ei_synced',
+            'turnkey_service',
+            'report_type',
             'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {

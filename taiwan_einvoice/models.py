@@ -59,6 +59,8 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
+COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=20)
+NO_NEED_TO_PRINT_TIME_MARGIN = datetime.timedelta(minutes=10)
 MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
 
 
@@ -1827,17 +1829,15 @@ class UploadBatch(models.Model):
                 raise Exception('Some E-Invoices disappear')
         else:
             content_object = self.batcheinvoice_set.get().content_object
-        COULD_PRINT_TIME_MARGIN_SECONDS = 1200
-        NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS = 600
         if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
             self.update_to_new_status(NEXT_STATUS)
         elif ('cp' == self.kind
             and (not eis.filter(print_mark=False).exists()
-                or not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=COULD_PRINT_TIME_MARGIN_SECONDS)).exists())
+                or not eis.filter(generate_time__gte=now() - COULD_PRINT_TIME_MARGIN).exists())
             ):
             self.update_to_new_status(NEXT_STATUS)
         elif ('np' == self.kind
-            and not eis.filter(generate_time__gte=now()-datetime.timedelta(seconds=NO_NEED_TO_PRINT_TIME_MARGIN_SECONDS)).exists()):
+            and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
             self.update_to_new_status(NEXT_STATUS)
         elif '57' == self.kind:
             check_C0501 = False
@@ -2248,14 +2248,14 @@ class SummaryReport(models.Model):
             summary_report.good_objects.add(*vars_list_for_ei_synced_true_false[True]["objects_list"])
             if vars_list_for_ei_synced_true_false[False]["objects_list"]:
                 summary_report.failed_objects.add(*vars_list_for_ei_synced_true_false[False]["objects_list"])
+            summary_report.notice_in_new_creation()
         else:
             #TODO
             #summary_report.save()
             pass
 
         return summary_report
-
-
+    
 
     @classmethod
     def auto_generate_report(cls, generate_at_time=None):
@@ -2305,6 +2305,12 @@ class SummaryReport(models.Model):
                 if now() - end_time >= MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
                     cls.generate_report_and_notice(turnkey_service, report_type, begin_time, end_time)
     
+
+    def notice_in_new_creation(self):
+        if self.failed_count <= 0: return
+
+
+
 
 
 class TEAlarm(models.Model):

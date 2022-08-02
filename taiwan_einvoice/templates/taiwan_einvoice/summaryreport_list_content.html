@@ -60,19 +60,26 @@
                     <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_count }}"></div>
                     <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count }}"></div>
                 </td>
-                <td field="is_resolved">
-                    {% if obj.failed_count > 0 %}
-                        {% if obj.is_resolved %}
-                            {% trans "Resolved" %}
-                        {% else %}
-                            {% trans "Not yet" %}
+                {% ifequal "h" obj.report_type %}
+                    <td field="is_resolved">
+                        {% if obj.failed_count > 0 %}
+                            {% if obj.is_resolved %}
+                                {% trans "Resolved" %}
+                            {% else %}
+                                <br/><span class="text-danger font-weight-bold">{% trans "Not yet" %}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                </td>
-                <td field="resolved_note">{{ obj.resolved_note }}</td>
-                <td field="resolver">
-                    {% if obj.resolver %}{{ obj.resolver }}{% endif %}
-                </td>
+                    </td>
+                    <td field="resolved_note">{{ obj.resolved_note }}</td>
+                    <td field="resolver">
+                        {% if obj.resolver %}{{ obj.resolver }}{% endif %}
+                    </td>
+                {% else %}
+                    <td colspan="3" align="center">
+                        <br/>
+                        {% trans "Only use in hourly report" %}
+                    </td>
+                {% endifequal %}
             </tr>
         {% endfor %}
     </tbody>
