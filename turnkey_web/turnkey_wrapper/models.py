@@ -277,27 +277,34 @@ class EITurnkey(models.Model):
     tea_turnkey_service_endpoint = models.CharField(max_length=755)
     allow_ips = models.JSONField(null=True)
     endpoint = models.CharField(max_length=755, null=True)
-
-
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
-    
-
+    @property
+    def SummaryResultUnpackBAK(self):
+        task_config_object = self.get_task_config(category_type='B2B', process_type='EXCHANGE', task='Unpack')
+        return os.path.join(task_config_object.SRC_PATH, "BAK", "SummaryResult")
     @property
     def B2BExchangeUpCastSRC(self):
-        return os.path.join(self.data_abspath, "UpCast", "B2BEXCHANGE", "{mig}", "SRC")
-
-    
+        task_config_object = self.get_task_config(category_type='B2B', process_type='EXCHANGE', task='UpCast')
+        return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
     @property
     def B2BStorageUpCastSRC(self):
-        return os.path.join(self.data_abspath, "UpCast", "B2BSTORAGE", "{mig}", "SRC")
-
-    
+        task_config_object = self.get_task_config(category_type='B2B', process_type='STORAGE', task='UpCast')
+        return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
     @property
     def B2CStorageUpCastSRC(self):
-        return os.path.join(self.data_abspath, "UpCast", "B2CSTORAGE", "{mig}", "SRC")
+        task_config_object = self.get_task_config(category_type='B2C', process_type='STORAGE', task='UpCast')
+        return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
 
+
+    def get_task_config(self, category_type='', process_type='', task=''):
+        data_abspath = self.data_abspath
+        return TASK_CONFIG.objects.get(CATEGORY_TYPE=category_type,
+                                       PROCESS_TYPE=process_type,
+                                       TASK=task,
+                                       SRC_PATH__startswith=data_abspath)
+    
 
     def verify_counter_based_otp_in_row(self, otps):
         n_times_in_a_row = 3
@@ -392,15 +399,9 @@ class EITurnkeyBatch(models.Model):
 
     def save(self, *args, **kwargs):
         data_abspath = self.ei_turnkey.data_abspath
-        file_format = "XML"
-        version = self.get_turnkey_version_display()
-        encoding = "utf-8"
-        task_config_objects = TASK_CONFIG.objects.filter(SRC_PATH__startswith=data_abspath,
-                                                         FILE_FORMAT=file_format,
-                                                         VERSION=version,
-                                                         ENCODING=encoding)
+        task_config_objects = TASK_CONFIG.objects.filter(SRC_PATH__startswith=data_abspath)
 
-        if not task_config_objects.filter(TASK="ReceiveFile").exists():
+        if not task_config_objects.filter(CATEGORY_TYPE="B2B", PROCESS_TYPE="EXCHANGE", TASK="ReceiveFile").exists():
             raise EITurnkeyConfigurationError(_("ReceiveFile directory does not exist!"))
 
         TASK_D = {
