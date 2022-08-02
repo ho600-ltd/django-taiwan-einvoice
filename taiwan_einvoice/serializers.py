@@ -520,7 +520,8 @@ class TEAlarmSerializer(ModelSerializer):
     def get_content_object_dict(self, instance):
         request = self.context.get('request', None)
         return {
-            "summaryreport": SummaryReportSerializer(instance.content_object, context={"request": request})
+            "summaryreport": SummaryReportSerializer(instance.content_object, context={"request": request}),
+            "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request}),
         }[instance.content_type.model].data
 
 

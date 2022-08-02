@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
-from django.db.models import Max, F, Count
+from django.db.models import Max, F, Count, Q
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import translation
@@ -1964,7 +1964,7 @@ class UploadBatch(models.Model):
         
         ids_in_c = []
         status['__else__'] = status['__else__'].lower()
-        finish_status = ['i','e', 'c']
+        finish_status = ['i', 'e', 'c']
         is_finish = True
         exclude_ids = []
         lg.debug("status: {}".format(status))
@@ -2005,6 +2005,35 @@ class UploadBatch(models.Model):
 
         if status['__else__'] not in finish_status:
             is_finish = False
+        
+        for error_bei in self.batcheinvoice_set.filter(Q(status__in=("e", "i"))
+                                                        |~Q(result_code="")
+                                                        ):
+            target_audience_type = "p"
+            title = _("Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}").format(
+                slug=self.slug,
+                content_object=str(error_bei.content_object),
+                target_audience=_("General User") if "g" == target_audience_type else _("Programmer"),
+            )
+            body = _("""Error status: "{status}"
+Result code: "{result_code}"
+            """).format(status=bei.status, result_code=bei.result_code)
+
+            te_alarm, new_creation = TEAlarm.objects.get_or_create(
+                turnkey_service=self.turnkey_service,
+                target_audience_type=target_audience_type,
+                title=title,
+                body=body,
+                content_type=ContentType.objects.get_for_model(self),
+                object_id=self.id,
+            )
+            only_with_perms_in = {"g": ("view_te_alarm_for_general_user", "view_te_alarm_for_programmer", ),
+                                    "p": ("view_te_alarm_for_programmer", ),
+                                    }[target_audience_type]
+            notified_users = get_users_with_perms(self, only_with_perms_in=only_with_perms_in)
+            if notified_users:
+                te_alarm.notified_users.add(notified_users)
+
         return is_finish
 
 

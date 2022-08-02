@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-02 14:38+0800\n"
+"POT-Creation-Date: 2022-08-02 16:48+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -236,6 +236,26 @@ msgstr "已上傳到 TKW"
 msgid "Finish"
 msgstr "完成"
 
+#, python-brace-format
+msgid "Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}"
+msgstr "{target_audience}注意: {slug} 中的發票({content_object})無法同步"
+
+msgid "General User"
+msgstr "一般使用者"
+
+msgid "Programmer"
+msgstr "開發人員"
+
+#, python-brace-format
+msgid ""
+"Error status: \"{status}\"\n"
+"Result code: \"{result_code}\"\n"
+"            "
+msgstr ""
+"錯誤狀態: \"{status}\"\n"
+"結果碼: \"{result_code}\"\n"
+"            "
+
 msgid "Waiting"
 msgstr "等待中"
 
@@ -297,12 +317,6 @@ msgstr "{track_no}@{mig_no} 的結果碼: {status}-{result_code}"
 msgid "Failed-sync E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}"
 msgstr "{target_audience}所需處理的同步失敗發票，詳見 {name} 總結報表({report_type}@{begin_time})"
 
-msgid "General User"
-msgstr "一般使用者"
-
-msgid "Programmer"
-msgstr "開發人員"
-
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
 
@@ -343,12 +357,12 @@ msgstr "No."
 msgid "Create Time"
 msgstr "創建時間"
 
-msgid "Creator"
-msgstr "創建者"
-
 msgctxt "auditlog"
 msgid "Type"
 msgstr "稽核類別"
+
+msgid "Creator"
+msgstr "創建者"
 
 msgctxt "auditlog"
 msgid "Content Object"
