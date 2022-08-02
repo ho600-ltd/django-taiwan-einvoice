@@ -230,6 +230,8 @@ $(function () {
             'identifier__icontains',
             'seller__legal_entity__identifier__icontains',
             'batch__slug__icontains',
+            'title__icontains',
+            'body__icontains',
             'track__icontains'
         ];
         for (var param of string_kind_params) {
@@ -241,12 +243,14 @@ $(function () {
         var select_kind_params = [
             'is_original_copy',
             'is_active',
+            'is_error',
             'print_mark',
             'carrier_type__regex',
             'npoban__regex',
             'ei_synced',
             'turnkey_service',
             'report_type',
+            'target_audience_type',
             'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {

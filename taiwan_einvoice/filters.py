@@ -492,6 +492,8 @@ class AuditLogFilter(filters.FilterSet):
         model = AuditLog
         fields = {
             "create_time": ("gte", "gt", "lte", "lt"),
+            "turnkey_service": ("exact", ),
+            "is_error": ("exact", ),
         }
 
 
@@ -527,6 +529,6 @@ class TEAlarmFilter(filters.FilterSet):
             "create_time": ("gte", "gt", "lte", "lt"),
             "turnkey_service": ("exact", ),
             "target_audience_type": ("exact", ),
-            "title": ("exact", ),
-            "body": ("exact", ),
+            "title": ("exact", 'icontains', ),
+            "body": ("exact", 'icontains', ),
         }

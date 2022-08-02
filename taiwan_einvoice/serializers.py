@@ -520,6 +520,7 @@ class TEAlarmSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:tealarm-detail", lookup_field='pk')
     turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    get_target_audience_type_display = CharField(read_only=True)
 
 
 

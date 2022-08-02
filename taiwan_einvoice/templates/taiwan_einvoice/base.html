@@ -158,9 +158,7 @@
                                         <a role="presentation" class="dropdown-item nav_summaryreport" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:summaryreport-list' %}?format=html">{% trans "Summary Report" %}</a>
                                     {% endif %}
                                     {% if can_view_programmer_alarm_under_turnkeyservices.exists or can_view_general_user_alarm_under_turnkeyservices.exists %}
-                                        {% comment %}
                                         <a role="presentation" class="dropdown-item nav_tealarm" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:tealarm-list' %}?format=html">{% trans "TE Alarm" %}</a>
-                                        {% endcomment %}
                                     {% endif %}
                                     {% if perms.taiwan_einvoice.view_legalentity %}
                                         <a role="presentation" class="dropdown-item nav_legalentity" href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:legalentity-list' %}?format=html">{% trans "Legal Entity" %}</a>

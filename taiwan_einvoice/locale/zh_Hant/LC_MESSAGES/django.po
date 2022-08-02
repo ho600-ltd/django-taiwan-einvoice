@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-02 08:11+0800\n"
+"POT-Creation-Date: 2022-08-02 14:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -257,6 +257,9 @@ msgstr "成功完成 EI 程序(C)"
 msgid "BatchEInvoice does exist"
 msgstr "批次上傳電子發票(id: {})不存在!"
 
+msgid "The last Batch E-Invoice does not exist!"
+msgstr "最新批次上傳電子發票(id: {})不存在!"
+
 msgid "Hour"
 msgstr "每小時"
 
@@ -278,8 +281,27 @@ msgstr "每年"
 msgid "Daily summary from EI"
 msgstr "EI每日報表"
 
-msgid "The last Batch E-Invoice does not exist!"
-msgstr "最新批次上傳電子發票(id: {})不存在!"
+#, python-brace-format
+msgid "Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI"
+msgstr "請儘速列印發票({track_no})，列印後方才能上傳 EI 大平台"
+
+#, python-brace-format
+msgid "Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})"
+msgstr "請為 {track_no} 發票檢查 taiwan_einvoice.crontabs.polling_upload_batch 排程"
+
+#, python-brace-format
+msgid "The {track_no}@{mig_no} has result_code: {status}-{result_code}"
+msgstr "{track_no}@{mig_no} 的結果碼: {status}-{result_code}"
+
+#, python-brace-format
+msgid "Failed-sync E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}"
+msgstr "{target_audience}所需處理的同步失敗發票，詳見 {name} 總結報表({report_type}@{begin_time})"
+
+msgid "General User"
+msgstr "一般使用者"
+
+msgid "Programmer"
+msgstr "開發人員"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -289,6 +311,18 @@ msgstr "已經登出"
 
 msgid "Taiwan EInvoice Api"
 msgstr "臺灣電子發票 Api"
+
+msgid "Turnkey Service"
+msgstr "Turnkey 服務"
+
+msgid "Is Error?"
+msgstr "是否錯誤?"
+
+msgid "Error"
+msgstr "錯誤"
+
+msgid "None"
+msgstr "無"
 
 msgid "Create time later than"
 msgstr "創建時間晚於"
@@ -315,9 +349,6 @@ msgstr "創建者"
 msgctxt "auditlog"
 msgid "Type"
 msgstr "稽核類別"
-
-msgid "Turnkey Service"
-msgstr "Turnkey 服務"
 
 msgctxt "auditlog"
 msgid "Content Object"
@@ -383,6 +414,9 @@ msgstr "稽核 Log"
 
 msgid "Summary Report"
 msgstr "總結報表"
+
+msgid "TE Alarm"
+msgstr "TE 警示"
 
 msgid "Legal Entity"
 msgstr "買受人"
@@ -1140,6 +1174,26 @@ msgstr "尚未"
 msgid "Only use in hourly report"
 msgstr "僅用於每小時報表"
 
+msgid "Target Audience Type"
+msgstr "目標對象"
+
+msgctxt "taiwan_einvoice"
+msgid "Title contains"
+msgstr "標題包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Body contains"
+msgstr "內文包含"
+
+msgid "Notified users"
+msgstr "已通知用戶"
+
+msgid "Title"
+msgstr "標題"
+
+msgid "系統管理員"
+msgstr ""
+
 msgid "Is on working?"
 msgstr "是否使用中?"
 
@@ -1517,9 +1571,3 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
-
-#~ msgid "TE Alarm"
-#~ msgstr "TE 警示"
-
-#~ msgid "Alarm for programmer"
-#~ msgstr "開發者警示"

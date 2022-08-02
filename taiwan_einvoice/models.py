@@ -2373,8 +2373,8 @@ class TEAlarm(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     target_audience_type_choices = (
-        ("g", "General User", ),
-        ("p", "Programmer", ),
+        ("g", _("General User"), ),
+        ("p", _("Programmer"), ),
     )
     target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
     notified_users = models.ManyToManyField(User)
