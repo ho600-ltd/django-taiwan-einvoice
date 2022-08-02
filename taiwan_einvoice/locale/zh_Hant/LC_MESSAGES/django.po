@@ -1145,19 +1145,19 @@ msgid "Failed counts"
 msgstr "失敗筆數"
 
 msgid "Resolved counts"
-msgstr "釋疑筆數"
+msgstr "解決筆數"
 
 msgid "Total counts"
 msgstr "總筆數"
 
 msgid "Is resolved?"
-msgstr "是否釋疑?"
+msgstr "是否解決?"
 
 msgid "Resolved Note"
-msgstr "釋疑說明"
+msgstr "解決說明"
 
 msgid "Resolver"
-msgstr "釋疑者"
+msgstr "解決者"
 
 msgid "Good"
 msgstr "成功"
@@ -1166,7 +1166,7 @@ msgid "Failed"
 msgstr "失敗"
 
 msgid "Resolved"
-msgstr "釋疑"
+msgstr "已解決"
 
 msgid "Not yet"
 msgstr "尚未"
@@ -1280,7 +1280,7 @@ msgid "Edit"
 msgstr "編輯"
 
 msgid "Resolve"
-msgstr "釋疑"
+msgstr "解決"
 
 msgid "Seller Invoice Track No"
 msgstr "字軌號碼"

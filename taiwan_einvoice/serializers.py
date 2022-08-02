@@ -502,11 +502,35 @@ class AuditLogSerializer(ModelSerializer):
 
 
 
+class TEAlarmSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:tealarm-detail", lookup_field='pk')
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    get_target_audience_type_display = CharField(read_only=True)
+    content_object_dict = SerializerMethodField()
+
+
+
+    class Meta:
+        model = TEAlarm
+        fields = '__all__'
+
+
+
+    def get_content_object_dict(self, instance):
+        request = self.context.get('request', None)
+        return {
+            "summaryreport": SummaryReportSerializer(instance.content_object, context={"request": request})
+        }[instance.content_type.model].data
+
+
+
 class SummaryReportSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:summaryreport-detail", lookup_field='pk')
     turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
     get_report_type_display = CharField(read_only=True)
+    te_alarms = SerializerMethodField()
 
 
 
@@ -516,16 +540,11 @@ class SummaryReportSerializer(ModelSerializer):
 
 
 
-class TEAlarmSerializer(ModelSerializer):
-    resource_uri = HyperlinkedIdentityField(
-        view_name="taiwan_einvoice:taiwaneinvoiceapi:tealarm-detail", lookup_field='pk')
-    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
-    get_target_audience_type_display = CharField(read_only=True)
-
-
-
-    class Meta:
-        model = TEAlarm
-        fields = '__all__'
-
-
+    def get_te_alarms(self, instance):
+        request = self.context.get('request', None)
+        return [{"id": tea.id,
+                 "title": tea.title,
+                 "body": tea.body,
+                }
+            for tea in instance.te_alarms.all()]
+        #return [TEAlarmSerializer(tea, context={"request": request}).data for tea in instance.te_alarms.all()]

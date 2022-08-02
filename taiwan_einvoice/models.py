@@ -2104,6 +2104,22 @@ class EInvoicesContentType(models.Model):
 
 
 
+class TEAlarm(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    target_audience_type_choices = (
+        ("g", _("General User"), ),
+        ("p", _("Programmer"), ),
+    )
+    target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
+    notified_users = models.ManyToManyField(User)
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
 class SummaryReport(models.Model):
     LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE = _("The last Batch E-Invoice does not exist!")
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -2138,7 +2154,7 @@ class SummaryReport(models.Model):
     resolved_note = models.TextField(default="")
     resolver = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
 
-
+    te_alarms = GenericRelation(TEAlarm)
 
     class Meta:
         unique_together = (("turnkey_service", "begin_time", "report_type", ), )
@@ -2149,6 +2165,7 @@ class SummaryReport(models.Model):
     def generate_report_and_notice(cls, turnkey_service, report_type, begin_time, end_time):
         if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
             return None
+        lg = logging.getLogger("taiwan_einvoice")
         translation.activate(settings.LANGUAGE_CODE)
 
         model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service, 
@@ -2169,6 +2186,7 @@ class SummaryReport(models.Model):
         resolved_counts = {}
         good_objects = []
         failed_objects = []
+        resolved_objects = []
         def dict_value_plus_1(dictionary, key):
             if key in dictionary: dictionary[key] += 1
             else: dictionary[key] = 1
@@ -2189,7 +2207,6 @@ class SummaryReport(models.Model):
             new_creation = False
         if not new_creation and (summary_report.failed_count <= 0
             or summary_report.is_resolved
-            or summary_report.resolved_count >= summary_report.failed_count
             ):
             return summary_report
 
@@ -2203,12 +2220,12 @@ class SummaryReport(models.Model):
                                                     "counts_var": failed_counts,
                                                     "objects_list": failed_objects,
                                               }}
-        for mos in model_objects:
-            if new_creation:
-                for ei_synced, vars in vars_list_for_ei_synced_true_false.items():
+        if new_creation:
+            for mos in model_objects:
+                for ei_synced, _vars in vars_list_for_ei_synced_true_false.items():
                     for m in mos.filter(ei_synced=ei_synced):
-                        vars["count_var"] += 1
-                        dict_value_plus_1(vars["counts_var"], m.get_mig_no())
+                        _vars["count_var"] += 1
+                        dict_value_plus_1(_vars["counts_var"], m.get_mig_no())
                         last_batch_einvoice = m.last_batch_einvoice
                         if last_batch_einvoice:
                             last_einvoices_content_type = last_batch_einvoice.last_einvoices_content_type
@@ -2224,11 +2241,8 @@ class SummaryReport(models.Model):
                                 einvoices_content_type_id=last_einvoices_content_type.id,
                             )
                             problems.setdefault(problem_key, []).append(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
-                        vars["objects_list"].append(last_einvoices_content_type)
-            else:
-                pass
+                        _vars["objects_list"].append(last_einvoices_content_type)
 
-        if new_creation:
             good_count = vars_list_for_ei_synced_true_false[True]["count_var"]
             failed_count = vars_list_for_ei_synced_true_false[False]["count_var"]
             if 0 >= good_count + failed_count:
@@ -2244,11 +2258,21 @@ class SummaryReport(models.Model):
             summary_report.good_objects.add(*vars_list_for_ei_synced_true_false[True]["objects_list"])
             if vars_list_for_ei_synced_true_false[False]["objects_list"]:
                 summary_report.failed_objects.add(*vars_list_for_ei_synced_true_false[False]["objects_list"])
-            summary_report.notice_in_new_creation()
+            summary_report.notice(new_creation=True)
         else:
-            #TODO
-            #summary_report.save()
-            pass
+            for eict in summary_report.failed_objects.all():
+                if eict.content_object.ei_synced:
+                    resolved_count += 1
+                    dict_value_plus_1(resolved_counts, eict.content_object.get_mig_no())
+                    resolved_objects.append(eict.content_object.last_batch_einvoice.last_einvoices_content_type)
+            summary_report.resolved_count = resolved_count
+            summary_report.resolved_counts = resolved_counts
+            if summary_report.resolved_count >= summary_report.failed_count:
+                summary_report.is_resolved = True
+            summary_report.save()
+            if resolved_objects:
+                summary_report.resolved_objects.add(*resolved_objects)
+            summary_report.notice(new_creation=False)
 
         return summary_report
     
@@ -2302,12 +2326,16 @@ class SummaryReport(models.Model):
                     cls.generate_report_and_notice(turnkey_service, report_type, begin_time, end_time)
     
 
-    def notice_in_new_creation(self):
-        if self.failed_count <= 0: return
+    def notice(self, new_creation=True):
+        if self.failed_count <= 0 or self.resolved_count >= self.failed_count:
+            return
 
         translation.activate(settings.LANGUAGE_CODE)
         target_audience_types = {}
         for failed_einvoice_ct in self.failed_objects.all():
+            if self.resolved_objects.filter(id=failed_einvoice_ct.id):
+                continue
+
             mig_no = failed_einvoice_ct.content_object.get_mig_no()
             track_no = failed_einvoice_ct.content_object.track_no
             fe_key = "{mig_no}-{track_no}-{einvoices_content_type_id}".format(
@@ -2366,22 +2394,5 @@ class SummaryReport(models.Model):
                 te_alarm.notified_users.add(notified_users)
         self.problems = summary_report_problems
         self.save()
-
-
-
-class TEAlarm(models.Model):
-    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
-    target_audience_type_choices = (
-        ("g", _("General User"), ),
-        ("p", _("Programmer"), ),
-    )
-    target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
-    notified_users = models.ManyToManyField(User)
-    title = models.CharField(max_length=255)
-    body = models.TextField()
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
-    object_id = models.PositiveIntegerField(default=0)
-    content_object = GenericForeignKey('content_type', 'object_id')
 
 
