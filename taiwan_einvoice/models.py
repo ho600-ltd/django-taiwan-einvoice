@@ -2317,10 +2317,12 @@ class SummaryReport(models.Model):
             )
 
             last_batch_einvoice = failed_einvoice_ct.content_object.last_batch_einvoice
-            if not last_batch_einvoice:
-                target_audience_types.setdefault("p", {})[fe_key] = self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE
-            elif last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
+            if last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
                 target_audience_types.setdefault("g", {})[fe_key] = _("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no)
+            elif not last_batch_einvoice:
+                target_audience_types.setdefault("p", {})[fe_key] = self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE
+            elif last_batch_einvoice and last_batch_einvoice.batch.kind in ["cp", "np"]:
+                target_audience_types.setdefault("p", {})[fe_key] = _("Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})").format(track_no=track_no)
             else:
                 target_audience_types.setdefault("p", {})[fe_key] = _("The {track_no}@{mig_no} has result_code: {status}-{result_code}").format(
                     track_no=track_no,
