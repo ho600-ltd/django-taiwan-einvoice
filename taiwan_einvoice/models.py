@@ -5,12 +5,14 @@ from binascii import unhexlify
 from Crypto.Cipher import AES
 from hashlib import sha1
 from random import random, randint, choice
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
 from django.db.models import Max, F, Count
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils import translation
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext, pgettext
@@ -739,7 +741,7 @@ class SellerInvoiceTrackNo(models.Model):
 
     def delete(self, *args, **kwargs):
         if self.einvoice_set.exists():
-            ei = self.einvoice_set.first()
+            ei = self.einvoice_set.order_by('id').first()
             raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})"), ei.track_no_)
         return super().delete(*args, **kwargs)
 
@@ -1486,13 +1488,8 @@ class VoidEInvoice(models.Model):
     new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
     @property
     def last_batch_einvoice(self):
-        try:
-            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
-                                            object_id=self.id)
-        except BatchEInvoice.DoesNotExist:
-            return None
-        else:
-            return bei
+        return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id).order_by('id').last()
 
 
     def __str__(self):
@@ -2059,10 +2056,12 @@ class BatchEInvoice(models.Model):
     history = HistoricalRecords()
     @property
     def last_einvoices_content_type(self):
-        return EInvoicesContentType.objects.filter(
+        eict, new_creation = EInvoicesContentType.objects.get_or_create(
             content_type=self.content_type,
             object_id=self.object_id,
-        ).last()
+            status=self.status,
+        )
+        return eict
 
 
     def __str__(self):
@@ -2096,6 +2095,7 @@ class AuditLog(models.Model):
 
 
 class EInvoicesContentType(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -2105,6 +2105,7 @@ class EInvoicesContentType(models.Model):
 
 
 class SummaryReport(models.Model):
+    LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE = _("The last Batch E-Invoice does not exist!")
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     begin_time = models.DateTimeField(db_index=True)
@@ -2148,6 +2149,7 @@ class SummaryReport(models.Model):
     def generate_report_and_notice(cls, turnkey_service, report_type, begin_time, end_time):
         if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
             return None
+        translation.activate(settings.LANGUAGE_CODE)
 
         model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service, 
                                                  create_time__gte=begin_time,
@@ -2210,24 +2212,18 @@ class SummaryReport(models.Model):
                         last_batch_einvoice = m.last_batch_einvoice
                         if last_batch_einvoice:
                             last_einvoices_content_type = last_batch_einvoice.last_einvoices_content_type
-                            if not last_einvoices_content_type:
-                                last_einvoices_content_type = EInvoicesContentType(
-                                    content_type=last_batch_einvoice.content_type,
-                                    object_id=last_batch_einvoice.object_id,
-                                )
-                                last_einvoices_content_type.save()
                         else:
-                            last_einvoices_content_type = EInvoicesContentType(
-                                content_type=ContentType.objects.get_for_model(m),
-                                object_id=m.id,
-                            )
+                            last_einvoices_content_type = EInvoicesContentType(content_type=ContentType.objects.get_for_model(m),
+                                                                               object_id=m.id,
+                                                                               status="-",
+                                                                              )
                             last_einvoices_content_type.save()
                             problem_key = "{mig_no}-{track_no}-{einvoices_content_type_id}".format(
                                 mig_no=m.get_mig_no(),
                                 track_no=m.track_no,
                                 einvoices_content_type_id=last_einvoices_content_type.id,
                             )
-                            problems.setdefault(problem_key, []).append(_("The last Batch E-Invoice does not exist!"))
+                            problems.setdefault(problem_key, []).append(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
                         vars["objects_list"].append(last_einvoices_content_type)
             else:
                 pass
@@ -2309,7 +2305,65 @@ class SummaryReport(models.Model):
     def notice_in_new_creation(self):
         if self.failed_count <= 0: return
 
+        translation.activate(settings.LANGUAGE_CODE)
+        target_audience_types = {}
+        for failed_einvoice_ct in self.failed_objects.all():
+            mig_no = failed_einvoice_ct.content_object.get_mig_no()
+            track_no = failed_einvoice_ct.content_object.track_no
+            fe_key = "{mig_no}-{track_no}-{einvoices_content_type_id}".format(
+                mig_no=mig_no,
+                track_no=track_no,
+                einvoices_content_type_id=failed_einvoice_ct.id,
+            )
 
+            last_batch_einvoice = failed_einvoice_ct.content_object.last_batch_einvoice
+            if not last_batch_einvoice:
+                target_audience_types.setdefault("p", {})[fe_key] = self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE
+            elif last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
+                target_audience_types.setdefault("g", {})[fe_key] = _("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no)
+            else:
+                target_audience_types.setdefault("p", {})[fe_key] = _("The {track_no}@{mig_no} has result_code: {status}-{result_code}").format(
+                    track_no=track_no,
+                    mig_no=mig_no,
+                    status=last_batch_einvoice.status,
+                    result_code=last_batch_einvoice.result_code,
+                )
+        summary_report_problems = self.problems
+        for target_audience_type, errors_d in target_audience_types.items():
+            _errors_keys = list(errors_d.keys())
+            _errors_keys.sort(key=lambda x: x.split('-')[1])
+            _bodys = []
+            for _ek in _errors_keys:
+                _bodys.append(errors_d[_ek])
+                if _ek in summary_report_problems:
+                    if errors_d[_ek] not in summary_report_problems[_ek]:
+                        summary_report_problems[_ek].append(errors_d[_ek])
+                else:
+                    summary_report_problems[_ek] = [errors_d[_ek]]
+            body = "\n\n".join(_bodys)
+            title = _("Failed-sync E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}").format(
+                name=self.turnkey_service.name,
+                report_type=self.get_report_type_display(),
+                begin_time=self.begin_time.strftime("%Y-%m-%d %H:%M:%S"),
+                target_audience=_("General User") if "g" == target_audience_type else _("Programmer"),
+            )
+
+            te_alarm, new_creation = TEAlarm.objects.get_or_create(
+                turnkey_service=self.turnkey_service,
+                target_audience_type=target_audience_type,
+                title=title,
+                body=body,
+                content_type=ContentType.objects.get_for_model(self),
+                object_id=self.id,
+            )
+            only_with_perms_in = {"g": ("view_te_alarm_for_general_user", "view_te_alarm_for_programmer", ),
+                                  "p": ("view_te_alarm_for_programmer", ),
+                                 }[target_audience_type]
+            notified_users = get_users_with_perms(self, only_with_perms_in=only_with_perms_in)
+            if notified_users:
+                te_alarm.notified_users.add(notified_users)
+        self.problems = summary_report_problems
+        self.save()
 
 
 
@@ -2321,7 +2375,7 @@ class TEAlarm(models.Model):
         ("p", "Programmer", ),
     )
     target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
-    notified_users = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    notified_users = models.ManyToManyField(User)
     title = models.CharField(max_length=255)
     body = models.TextField()
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
