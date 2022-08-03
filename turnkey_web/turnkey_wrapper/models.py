@@ -1,4 +1,5 @@
 import os, re, logging, datetime, pathlib, shutil, glob, pytz, xmltodict, zlib
+from xmlrpc.client import Boolean
 from json2xml import json2xml
 from django.db import models
 from django.db.models import Count, Q
@@ -25,6 +26,11 @@ class MIGConfigurationError(Exception):
 
 
 class EITurnkeyConfigurationError(Exception):
+    pass
+
+
+
+class EITurnkeyDailySummaryResultXMLParseError(Exception):
     pass
 
 
@@ -358,75 +364,23 @@ class EITurnkey(models.Model):
     endpoint = models.CharField(max_length=755, null=True)
     @classmethod
     def parse_summary_result_then_create_objects(cls):
+        lg = logging.getLogger("turnkey_web")
         paths = []
         for ei_turnkey in cls.objects.all().order_by('routing_id'):
             if ei_turnkey.SummaryResultUnpackBAK not in paths:
                 paths.append(ei_turnkey.SummaryResultUnpackBAK)
         for path in paths:
             for filepath in glob.glob(os.path.join(path, "*", "*", "*")):
-                if EITurnkeyDailySummaryResultXML.objects.filter(abspath=filepath).exists():
+                if EITurnkeyDailySummaryResultXML.objects.filter(abspath=filepath, is_parsed=True).exists():
                     continue
                 content = open(filepath, 'r').read()
                 if 'SummaryResult xmlns' not in content:
                     continue
-                ignore_very_old_TURNKEY_MESSAGE_LOG = False
-                print(filepath)
-                X = xmltodict.parse(content.encode('utf-8'))
-                party_id = X['SummaryResult']['RoutingInfo']['From']['PartyId']
-                routing_id = X['SummaryResult']['RoutingInfo']['FromVAC']['RoutingId']
-                ei_turnkey = cls.objects.get(party_id=party_id, routing_id=routing_id)
-                if list == type(X['SummaryResult']['DetailList']['Message']):
-                    messages = X['SummaryResult']['DetailList']['Message']
-                else:
-                    messages = [X['SummaryResult']['DetailList']['Message']]
-                for message in messages:
-                    ids = message['Info']['Id'].split('-')
-                    mig_no = ids[1]
-                    report_date = ids[2]
-                    report_time = ids[3]
-                    print(report_date, report_time)
-                    result_date = datetime.datetime.strptime(report_date, "%Y%m%d").date
-                    summary_result, new_creation = EITurnkeyDailySummaryResult.objects.get_or_create(
-                        ei_turnkey=ei_turnkey,
-                        result_date=result_date
-                    )
-                    if ignore_very_old_TURNKEY_MESSAGE_LOG:
-                        continue
-                    UUID = "-".join(ids[4:])
-                    mig_no = message['Info']['MessageType']
-                    counts = {
-                        "Total": summary_result.total_count,
-                        "Good": summary_result.good_count,
-                        "Failed": summary_result.failed_count,
-                    }
-                    batch_einvoice_idss = {
-                        "Total": summary_result.total_batch_einvoice_ids,
-                        "Good": summary_result.good_batch_einvoice_ids,
-                        "Failed": summary_result.failed_batch_einvoice_ids,
-                    }
-                    for key in counts.keys():
-                        if list == type(message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']):
-                            invoices = message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']
-                        else:
-                            invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
-                        for invoice in invoices:
-                            invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
-                            try:
-                                tml = TURNKEY_MESSAGE_LOG.objects.get(UUID=UUID, INVOICE_IDENTIFIER=invoice_identifier)
-                            except TURNKEY_MESSAGE_LOG.DoesNotExist:
-                                if not ignore_very_old_TURNKEY_MESSAGE_LOG:
-                                    report_datetime = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(report_date+report_time+"000", "%Y%m%d%H%M%S%f"))
-                                    first_eitbei = EITurnkeyBatchEInvoice.objects.all().order_by('upload_to_ei_time').first()
-                                    if first_eitbei and report_datetime < first_eitbei.upload_to_ei_time:
-                                        ignore_very_old_TURNKEY_MESSAGE_LOG = True
-                                        break
-                            eitbei = EITurnkeyBatchEInvoice.objects.get(invoice_identifier=invoice_identifier, upload_to_ei_time=tml.MESSAGE_DTS_datetime)
-                            if eitbei.batch_einvoice_id not in batch_einvoice_idss[key]:
-                                counts[key] += 1
-                                batch_einvoice_idss[key].append(eitbei.batch_einvoice_id)
-                    #TODO
-                eitdsrxml = EITurnkeyDailySummaryResultXML(ei_turnkey=ei_turnkey,
-                                                           abspath=filepath)
+                lg.debug(filepath)
+                try:
+                    eitdsrxml = EITurnkeyDailySummaryResultXML.objects.get(abspath=filepath)
+                except EITurnkeyDailySummaryResultXML.DoesNotExist:
+                    eitdsrxml = EITurnkeyDailySummaryResultXML(abspath=filepath)
                 eitdsrxml.content = content
                 eitdsrxml.save()
 
@@ -898,8 +852,16 @@ class EITurnkeyBatchEInvoice(models.Model):
 
 class EITurnkeyDailySummaryResultXML(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
-    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
     abspath = models.CharField(max_length=255, unique=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
+    result_date = models.DateField()
+    is_parsed = models.BooleanField(default=False)
+    total_count = models.SmallIntegerField(default=0)
+    good_count = models.SmallIntegerField(default=0)
+    failed_count = models.SmallIntegerField(default=0)
+    total_batch_einvoice_ids = models.JSONField(default=[])
+    good_batch_einvoice_ids = models.JSONField(default=[])
+    failed_batch_einvoice_ids = models.JSONField(default=[])
     binary_content = models.BinaryField()
     @property
     def content(self):
@@ -911,19 +873,125 @@ class EITurnkeyDailySummaryResultXML(models.Model):
             value = value.encode('utf-8')
         self.binary_content = zlib.compress(value)
 
+    
+    def parse(self):
+        lg = logging.getLogger('turnkey_web')
+        ignore_very_old_TURNKEY_MESSAGE_LOG = False
+        error_message = ''
+        X = xmltodict.parse(self.content)
+        party_id = X['SummaryResult']['RoutingInfo']['From']['PartyId']
+        routing_id = X['SummaryResult']['RoutingInfo']['FromVAC']['RoutingId']
+        self.ei_turnkey = EITurnkey.objects.get(party_id=party_id, routing_id=routing_id)
+        counts = {
+            "Total": 0,
+            "Good": 0,
+            "Failed": 0,
+        }
+        batch_einvoice_idss = {
+            "Total": [],
+            "Good": [],
+            "Failed": [],
+        }
+
+        if list == type(X['SummaryResult']['DetailList']['Message']):
+            messages = X['SummaryResult']['DetailList']['Message']
+        else:
+            messages = [X['SummaryResult']['DetailList']['Message']]
+        for message in messages:
+            ids = message['Info']['Id'].split('-')
+            mig_no, report_date, report_time = ids[1:4]
+            uuid = "-".join(ids[4:])
+            self.result_date = datetime.datetime.strptime(report_date, "%Y%m%d").date()
+            mig_no = message['Info']['MessageType']
+            for key in counts.keys():
+                if '0' == message['ResultType'][key]['ResultDetailType']['Count']:
+                    continue
+                if list == type(message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']):
+                    invoices = message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']
+                else:
+                    invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
+                for invoice in invoices:
+                    invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
+                    try:
+                        tml = TURNKEY_MESSAGE_LOG.objects.get(UUID=uuid, INVOICE_IDENTIFIER=invoice_identifier)
+                    except TURNKEY_MESSAGE_LOG.DoesNotExist:
+                        if not ignore_very_old_TURNKEY_MESSAGE_LOG:
+                            report_datetime = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(report_date+report_time+"000", "%Y%m%d%H%M%S%f"))
+                            first_eitbei = EITurnkeyBatchEInvoice.objects.all().order_by('upload_to_ei_time').first()
+                            if first_eitbei and report_datetime < first_eitbei.upload_to_ei_time:
+                                self.is_parsed = True
+                                return None
+                    eitbei = EITurnkeyBatchEInvoice.objects.get(invoice_identifier=invoice_identifier, upload_to_ei_time=tml.MESSAGE_DTS_datetime)
+                    if eitbei.batch_einvoice_id not in batch_einvoice_idss[key]:
+                        counts[key] += 1
+                        batch_einvoice_idss[key].append(eitbei.batch_einvoice_id)
+        if counts['Total'] != counts['Good'] + counts['Failed']:
+            error_message = "{filepath} Total({total_count}) != Good({good_count}) + Failed({failed_count})".format(
+                filepath=self.abspath,
+                total_count=counts['Total'],
+                good_count=counts['Good'],
+                failed_count=counts['Failed'])
+            lg.error(error_message)
+
+        self.total_count = counts['Total']
+        self.good_count = counts['Good']
+        self.failed_count = counts['Failed']
+        self.total_batch_einvoice_ids = batch_einvoice_idss['Total']
+        self.good_batch_einvoice_ids = batch_einvoice_idss['Good']
+        self.failed_batch_einvoice_ids = batch_einvoice_idss['Failed']
+
+        if "" == error_message:
+            self.is_parsed = True
+            summary_result, new_creation = EITurnkeyDailySummaryResult.objects.get_or_create(
+                ei_turnkey=self.ei_turnkey,
+                result_date=self.result_date
+            )
+        else:
+            self.is_parsed = False
+            summary_result = None
+        return summary_result
+
+
+    def save(self, *args, **kwargs):
+        lg = logging.getLogger('turnkey_web')
+        summary_result = None
+        if self.binary_content and not self.is_parsed:
+            try:
+                summary_result = self.parse()
+            except Exception as e:
+                lg.error("{abspath}: {e}".format(abspath=self.abspath, e=e))
+        super().save(*args, **kwargs)
+        if summary_result:
+            summary_result.xml_files.add(self)
+
 
 
 class EITurnkeyDailySummaryResult(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
     result_date = models.DateField()
-    total_count = models.SmallIntegerField(default=0)
-    good_count = models.SmallIntegerField(default=0)
-    failed_count = models.SmallIntegerField(default=0)
-    total_batch_einvoice_ids = models.JSONField(default=[])
-    good_batch_einvoice_ids = models.JSONField(default=[])
-    failed_batch_einvoice_ids = models.JSONField(default=[])
     xml_files = models.ManyToManyField(EITurnkeyDailySummaryResultXML)
+    @property
+    def total_count(self):
+        return sum(self.xml_files.all().values_list('total_count', flat=True))
+    @property
+    def good_count(self):
+        return sum(self.xml_files.all().values_list('good_count', flat=True))
+    @property
+    def failed_count(self):
+        return sum(self.xml_files.all().values_list('failed_count', flat=True))
+    total_batch_einvoice_ids = models.JSONField(default=[])
+    @property
+    def total_batch_einvoice_ids(self):
+        return [x for y in self.xml_files.all().values_list('total_batch_einvoice_ids', flat=True) for x in y]
+    good_batch_einvoice_ids = models.JSONField(default=[])
+    @property
+    def good_batch_einvoice_ids(self):
+        return [x for y in self.xml_files.all().values_list('good_batch_einvoice_ids', flat=True) for x in y]
+    failed_batch_einvoice_ids = models.JSONField(default=[])
+    @property
+    def failed_batch_einvoice_ids(self):
+        return [x for y in self.xml_files.all().values_list('failed_batch_einvoice_ids', flat=True) for x in y]
 
 
 
