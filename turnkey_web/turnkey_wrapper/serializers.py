@@ -36,6 +36,8 @@ from turnkey_wrapper.models import (
     EITurnkey,
     EITurnkeyBatch,
     EITurnkeyBatchEInvoice,
+    EITurnkeyDailySummaryResultXML,
+    EITurnkeyDailySummaryResult,
 )
 
 
@@ -212,4 +214,43 @@ class EITurnkeyBatchEInvoiceSerializer(ModelSerializer):
 
     class Meta:
         model = EITurnkeyBatchEInvoice
+        fields = '__all__'
+
+
+
+class EITurnkeyDailySummaryResultXMLSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeydailysummaryresultxml-detail")
+    ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
+    
+
+
+    class Meta:
+        model = EITurnkeyDailySummaryResultXML
+        fields = [
+            "id",
+            "resource_uri",
+            "create_time",
+            "ei_turnkey",
+            "ei_turnkey_dict",
+            "abspath",
+            "result_date",
+            "is_parsed",
+            "total_count",
+            "good_count",
+            "failed_count",
+            "total_batch_einvoice_ids",
+            "good_batch_einvoice_ids",
+            "failed_batch_einvoice_ids",
+        ]
+
+
+
+class EITurnkeyDailySummaryResultSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeydailysummaryresultxml-detail")
+    ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
+    
+
+
+    class Meta:
+        model = EITurnkeyDailySummaryResult
         fields = '__all__'

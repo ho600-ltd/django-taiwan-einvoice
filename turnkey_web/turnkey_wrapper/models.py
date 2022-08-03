@@ -30,11 +30,6 @@ class EITurnkeyConfigurationError(Exception):
 
 
 
-class EITurnkeyDailySummaryResultXMLParseError(Exception):
-    pass
-
-
-
 class C0401JSON2MIGXMl(object):
     versions = ["3.2"]
     base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:{version} C0401.xsd">

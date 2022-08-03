@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-29 11:45+0800\n"
+"POT-Creation-Date: 2022-08-03 16:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,15 @@ msgstr "已執行 polling_ei_turnkey_batch"
 #, python-brace-format
 msgid "Title: {title}"
 msgstr "標題: {title}"
+
+msgid "There is no alarm in polling_ei_turnkey, just logging"
+msgstr "polling_ei_turnkey 無警示，單純紀錄"
+
+msgid "Executed polling_ei_turnkey"
+msgstr "已執行 polling_ei_turnkey"
+
+msgid "There is no setting for {}"
+msgstr "{} 無設定"
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -136,9 +145,6 @@ msgstr "EI 回傳 I 錯誤(I)"
 msgid "Successful EI process(C)"
 msgstr "EI 確認成功(C)"
 
-msgid "There is no setting for {}"
-msgstr "{} 無設定"
-
 msgid "TRANSPORT_ID contains"
 msgstr "TRANSPORT_ID 包含"
 
@@ -233,6 +239,9 @@ msgstr "EI Turnkey 批次"
 msgid "EI Turnkey BatchE Invoice"
 msgstr "EI Turnkey 批次發票"
 
+msgid "EI Turnkey Daily Summary Result XML"
+msgstr "EI Turnkey 每日總結 XML"
+
 msgid "Timezone"
 msgstr "時區"
 
@@ -310,3 +319,39 @@ msgstr "結果碼包含"
 
 msgid "Time in the Year Month Range"
 msgstr "所處期別"
+
+msgid "Batch E-Invoice ID"
+msgstr ""
+
+msgid "Year Month Range"
+msgstr "所處期別"
+
+msgid "Upload to EI Time"
+msgstr "上傳EI大平台時間"
+
+msgid "Is Parsed?"
+msgstr "是否解析?"
+
+msgid "Parsed"
+msgstr "已解析"
+
+msgid "Not yet"
+msgstr "未"
+
+msgid "File path contains"
+msgstr "檔案路徑包含"
+
+msgid "Result Date greater than"
+msgstr "報表時間晚於"
+
+msgid "Result Date less than"
+msgstr "報表時間早於"
+
+msgid "Create Time"
+msgstr "創建時間"
+
+msgid "XML Date"
+msgstr "XML 日期"
+
+msgid "File path"
+msgstr "檔案路徑"

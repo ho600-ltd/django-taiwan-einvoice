@@ -209,6 +209,17 @@ $(function () {
         for (var param of datetime_kind_params) {
             $('#'+param).datetimepicker({ format: $self.datetimepicker_format });
         }
+        
+        var date_kind_params = [
+            'result_date__gte', 'result_date__lt'
+        ];
+        for (var param of date_kind_params) {
+            var date_kind_param = url.searchParams.get(param);
+            if (date_kind_param) {
+                $("input[name='"+param+"']").val(date_kind_param);
+            }
+            $('#'+param).datetimepicker({ format: "YYYY-MM-DD" });
+        }
 
         var string_kind_params = [
             'TASK__icontains',
@@ -227,6 +238,7 @@ $(function () {
             'party_id__icontains',
             'routing_id__icontains',
             'slug__icontains',
+            'abspath__icontains',
             'ei_turnkey_batch__slug__icontains',
             'result_code__icontains',
             'batch_einvoice_track_no__icontains',
@@ -250,6 +262,7 @@ $(function () {
             'STATUS',
             'MESSAGE_TYPE',
             'FROM_ROUTING_ID',
+            'is_parsed',
             'ei_turnkey_batch__mig'
         ];
         for (var param of select_kind_params) {

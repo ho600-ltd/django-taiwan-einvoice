@@ -35,6 +35,8 @@ from turnkey_wrapper.models import (
     EITurnkey,
     EITurnkeyBatch,
     EITurnkeyBatchEInvoice,
+    EITurnkeyDailySummaryResultXML,
+    EITurnkeyDailySummaryResult,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
@@ -52,6 +54,8 @@ from turnkey_wrapper.serializers import (
     EITurnkeySerializer,
     EITurnkeyBatchSerializer,
     EITurnkeyBatchEInvoiceSerializer,
+    EITurnkeyDailySummaryResultXMLSerializer,
+    EITurnkeyDailySummaryResultSerializer,
 )
 from turnkey_wrapper.filters import (
     FROM_CONFIGFilter,
@@ -69,6 +73,8 @@ from turnkey_wrapper.filters import (
     EITurnkeyFilter,
     EITurnkeyBatchFilter,
     EITurnkeyBatchEInvoiceFilter,
+    EITurnkeyDailySummaryResultXMLFilter,
+    EITurnkeyDailySummaryResultFilter,
 )
 from turnkey_wrapper.renderers import (
     TKWBrowsableAPIRenderer,
@@ -87,6 +93,8 @@ from turnkey_wrapper.renderers import (
     EITurnkeyHtmlRenderer,
     EITurnkeyBatchHtmlRenderer,
     EITurnkeyBatchEInvoiceHtmlRenderer,
+    EITurnkeyDailySummaryResultXMLHtmlRenderer,
+    EITurnkeyDailySummaryResultHtmlRenderer,
 )
 
 
@@ -325,6 +333,28 @@ class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
     serializer_class = EITurnkeyBatchEInvoiceSerializer
     filter_class = EITurnkeyBatchEInvoiceFilter
     renderer_classes = (EITurnkeyBatchEInvoiceHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+
+
+class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUserInLocalhost, )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyDailySummaryResultXML.objects.all().order_by('-result_date')
+    serializer_class = EITurnkeyDailySummaryResultXMLSerializer
+    filter_class = EITurnkeyDailySummaryResultXMLFilter
+    renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+
+
+class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
+    permission_classes = (IsSuperUserInLocalhost, )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyDailySummaryResult.objects.all().order_by('-id')
+    serializer_class = EITurnkeyDailySummaryResultSerializer
+    filter_class = EITurnkeyDailySummaryResultFilter
+    renderer_classes = (EITurnkeyDailySummaryResultHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
 
