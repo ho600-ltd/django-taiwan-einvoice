@@ -126,6 +126,13 @@
 </div>
 
 <div class="pagination_row">
+    <p class="">
+        {% blocktrans %}
+            Notice: "EI Daily Summary Result" counts the E-Invoice by "Upload to EI time", but the others use "Create Time".
+
+            This difference causes some E-Invoices to be counted in today's report, but be counted EI daily summary report of the next day, or the day after the next day.
+        {% endblocktrans %}
+    </p>
     <nav>
         {% if paginator %}
         {% get_pagination_html paginator %}
