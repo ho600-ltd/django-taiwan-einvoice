@@ -351,7 +351,7 @@ class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
 class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUserInLocalhost, )
     pagination_class = TenTo1000PerPagePagination
-    queryset = EITurnkeyDailySummaryResult.objects.all().order_by('-id')
+    queryset = EITurnkeyDailySummaryResult.objects.all().order_by('-result_date')
     serializer_class = EITurnkeyDailySummaryResultSerializer
     filter_class = EITurnkeyDailySummaryResultFilter
     renderer_classes = (EITurnkeyDailySummaryResultHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )

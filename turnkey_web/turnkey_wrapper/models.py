@@ -361,6 +361,7 @@ class EITurnkey(models.Model):
     def parse_summary_result_then_create_objects(cls):
         lg = logging.getLogger("turnkey_web")
         paths = []
+        eitdsrxmls = []
         for ei_turnkey in cls.objects.all().order_by('routing_id'):
             if ei_turnkey.SummaryResultUnpackBAK not in paths:
                 paths.append(ei_turnkey.SummaryResultUnpackBAK)
@@ -378,6 +379,8 @@ class EITurnkey(models.Model):
                     eitdsrxml = EITurnkeyDailySummaryResultXML(abspath=filepath)
                 eitdsrxml.content = content
                 eitdsrxml.save()
+                eitdsrxmls.append(eitdsrxml)
+        return eitdsrxmls
 
 
     @property

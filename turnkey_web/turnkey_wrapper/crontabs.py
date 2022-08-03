@@ -59,16 +59,18 @@ def polling_ei_turnkey(alert_log, *args, **kw):
 
     alert_log_status = SelectOption.objects.get(swarm='alert-log-status', value='LOG')
 
-    for summary_result in EITurnkey.parse_summary_result_then_create_objects():
-        title = _('Executed polling_ei_turnkey')
-        result = ei_turnkey.parse_summary_result_then_create_object()
-        _s = "Executed {ei_turnkey}.parse_summary_result_then_create_object() and got '{result}'".format(ei_turnkey=ei_turnkey,
-                                                                                                         result=result,)
+    title = _('Executed polling_ei_turnkey')
+    for summary_result_xml in EITurnkey.parse_summary_result_then_create_objects():
+        _s = "Parsed {abspath}: total count: {total_count}, good count: {good_count}, failed count: {failed_count} at {now}".format(
+            abspath=summary_result_xml.abspath,
+            total_count=summary_result_xml.total_count,
+            good_count=summary_result_xml.good_count,
+            failed=summary_result_xml.failed_count,
+            now=now()
+        )
         lg.debug(_s)
         mail_body += _s + "\n"
-        lg.debug("{ei_turnkey}.parse_summary_result_then_create_object() end at {now}".format(ei_turnkey=ei_turnkey, now=now()))
-
-    lg.debug("EITurnkey.parse_summary_result_then_create_object end at {}".format(now()))
+    lg.debug("EITurnkey.parse_summary_result_then_create_objects() end at {}".format(now()))
 
     alert_log.title = title
     alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body
