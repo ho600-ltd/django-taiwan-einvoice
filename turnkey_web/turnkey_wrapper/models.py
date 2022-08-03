@@ -1,4 +1,4 @@
-import os, re, logging, datetime, pathlib, shutil, glob, pytz, xmltodict
+import os, re, logging, datetime, pathlib, shutil, glob, pytz, xmltodict, zlib
 from json2xml import json2xml
 from django.db import models
 from django.db.models import Count, Q
@@ -14,6 +14,8 @@ EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS = ["G", "C"]
 EI_WELL_STATUSS = ["P", "G", "C"]
 EI_STATUSS = ["C", "G", "P", "E", "I"]
 MIG_NOS = ["C0401", "C0501", "C0701"]
+XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
+WILL_REMOVE_DFAJDLFZX_RE = re.compile('</?will_remove_dfajdlfzx>', re.I)
 
 
 
@@ -24,6 +26,82 @@ class MIGConfigurationError(Exception):
 
 class EITurnkeyConfigurationError(Exception):
     pass
+
+
+
+class C0401JSON2MIGXMl(object):
+    versions = ["3.2"]
+    base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:{version} C0401.xsd">
+    {xml_body}
+</Invoice>"""
+
+
+    def __init__(self, json_data, version="3.2"):
+        if version not in self.versions:
+            raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
+        self.version = version
+        self.json_data = self.regulate_json_data(json_data)
+    
+
+    def export_xml(self):
+        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
+
+    
+    def regulate_json_data(self, json_data):
+        def _append_sequence_number(index0, d):
+            d["SequenceNumber"] = "{:03d}".format(index0+1)
+            return d
+        json_data["Details"] = [{"ProductItem": _append_sequence_number(_i, _pi)}
+            for _i, _pi in enumerate(json_data["Details"])
+        ]
+
+        if "FreeTaxSalesAmount" not in json_data["Amount"]:
+            json_data["Amount"]["FreeTaxSalesAmount"] = '0'
+        if "ZeroTaxSalesAmount" not in json_data["Amount"]:
+            json_data["Amount"]["ZeroTaxSalesAmount"] = '0'
+        return json_data
+    
+
+    def get_xml_body(self):
+        xml_body = ''
+        for elm in ["Main", "Details", "Amount"]:
+            xml = json2xml.Json2xml(self.json_data[elm], wrapper=elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+            xml_body += XML_VERSION_RE.sub("", xml.decode('utf-8'))
+        return xml_body
+
+
+
+class C0501JSON2MIGXMl(C0401JSON2MIGXMl):
+    base_xml = """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:C0501:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0501:{version} C0501.xsd">
+    {xml_body}
+</CancelInvoice>"""
+
+
+    def __init__(self, json_data, version="3.2"):
+        super().__init__(json_data, version=version)
+
+
+    def export_xml(self):
+        return super().export_xml()
+
+
+    def regulate_json_data(self, json_data):
+        return json_data
+
+
+    def get_xml_body(self):
+        remove_elm = "will_remove_dfajdlfzx"
+        _xml_body = json2xml.Json2xml(self.json_data, wrapper=remove_elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+        _xml_body = XML_VERSION_RE.sub("", _xml_body.decode('utf-8'))
+        xml_body = WILL_REMOVE_DFAJDLFZX_RE.sub("", _xml_body)
+        return xml_body
+
+
+
+class C0701JSON2MIGXMl(C0501JSON2MIGXMl):
+    base_xml = """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:C0701:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0701:{version} C0701.xsd">
+    {xml_body}
+</VoidInvoice>"""
 
 
 
@@ -286,21 +364,71 @@ class EITurnkey(models.Model):
                 paths.append(ei_turnkey.SummaryResultUnpackBAK)
         for path in paths:
             for filepath in glob.glob(os.path.join(path, "*", "*", "*")):
+                if EITurnkeyDailySummaryResultXML.objects.filter(abspath=filepath).exists():
+                    continue
                 content = open(filepath, 'r').read()
                 if 'SummaryResult xmlns' not in content:
                     continue
+                ignore_very_old_TURNKEY_MESSAGE_LOG = False
+                print(filepath)
                 X = xmltodict.parse(content.encode('utf-8'))
                 party_id = X['SummaryResult']['RoutingInfo']['From']['PartyId']
                 routing_id = X['SummaryResult']['RoutingInfo']['FromVAC']['RoutingId']
                 ei_turnkey = cls.objects.get(party_id=party_id, routing_id=routing_id)
-                for message in X['SummaryResult']['DetailList']['Message']:
+                if list == type(X['SummaryResult']['DetailList']['Message']):
+                    messages = X['SummaryResult']['DetailList']['Message']
+                else:
+                    messages = [X['SummaryResult']['DetailList']['Message']]
+                for message in messages:
                     ids = message['Info']['Id'].split('-')
-                    version = ids[0]
                     mig_no = ids[1]
                     report_date = ids[2]
                     report_time = ids[3]
+                    print(report_date, report_time)
+                    result_date = datetime.datetime.strptime(report_date, "%Y%m%d").date
+                    summary_result, new_creation = EITurnkeyDailySummaryResult.objects.get_or_create(
+                        ei_turnkey=ei_turnkey,
+                        result_date=result_date
+                    )
+                    if ignore_very_old_TURNKEY_MESSAGE_LOG:
+                        continue
                     UUID = "-".join(ids[4:])
-                return X
+                    mig_no = message['Info']['MessageType']
+                    counts = {
+                        "Total": summary_result.total_count,
+                        "Good": summary_result.good_count,
+                        "Failed": summary_result.failed_count,
+                    }
+                    batch_einvoice_idss = {
+                        "Total": summary_result.total_batch_einvoice_ids,
+                        "Good": summary_result.good_batch_einvoice_ids,
+                        "Failed": summary_result.failed_batch_einvoice_ids,
+                    }
+                    for key in counts.keys():
+                        if list == type(message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']):
+                            invoices = message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']
+                        else:
+                            invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
+                        for invoice in invoices:
+                            invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
+                            try:
+                                tml = TURNKEY_MESSAGE_LOG.objects.get(UUID=UUID, INVOICE_IDENTIFIER=invoice_identifier)
+                            except TURNKEY_MESSAGE_LOG.DoesNotExist:
+                                if not ignore_very_old_TURNKEY_MESSAGE_LOG:
+                                    report_datetime = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(report_date+report_time+"000", "%Y%m%d%H%M%S%f"))
+                                    first_eitbei = EITurnkeyBatchEInvoice.objects.all().order_by('upload_to_ei_time').first()
+                                    if first_eitbei and report_datetime < first_eitbei.upload_to_ei_time:
+                                        ignore_very_old_TURNKEY_MESSAGE_LOG = True
+                                        break
+                            eitbei = EITurnkeyBatchEInvoice.objects.get(invoice_identifier=invoice_identifier, upload_to_ei_time=tml.MESSAGE_DTS_datetime)
+                            if eitbei.batch_einvoice_id not in batch_einvoice_idss[key]:
+                                counts[key] += 1
+                                batch_einvoice_idss[key].append(eitbei.batch_einvoice_id)
+                    #TODO
+                eitdsrxml = EITurnkeyDailySummaryResultXML(ei_turnkey=ei_turnkey,
+                                                           abspath=filepath)
+                eitdsrxml.content = content
+                eitdsrxml.save()
 
 
     @property
@@ -768,78 +896,36 @@ class EITurnkeyBatchEInvoice(models.Model):
 
 
 
-XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
-WILL_REMOVE_DFAJDLFZX_RE = re.compile('</?will_remove_dfajdlfzx>', re.I)
-class C0401JSON2MIGXMl(object):
-    versions = ["3.2"]
-    base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:{version} C0401.xsd">
-    {xml_body}
-</Invoice>"""
-
-
-    def __init__(self, json_data, version="3.2"):
-        if version not in self.versions:
-            raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
-        self.version = version
-        self.json_data = self.regulate_json_data(json_data)
-    
-
-    def export_xml(self):
-        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
-
-    
-    def regulate_json_data(self, json_data):
-        def _append_sequence_number(index0, d):
-            d["SequenceNumber"] = "{:03d}".format(index0+1)
-            return d
-        json_data["Details"] = [{"ProductItem": _append_sequence_number(_i, _pi)}
-            for _i, _pi in enumerate(json_data["Details"])
-        ]
-
-        if "FreeTaxSalesAmount" not in json_data["Amount"]:
-            json_data["Amount"]["FreeTaxSalesAmount"] = '0'
-        if "ZeroTaxSalesAmount" not in json_data["Amount"]:
-            json_data["Amount"]["ZeroTaxSalesAmount"] = '0'
-        return json_data
-    
-
-    def get_xml_body(self):
-        xml_body = ''
-        for elm in ["Main", "Details", "Amount"]:
-            xml = json2xml.Json2xml(self.json_data[elm], wrapper=elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
-            xml_body += XML_VERSION_RE.sub("", xml.decode('utf-8'))
-        return xml_body
+class EITurnkeyDailySummaryResultXML(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
+    abspath = models.CharField(max_length=255, unique=True)
+    binary_content = models.BinaryField()
+    @property
+    def content(self):
+        content = zlib.decompress(self.binary_content)
+        return content
+    @content.setter
+    def content(self, value=''):
+        if bytes != type(value):
+            value = value.encode('utf-8')
+        self.binary_content = zlib.compress(value)
 
 
 
-class C0501JSON2MIGXMl(C0401JSON2MIGXMl):
-    base_xml = """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:C0501:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0501:{version} C0501.xsd">
-    {xml_body}
-</CancelInvoice>"""
-
-
-    def __init__(self, json_data, version="3.2"):
-        super().__init__(json_data, version=version)
-
-
-    def export_xml(self):
-        return super().export_xml()
-
-
-    def regulate_json_data(self, json_data):
-        return json_data
-
-
-    def get_xml_body(self):
-        remove_elm = "will_remove_dfajdlfzx"
-        _xml_body = json2xml.Json2xml(self.json_data, wrapper=remove_elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
-        _xml_body = XML_VERSION_RE.sub("", _xml_body.decode('utf-8'))
-        xml_body = WILL_REMOVE_DFAJDLFZX_RE.sub("", _xml_body)
-        return xml_body
+class EITurnkeyDailySummaryResult(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
+    result_date = models.DateField()
+    total_count = models.SmallIntegerField(default=0)
+    good_count = models.SmallIntegerField(default=0)
+    failed_count = models.SmallIntegerField(default=0)
+    total_batch_einvoice_ids = models.JSONField(default=[])
+    good_batch_einvoice_ids = models.JSONField(default=[])
+    failed_batch_einvoice_ids = models.JSONField(default=[])
+    xml_files = models.ManyToManyField(EITurnkeyDailySummaryResultXML)
 
 
 
-class C0701JSON2MIGXMl(C0501JSON2MIGXMl):
-    base_xml = """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:C0701:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0701:{version} C0701.xsd">
-    {xml_body}
-</VoidInvoice>"""
+    class Meta:
+        unique_together = (("ei_turnkey", "result_date", ), )
