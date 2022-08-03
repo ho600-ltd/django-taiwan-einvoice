@@ -236,6 +236,29 @@ class EITurnkeyModelViewSet(ModelViewSet):
 
     
 
+    @action(detail=True, methods=['get'])
+    def get_ei_turnkey_summary_results(self, request, pk=None):
+        lg = logging.getLogger('turnkey_web')
+        eit = EITurnkey.objects.get(id=pk)
+        result_date__gte = request.GET.get('result_date__gte', '')
+        if result_date__gte:
+            result_date = datetime.datetime.strptime(result_date__gte, "%Y-%m-%d").date()
+            eitsrs = eit.eiturnkeydailysummaryresult_set.filter(result_date__gte=result_date).order_by('result_date')[:10]
+        else:
+            eitsrs = eit.eiturnkeydailysummaryresult_set.filter().order_by('result_date')[:10]
+
+        result_datas = [{
+            "result_date": e.result_date,
+            "total_count": e.total_count,
+            "good_count": e.good_count,
+            "failed_count": e.failed_count,
+            "total_batch_einvoice_ids": e.total_batch_einvoice_ids,
+            "good_batch_einvoice_ids": e.good_batch_einvoice_ids,
+            "failed_batch_einvoice_ids": e.failed_batch_einvoice_ids,
+            } for e in eitsrs]
+        return Response(result_datas)
+    
+
     @action(detail=True, methods=['post'])
     def upload_eiturnkey_batch_einvoice_bodys(self, request, pk=None):
         lg = logging.getLogger('turnkey_web')
