@@ -248,6 +248,12 @@ class EITurnkeyDailySummaryResultXMLSerializer(ModelSerializer):
 class EITurnkeyDailySummaryResultSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeydailysummaryresultxml-detail")
     ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
+    total_count = IntegerField(read_only=True)
+    good_count = IntegerField(read_only=True)
+    failed_count = IntegerField(read_only=True)
+    total_batch_einvoice_ids = JSONField(read_only=True)
+    good_batch_einvoice_ids = JSONField(read_only=True)
+    failed_batch_einvoice_ids = JSONField(read_only=True)
     
 
 

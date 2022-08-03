@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-03 16:02+0800\n"
+"POT-Creation-Date: 2022-08-03 16:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -242,6 +242,9 @@ msgstr "EI Turnkey 批次發票"
 msgid "EI Turnkey Daily Summary Result XML"
 msgstr "EI Turnkey 每日總結 XML"
 
+msgid "EI Turnkey Daily Summary Result"
+msgstr "EI Turnkey 每日總結報表"
+
 msgid "Timezone"
 msgstr "時區"
 
@@ -329,18 +332,6 @@ msgstr "所處期別"
 msgid "Upload to EI Time"
 msgstr "上傳EI大平台時間"
 
-msgid "Is Parsed?"
-msgstr "是否解析?"
-
-msgid "Parsed"
-msgstr "已解析"
-
-msgid "Not yet"
-msgstr "未"
-
-msgid "File path contains"
-msgstr "檔案路徑包含"
-
 msgid "Result Date greater than"
 msgstr "報表時間晚於"
 
@@ -352,6 +343,18 @@ msgstr "創建時間"
 
 msgid "XML Date"
 msgstr "XML 日期"
+
+msgid "Is Parsed?"
+msgstr "是否解析?"
+
+msgid "Parsed"
+msgstr "已解析"
+
+msgid "Not yet"
+msgstr "未"
+
+msgid "File path contains"
+msgstr "檔案路徑包含"
 
 msgid "File path"
 msgstr "檔案路徑"
