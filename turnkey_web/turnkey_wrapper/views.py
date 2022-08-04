@@ -243,9 +243,9 @@ class EITurnkeyModelViewSet(ModelViewSet):
         result_date__gte = request.GET.get('result_date__gte', '')
         if result_date__gte:
             result_date = datetime.datetime.strptime(result_date__gte, "%Y-%m-%d").date()
-            eitsrs = eit.eiturnkeydailysummaryresult_set.filter(result_date__gte=result_date).order_by('result_date')[:10]
+            eitsrs = eit.eiturnkeydailysummaryresult_set.filter(result_date__gte=result_date).order_by('result_date')[:100]
         else:
-            eitsrs = eit.eiturnkeydailysummaryresult_set.filter().order_by('result_date')[:10]
+            eitsrs = eit.eiturnkeydailysummaryresult_set.filter().order_by('result_date')[:100]
 
         result_datas = [{
             "result_date": e.result_date,
@@ -256,7 +256,13 @@ class EITurnkeyModelViewSet(ModelViewSet):
             "good_batch_einvoice_ids": e.good_batch_einvoice_ids,
             "failed_batch_einvoice_ids": e.failed_batch_einvoice_ids,
             } for e in eitsrs]
-        return Response(result_datas)
+        twrc = TurnkeyWebReturnCode("0")
+        result = {
+            "return_code": twrc.return_code,
+            "return_code_message": twrc.message,
+            "datas": result_datas,
+        }
+        return Response(result)
     
 
     @action(detail=True, methods=['post'])

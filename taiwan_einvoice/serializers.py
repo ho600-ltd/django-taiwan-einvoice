@@ -497,7 +497,8 @@ class AuditLogSerializer(ModelSerializer):
     def get_content_object_dict(self, instance):
         request = self.context.get('request', None)
         return {
-            "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request})
+            "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request}),
+            "turnkeyservice": TurnkeyServiceSerializer(instance.content_object, context={"request": request})
         }[instance.content_type.model].data
 
 

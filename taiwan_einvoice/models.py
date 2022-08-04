@@ -633,6 +633,94 @@ class TurnkeyService(models.Model):
         key = '{}-{}-{}-{}'.format(self.routing_id, self.hash_key, self.transport_id, self.party_id)
         cbotpr = CounterBasedOTPinRow(SECRET=key.encode('utf-8'), N_TIMES_IN_A_ROW=n_times_in_a_row)
         return cbotpr.generate_otps()
+    
+
+    def get_and_create_ei_turnkey_daily_summary_result(self):
+        audit_type = AuditType.objects.get(name="EI_SUMMARY_RESULT")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self,
+            content_object=self,
+            is_error=False,
+        )
+        url = self.tkw_endpoint + '{action}/'.format(action="get_ei_turnkey_summary_results")
+        counter_based_otp_in_row = ','.join(self.generate_counter_based_otp_in_row())
+        last_summary_report = self.summaryreport_set.filter(report_type='E').order_by('begin_time').last()
+        payload = {"format": "json"}
+        if last_summary_report:
+            payload["result_date__gte"] = last_summary_report.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d")
+        try:
+            response = requests.get(url,
+                                    params=payload,
+                                    headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "TurnkeyService.get_and_create_ei_turnkey_daily_summary_result",
+                "url": url,
+                "position at": "requests.get(...)",
+                "params": payload,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                for summary_result in result_json['data']:
+                    problems = sr.problems
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(summary_result['result_date'], "%Y-%m-%d"))
+                    end_time = begin_time + datetime.timedelta(days=1)
+                    sr = SummaryReport.objects.get_or_create(turnkey_service=self,
+                                                             report_type='E',
+                                                             begin_time=begin_time,
+                                                            )
+                    sr.end_time = end_time
+                    for k in ["total_count", "good_count", "failed_count"]:
+                        setattr(sr, k, summary_result[k])
+                    field_d = {
+                        "good_batch_einvoice_ids": "good_objects",
+                        "failed_batch_einvoice_ids": "failed_objects",
+                    }
+                    for tk in ["good_batch_einvoice_ids", "failed_batch_einvoice_ids"]:
+                        beis = BatchEInvoice.objects.filter(id__in=summary_result[tk])
+                        if beis.count() != summary_result[tk]:
+                            if tk in problems:
+                                problems[tk].append(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE)
+                            else:
+                                problems[tk] = [sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE]
+                        einvoices_content_types = [_bei.last_einvoices_content_type for _bei in beis]
+                        remove_ects = []
+                        for _ect in getattr(sr, field_d[tk]).all():
+                            if _ect not in einvoices_content_types:
+                                remove_ects.append(_ect)
+                        add_ects = []
+                        for _ect in einvoices_content_types:
+                            if not getattr(sr, field_[tk]).filter(id=_ect.id).exists():
+                                add_ects.append(_ect)
+                        if remove_ects:
+                            getattr(sr, field_d[tk]).remove(remove_ects)
+                            for _ect in remove_ects:
+                                _ect.content_object.ei_audited = False
+                                _ect.content_object.save()
+                        if add_ects:
+                            getattr(sr, field_d[tk]).add(add_ects)
+                            for _ect in add_ects:
+                                _ect.content_object.ei_audited = True
+                                _ect.content_object.save()
+                    sr.problems = problems
+                    sr.save()
+
+                audit_log.is_error = False
+                audit_log.save()
+                return result_json
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
+
 
 
 
@@ -2105,6 +2193,7 @@ class AuditType(models.Model):
         ("EITURNKEY_PROCESSING", "EITurnkey Processing"),
         ("EI_PROCESSING", "EI Processing"),
         ("EI_PROCESSED", "EI Processed"),
+        ("EI_SUMMARY_RESULT", "EI Summary Result"),
     )
     name = models.CharField(max_length=32, choices=name_choices, unique=True)
 
@@ -2151,6 +2240,8 @@ class TEAlarm(models.Model):
 
 class SummaryReport(models.Model):
     LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE = _("The last Batch E-Invoice does not exist!")
+    NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE = _("The ids in Summary Result do not match BatchEInvoice!")
+
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     begin_time = models.DateTimeField(db_index=True)

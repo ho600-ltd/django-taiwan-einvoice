@@ -33,7 +33,7 @@
                     <div field="content_object">{{ obj.content_object_dict.str_name }}</div>
                 </td>
                 <td field="is_error">{% if obj.is_error %}{% trans "Error" %}{% endif %}</td>
-                <td field="log"><pre style="max-width: 600px;">{{ obj.log|pprint }}<pre></td>
+                <td field="log"><pre style="max-width: 600px; max-height: 100px;">{{ obj.log|pprint }}<pre></td>
             </tr>
         {% endfor %}
     </tbody>
