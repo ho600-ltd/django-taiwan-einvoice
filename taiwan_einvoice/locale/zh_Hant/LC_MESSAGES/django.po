@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-03 20:40+0800\n"
+"POT-Creation-Date: 2022-08-04 13:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,6 +30,12 @@ msgstr "已執行 polling_upload_batch"
 #, python-brace-format
 msgid "Title: {title}"
 msgstr "標題: {title}"
+
+msgid "There is no alarm in polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result, just logging"
+msgstr "polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result 並無警示，單純紀錄"
+
+msgid "Executed polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
+msgstr "已執行 polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -280,6 +286,9 @@ msgstr "批次上傳電子發票(id: {})不存在!"
 msgid "The last Batch E-Invoice does not exist!"
 msgstr "最新批次上傳電子發票(id: {})不存在!"
 
+msgid "The ids in Summary Result do not match BatchEInvoice!"
+msgstr "日總結成果中的 ids 無法對應「批次上傳電子發票」紀錄"
+
 msgid "Hour"
 msgstr "每小時"
 
@@ -487,7 +496,7 @@ msgid "Track no."
 msgstr "字軌號碼"
 
 msgid "Body"
-msgstr "Body"
+msgstr "內文"
 
 msgid "Status"
 msgstr "狀態"

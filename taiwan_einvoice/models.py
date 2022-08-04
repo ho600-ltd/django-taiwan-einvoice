@@ -636,6 +636,7 @@ class TurnkeyService(models.Model):
     
 
     def get_and_create_ei_turnkey_daily_summary_result(self):
+        translation.activate(settings.LANGUAGE_CODE)
         audit_type = AuditType.objects.get(name="EI_SUMMARY_RESULT")
         audit_log = AuditLog(
             creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
@@ -669,15 +670,17 @@ class TurnkeyService(models.Model):
             result_json = response.json()
             audit_log.log = result_json
             if 200 == response.status_code and "0" == result_json['return_code']:
-                for summary_result in result_json['data']:
-                    problems = sr.problems
+                for summary_result in result_json['results']:
                     begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(summary_result['result_date'], "%Y-%m-%d"))
                     end_time = begin_time + datetime.timedelta(days=1)
-                    sr = SummaryReport.objects.get_or_create(turnkey_service=self,
+                    sr, new_creation = SummaryReport.objects.get_or_create(turnkey_service=self,
                                                              report_type='E',
                                                              begin_time=begin_time,
+                                                             end_time=end_time,
                                                             )
-                    sr.end_time = end_time
+                    if sr.is_resolved:
+                        continue
+                    problems = sr.problems
                     for k in ["total_count", "good_count", "failed_count"]:
                         setattr(sr, k, summary_result[k])
                     field_d = {
@@ -688,9 +691,9 @@ class TurnkeyService(models.Model):
                         beis = BatchEInvoice.objects.filter(id__in=summary_result[tk])
                         if beis.count() != summary_result[tk]:
                             if tk in problems:
-                                problems[tk].append(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE)
+                                problems[tk].append(str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE))
                             else:
-                                problems[tk] = [sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE]
+                                problems[tk] = [str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE)]
                         einvoices_content_types = [_bei.last_einvoices_content_type for _bei in beis]
                         remove_ects = []
                         for _ect in getattr(sr, field_d[tk]).all():
@@ -698,20 +701,31 @@ class TurnkeyService(models.Model):
                                 remove_ects.append(_ect)
                         add_ects = []
                         for _ect in einvoices_content_types:
-                            if not getattr(sr, field_[tk]).filter(id=_ect.id).exists():
+                            if not getattr(sr, field_d[tk]).filter(id=_ect.id).exists():
                                 add_ects.append(_ect)
                         if remove_ects:
-                            getattr(sr, field_d[tk]).remove(remove_ects)
+                            getattr(sr, field_d[tk]).remove(*remove_ects)
                             for _ect in remove_ects:
                                 _ect.content_object.ei_audited = False
                                 _ect.content_object.save()
                         if add_ects:
-                            getattr(sr, field_d[tk]).add(add_ects)
-                            for _ect in add_ects:
-                                _ect.content_object.ei_audited = True
-                                _ect.content_object.save()
+                            getattr(sr, field_d[tk]).add(*add_ects)
+                            if "good_batch_einvoice_ids" == tk:
+                                for _ect in add_ects:
+                                    _ect.content_object.set_ei_audited_true()
                     sr.problems = problems
+                    good_counts = {}
+                    for good_object in sr.good_objects.all():
+                        _dict_value_plus_1(good_counts, good_object.content_object.get_mig_no())
+                    failed_counts = {}
+                    for failed_object in sr.failed_objects.all():
+                        _dict_value_plus_1(failed_counts, failed_object.content_object.get_mig_no())
+                    sr.good_counts = good_counts
+                    sr.failed_counts = failed_counts
+                    if not sr.problems and sr.failed_count <= 0:
+                        sr.is_resolved = True
                     sr.save()
+                    sr.notice()
 
                 audit_log.is_error = False
                 audit_log.save()
@@ -906,9 +920,10 @@ class EInvoiceMIG(models.Model):
 
 
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark', 'ei_synced', 'generate_time']
+    only_fields_can_update = ['print_mark', 'ei_synced', 'ei_audited', 'generate_time']
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
@@ -1317,6 +1332,11 @@ class EInvoice(models.Model):
             EInvoice.objects.filter(id=self.id).update(generate_time=generate_time)
 
 
+    def set_ei_audited_true(self):
+        if 'ei_audited' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(ei_audited=True)
+
+
     def set_ei_synced_true(self):
         if 'ei_synced' in self.only_fields_can_update:
             EInvoice.objects.filter(id=self.id).update(ei_synced=True)
@@ -1451,6 +1471,7 @@ class EInvoicePrintLog(models.Model):
 class CancelEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
@@ -1489,6 +1510,10 @@ class CancelEInvoice(models.Model):
 
     def __str__(self):
         return "{}@{}".format(self.einvoice.track_no, self.get_mig_no())
+
+
+    def set_ei_audited_true(self):
+        CancelEInvoice.objects.filter(id=self.id).update(ei_audited=True)
 
 
     def set_ei_synced_true(self):
@@ -1553,6 +1578,7 @@ class CancelEInvoice(models.Model):
 class VoidEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
@@ -1582,6 +1608,10 @@ class VoidEInvoice(models.Model):
 
     def __str__(self):
         return "{}@{}".format(self.einvoice.track_no, self.get_mig_no())
+
+
+    def set_ei_audited_true(self):
+        VoidEInvoice.objects.filter(id=self.id).update(ei_audited=True)
 
 
     def set_ei_synced_true(self):
@@ -2238,6 +2268,13 @@ class TEAlarm(models.Model):
     content_object = GenericForeignKey('content_type', 'object_id')
 
 
+
+def _dict_value_plus_1(dictionary, key):
+    if key in dictionary: dictionary[key] += 1
+    else: dictionary[key] = 1
+
+
+
 class SummaryReport(models.Model):
     LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE = _("The last Batch E-Invoice does not exist!")
     NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE = _("The ids in Summary Result do not match BatchEInvoice!")
@@ -2256,15 +2293,15 @@ class SummaryReport(models.Model):
         ("E", _("Daily summary from EI")),
     )
     report_type = models.CharField(max_length=1, choices=report_type_choices, db_index=True)
-    problems = models.JSONField()
+    problems = models.JSONField(default={})
 
     good_count = models.SmallIntegerField(default=0)
     failed_count = models.SmallIntegerField(default=0)
     resolved_count = models.SmallIntegerField(default=0)
 
-    good_counts = models.JSONField()
-    failed_counts = models.JSONField()
-    resolved_counts = models.JSONField()
+    good_counts = models.JSONField(default={})
+    failed_counts = models.JSONField(default={})
+    resolved_counts = models.JSONField(default={})
 
     good_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_good_object")
     failed_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_failed_object")
@@ -2307,10 +2344,6 @@ class SummaryReport(models.Model):
         good_objects = []
         failed_objects = []
         resolved_objects = []
-        def dict_value_plus_1(dictionary, key):
-            if key in dictionary: dictionary[key] += 1
-            else: dictionary[key] = 1
-
         try:
             summary_report = cls.objects.get(turnkey_service=turnkey_service,
                                              report_type=report_type,
@@ -2345,7 +2378,7 @@ class SummaryReport(models.Model):
                 for ei_synced, _vars in vars_list_for_ei_synced_true_false.items():
                     for m in mos.filter(ei_synced=ei_synced):
                         _vars["count_var"] += 1
-                        dict_value_plus_1(_vars["counts_var"], m.get_mig_no())
+                        _dict_value_plus_1(_vars["counts_var"], m.get_mig_no())
                         last_batch_einvoice = m.last_batch_einvoice
                         if last_batch_einvoice:
                             last_einvoices_content_type = last_batch_einvoice.last_einvoices_content_type
@@ -2383,7 +2416,7 @@ class SummaryReport(models.Model):
             for eict in summary_report.failed_objects.all():
                 if eict.content_object.ei_synced:
                     resolved_count += 1
-                    dict_value_plus_1(resolved_counts, eict.content_object.get_mig_no())
+                    _dict_value_plus_1(resolved_counts, eict.content_object.get_mig_no())
                     resolved_objects.append(eict.content_object.last_batch_einvoice.last_einvoices_content_type)
             summary_report.resolved_count = resolved_count
             summary_report.resolved_counts = resolved_counts

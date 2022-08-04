@@ -61,7 +61,7 @@ def polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result(al
 
     for turnkey_service in TurnkeyService.objects.exclude(Q(tkw_endpoint='')|Q(tkw_endpoint__isnull=True)).order_by('routing_id'):
         title = _('Executed polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result')
-        _s = turnkey_service.get_and_create_ei_turnkey_daily_summary_result()
+        _s = str(turnkey_service.get_and_create_ei_turnkey_daily_summary_result())
         lg.debug(_s)
         mail_body += _s + "\n"
         lg.debug("{turnkey_service}.get_and_create_ei_turnkey_daily_summary_result end at {now}".format(turnkey_service=turnkey_service, now=now()))
