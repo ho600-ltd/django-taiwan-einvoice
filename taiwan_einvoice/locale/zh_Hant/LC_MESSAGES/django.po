@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-04 16:31+0800\n"
+"POT-Creation-Date: 2022-08-04 17:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -289,6 +289,9 @@ msgstr "最新批次上傳電子發票(id: {})不存在!"
 msgid "The ids in Summary Result do not match BatchEInvoice!"
 msgstr "日總結成果中的 ids 無法對應「批次上傳電子發票」紀錄"
 
+msgid "EI Daily Summary Result report it as failed record!"
+msgstr "EI 日總結成果回報此為失敗紀錄!"
+
 msgid "Hourly Sync"
 msgstr "每小時同步"
 
@@ -321,9 +324,8 @@ msgstr "請儘速列印發票({track_no})，列印後方才能上傳 EI 大平�
 msgid "Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})"
 msgstr "請為 {track_no} 發票檢查 taiwan_einvoice.crontabs.polling_upload_batch 排程"
 
-#, python-brace-format
-msgid "The {track_no}@{mig_no} has result_code: {status}-{result_code}"
-msgstr "{track_no}@{mig_no} 的結果碼: {status}-{result_code}"
+msgid "The {track_no}@{mig_no} has result_code: {status}: '{result_code}'"
+msgstr "{track_no}@{mig_no} 的結果碼: {status}: '{result_code}'"
 
 #, python-brace-format
 msgid "Failed-{ei_check_type} E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}"
