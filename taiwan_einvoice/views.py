@@ -420,7 +420,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
         except TurnkeyService.DoesNotExist:
             er = {
-                "error_title": "TurnkeyService Does Not Exist",
+                "error_title": _("TurnkeyService Does Not Exist"),
                 "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_web),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -468,13 +468,13 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 end_no = cols[6]
                 if begin_no[-2:] not in ('00', '50'):
                     er = {
-                        "error_title": "Begin No. Error",
+                        "error_title": _("Begin No. Error"),
                         "error_message": _("{} has error: \n\n\nThe suffix of begin_no should be 00 or 50.").format(line)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
                 if end_no[-2:] not in ('49', '99'):
                     er = {
-                        "error_title": "End No. Error",
+                        "error_title": _("End No. Error"),
                         "error_message": _("{} has error: \n\n\nThe suffix of end_no should be 49 or 99.").format(line)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -498,7 +498,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     else:
                         error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
                     er = {
-                        "error_title": "Data Error",
+                        "error_title": _("Data Error"),
                         "error_message": error_message,
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -519,7 +519,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 
                 error_message = _("{} ~ {} has error: \n\n\nnumber overlapping").format(data['begin_no'], data['end_no'])
                 er = {
-                    "error_title": "Data Error",
+                    "error_title": _("Data Error"),
                     "error_message": error_message,
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)

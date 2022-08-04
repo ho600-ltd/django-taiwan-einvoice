@@ -674,59 +674,13 @@ class TurnkeyService(models.Model):
                     begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(summary_result['result_date'], "%Y-%m-%d"))
                     end_time = begin_time + datetime.timedelta(days=1)
                     sr, new_creation = SummaryReport.objects.get_or_create(turnkey_service=self,
-                                                             report_type='E',
-                                                             begin_time=begin_time,
-                                                             end_time=end_time,
-                                                            )
+                                                                           report_type='E',
+                                                                           begin_time=begin_time,
+                                                                           end_time=end_time,
+                                                                          )
                     if sr.is_resolved:
                         continue
-                    problems = sr.problems
-                    for k in ["total_count", "good_count", "failed_count"]:
-                        setattr(sr, k, summary_result[k])
-                    field_d = {
-                        "good_batch_einvoice_ids": "good_objects",
-                        "failed_batch_einvoice_ids": "failed_objects",
-                    }
-                    for tk in ["good_batch_einvoice_ids", "failed_batch_einvoice_ids"]:
-                        beis = BatchEInvoice.objects.filter(id__in=summary_result[tk])
-                        if beis.count() != summary_result[tk]:
-                            if tk in problems:
-                                problems[tk].append(str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE))
-                            else:
-                                problems[tk] = [str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE)]
-                        einvoices_content_types = [_bei.last_einvoices_content_type for _bei in beis]
-                        remove_ects = []
-                        for _ect in getattr(sr, field_d[tk]).all():
-                            if _ect not in einvoices_content_types:
-                                remove_ects.append(_ect)
-                        add_ects = []
-                        for _ect in einvoices_content_types:
-                            if not getattr(sr, field_d[tk]).filter(id=_ect.id).exists():
-                                add_ects.append(_ect)
-                        if remove_ects:
-                            getattr(sr, field_d[tk]).remove(*remove_ects)
-                            for _ect in remove_ects:
-                                _ect.content_object.ei_audited = False
-                                _ect.content_object.save()
-                        if add_ects:
-                            getattr(sr, field_d[tk]).add(*add_ects)
-                            if "good_batch_einvoice_ids" == tk:
-                                for _ect in add_ects:
-                                    _ect.content_object.set_ei_audited_true()
-                    sr.problems = problems
-                    good_counts = {}
-                    for good_object in sr.good_objects.all():
-                        _dict_value_plus_1(good_counts, good_object.content_object.get_mig_no())
-                    failed_counts = {}
-                    for failed_object in sr.failed_objects.all():
-                        _dict_value_plus_1(failed_counts, failed_object.content_object.get_mig_no())
-                    sr.good_counts = good_counts
-                    sr.failed_counts = failed_counts
-                    if not sr.problems and sr.failed_count <= 0:
-                        sr.is_resolved = True
-                    sr.save()
-                    sr.notice()
-
+                    sr.generate_ei_daily_summary_report(summary_result)
                 audit_log.is_error = False
                 audit_log.save()
                 return result_json
@@ -2284,13 +2238,14 @@ class SummaryReport(models.Model):
     begin_time = models.DateTimeField(db_index=True)
     end_time = models.DateTimeField(db_index=True)
     report_type_choices = (
-        ("h", _("Hour")),
-        ("d", _("Day")),
-        ("w", _("Week")),
-        ("m", _("Month")),
-        ("o", _("Odd month ~ Even month")),
-        ("y", _("Year")),
-        ("E", _("Daily summary from EI")),
+        ("h", _("Hourly Sync")),
+        ("d", _("Daily Sync")),
+        ("w", _("Weekly Sync")),
+        ("m", _("Monthly Sync")),
+        ("o", _("Odd month ~ Even month Sync")),
+        ("y", _("Yearly Sync")),
+        ("a", _("Daily Audit")),
+        ("E", _("Daily Summary from EI")),
     )
     report_type = models.CharField(max_length=1, choices=report_type_choices, db_index=True)
     problems = models.JSONField(default={})
@@ -2324,7 +2279,10 @@ class SummaryReport(models.Model):
             return None
         lg = logging.getLogger("taiwan_einvoice")
         translation.activate(settings.LANGUAGE_CODE)
-
+        if "a" == report_type:
+            ei_check_type = 'ei_audited'
+        else:
+            ei_check_type = 'ei_synced'
         model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service, 
                                                  create_time__gte=begin_time,
                                                  create_time__lt=end_time).order_by('id'),
@@ -2363,7 +2321,7 @@ class SummaryReport(models.Model):
             ):
             return summary_report
 
-        vars_list_for_ei_synced_true_false = {True: {
+        vars_list_for_ei_check_type_true_false = {True: {
                                                     "count_var": good_count,
                                                     "counts_var": good_counts,
                                                     "objects_list": good_objects,
@@ -2375,8 +2333,8 @@ class SummaryReport(models.Model):
                                               }}
         if new_creation:
             for mos in model_objects:
-                for ei_synced, _vars in vars_list_for_ei_synced_true_false.items():
-                    for m in mos.filter(ei_synced=ei_synced):
+                for ture_or_false, _vars in vars_list_for_ei_check_type_true_false.items():
+                    for m in mos.filter(**{ei_check_type: ture_or_false}):
                         _vars["count_var"] += 1
                         _dict_value_plus_1(_vars["counts_var"], m.get_mig_no())
                         last_batch_einvoice = m.last_batch_einvoice
@@ -2395,26 +2353,25 @@ class SummaryReport(models.Model):
                             )
                             problems.setdefault(problem_key, []).append(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
                         _vars["objects_list"].append(last_einvoices_content_type)
-
-            good_count = vars_list_for_ei_synced_true_false[True]["count_var"]
-            failed_count = vars_list_for_ei_synced_true_false[False]["count_var"]
+            good_count = vars_list_for_ei_check_type_true_false[True]["count_var"]
+            failed_count = vars_list_for_ei_check_type_true_false[False]["count_var"]
             if 0 >= good_count + failed_count:
                 return None
             summary_report.problems = problems
             summary_report.good_count = good_count
-            summary_report.good_counts = vars_list_for_ei_synced_true_false[True]["counts_var"]
+            summary_report.good_counts = vars_list_for_ei_check_type_true_false[True]["counts_var"]
             summary_report.resolved_count = resolved_count
             summary_report.failed_count = failed_count
-            summary_report.failed_counts = vars_list_for_ei_synced_true_false[False]["counts_var"]
+            summary_report.failed_counts = vars_list_for_ei_check_type_true_false[False]["counts_var"]
             summary_report.resolved_counts = resolved_counts
             summary_report.save()
-            summary_report.good_objects.add(*vars_list_for_ei_synced_true_false[True]["objects_list"])
-            if vars_list_for_ei_synced_true_false[False]["objects_list"]:
-                summary_report.failed_objects.add(*vars_list_for_ei_synced_true_false[False]["objects_list"])
+            summary_report.good_objects.add(*vars_list_for_ei_check_type_true_false[True]["objects_list"])
+            if vars_list_for_ei_check_type_true_false[False]["objects_list"]:
+                summary_report.failed_objects.add(*vars_list_for_ei_check_type_true_false[False]["objects_list"])
             summary_report.notice(new_creation=True)
         else:
             for eict in summary_report.failed_objects.all():
-                if eict.content_object.ei_synced:
+                if getattr(eict.content_object, ei_check_type):
                     resolved_count += 1
                     _dict_value_plus_1(resolved_counts, eict.content_object.get_mig_no())
                     resolved_objects.append(eict.content_object.last_batch_einvoice.last_einvoices_content_type)
@@ -2437,6 +2394,7 @@ class SummaryReport(models.Model):
         timedelta_d = {
             "h": datetime.timedelta(minutes=91),
             "d": datetime.timedelta(hours=24 + 8),
+            "a": datetime.timedelta(hours=24 + 8),
             "w": datetime.timedelta(hours=24 * 7 + 9),
             "m": datetime.timedelta(hours=24 * 31 + 10),
             "o": datetime.timedelta(hours=24 * 61 + 11),
@@ -2453,6 +2411,9 @@ class SummaryReport(models.Model):
                     end_time = begin_time + datetime.timedelta(minutes=60)
                 elif "d" == report_type:
                     begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                    end_time = begin_time + datetime.timedelta(hours=24)
+                elif "a" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0)) - datetime.timedelta(hours=24)
                     end_time = begin_time + datetime.timedelta(hours=24)
                 elif "w" == report_type:
                     _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
@@ -2524,10 +2485,11 @@ class SummaryReport(models.Model):
                 else:
                     summary_report_problems[_ek] = [errors_d[_ek]]
             body = "\n\n".join(_bodys)
-            title = _("Failed-sync E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}").format(
+            title = _("Failed-{ei_check_type} E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}").format(
+                ei_check_type=_("Audit") if "a" == self.report_type else _("Sync"),
                 name=self.turnkey_service.name,
                 report_type=self.get_report_type_display(),
-                begin_time=self.begin_time.strftime("%Y-%m-%d %H:%M:%S"),
+                begin_time=self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
                 target_audience=_("General User") if "g" == target_audience_type else _("Programmer"),
             )
 
@@ -2549,3 +2511,51 @@ class SummaryReport(models.Model):
         self.save()
 
 
+    def generate_ei_daily_summary_report(self, summary_result):
+        sr = self
+        problems = sr.problems
+        for k in ["total_count", "good_count", "failed_count"]:
+            setattr(sr, k, summary_result[k])
+        field_d = {
+            "good_batch_einvoice_ids": "good_objects",
+            "failed_batch_einvoice_ids": "failed_objects",
+        }
+        for tk in ["good_batch_einvoice_ids", "failed_batch_einvoice_ids"]:
+            beis = BatchEInvoice.objects.filter(id__in=summary_result[tk])
+            if beis.count() != summary_result[tk]:
+                if tk in problems:
+                    problems[tk].append(str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE))
+                else:
+                    problems[tk] = [str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE)]
+            einvoices_content_types = [_bei.last_einvoices_content_type for _bei in beis]
+            remove_ects = []
+            for _ect in getattr(sr, field_d[tk]).all():
+                if _ect not in einvoices_content_types:
+                    remove_ects.append(_ect)
+            add_ects = []
+            for _ect in einvoices_content_types:
+                if not getattr(sr, field_d[tk]).filter(id=_ect.id).exists():
+                    add_ects.append(_ect)
+            if remove_ects:
+                getattr(sr, field_d[tk]).remove(*remove_ects)
+                for _ect in remove_ects:
+                    _ect.content_object.ei_audited = False
+                    _ect.content_object.save()
+            if add_ects:
+                getattr(sr, field_d[tk]).add(*add_ects)
+                if "good_batch_einvoice_ids" == tk:
+                    for _ect in add_ects:
+                        _ect.content_object.set_ei_audited_true()
+        sr.problems = problems
+        good_counts = {}
+        for good_object in sr.good_objects.all():
+            _dict_value_plus_1(good_counts, good_object.content_object.get_mig_no())
+        failed_counts = {}
+        for failed_object in sr.failed_objects.all():
+            _dict_value_plus_1(failed_counts, failed_object.content_object.get_mig_no())
+        sr.good_counts = good_counts
+        sr.failed_counts = failed_counts
+        if not sr.problems and sr.failed_count <= 0:
+            sr.is_resolved = True
+        sr.save()
+        sr.notice()

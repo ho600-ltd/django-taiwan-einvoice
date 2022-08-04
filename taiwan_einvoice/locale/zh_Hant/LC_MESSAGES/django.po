@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-04 13:31+0800\n"
+"POT-Creation-Date: 2022-08-04 16:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -244,7 +244,7 @@ msgstr "完成"
 
 #, python-brace-format
 msgid "Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}"
-msgstr "{target_audience}注意: {slug} 中的發票({content_object})無法同步"
+msgstr "{target_audience}注意: {slug} 中的發票({content_object})無法完成同步"
 
 msgid "General User"
 msgstr "一般使用者"
@@ -289,25 +289,28 @@ msgstr "最新批次上傳電子發票(id: {})不存在!"
 msgid "The ids in Summary Result do not match BatchEInvoice!"
 msgstr "日總結成果中的 ids 無法對應「批次上傳電子發票」紀錄"
 
-msgid "Hour"
-msgstr "每小時"
+msgid "Hourly Sync"
+msgstr "每小時同步"
 
-msgid "Day"
-msgstr "每日"
+msgid "Daily Sync"
+msgstr "每日同步"
 
-msgid "Week"
-msgstr "每週"
+msgid "Weekly Sync"
+msgstr "每周同步"
 
-msgid "Month"
-msgstr "每月"
+msgid "Monthly Sync"
+msgstr "每月同步"
 
-msgid "Odd month ~ Even month"
-msgstr "單數月~雙數月"
+msgid "Odd month ~ Even month Sync"
+msgstr "單數月~雙數月同步"
 
-msgid "Year"
-msgstr "每年"
+msgid "Yearly Sync"
+msgstr "每年同步"
 
-msgid "Daily summary from EI"
+msgid "Daily Audit"
+msgstr "每日稽核"
+
+msgid "Daily Summary from EI"
 msgstr "EI 日報表"
 
 #, python-brace-format
@@ -323,8 +326,14 @@ msgid "The {track_no}@{mig_no} has result_code: {status}-{result_code}"
 msgstr "{track_no}@{mig_no} 的結果碼: {status}-{result_code}"
 
 #, python-brace-format
-msgid "Failed-sync E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}"
-msgstr "{target_audience}所需處理的同步失敗發票，詳見 {name} 總結報表({report_type}@{begin_time})"
+msgid "Failed-{ei_check_type} E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}"
+msgstr "{target_audience}所需處理的{ei_check_type}失敗發票，詳見 {name} 總結報表({report_type}@{begin_time})"
+
+msgid "Audit"
+msgstr "稽核"
+
+msgid "Sync"
+msgstr "同步"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -1471,6 +1480,9 @@ msgstr "已存在的群組數量已超過限度({})"
 msgid "Group name exists"
 msgstr "工作人員群組名稱已存在"
 
+msgid "TurnkeyService Does Not Exist"
+msgstr "Turnkwy 伺服器不存在"
+
 msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
 
@@ -1508,6 +1520,9 @@ msgstr ""
 "{} 有誤: \n"
 "太晚匯入。"
 
+msgid "Begin No. Error"
+msgstr "起始號碼錯誤"
+
 msgid ""
 "{} has error: \n"
 "\n"
@@ -1518,6 +1533,9 @@ msgstr ""
 "\n"
 "\n"
 "起號的後 2 碼須為 00 或 50 。"
+
+msgid "End No. Error"
+msgstr "結束號碼期間錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -1532,6 +1550,9 @@ msgstr ""
 
 msgid "{} exists"
 msgstr "{} 已存在"
+
+msgid "Data Error"
+msgstr "資料錯誤"
 
 msgid "Identifier Error"
 msgstr "統編錯誤"
