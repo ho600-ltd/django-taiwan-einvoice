@@ -26,6 +26,7 @@
                 <div>good_batch_einvoice_ids</div>
                 <div class="text-danger">failed_batch_einvoice_ids</div>
             </th>
+            <th>{% trans "Error Note" %}</th>
             <th>{% trans "File path" %}</th>
         </tr>
     </thead>
@@ -54,6 +55,13 @@
                     <pre field="total_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.total_batch_einvoice_ids|pprint }}</pre>
                     <pre class="font-weight-bold" field="good_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.good_batch_einvoice_ids|pprint }}</pre>
                     <pre class="text-danger" field="failed_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.failed_batch_einvoice_ids|pprint }}</pre>
+                </td>
+                <td field="error_note">
+                    {% if not obj.is_parsed and obj.error_note %}
+                        <span class="text-danger">{{ obj.error_note }}</span>
+                    {% else %}
+                        <span class="font-weight-light">{% trans "None" %}</span>
+                    {% endif %}
                 </td>
                 <td field="abspath">{{ obj.abspath }}</td>
             </tr>

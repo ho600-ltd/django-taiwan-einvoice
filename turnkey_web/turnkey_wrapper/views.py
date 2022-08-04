@@ -363,7 +363,7 @@ class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
 class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUserInLocalhost, )
     pagination_class = TenTo1000PerPagePagination
-    queryset = EITurnkeyDailySummaryResultXML.objects.all().order_by('-result_date')
+    queryset = EITurnkeyDailySummaryResultXML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
     serializer_class = EITurnkeyDailySummaryResultXMLSerializer
     filter_class = EITurnkeyDailySummaryResultXMLFilter
     renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )

@@ -61,13 +61,16 @@ def polling_ei_turnkey(alert_log, *args, **kw):
 
     title = _('Executed polling_ei_turnkey')
     for summary_result_xml in EITurnkey.parse_summary_result_then_create_objects():
-        _s = "Parsed {abspath}: total count: {total_count}, good count: {good_count}, failed count: {failed_count} at {now}".format(
-            abspath=summary_result_xml.abspath,
-            total_count=summary_result_xml.total_count,
-            good_count=summary_result_xml.good_count,
-            failed=summary_result_xml.failed_count,
-            now=now()
-        )
+        if summary_result_xml:
+            _s = "Parsed {abspath}: total count: {total_count}, good count: {good_count}, failed count: {failed_count} at {now}".format(
+                abspath=summary_result_xml.abspath,
+                total_count=summary_result_xml.total_count,
+                good_count=summary_result_xml.good_count,
+                failed_count=summary_result_xml.failed_count,
+                now=now()
+            )
+        else:
+            _s = "__None__"
         lg.debug(_s)
         mail_body += _s + "\n"
     lg.debug("EITurnkey.parse_summary_result_then_create_objects() end at {}".format(now()))

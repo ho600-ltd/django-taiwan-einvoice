@@ -365,12 +365,25 @@ class EITurnkey(models.Model):
         for ei_turnkey in cls.objects.all().order_by('routing_id'):
             if ei_turnkey.SummaryResultUnpackBAK not in paths:
                 paths.append(ei_turnkey.SummaryResultUnpackBAK)
+        _filepaths = []
         for path in paths:
-            for filepath in glob.glob(os.path.join(path, "*", "*", "*")):
+            _filepaths.extend(glob.glob(os.path.join(path, "*", "*", "*")))
+        lg.debug("_filepaths: {}".format(_filepaths))
+        exclude_filepaths = EITurnkeyDailySummaryResultXML.objects.filter(abspath__in=_filepaths, is_parsed=True).values_list('abspath', flat=True)
+        lg.debug("exclude_filepaths: {}".format(exclude_filepaths))
+        filepaths = []
+        for _fp in _filepaths:
+            if _fp not in filepaths and _fp not in exclude_filepaths:
+                filepaths.append(_fp)
+        lg.debug("filepaths: {}".format(filepaths))
+        if filepaths:
+            for filepath in filepaths:
                 if EITurnkeyDailySummaryResultXML.objects.filter(abspath=filepath, is_parsed=True).exists():
                     continue
                 content = open(filepath, 'r').read()
                 if 'SummaryResult xmlns' not in content:
+                    _eitdsrxml = EITurnkeyDailySummaryResultXML(abspath=filepath, is_parsed=True)
+                    _eitdsrxml.save()
                     continue
                 lg.debug(filepath)
                 try:
@@ -851,8 +864,8 @@ class EITurnkeyBatchEInvoice(models.Model):
 class EITurnkeyDailySummaryResultXML(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     abspath = models.CharField(max_length=255, unique=True)
-    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
-    result_date = models.DateField()
+    ei_turnkey = models.ForeignKey(EITurnkey, null=True, on_delete=models.DO_NOTHING)
+    result_date = models.DateField(null=True)
     is_parsed = models.BooleanField(default=False)
     total_count = models.SmallIntegerField(default=0)
     good_count = models.SmallIntegerField(default=0)
@@ -861,6 +874,7 @@ class EITurnkeyDailySummaryResultXML(models.Model):
     good_batch_einvoice_ids = models.JSONField(default=[])
     failed_batch_einvoice_ids = models.JSONField(default=[])
     binary_content = models.BinaryField()
+    error_note = models.TextField(default='')
     @property
     def content(self):
         content = zlib.decompress(self.binary_content)
@@ -945,6 +959,7 @@ class EITurnkeyDailySummaryResultXML(models.Model):
                 result_date=self.result_date
             )
         else:
+            self.error_note = error_message
             self.is_parsed = False
             summary_result = None
         return summary_result
@@ -957,7 +972,8 @@ class EITurnkeyDailySummaryResultXML(models.Model):
             try:
                 summary_result = self.parse()
             except Exception as e:
-                lg.error("{abspath}: {e}".format(abspath=self.abspath, e=e))
+                lg.error("{abspath}: {type} {e}".format(abspath=self.abspath, type=type(e), e=e))
+                self.error_note = "{}: {}".format(type(e), str(e))
         super().save(*args, **kwargs)
         if summary_result:
             summary_result.xml_files.add(self)

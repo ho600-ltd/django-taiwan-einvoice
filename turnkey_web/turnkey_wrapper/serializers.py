@@ -241,6 +241,7 @@ class EITurnkeyDailySummaryResultXMLSerializer(ModelSerializer):
             "total_batch_einvoice_ids",
             "good_batch_einvoice_ids",
             "failed_batch_einvoice_ids",
+            "error_note",
         ]
 
 
