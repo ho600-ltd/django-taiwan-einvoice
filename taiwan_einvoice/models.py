@@ -529,6 +529,12 @@ class Seller(models.Model):
         return "{}: {}, {}".format(self.legal_entity,
                                    self.print_with_seller_optional_fields,
                                    self.print_with_buyer_optional_fields)
+    
+
+    def save(self, *args, **kwargs):
+        if not self.pk and Seller.objects.filter(legal_entity__identifier=self.legal_entity.identifier).exists():
+            raise IdentifierDuplicateError("{} does exist!".format(self.legal_entity.identifier))
+        super().save(*args, **kwargs)
 
 
 
