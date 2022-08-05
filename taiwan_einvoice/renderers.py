@@ -142,6 +142,13 @@ class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('sellerinvoicetrackno_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        return  res
+
+
+
     def get_content(self, renderer, data, accepted_media_type, renderer_context):
         if getattr(data.get('detail', ''), 'code', ''):
             return data['detail']

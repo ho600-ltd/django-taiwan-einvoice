@@ -232,6 +232,7 @@ $(function () {
             'batch__slug__icontains',
             'title__icontains',
             'body__icontains',
+            'no_including',
             'track__icontains'
         ];
         for (var param of string_kind_params) {
@@ -249,6 +250,7 @@ $(function () {
             'npoban__regex',
             'ei_synced',
             'turnkey_service',
+            'turnkey_web',
             'report_type',
             'target_audience_type',
             'cancel_einvoice_type'

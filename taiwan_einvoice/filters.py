@@ -175,12 +175,14 @@ class TurnkeyServiceGroupFilter(filters.FilterSet):
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
     now_use = filters.BooleanFilter(method='filter_now_use')
     date_in_year_month_range = filters.CharFilter(method='filter_date_in_year_month_range')
+    no_including = filters.CharFilter(method='filter_no_including')
 
 
 
     class Meta:
         model = SellerInvoiceTrackNo
         fields = {
+            'turnkey_web': ('exact', ),
             'type': ('exact', ),
             'track': ('icontains', ),
         }
@@ -202,6 +204,15 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return queryset
         else:
             return queryset.filter(begin_time__lte=d, end_time__gte=d)
+    
+
+    def filter_no_including(self, queryset, name, value):
+        try:
+            value = "{:08d}".format(int(value))
+        except ValueError:
+            return queryset
+        else:
+            return queryset.filter(begin_no__lte=value, end_no__gte=value)
 
 
 

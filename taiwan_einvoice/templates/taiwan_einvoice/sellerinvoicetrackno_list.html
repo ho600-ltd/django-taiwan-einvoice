@@ -17,7 +17,21 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_web">{% trans "Turnkey Service" %}</label>
+                    <div class="input-group date" id="turnkey_web" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_web"
+                            name="turnkey_web" id="id_turnkey_web">
+                            <option value=""></option>
+                            {% for ts in turnkey_services %}
+                                <option value="{{ ts.id }}">{{ ts.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="date_in_year_month_range">{% trans "Datetime is included by the Year Month Range" %}</label>
                     <div class="input-group date" id="date_in_year_month_range" data-target-input="nearest">
@@ -29,11 +43,19 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-6">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="track__icontains">{% trans "Track contains" context "taiwan_einvoice" %}</label>
                     <div class="input-group" id="track__icontains" data-target-input="nearest">
                         <input type="text" class="form-control" name="track__icontains" id="id_track__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="no_including">{% trans "Including No." context "taiwan_einvoice" %}</label>
+                    <div class="input-group" id="no_including" data-target-input="nearest">
+                        <input type="text" class="form-control" name="no_including" id="id_no_including" />
                     </div>
                 </div>
             </div>

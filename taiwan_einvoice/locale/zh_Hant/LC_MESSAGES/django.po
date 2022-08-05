@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-04 17:31+0800\n"
+"POT-Creation-Date: 2022-08-05 09:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -324,6 +324,7 @@ msgstr "請儘速列印發票({track_no})，列印後方才能上傳 EI 大平�
 msgid "Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})"
 msgstr "請為 {track_no} 發票檢查 taiwan_einvoice.crontabs.polling_upload_batch 排程"
 
+#, python-brace-format
 msgid "The {track_no}@{mig_no} has result_code: {status}: '{result_code}'"
 msgstr "{track_no}@{mig_no} 的結果碼: {status}: '{result_code}'"
 
@@ -1082,6 +1083,10 @@ msgstr "期別所含括的時間"
 msgctxt "taiwan_einvoice"
 msgid "Track contains"
 msgstr "字軌包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Including No."
+msgstr "涵蓋此號碼"
 
 msgid "Create Seller Invoice Track No"
 msgstr "新增字軌號碼檔"
