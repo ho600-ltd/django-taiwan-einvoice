@@ -748,15 +748,36 @@ class SellerInvoiceTrackNo(models.Model):
     begin_time = models.DateTimeField(db_index=True)
     end_time = models.DateTimeField(db_index=True)
     @property
-    def year_month_range(self):
+    def pure_year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
+        return chmk_year, begin_month, end_month
+    @property
+    def year_month(self):
+        chmk_year, begin_month, end_month = self.pure_year_month_range
+        return "{:03d}{:02d}".format(chmk_year, end_month)
+    @property
+    def year_month_range(self):
+        chmk_year, begin_month, end_month = self.pure_year_month_range
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track = models.CharField(max_length=2, db_index=True)
     begin_no = models.IntegerField(db_index=True)
     end_no = models.IntegerField(db_index=True)
-
+    @property
+    def count_blank_no(self):
+        return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
+    @property
+    def next_blank_no(self):
+        try:
+            new_no = self.get_new_no()
+        except NotEnoughNumberError:
+            new_no = ''
+        return new_no
+    @property
+    def can_be_deleted(self):
+        return not self.einvoice_set.exists()
+    
 
 
     class Meta:
@@ -795,24 +816,31 @@ class SellerInvoiceTrackNo(models.Model):
         return queryset
 
 
-    @property
-    def count_blank_no(self):
-        return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
+    @classmethod
+    def create_blank_numbers_and_upload_batchs(cls, seller_invoice_track_nos, executor=None):
+        if 1 != len(seller_invoice_track_nos.values('turnkey_web__seller__legal_entity__identifier'
+                                                   ).annotate(a_c=Count('turnkey_web__seller__legal_entity__identifier'))):
+            raise IdentifierError(_("Only use the same identifier to create the record for blank numbers!"))
+        elif 1 != len(seller_invoice_track_nos.values('begin_time').annotate(a_c=Count('begin_time'))):
+            raise IdentifierError(_("Only use the same begin_time to create the record for blank numbers!"))
+        elif 1 != len(seller_invoice_track_nos.values('end_time').annotate(a_c=Count('end_time'))):
+            raise IdentifierError(_("Only use the same end_time to create the record for blank numbers!"))
 
+        party_ids = [d['turnkey_web__party_id'] for d in seller_invoice_track_nos.values('turnkey_web__party_id').annotate(dev_null=Count('turnkey_web__party_id'))]
+        tax_types = [d['type'] for d in seller_invoice_track_nos.values('type').annotate(dev_null=Count('type'))]
+        tracks = [d['track'] for d in seller_invoice_track_nos.values('track').annotate(dev_null=Count('track'))]
+        upload_batchs = []
+        for party_id in party_ids:
+            for tax_type in tax_types:
+                for track in tracks:
+                    sitns = seller_invoice_track_nos.filter(turnkey_web__party_id=party_id,
+                                                            type=tax_type,
+                                                            track=track).order_by('track', 'begin_no')
+                    upload_batch = UploadBatch.append_to_the_upload_batch(sitns.first(), executor=executor)
+                    if upload_batch:
+                        upload_batchs.append(upload_batch)
+        return upload_batchs
 
-    @property
-    def next_blank_no(self):
-        try:
-            new_no = self.get_new_no()
-        except NotEnoughNumberError:
-            new_no = ''
-        return new_no
-    
-
-    @property
-    def can_be_deleted(self):
-        return not self.einvoice_set.exists()
-    
 
     def delete(self, *args, **kwargs):
         if self.einvoice_set.exists():
@@ -851,7 +879,28 @@ class SellerInvoiceTrackNo(models.Model):
         return ei
 
 
-
+    def export_json_for_mig(self):
+        sitns = SellerInvoiceTrackNo.objects.filter(turnkey_web__seller__legal_entity__identifier=self.turnkey_web.seller.legal_entity.identifier,
+                                                    begin_time=self.begin_time,
+                                                    end_time=self.end_time,
+                                                    turnkey_web__party_id=self.turnkey_web.party_id,
+                                                    type=self.type,
+                                                    track=self.track).order_by('track', 'begin_no')
+        Details = []
+        for sitn in sitns:
+            if sitn.next_blank_no:
+                Details.append((sitn.next_blank_no, sitn.end_no))
+        J = {"E0402": {
+            "Main": {
+                "HeadBan": self.turnkey_web.party_id,
+                "BranchBan": self.turnkey_web.seller.legal_entity.identifier,
+                "InvoiceType": self.type,
+                "YearMonth": self.year_month,
+                "InvoiceTrack": self.track,
+            },
+            "Details": Details
+        }}
+        return J
 
 
 
@@ -1047,7 +1096,7 @@ class EInvoice(models.Model):
 
 
     def __str__(self):
-        return "{}@{}".format(self.track_no, self.get_mig_no())
+        return "{}".format(self.track_no)
 
 
 
@@ -1482,7 +1531,7 @@ class CancelEInvoice(models.Model):
 
 
     def __str__(self):
-        return "{}@{}".format(self.einvoice.track_no, self.get_mig_no())
+        return "{}".format(self.einvoice.track_no)
 
 
     def set_ei_audited_true(self):
@@ -1580,7 +1629,7 @@ class VoidEInvoice(models.Model):
 
 
     def __str__(self):
-        return "{}@{}".format(self.einvoice.track_no, self.get_mig_no())
+        return "{}".format(self.einvoice.track_no)
 
 
     def set_ei_audited_true(self):
@@ -1658,6 +1707,8 @@ class UploadBatch(models.Model):
 
         ("w4", _("Wait for C0401")),            # to CancelEInvoice or VoidEInvoice
         ("54", _("Wait for C0501 or C0401")),   # to VoidEInvoice
+
+        ("E",  "E0401 ~ E0501"),
     )
     kind = models.CharField(max_length=2, choices=kind_choices)
     executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
@@ -1954,12 +2005,14 @@ class UploadBatch(models.Model):
             
             if check_C0401 and check_C0501:
                 self.update_to_new_status(NEXT_STATUS)
+        elif 'E' == self.kind:
+            self.update_to_new_status(NEXT_STATUS)
 
 
     @classmethod
-    def append_to_the_upload_batch(cls, content_object):
+    def append_to_the_upload_batch(cls, content_object, executor=None):
         ct = ContentType.objects.get_for_model(content_object)
-        if content_object.ei_synced:
+        if hasattr(content_object, "ei_synced") and content_object.ei_synced:
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, status='c').batch
         elif BatchEInvoice.objects.filter(content_type=ct, object_id=content_object.id, result_code='').exists():
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
@@ -2040,6 +2093,31 @@ class UploadBatch(models.Model):
                                )
             be.save()
             return ub
+        elif content_object._meta.model_name in ['sellerinvoicetrackno',]:
+            mig_type = EInvoiceMIG.objects.get(no='E0402')
+            kind = 'E'
+            slug_prefix = "{year_month}{track}{type}".format(year_month=content_object.year_month,
+                                                             track=content_object.track,
+                                                             type=content_object.type)
+            slug = slug_prefix + "{:05d}".format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
+
+            ub = UploadBatch(turnkey_service=content_object.turnkey_web,
+                             slug=slug,
+                             mig_type=mig_type,
+                             kind=kind,
+                             status='0',
+                             executor=executor,
+                             )
+            ub.save()
+            be = BatchEInvoice(batch=ub,
+                               content_object=content_object,
+                               begin_time=content_object.begin_time,
+                               end_time=content_object.end_time,
+                               track_no="{}{}".format(content_object.track, content_object.begin_no),
+                               body="",
+                               )
+            be.save()
+            return ub
         else:
             return None
 
@@ -2087,12 +2165,13 @@ class UploadBatch(models.Model):
         if ids_in_c:
             bei = self.batcheinvoice_set.get(id=ids_in_c[0])
             content_model = bei.content_type.model_class()
-            content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c
-                                                      ).values_list('object_id',
-                                                                    named=False,
-                                                                    flat=True)
-            lg.debug("content_ids: {}".format(content_ids))
-            content_model.objects.filter(id__in=content_ids).update(ei_synced=True)
+            if content_model in ["EInvoice", "CancelEInvoice", "VoidEInvoice"]:
+                content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c
+                                                          ).values_list('object_id',
+                                                                        named=False,
+                                                                        flat=True)
+                lg.debug("content_ids: {}".format(content_ids))
+                content_model.objects.filter(id__in=content_ids).update(ei_synced=True)
 
         if status['__else__'] not in finish_status:
             is_finish = False

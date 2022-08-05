@@ -75,6 +75,63 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
 }
 
 
+function create_and_upload_blank_numbers(taiwan_einvoice_site) {
+    return function () {
+        var $btn = $(this);
+        var second_offset = taiwan_einvoice_site.get_second_offset_by_timezone_id_value(taiwan_einvoice_site);
+        var turnkey_web__seller__legal_entity__identifier = $('select[name=turnkey_web__seller__legal_entity__identifier]').val();
+        var date_in_year_month_range = $('input[name=date_in_year_month_range]').val();
+        var date_in_year_month_range = taiwan_einvoice_site.convert_time_from_utc_str(date_in_year_month_range,
+                                                                                      -1 * second_offset,
+                                                                                      taiwan_einvoice_site.django_datetime_format);
+        var ids = [];
+        var $first_tr;
+        $('table.search_result tr').each(function(){
+            var $tr = $(this);
+            var id = $tr.attr('sellerinvoicetrackno_id');
+            if (id) {
+                ids.push(id);
+                $first_tr = $tr;
+            }
+        });
+        if (0 >= ids.length) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$ERROR_MODAL,
+                gettext("Data Error"),
+                gettext("No data")
+            );
+            return false;
+        }
+        $.ajax({
+            type: "POST",
+            url: $first_tr.attr("resource_uri") + $btn.attr('action') + '/',
+            data: JSON.stringify({"turnkey_web__seller__legal_entity__identifier": turnkey_web__seller__legal_entity__identifier,
+                   "date_in_year_month_range": date_in_year_month_range,
+                   "seller_invoice_track_no_ids": ids.join(",")
+                  }),
+            dataType: 'json',
+            contentType: 'application/json',
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
+            },
+            success: function(json) {
+                var fmts = ngettext('Create %(count)s record', 'Create %(count)s records', json["slugs"].length);
+                var message = interpolate(fmts, { count: json["slugs"].length }, true);
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$SUCCESS_MODAL,
+                    gettext("Create the Blank Number Record Successfully"),
+                    message
+                );
+            }
+        });
+    }
+}
+
+
 function delete_seller_invoice_track_no_modal (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
@@ -137,6 +194,7 @@ $(function () {
 
     $('button.upload_csv_to_multiple_create_modal').click(upload_csv_to_multiple_create_modal(taiwan_einvoice_site));
     $('button.upload_csv_to_multiple_create').click(upload_csv_to_multiple_create(taiwan_einvoice_site));
+    $('button.create_and_upload_blank_numbers').click(create_and_upload_blank_numbers(taiwan_einvoice_site));
     $('button.delete_seller_invoice_track_no_modal').click(delete_seller_invoice_track_no_modal(taiwan_einvoice_site));
     $('button.delete_seller_invoice_track_no').click(delete_seller_invoice_track_no(taiwan_einvoice_site));
 });

@@ -105,6 +105,43 @@ class C0701JSON2MIGXMl(C0501JSON2MIGXMl):
 </VoidInvoice>"""
 
 
+class E0402JSON2MIGXMl(object):
+    versions = ["3.2"]
+    base_xml = """<BranchTrackBlank xmlns="urn:GEINV:eInvoiceMessage:E0402:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:E0402:{version} E0402.xsd">
+    {xml_body}
+</BranchTrackBlank>"""
+
+
+    def __init__(self, json_data, version="3.2"):
+        if version not in self.versions:
+            raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
+        self.version = version
+        self.json_data = self.regulate_json_data(json_data)
+    
+
+    def export_xml(self):
+        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
+
+    
+    def regulate_json_data(self, json_data):
+        data = {}
+        data["Main"] = json_data["Main"]
+        data["Details"] = [{"BranchTrackBlankItem": {"InvoiceBeginNo": d[0],
+                                                     "InvoiceEndNo": d[1]}
+                           } for d in json_data["Details"] ]
+        return data
+    
+
+    def get_xml_body(self):
+        xml_body = ''
+        for elm in ["Main", "Details"]:
+            xml = json2xml.Json2xml(self.json_data[elm], wrapper=elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+            xml_body += XML_VERSION_RE.sub("", xml.decode('utf-8'))
+        return xml_body
+
+
+
+
 
 class FROM_CONFIG(models.Model):
     TRANSPORT_ID = models.CharField(db_column='TRANSPORT_ID', max_length=10, blank=True, null=True)
@@ -414,6 +451,10 @@ class EITurnkey(models.Model):
     @property
     def B2CStorageUpCastSRC(self):
         task_config_object = self.get_task_config(category_type='B2C', process_type='STORAGE', task='UpCast')
+        return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
+    @property
+    def B2PMessageUpCastSRC(self):
+        task_config_object = self.get_task_config(category_type='B2P', process_type='MESSAGE', task='UpCast')
         return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
 
 
@@ -735,7 +776,10 @@ class EITurnkeyBatch(models.Model):
             f.write(eitbei.mig_xml)
             f.close()
         for f in glob.glob(os.path.join(tmp_data_path, "*")):
-            shutil.move(f, self.ei_turnkey.B2CStorageUpCastSRC.format(mig=self.mig))
+            if self.mig.startswith("E"):
+                shutil.move(f, self.ei_turnkey.B2PMessageUpCastSRC.format(mig=self.mig))
+            elif self.mig.startswith("C"):
+                shutil.move(f, self.ei_turnkey.B2CStorageUpCastSRC.format(mig=self.mig))
         
         self.update_to_new_status(NEXT_STATUS_IN_GOOD)
         return True
@@ -812,25 +856,34 @@ class EITurnkeyBatchEInvoice(models.Model):
                 j2mx = C0501JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
             elif 'C0701' == k:
                 j2mx = C0701JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            elif 'E0402' == k:
+                j2mx = E0402JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
             return j2mx.export_xml()
 
 
     def save(self, *args, **kwargs):
         if not self.invoice_identifier:
             mig = self.ei_turnkey_batch.mig
-            if "C0401" == mig:
-                invoice_date = self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"]
-            elif "C0501" == mig:
-                invoice_date = self.body[self.ei_turnkey_batch.mig]["CancelDate"]
-            elif "C0701" == mig:
-                invoice_date = self.body[self.ei_turnkey_batch.mig]["VoidDate"]
+            if mig in ["C0401", "C0501", "C0701"]:
+                if "C0401" == mig:
+                    invoice_date = self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"]
+                elif "C0501" == mig:
+                    invoice_date = self.body[self.ei_turnkey_batch.mig]["CancelDate"]
+                elif "C0701" == mig:
+                    invoice_date = self.body[self.ei_turnkey_batch.mig]["VoidDate"]
+                self.invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
+                    mig=mig,
+                    batch_einvoice_track_no=self.batch_einvoice_track_no,
+                    InvoiceDate=invoice_date,
+                )
+            elif "E0402" == mig:
+                self.invoice_identifier = "{BranchBan}-{InvoiceTrack}-{InvoiceType}".format(
+                    BranchBan=self.body[self.ei_turnkey_batch.mig]["Main"]["BranchBan"],
+                    InvoiceTrack=self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceTrack"],
+                    InvoiceType=self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceType"],
+                )
             else:
                 raise MIGConfigurationError(_("There is no setting for {}").format(mig))
-            self.invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
-                mig=mig,
-                batch_einvoice_track_no=self.batch_einvoice_track_no,
-                InvoiceDate=invoice_date,
-            )
         super().save(*args, **kwargs)
 
 

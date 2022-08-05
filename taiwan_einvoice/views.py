@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.contrib.auth.models import Permission, User, Group
 from django.contrib.contenttypes.models import ContentType
-from django.utils.timezone import now
+from django.utils.timezone import now, utc
 from django.utils.translation import ugettext_lazy as _
 
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms, remove_perm, assign_perm
@@ -417,6 +417,45 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+    @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
+    def create_and_upload_blank_numbers(self, request, pk=None):
+        sitn = self.get_object()
+        if sitn:
+            identifier = request.data.get('turnkey_web__seller__legal_entity__identifier', '')
+            date_in_year_month_range = request.data.get('date_in_year_month_range', '')
+            seller_invoice_track_no_ids = request.data.get('seller_invoice_track_no_ids', '')
+            if "" in [identifier, date_in_year_month_range, seller_invoice_track_no_ids]:
+                result = {"error_title": _("Blank Numbers Error"),
+                          "error_message": _("All fields are required!")}
+            date_in_year_month_range = datetime.datetime.strptime(date_in_year_month_range, "%Y-%m-%d %H:%M:%S").astimezone(utc)
+            seller_invoice_track_no_ids = seller_invoice_track_no_ids.split(',')
+            seller_invoice_track_nos = SellerInvoiceTrackNo.objects.filter(turnkey_web__seller__legal_entity__identifier=identifier,
+                                                                           begin_time__lte=date_in_year_month_range,
+                                                                           end_time__gte=date_in_year_month_range)
+            if not seller_invoice_track_nos.exists():
+                result = {"error_title": _("Blank Numbers Error"),
+                          "error_message": _("There is no any seller-invoice-track-no records!")}
+            elif (len(seller_invoice_track_no_ids) != seller_invoice_track_nos.count()
+                    or seller_invoice_track_nos.count() != seller_invoice_track_nos.filter(id__in=seller_invoice_track_no_ids).count()):
+                result = {"error_title": _("Blank Numbers Error"),
+                          "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
+            elif sitn not in seller_invoice_track_nos:
+                result = {"error_title": _("Seller Invoice Track No Error"),
+                          "error_message": _("The first record does not exist!")}
+            
+            try:
+                upload_batchs = SellerInvoiceTrackNo.create_blank_numbers_and_upload_batchs(seller_invoice_track_nos, executor=request.user)
+            except Exception as e:
+                result = {"error_title": _("Create Upload Batch Error"),
+                          "error_message": "{}: {}".format(type(e), str(e))}
+            else:
+                return Response({"slugs": [upload_batch.slug for upload_batch in upload_batchs]}, status=status.HTTP_201_CREATED)
+        else:
+            result = {"error_title": _("Seller Invoice Track No. Error"),
+                      "error_message": _("{} does not ecreate_blank_numbers_and_upload_batchxist").format(pk)}
+        return Response(result, status=status.HTTP_403_FORBIDDEN)
 
 
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])

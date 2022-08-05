@@ -300,6 +300,7 @@ class TurnkeyServiceRelatedField(PrimaryKeyRelatedField):
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     turnkey_web = TurnkeyServiceRelatedField(required=True, allow_null=False)
     turnkey_web_dict = TurnkeyServiceSerializer(source='turnkey_web', read_only=True)
     type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
@@ -312,6 +313,11 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     class Meta:
         model = SellerInvoiceTrackNo
         fields = '__all__'
+
+
+
+    def get_str_name(self, instance):
+        return str(instance)
 
 
 
@@ -432,6 +438,7 @@ class UploadBatchSerializer(ModelSerializer):
     turnkey_service_dict = TurnkeyServiceSerializer(source="turnkey_service", read_only=True)
     get_kind_display = CharField(read_only=True)
     get_status_display = CharField(read_only=True)
+    executor_dict = UserSerializer(source='executor', read_only=True)
 
 
 
@@ -467,6 +474,7 @@ class BatchEInvoiceSerializer(ModelSerializer):
             "einvoice": EInvoiceSerializer(instance.content_object, context={"request": request}),
             "canceleinvoice": CancelEInvoiceSerializer(instance.content_object, context={"request": request}),
             "voideinvoice": VoidEInvoiceSerializer(instance.content_object, context={"request": request}),
+            "sellerinvoicetrackno": SellerInvoiceTrackNoSerializer(instance.content_object, context={"request": request}),
         }[instance.content_type.model].data
 
 

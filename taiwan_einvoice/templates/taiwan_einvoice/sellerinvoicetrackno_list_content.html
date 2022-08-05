@@ -12,6 +12,22 @@
             class="btn btn-success upload_csv_to_multiple_create_modal" data-toggle="modal">
             {% trans "Create Seller Invoice Track No" %}
         </button>
+        {% if request.GET.turnkey_web__seller__legal_entity__identifier and request.GET.date_in_year_month_range %}
+            {% if 0 < data.count %}
+                <button id="create_and_upload_blank_numbers_button_0" action="create_and_upload_blank_numbers"
+                    class="btn btn-warning create_and_upload_blank_numbers">
+                    {% trans "Create and Upload Blank Numbers" %}
+                </button>
+            {% else %}
+                <span class="text-warning">
+                    {% trans "No need to upload blank numbers" %}%
+                </span>
+            {% endif %}
+        {% else %}
+            <span class="text-warning">
+                {% trans "Search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' button" %}
+            </span>
+        {% endif %}
     {% endif %}
 </div>
 

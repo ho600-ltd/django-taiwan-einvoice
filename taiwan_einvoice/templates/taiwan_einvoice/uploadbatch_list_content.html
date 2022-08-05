@@ -33,7 +33,7 @@
                 <td field="kind">{{ obj.get_kind_display }}</td>
                 <td field="executor">
                     {% if obj.executor %}
-                        {{ obj.executor }}
+                        {{ obj.executor_dict.first_name }}:{{ obj.executor_dict.id }}
                     {% else %}
                         {% trans "Auto-Executed" %}
                     {% endif %}

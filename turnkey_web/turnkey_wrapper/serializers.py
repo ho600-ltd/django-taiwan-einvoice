@@ -178,6 +178,7 @@ class EITurnkeySerializer(ModelSerializer):
         model = EITurnkey
         fields = [
             "id",
+            "can_sync_to_ei",
             "resource_uri",
             "tmpdata_abspath",
             "data_abspath",
