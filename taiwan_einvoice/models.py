@@ -630,6 +630,8 @@ class TurnkeyService(models.Model):
     def save(self, *args, **kwargs):
         if not self.hash_key:
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
+        if self.party_id != self.seller.legal_entity.identifier:
+            raise IdentifierError(_("Party ID does not match seller.legal_entity.identifier"))
             
         super(TurnkeyService, self).save(*args, **kwargs)
 
