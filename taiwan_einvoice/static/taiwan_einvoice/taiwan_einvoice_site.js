@@ -253,6 +253,8 @@ $(function () {
             'turnkey_web',
             'report_type',
             'target_audience_type',
+            'type',
+            'turnkey_web__seller__legal_entity__identifier',
             'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {

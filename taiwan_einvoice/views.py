@@ -120,6 +120,12 @@ from taiwan_einvoice.paginations import (
 )
 
 
+
+class OneHundredPerPagePagination(TenTo100PerPagePagination):
+    page_size = 100
+
+
+
 def index(request):
     escpos_webs = ESCPOSWeb.objects.all().order_by('id')
     return render(request, 'taiwan_einvoice/index.html', {
@@ -392,7 +398,7 @@ class TurnkeyServiceGroupModelViewSet(ModelViewSet):
 
 class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNo, ), )
-    pagination_class = TenTo100PerPagePagination
+    pagination_class = OneHundredPerPagePagination
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-type', '-begin_time', '-track', '-begin_no')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter

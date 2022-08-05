@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-05 09:33+0800\n"
+"POT-Creation-Date: 2022-08-05 10:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1077,6 +1077,10 @@ msgstr "角色註記"
 msgid "Extra information"
 msgstr "其他資訊"
 
+msgctxt "sellerinvoicetrackno"
+msgid "Party ID"
+msgstr "統一編號"
+
 msgid "Datetime is included by the Year Month Range"
 msgstr "期別所含括的時間"
 
@@ -1099,6 +1103,9 @@ msgstr "起始號碼"
 
 msgid "End No."
 msgstr "結束號碼"
+
+msgid "Blank No."
+msgstr "空白未使用號碼"
 
 msgid "Blank No. Count"
 msgstr "空白張數"

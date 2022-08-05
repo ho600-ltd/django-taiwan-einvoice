@@ -67,6 +67,16 @@ MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
 
 
 
+class IdentifierError(Exception):
+    pass
+
+
+
+class IdentifierDuplicateError(Exception):
+    pass
+
+
+
 class CancelEInvoiceMIGError(Exception):
     pass
 
@@ -533,7 +543,7 @@ class Seller(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk and Seller.objects.filter(legal_entity__identifier=self.legal_entity.identifier).exists():
-            raise IdentifierDuplicateError("{} does exist!".format(self.legal_entity.identifier))
+            raise IdentifierDuplicateError(_("{} does exist!").format(self.legal_entity.identifier))
         super().save(*args, **kwargs)
 
 
@@ -795,7 +805,11 @@ class SellerInvoiceTrackNo(models.Model):
 
     @property
     def next_blank_no(self):
-        return ''
+        try:
+            new_no = self.get_new_no()
+        except NotEnoughNumberError:
+            new_no = ''
+        return new_no
     
 
     @property

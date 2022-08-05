@@ -17,7 +17,21 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="turnkey_web__seller__legal_entity__identifier">{% trans "Party ID" context "sellerinvoicetrackno" %}</label>
+                    <div class="input-group date" id="turnkey_web__seller__legal_entity__identifier" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_web__seller__legal_entity__identifier"
+                            name="turnkey_web__seller__legal_entity__identifier" id="id_turnkey_web__seller__legal_entity__identifier">
+                            <option value=""></option>
+                            {% for slei in seller__legal_entity__identifiers %}
+                                <option value="{{ slei }}">{{ slei }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
                     <label for="turnkey_web">{% trans "Turnkey Service" %}</label>
                     <div class="input-group date" id="turnkey_web" data-target-input="nearest">
@@ -31,7 +45,21 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="type">{% trans "Tax Type" %}</label>
+                    <div class="input-group date" id="type" data-target-input="nearest">
+                        <select class="form-control" data-target="#type"
+                            name="type" id="id_type">
+                            <option value=""></option>
+                            {% for tc in type_choices %}
+                                <option value="{{ tc.0 }}">{{ tc.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
                     <label for="date_in_year_month_range">{% trans "Datetime is included by the Year Month Range" %}</label>
                     <div class="input-group date" id="date_in_year_month_range" data-target-input="nearest">
@@ -43,7 +71,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
                     <label for="track__icontains">{% trans "Track contains" context "taiwan_einvoice" %}</label>
                     <div class="input-group" id="track__icontains" data-target-input="nearest">
@@ -51,7 +79,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
                     <label for="no_including">{% trans "Including No." context "taiwan_einvoice" %}</label>
                     <div class="input-group" id="no_including" data-target-input="nearest">
