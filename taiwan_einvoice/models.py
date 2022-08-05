@@ -782,7 +782,7 @@ class SellerInvoiceTrackNo(models.Model):
 
     @property
     def count_blank_no(self):
-        return self.end_no - self.begin_no + 1 - self.einvoice_set.count()
+        return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
 
 
     @property
