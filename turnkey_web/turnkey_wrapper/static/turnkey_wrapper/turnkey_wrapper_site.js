@@ -72,7 +72,7 @@ $(function () {
         display_format = display_format ? display_format : 'Y-m-d H:i:s';
 
         var $self = this;
-        if(!time_str){
+        if(!time_str || "None" == time_str){
             return '';
         }
         time_str = $self.convert_tastypie_datetime(time_str.replace(/Z$/, ''));
