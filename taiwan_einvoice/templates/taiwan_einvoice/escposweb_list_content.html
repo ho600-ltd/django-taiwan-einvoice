@@ -6,7 +6,7 @@
     {% endwith %}
 </div>
 
-<table class="table">
+<table class="table" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th width="5%">{% trans "No." %}</th>
@@ -20,7 +20,7 @@
     <tbody>
         {% for escposweb in data.results %}
             <tr escposweb_id="{{ escposweb.id }}">
-                <td>{{ forloop.counter }}.</td>
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
                 <td field="name">{{ escposweb.name }}</td>
                 <td>{{ escposweb.slug }}</td>
                 <td>{{ escposweb.mask_hash_key }}</td>

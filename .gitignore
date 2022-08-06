@@ -7,6 +7,7 @@ assets/*.odt
 assets/*/
 .vscode/
 docs/_build
+turnkey_web/statics/
 .py3env/
 *.pyc
 *.mo

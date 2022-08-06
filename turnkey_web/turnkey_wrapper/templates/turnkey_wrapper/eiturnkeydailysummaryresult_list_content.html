@@ -1,0 +1,52 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>{% trans "Create Time" %}</th>
+            <th>
+                <div class="font-weight-light">{% trans "EI Turnkey" %}</div>
+                <div>{% trans "XML Date" %}</div>
+            </th>
+            <th>
+                <div class="font-weight-light">total_count</div>
+                <div>good_count</div>
+                <div class="text-danger">failed_count</div>
+            </th>
+            <th>
+                <div class="font-weight-light">total_batch_einvoice_ids</div>
+                <div>good_batch_einvoice_ids</div>
+                <div class="text-danger">failed_batch_einvoice_ids</div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td class="datetime" field="create_time" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
+                <td>
+                    <div field="ei_turnkey">{{ obj.ei_turnkey_dict.party_id }}({{ obj.ei_turnkey_dict.routing_id }})</div>
+                    <div class="font-weight-bold" field="result_date">{{ obj.result_date }}</div>
+                </td>
+                <td>
+                    <div class="font-weight-light" field="total_count">{{ obj.total_count }}</div>
+                    <div field="good_count">{{ obj.good_count }}</div>
+                    <div class="text-danger" field="failed_count">{{ obj.failed_count }}</div>
+                </td>
+                <td>
+                    <pre field="total_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.total_batch_einvoice_ids|pprint }}</pre>
+                    <pre class="font-weight-bold" field="good_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.good_batch_einvoice_ids|pprint }}</pre>
+                    <pre class="text-danger" field="failed_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.failed_batch_einvoice_ids|pprint }}</pre>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

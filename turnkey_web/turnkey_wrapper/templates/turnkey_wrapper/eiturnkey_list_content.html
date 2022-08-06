@@ -1,0 +1,40 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>tmpdata_abspath</th>
+            <th>data_abspath</th>
+            <th>hash_key</th>
+            <th>transport_id</th>
+            <th>party_id</th>
+            <th>routing_id</th>
+            <th>tea_turnkey_service_endpoint</th>
+            <th>allow_ips</th>
+            <th>endpoint</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td field="tmpdata_abspath">{{ obj.tmpdata_abspath }}</td>
+                <td field="data_abspath">{{ obj.data_abspath }}</td>
+                <td field="mask_hash_key">{{ obj.mask_hash_key }}</td>
+                <td field="transport_id">{{ obj.transport_id }}</td>
+                <td field="party_id">{{ obj.party_id }}</td>
+                <td field="routing_id">{{ obj.routing_id }}</td>
+                <td field="tea_turnkey_service_endpoint">{{ obj.tea_turnkey_service_endpoint }}</td>
+                <td field="allow_ips">{{ obj.allow_ips }}</td>
+                <td field="endpoint">{{ obj.endpoint }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

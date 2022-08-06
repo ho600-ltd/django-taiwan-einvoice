@@ -1,0 +1,69 @@
+{% extends 'turnkey_wrapper/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{% static "turnkey_wrapper/TURNKEY_SYSEVENT_LOG_list.js" %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="SEQNO__icontains">{% trans "SEQNO contains" %}</label>
+                    <div class="input-group" id="SEQNO__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="SEQNO__icontains" id="id_SEQNO__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="SUBSEQNO__icontains">{% trans "SUBSEQNO contains" %}</label>
+                    <div class="input-group" id="SUBSEQNO__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="SUBSEQNO__icontains" id="id_SUBSEQNO__icontains" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}

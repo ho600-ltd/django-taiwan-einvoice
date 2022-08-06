@@ -1,0 +1,103 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/auditlog_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_service">{% trans "Turnkey Service" %}</label>
+                    <div class="input-group date" id="turnkey_service" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_service"
+                            name="turnkey_service" id="id_turnkey_service">
+                            <option value=""></option>
+                            {% for ts in turnkey_services %}
+                                <option value="{{ ts.id }}">{{ ts.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="is_error">{% trans "Is Error?" %}</label>
+                    <div class="input-group date" id="is_error" data-target-input="nearest">
+                        <select class="form-control" data-target="#is_error"
+                            name="is_error" id="id_is_error">
+                            <option value=""></option>
+                            <option value="1">{% trans "Error" %}</option>
+                            <option value="0">{% trans "None" %}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__gte">{% trans "Create time later than" %}</label>
+                    <div class="input-group date" id="create_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
+                            name="create_time__gte" id="id_create_time__gte" />
+                        <div class="input-group-append" data-target="#create_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__lt">{% trans "Create time earlier than" %}</label>
+                    <div class="input-group date" id="create_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
+                            name="create_time__lt" id="id_create_time__lt" />
+                        <div class="input-group-append" data-target="#create_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+{% endblock %}

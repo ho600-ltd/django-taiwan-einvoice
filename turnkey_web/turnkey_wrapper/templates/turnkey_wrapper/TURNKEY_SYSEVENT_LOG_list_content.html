@@ -1,0 +1,52 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>EVENTDTS</th>
+            <th>PARTY_ID</th>
+            <th>SEQNO</th>
+            <th>SUBSEQNO</th>
+            <th>ERRORCODE</th>
+            <th>UUID</th>
+            <th>INFORMATION1</th>
+            <th>INFORMATION2</th>
+            <th>INFORMATION3</th>
+            <th>MESSAGE1</th>
+            <th>MESSAGE2</th>
+            <th>MESSAGE3</th>
+            <th>MESSAGE4</th>
+            <th>MESSAGE5</th>
+            <th>MESSAGE6</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td field="EVENTDTS">{{ obj.EVENTDTS }}</td>
+                <td field="PARTY_ID">{{ obj.PARTY_ID }}</td>
+                <td field="SEQNO">{{ obj.SEQNO }}</td>
+                <td field="SUBSEQNO">{{ obj.SUBSEQNO }}</td>
+                <td field="ERRORCODE">{{ obj.ERRORCODE }}</td>
+                <td field="UUID">{{ obj.UUID }}</td>
+                <td field="INFORMATION1">{{ obj.INFORMATION1 }}</td>
+                <td field="INFORMATION2">{{ obj.INFORMATION2 }}</td>
+                <td field="INFORMATION3">{{ obj.INFORMATION3 }}</td>
+                <td field="MESSAGE1">{{ obj.MESSAGE1 }}</td>
+                <td field="MESSAGE2">{{ obj.MESSAGE2 }}</td>
+                <td field="MESSAGE3">{{ obj.MESSAGE3 }}</td>
+                <td field="MESSAGE4">{{ obj.MESSAGE4 }}</td>
+                <td field="MESSAGE5">{{ obj.MESSAGE5 }}</td>
+                <td field="MESSAGE6">{{ obj.MESSAGE6 }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

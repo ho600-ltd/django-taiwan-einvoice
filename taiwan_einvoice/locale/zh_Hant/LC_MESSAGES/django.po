@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-03 11:19+0800\n"
+"POT-Creation-Date: 2022-08-05 10:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,22 @@ msgstr ""
 
 msgid "Print Serial No.:{}"
 msgstr "列印序號: {}"
+
+msgid "There is no alarm in polling_upload_batch, just logging"
+msgstr "polling_upload_batch 並無警示，單純紀錄"
+
+msgid "Executed polling_upload_batch"
+msgstr "已執行 polling_upload_batch"
+
+#, python-brace-format
+msgid "Title: {title}"
+msgstr "標題: {title}"
+
+msgid "There is no alarm in polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result, just logging"
+msgstr "polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result 並無警示，單純紀錄"
+
+msgid "Executed polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
+msgstr "已執行 polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -99,6 +115,24 @@ msgstr "58mm 電子發票"
 msgid "80mm Receipt"
 msgstr "80mm 收據"
 
+msgid "once per 5 minutes"
+msgstr "每 5 分鐘 1 次"
+
+msgid "once per 10 minutes"
+msgstr "每 10 分鐘 1 次"
+
+msgid "once per 15 minutes"
+msgstr "每 15 分鐘 1 次"
+
+msgid "once per 20 minutes"
+msgstr "每 20 分鐘 1 次"
+
+msgid "once per 30 minutes"
+msgstr "每 30 分鐘 1 次"
+
+msgid "once per 60 minutes"
+msgstr "每 60 分鐘 1 次"
+
 msgid "General"
 msgstr "一般稅額"
 
@@ -116,14 +150,6 @@ msgstr "手機條碼"
 
 msgid "Natural person barcode"
 msgstr "自然人憑證條碼"
-
-#, python-brace-format
-msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
-msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
-
-#, python-brace-format
-msgid "Donate to NPO( {npoban} )"
-msgstr "捐贈社福團體(捐贈碼 {npoban} )"
 
 msgctxt "canceleinvoice"
 msgid "Canceled at {} {}"
@@ -153,6 +179,14 @@ msgctxt "voideinvoice"
 msgid "Remark: {}"
 msgstr "備註: {}"
 
+#, python-brace-format
+msgid "Carrier Type: {carrier_type} {carrier_id1} {carrier_id2}"
+msgstr "載具: {carrier_type} {carrier_id1} {carrier_id2}"
+
+#, python-brace-format
+msgid "Donate to NPO( {npoban} )"
+msgstr "捐贈社福團體(捐贈碼 {npoban} )"
+
 msgid "No details"
 msgstr "無明細"
 
@@ -165,9 +199,144 @@ msgstr "內容物件: {} 無「check_before_cancel_einvoice」方法"
 msgid "Content Object: {} has no 'post_cancel_einvoice' method"
 msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
+msgid "Max records in details is 999"
+msgstr "明細最多只能有 999 筆紀錄"
+
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
 msgstr "{total_amount} 已大於上限金額({forbidden_above_amount})"
+
+msgid "Wait for printed"
+msgstr "等待列印紙本"
+
+msgid "Could print"
+msgstr "可能需要列印"
+
+msgid "No need to print"
+msgstr "無需列印紙本"
+
+msgid "Wait for C0501 or C0701"
+msgstr "等待C0501或C0701"
+
+msgid "Wait for C0401"
+msgstr "等待C0401"
+
+msgid "Wait for C0501 or C0401"
+msgstr "等待C0501或C0401"
+
+msgid "Collecting"
+msgstr "收集中"
+
+msgid "Waiting for trigger(Stop Collecting)"
+msgstr "等待觸發(停止收集)"
+
+msgid "Noticed to TKW"
+msgstr "已通知 TKW"
+
+msgid "Exporting E-Invoice JSON"
+msgstr "製作電子發票 JSON"
+
+msgid "Uploaded to TKW"
+msgstr "已上傳到 TKW"
+
+msgid "Finish"
+msgstr "完成"
+
+#, python-brace-format
+msgid "Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}"
+msgstr "{target_audience}注意: {slug} 中的發票({content_object})無法完成同步"
+
+msgid "General User"
+msgstr "一般使用者"
+
+msgid "Programmer"
+msgstr "開發人員"
+
+#, python-brace-format
+msgid ""
+"Error status: \"{status}\"\n"
+"Result code: \"{result_code}\"\n"
+"            "
+msgstr ""
+"錯誤狀態: \"{status}\"\n"
+"結果碼: \"{result_code}\"\n"
+"            "
+
+msgid "Waiting"
+msgstr "等待中"
+
+msgid "Preparing for EI(P)"
+msgstr "準備上傳到 EI(P)"
+
+msgid "Uploaded to EI or Downloaded from EI(G)"
+msgstr "已上傳到 EI 或已從 EI 下載(G)"
+
+msgid "E Error for EI process(E)"
+msgstr "EI 回傳 E 錯誤(E)"
+
+msgid "I Error for EI process(I)"
+msgstr "EI 回傳 I 錯誤(I)"
+
+msgid "Successful EI process(C)"
+msgstr "成功完成 EI 程序(C)"
+
+msgid "BatchEInvoice does exist"
+msgstr "批次上傳電子發票(id: {})不存在!"
+
+msgid "The last Batch E-Invoice does not exist!"
+msgstr "最新批次上傳電子發票(id: {})不存在!"
+
+msgid "The ids in Summary Result do not match BatchEInvoice!"
+msgstr "日總結成果中的 ids 無法對應「批次上傳電子發票」紀錄"
+
+msgid "EI Daily Summary Result report it as failed record!"
+msgstr "EI 日總結成果回報此為失敗紀錄!"
+
+msgid "Hourly Sync"
+msgstr "每小時同步"
+
+msgid "Daily Sync"
+msgstr "每日同步"
+
+msgid "Weekly Sync"
+msgstr "每周同步"
+
+msgid "Monthly Sync"
+msgstr "每月同步"
+
+msgid "Odd month ~ Even month Sync"
+msgstr "單數月~雙數月同步"
+
+msgid "Yearly Sync"
+msgstr "每年同步"
+
+msgid "Daily Audit"
+msgstr "每日稽核"
+
+msgid "Daily Summary from EI"
+msgstr "EI 日報表"
+
+#, python-brace-format
+msgid "Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI"
+msgstr "請儘速列印發票({track_no})，列印後方才能上傳 EI 大平台"
+
+#, python-brace-format
+msgid "Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})"
+msgstr "請為 {track_no} 發票檢查 taiwan_einvoice.crontabs.polling_upload_batch 排程"
+
+#, python-brace-format
+msgid "The {track_no}@{mig_no} has result_code: {status}: '{result_code}'"
+msgstr "{track_no}@{mig_no} 的結果碼: {status}: '{result_code}'"
+
+#, python-brace-format
+msgid "Failed-{ei_check_type} E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}"
+msgstr "{target_audience}所需處理的{ei_check_type}失敗發票，詳見 {name} 總結報表({report_type}@{begin_time})"
+
+msgid "Audit"
+msgstr "稽核"
+
+msgid "Sync"
+msgstr "同步"
 
 msgid "You can not edit yourself"
 msgstr "您無法編輯個人資料"
@@ -177,6 +346,54 @@ msgstr "已經登出"
 
 msgid "Taiwan EInvoice Api"
 msgstr "臺灣電子發票 Api"
+
+msgid "Turnkey Service"
+msgstr "Turnkey 服務"
+
+msgid "Is Error?"
+msgstr "是否錯誤?"
+
+msgid "Error"
+msgstr "錯誤"
+
+msgid "None"
+msgstr "無"
+
+msgid "Create time later than"
+msgstr "創建時間晚於"
+
+msgid "Create time earlier than"
+msgstr "創建時間早於"
+
+msgid "Search"
+msgstr "搜尋"
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr "共 %(total_count)s 筆"
+
+msgid "No."
+msgstr "No."
+
+msgid "Create Time"
+msgstr "創建時間"
+
+msgctxt "auditlog"
+msgid "Type"
+msgstr "稽核類別"
+
+msgid "Creator"
+msgstr "創建者"
+
+msgctxt "auditlog"
+msgid "Content Object"
+msgstr "內容物件"
+
+msgid "Is error?"
+msgstr "是否錯誤?"
+
+msgid "Log"
+msgstr "Log"
 
 msgid "Taiwan E-Invoice Management"
 msgstr "臺灣電子發票管理"
@@ -221,11 +438,23 @@ msgstr "會計查驗"
 msgid "Print Log"
 msgstr "列印紀錄"
 
+msgid "Upload Batch"
+msgstr "上傳批次"
+
+msgid "Batch E-Invoice"
+msgstr "批次上傳電子發票"
+
+msgid "Audit Log"
+msgstr "稽核 Log"
+
+msgid "Summary Report"
+msgstr "總結報表"
+
+msgid "TE Alarm"
+msgstr "TE 警示"
+
 msgid "Legal Entity"
 msgstr "買受人"
-
-msgid "Turnkey Service"
-msgstr "Turnkey 服務"
 
 msgid "Timezone"
 msgstr "時區"
@@ -260,6 +489,36 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
+msgid "Batch Slug contains"
+msgstr "批次代號包含"
+
+msgid "Track No. contains"
+msgstr "字軌號碼包含"
+
+msgid "Batch slug"
+msgstr "批次代號"
+
+msgid "Content Object"
+msgstr "內容物件"
+
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Track no."
+msgstr "字軌號碼"
+
+msgid "Body"
+msgstr "內文"
+
+msgid "Status"
+msgstr "狀態"
+
+msgid "Result Code"
+msgstr "結果碼"
+
+msgid "Pass if error"
+msgstr "略過錯誤"
+
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Canceled E-Invoice"
 msgstr "被作廢發票的一維條碼"
@@ -272,9 +531,6 @@ msgstr "作廢時間晚於"
 
 msgid "Cancel time earlier than"
 msgstr "作廢時間早於"
-
-msgid "Search"
-msgstr "搜尋"
 
 msgid "Cancel E-Invoice"
 msgstr "作廢電子發票"
@@ -318,9 +574,6 @@ msgstr "備註(選填)"
 msgid "Limit to 200 words"
 msgstr "上限200個字"
 
-msgid "No."
-msgstr "No."
-
 msgctxt "taiwan_einvoice"
 msgid "Year Month Range"
 msgstr "期別"
@@ -355,10 +608,6 @@ msgstr ""
 "作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
 "            "
 
-#, python-format
-msgid "%(total_count)s records"
-msgstr "共 %(total_count)s 筆"
-
 msgid "Canceled Track No."
 msgstr "作廢發票的字軌號碼"
 
@@ -375,12 +624,15 @@ msgstr "作廢時間"
 msgid "New E-Invoice Track No."
 msgstr "另開發票字軌"
 
+msgid "Synced"
+msgstr "同步"
+
+msgid "Done"
+msgstr "完成"
+
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode"
 msgstr "一維條碼"
-
-msgid "Track No. contains"
-msgstr "字軌號碼包含"
 
 msgctxt "taiwan_einvoice"
 msgid "Product Details contains"
@@ -396,6 +648,23 @@ msgstr "開立時間晚於"
 msgid "Generate time earlier than"
 msgstr "開立時間早於"
 
+msgid "Carrier Type"
+msgstr "載具類別"
+
+msgid "None setting"
+msgstr "無設定"
+
+msgid "Is Donated?"
+msgstr "是否捐贈?"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Yes"
+msgstr "已捐贈"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "No"
+msgstr "無"
+
 msgid "Print Mark?"
 msgstr "正本是否已列印?"
 
@@ -408,7 +677,7 @@ msgid "No"
 msgstr "尚未印出"
 
 msgid "Cancel E-Invoice Type?"
-msgstr "作廢電子發票類型?"
+msgstr "作廢電子發票?"
 
 msgctxt "taiwan_einvoice_cancel_einvoice_type"
 msgid "Not Canceled"
@@ -423,7 +692,7 @@ msgid "Canceled, has new one"
 msgstr "已作廢，且有開立新發票"
 
 msgid "Void E-Invoice Type?"
-msgstr "註銷電子發票類型?"
+msgstr "註銷電子發票?"
 
 msgctxt "taiwan_einvoice_void_einvoice_type"
 msgid "Not yet"
@@ -432,6 +701,17 @@ msgstr "未註銷"
 msgctxt "taiwan_einvoice_void_einvoice_type"
 msgid "Voided"
 msgstr "已註銷"
+
+msgid "Is Synced to EI?"
+msgstr "是否同步至EI?"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Not Yet"
+msgstr "未同步"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Done"
+msgstr "已完成"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -463,9 +743,6 @@ msgstr "30秒"
 msgid "Print Mark"
 msgstr "正本已列印"
 
-msgid "Status"
-msgstr "狀態"
-
 msgid "Print"
 msgstr "列印"
 
@@ -480,9 +757,6 @@ msgstr "隨機碼"
 msgid "Generating Time"
 msgstr "開立時間"
 
-msgid "Year Month Range"
-msgstr "期別"
-
 msgid "Seller identifier"
 msgstr "賣方統編"
 
@@ -494,9 +768,6 @@ msgstr "捐贈註記"
 
 msgid "NPO Ban"
 msgstr "捐贈碼"
-
-msgid "Carrier Type"
-msgstr "載具類別"
 
 msgid "Carrier ID"
 msgstr "載具ID"
@@ -806,12 +1077,20 @@ msgstr "角色註記"
 msgid "Extra information"
 msgstr "其他資訊"
 
+msgctxt "sellerinvoicetrackno"
+msgid "Party ID"
+msgstr "統一編號"
+
 msgid "Datetime is included by the Year Month Range"
 msgstr "期別所含括的時間"
 
 msgctxt "taiwan_einvoice"
 msgid "Track contains"
 msgstr "字軌包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Including No."
+msgstr "涵蓋此號碼"
 
 msgid "Create Seller Invoice Track No"
 msgstr "新增字軌號碼檔"
@@ -824,6 +1103,9 @@ msgstr "起始號碼"
 
 msgid "End No."
 msgstr "結束號碼"
+
+msgid "Blank No."
+msgstr "空白未使用號碼"
 
 msgid "Blank No. Count"
 msgstr "空白張數"
@@ -881,6 +1163,95 @@ msgctxt "in_manager_group"
 msgid "Yes"
 msgstr "是"
 
+msgid "Report Type"
+msgstr "報表類型"
+
+msgid "Begin time later than"
+msgstr "開始時間晚於"
+
+msgid "Begin time earlier than"
+msgstr "開始時間早於"
+
+msgid "End time later than"
+msgstr "結束時間晚於"
+
+msgid "End time earlier than"
+msgstr "結束時間早於"
+
+msgid ""
+"\n"
+"            Notice: \"EI Daily Summary Result\" counts the E-Invoice by \"Upload to EI time\", but the others use \"Create Time\".\n"
+"\n"
+"            This difference causes some E-Invoices to be counted in today's report, but be counted EI daily summary report of the next day, or the day after the next day.\n"
+"        "
+msgstr ""
+"\n"
+"注意: 「EI 日報表」使用「上傳至 EI 的時間」來計算筆數，而其他類型報表則是使用「發票創建時間」來計算。\n"
+"\n"
+"這個差異會導致某些發票被歸類在今日的每日報表中，但它們卻可能屬於下一日或下下一日的 EI 日報表。 "
+
+msgid "Begin Time"
+msgstr "開始時間"
+
+msgid "End Time"
+msgstr "結束期間"
+
+msgid "Good counts"
+msgstr "成功筆數"
+
+msgid "Failed counts"
+msgstr "失敗筆數"
+
+msgid "Resolved counts"
+msgstr "解決筆數"
+
+msgid "Total counts"
+msgstr "總筆數"
+
+msgid "Is resolved?"
+msgstr "是否解決?"
+
+msgid "Resolved Note"
+msgstr "解決說明"
+
+msgid "Resolver"
+msgstr "解決者"
+
+msgid "Good"
+msgstr "成功"
+
+msgid "Failed"
+msgstr "失敗"
+
+msgid "Resolved"
+msgstr "已解決"
+
+msgid "Not yet"
+msgstr "尚未"
+
+msgid "Only display in the hourly report"
+msgstr "非「每小時報表」，無須顯示"
+
+msgid "Target Audience Type"
+msgstr "目標對象"
+
+msgctxt "taiwan_einvoice"
+msgid "Title contains"
+msgstr "標題包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Body contains"
+msgstr "內文包含"
+
+msgid "Notified users"
+msgstr "已通知用戶"
+
+msgid "Title"
+msgstr "標題"
+
+msgid "系統管理員"
+msgstr ""
+
 msgid "Is on working?"
 msgstr "是否使用中?"
 
@@ -890,23 +1261,29 @@ msgstr "是否商用?"
 msgid "Seller Identifier"
 msgstr "賣方統編"
 
+msgid "Auto Upload C0401?"
+msgstr "自動上傳 C0401?"
+
+msgid "Cron(execute once per ? minutes"
+msgstr "排程(每 ? 分鐘執行 1 次)"
+
 msgid "Transport ID"
-msgstr ""
+msgstr "傳送帳號"
 
 msgid "Party ID"
-msgstr ""
+msgstr "送方統編"
 
 msgid "Routing ID"
-msgstr ""
+msgstr "繞送代碼"
 
 msgid "Qrcode Seed"
-msgstr ""
+msgstr "Qrcode 種子"
 
 msgid "Turnkey Seed"
-msgstr ""
+msgstr "Turnkey 種子"
 
 msgid "Download Seed"
-msgstr ""
+msgstr "下載清冊種子"
 
 msgid "Remaining Count of the current period"
 msgstr "當期剩餘張數"
@@ -928,6 +1305,18 @@ msgstr "商用"
 msgid "Test"
 msgstr "測試"
 
+msgctxt "auto_upload_c0401_einvoice"
+msgid "Yes to C0401"
+msgstr "自動上傳 C0401"
+
+msgctxt "auto_upload_c0401_einvoice"
+msgid "Manually"
+msgstr "手動"
+
+msgctxt "upload_cronjob_format"
+msgid "No Cron"
+msgstr "無排程"
+
 #, python-format
 msgid "%(name)s's Staff Group"
 msgstr "『%(name)s』的工作人員群組"
@@ -948,6 +1337,9 @@ msgstr "瀏覽"
 msgid "Edit"
 msgstr "編輯"
 
+msgid "Resolve"
+msgstr "解決"
+
 msgid "Seller Invoice Track No"
 msgstr "字軌號碼"
 
@@ -956,6 +1348,12 @@ msgstr "匯入字軌號碼、刪除未使用的字軌號碼"
 
 msgid "Void E-Invoice"
 msgstr "註銷電子發票"
+
+msgid "Alarm for general user"
+msgstr "使用者警示"
+
+msgid "Alarm for programmer and general user"
+msgstr "開發者及使用者警示"
 
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"
@@ -969,6 +1367,24 @@ msgstr "工作人員群組名稱"
 
 msgid "Staffs"
 msgstr "工作人員"
+
+msgid "Update Time"
+msgstr "更新時間"
+
+msgid "MIG Type"
+msgstr "MIG類型"
+
+msgid "Kind"
+msgstr "類別"
+
+msgid "Executor"
+msgstr "執行者"
+
+msgid "EI Turnkey Batch ID"
+msgstr "EI Turnkey 批次 ID"
+
+msgid "Auto-Executed"
+msgstr "自動執行"
 
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Voided E-Invoice"
@@ -1078,8 +1494,14 @@ msgstr "已存在的群組數量已超過限度({})"
 msgid "Group name exists"
 msgstr "工作人員群組名稱已存在"
 
+msgid "TurnkeyService Does Not Exist"
+msgstr "Turnkwy 伺服器不存在"
+
 msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
+
+msgid "Year Month Range Error"
+msgstr "期別錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -1091,6 +1513,29 @@ msgstr ""
 "\n"
 "\n"
 "{}"
+
+msgid "Begin Time Error"
+msgstr "開始時間錯誤"
+
+msgid ""
+"{} has error: \n"
+"Too early to import."
+msgstr ""
+"{} 有誤: \n"
+"太早匯入。"
+
+msgid "End Time Error"
+msgstr "結束期間錯誤"
+
+msgid ""
+"{} has error: \n"
+"Too late to import."
+msgstr ""
+"{} 有誤: \n"
+"太晚匯入。"
+
+msgid "Begin No. Error"
+msgstr "起始號碼錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -1102,6 +1547,9 @@ msgstr ""
 "\n"
 "\n"
 "起號的後 2 碼須為 00 或 50 。"
+
+msgid "End No. Error"
+msgstr "結束號碼期間錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -1116,6 +1564,15 @@ msgstr ""
 
 msgid "{} exists"
 msgstr "{} 已存在"
+
+msgid "Data Error"
+msgstr "資料錯誤"
+
+msgid "Identifier Error"
+msgstr "統編錯誤"
+
+msgid "Identifier does not match the seller identifier of the TurnkeyService."
+msgstr "統編無法對應 Turnkey 服務的賣方統編。"
 
 msgid ""
 "{} ~ {} has error: \n"
@@ -1184,6 +1641,3 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
-
-#~ msgid "E-Invoice({}) was already canceled and has created the new one!"
-#~ msgstr "電子發票({})已被作廢且另有開立!"

@@ -1,0 +1,145 @@
+{% extends 'turnkey_wrapper/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{% static "turnkey_wrapper/eiturnkeybatch_list.js" %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="slug__icontains">{% trans "slug contains" %}</label>
+                    <div class="input-group" id="slug__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="mig">{% trans "MIG" %}</label>
+                    <div class="input-group" id="mig" data-target-input="nearest">
+                        <select class="form-control" data-target="#mig" name="mig" id="id_mig">
+                            <option value=""></option>
+                            <option value="C0401">C0401</option>
+                            <option value="C0501">C0501</option>
+                            <option value="C0701">C0701</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_version">{% trans "Turnkey MIG Version" %}</label>
+                    <div class="input-group" id="turnkey_version" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_version" name="turnkey_version" id="id_turnkey_version">
+                            <option value="3.2">3.2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="status">{% trans "Status" %}</label>
+                    <div class="input-group" id="status" data-target-input="nearest">
+                        <select class="form-control" data-target="#status" name="status" id="id_status">
+                            <option value=""></option>
+                            {% for sc in status_choices %}
+                                <option value="{{ sc.0 }}">{{ sc.0 }}. {{ sc.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__gte">{% trans "Create Time greater than" %}</label>
+                    <div class="input-group date" id="create_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
+                            name="create_time__gte" id="id_create_time__gte" />
+                        <div class="input-group-append" data-target="#create_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__lt">{% trans "Create Time less than" %}</label>
+                    <div class="input-group date" id="create_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
+                            name="create_time__lt" id="id_create_time__lt" />
+                        <div class="input-group-append" data-target="#create_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="update_time__gte">{% trans "Update Time greater than" %}</label>
+                    <div class="input-group date" id="update_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#update_time__gte"
+                            name="update_time__gte" id="id_update_time__gte" />
+                        <div class="input-group-append" data-target="#update_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="update_time__lt">{% trans "Update Time less than" %}</label>
+                    <div class="input-group date" id="update_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#update_time__lt"
+                            name="update_time__lt" id="id_update_time__lt" />
+                        <div class="input-group-append" data-target="#update_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}

@@ -23,6 +23,7 @@ from rest_framework.exceptions import PermissionDenied
 from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     NotEnoughNumberError,
+    EInvoiceMIG,
     StaffProfile,
     ESCPOSWeb,
     Printer,
@@ -36,6 +37,10 @@ from taiwan_einvoice.models import (
     VoidEInvoice,
     UploadBatch,
     BatchEInvoice,
+    AuditType,
+    AuditLog,
+    SummaryReport,
+    TEAlarm,
 )
 
 
@@ -46,6 +51,11 @@ class UserSerializer(ModelSerializer):
             'id', 'last_name', 'first_name', 'email', 'username',
         )
 
+
+class EInvoiceMIGSerializer(ModelSerializer):
+    class Meta:
+        model = EInvoiceMIG
+        fields = '__all__'
 
 
 class StaffProfileSerializer(ModelSerializer):
@@ -183,6 +193,7 @@ class TurnkeyServiceSerializer(ModelSerializer):
     mask_turnkey_seed = CharField(read_only=True)
     mask_download_seed = CharField(read_only=True)
     mask_epl_base_set = CharField(read_only=True)
+    upload_cronjob_format__display = CharField(read_only=True)
 
 
 
@@ -193,6 +204,7 @@ class TurnkeyServiceSerializer(ModelSerializer):
             'count_now_use_07_sellerinvoicetrackno_blank_no',
             'count_now_use_08_sellerinvoicetrackno_blank_no',
             'on_working',
+            'in_production',
             'name',
             'hash_key',
             'mask_hash_key',
@@ -203,6 +215,9 @@ class TurnkeyServiceSerializer(ModelSerializer):
             'mask_turnkey_seed',
             'mask_download_seed',
             'mask_epl_base_set',
+            'auto_upload_c0401_einvoice',
+            'upload_cronjob_format__display',
+            'tkw_endpoint',
             'qrcode_seed',
             'turnkey_seed',
             'download_seed',
@@ -285,10 +300,12 @@ class TurnkeyServiceRelatedField(PrimaryKeyRelatedField):
 class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     turnkey_web = TurnkeyServiceRelatedField(required=True, allow_null=False)
     turnkey_web_dict = TurnkeyServiceSerializer(source='turnkey_web', read_only=True)
     type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
     type__display = CharField(read_only=True)
+    next_blank_no = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
     year_month_range = CharField(read_only=True)
     can_be_deleted = BooleanField(read_only=True)
@@ -296,6 +313,11 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     class Meta:
         model = SellerInvoiceTrackNo
         fields = '__all__'
+
+
+
+    def get_str_name(self, instance):
+        return str(instance)
 
 
 
@@ -324,6 +346,7 @@ class EInvoiceSimpleSerializer(ModelSerializer):
 class EInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     creator_dict = UserSerializer(source='creator', read_only=True)
     seller_invoice_track_no_dict = SellerInvoiceTrackNoSerializer(source='seller_invoice_track_no', read_only=True)
     track_no = CharField(read_only=True)
@@ -339,9 +362,16 @@ class EInvoiceSerializer(ModelSerializer):
     canceled_time = DateTimeField(read_only=True)
     related_einvoices = EInvoiceSimpleSerializer(read_only=True, many=True)
 
+
+
     class Meta:
         model = EInvoice
         fields = '__all__'
+
+    
+
+    def get_str_name(self, instance):
+        return str(instance)
 
 
 
@@ -361,6 +391,7 @@ class EInvoicePrintLogSerializer(ModelSerializer):
 class CancelEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     creator_dict = UserSerializer(source='creator', read_only=True)
     einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
     new_einvoice_dict = EInvoiceSerializer(source='new_einvoice', read_only=True)
@@ -373,9 +404,15 @@ class CancelEInvoiceSerializer(ModelSerializer):
 
 
 
+    def get_str_name(self, instance):
+        return str(instance)
+
+
+
 class VoidEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:voideinvoice-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
     creator_dict = UserSerializer(source='creator', read_only=True)
     einvoice_dict = EInvoiceSerializer(source='einvoice', read_only=True)
     new_einvoice_dict = EInvoiceSerializer(source='new_einvoice', read_only=True)
@@ -387,9 +424,21 @@ class VoidEInvoiceSerializer(ModelSerializer):
         fields = '__all__'
 
 
+
+    def get_str_name(self, instance):
+        return str(instance)
+
+
 class UploadBatchSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:uploadbatch-detail", lookup_field='pk')
+    str_name = SerializerMethodField()
+    mig_type_dict = EInvoiceMIGSerializer(source="mig_type", read_only=True)
+    batch_einvoice_count = IntegerField(read_only=True)
+    turnkey_service_dict = TurnkeyServiceSerializer(source="turnkey_service", read_only=True)
+    get_kind_display = CharField(read_only=True)
+    get_status_display = CharField(read_only=True)
+    executor_dict = UserSerializer(source='executor', read_only=True)
 
 
 
@@ -399,12 +448,114 @@ class UploadBatchSerializer(ModelSerializer):
 
 
 
+    def get_str_name(self, instance):
+        return str(instance)
+
+
+
 class BatchEInvoiceSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-detail", lookup_field='pk')
+    batch_dict = UploadBatchSerializer(source="batch", read_only=True)
+    year_month_range = CharField(read_only=True)
+    content_object_dict = SerializerMethodField()
 
 
 
     class Meta:
         model = BatchEInvoice
         fields = '__all__'
+
+    
+
+    def get_content_object_dict(self, instance):
+        request = self.context.get('request', None)
+        return {
+            "einvoice": EInvoiceSerializer(instance.content_object, context={"request": request}),
+            "canceleinvoice": CancelEInvoiceSerializer(instance.content_object, context={"request": request}),
+            "voideinvoice": VoidEInvoiceSerializer(instance.content_object, context={"request": request}),
+            "sellerinvoicetrackno": SellerInvoiceTrackNoSerializer(instance.content_object, context={"request": request}),
+        }[instance.content_type.model].data
+
+
+
+
+class AuditTypeSerializer(ModelSerializer):
+    class Meta:
+        model = AuditType
+        fields = '__all__'
+
+
+
+class AuditLogSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:auditlog-detail", lookup_field='pk')
+    creator_dict = UserSerializer(source='creator', read_only=True)
+    type_dict = AuditTypeSerializer(source='type', read_only=True)
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    content_object_dict = SerializerMethodField()
+
+
+
+    class Meta:
+        model = AuditLog
+        fields = '__all__'
+
+
+
+    def get_content_object_dict(self, instance):
+        request = self.context.get('request', None)
+        return {
+            "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request}),
+            "turnkeyservice": TurnkeyServiceSerializer(instance.content_object, context={"request": request})
+        }[instance.content_type.model].data
+
+
+
+class TEAlarmSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:tealarm-detail", lookup_field='pk')
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    get_target_audience_type_display = CharField(read_only=True)
+    content_object_dict = SerializerMethodField()
+
+
+
+    class Meta:
+        model = TEAlarm
+        fields = '__all__'
+
+
+
+    def get_content_object_dict(self, instance):
+        request = self.context.get('request', None)
+        return {
+            "summaryreport": SummaryReportSerializer(instance.content_object, context={"request": request}),
+            "uploadbatch": UploadBatchSerializer(instance.content_object, context={"request": request}),
+        }[instance.content_type.model].data
+
+
+
+class SummaryReportSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:summaryreport-detail", lookup_field='pk')
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
+    get_report_type_display = CharField(read_only=True)
+    te_alarms = SerializerMethodField()
+
+
+
+    class Meta:
+        model = SummaryReport
+        fields = '__all__'
+
+
+
+    def get_te_alarms(self, instance):
+        request = self.context.get('request', None)
+        return [{"id": tea.id,
+                 "title": tea.title,
+                 "body": tea.body,
+                }
+            for tea in instance.te_alarms.all()]
+        #return [TEAlarmSerializer(tea, context={"request": request}).data for tea in instance.te_alarms.all()]

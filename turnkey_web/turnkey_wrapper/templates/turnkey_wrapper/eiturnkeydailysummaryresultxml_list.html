@@ -1,0 +1,134 @@
+{% extends 'turnkey_wrapper/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{% static "turnkey_wrapper/eiturnkeydailysummaryresultxml_list.js" %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="ei_turnkey">{% trans "EI Turnkey" %}</label>
+                    <div class="input-group" id="ei_turnkey" data-target-input="nearest">
+                        <select class="form-control" name="ei_turnkey" id="id_ei_turnkey">
+                            <option value=""></option>
+                            {% for et in ei_turnkeys %}
+                                <option value="{{ et.id }}">{{ et.party_id }}({{ et.routing_id }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="is_parsed">{% trans "Is Parsed?" %}</label>
+                    <div class="input-group" id="is_parsed" data-target-input="nearest">
+                        <select class="form-control" name="is_parsed" id="id_is_parsed">
+                            <option value=""></option>
+                            <option value="1">{% trans "Parsed" %}</option>
+                            <option value="0">{% trans "Not yet" %}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="form-group">
+                    <label for="abspath__icontains">{% trans "File path contains" %}</label>
+                    <div class="input-group" id="abspath__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="abspath__icontains" id="id_abspath__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__gte">{% trans "Create Time greater than" %}</label>
+                    <div class="input-group date" id="create_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
+                            name="create_time__gte" id="id_create_time__gte" />
+                        <div class="input-group-append" data-target="#create_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__lt">{% trans "Create Time less than" %}</label>
+                    <div class="input-group date" id="create_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
+                            name="create_time__lt" id="id_create_time__lt" />
+                        <div class="input-group-append" data-target="#create_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="result_date__gte">{% trans "XML Date greater than" %}</label>
+                    <div class="input-group date" id="result_date__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datepicker-input" data-target="#result_date__gte"
+                            name="result_date__gte" id="id_result_date__gte" />
+                        <div class="input-group-append" data-target="#result_date__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="result_date__lt">{% trans "XML Date less than" %}</label>
+                    <div class="input-group date" id="result_date__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datepicker-input" data-target="#result_date__lt"
+                            name="result_date__lt" id="id_result_date__lt" />
+                        <div class="input-group-append" data-target="#result_date__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}

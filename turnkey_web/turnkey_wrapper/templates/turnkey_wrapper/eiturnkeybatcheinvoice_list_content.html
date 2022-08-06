@@ -1,0 +1,52 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>ei_turnkey_batch</th>
+            <th>
+                <div class="">{% trans "Batch E-Invoice ID" %}</div>
+                <div class="font-weight-light">{% trans "Year Month Range" %}</div>
+                <div class="">{% trans "Track No." %}</div>
+                <div class="font-weight-light">{% trans "Upload to EI Time" %}</div>
+            </th>
+            <th>status<br/>&amp;result_code</th>
+            <th>body</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td field="ei_turnkey_batch">{{ obj.ei_turnkey_batch_dict.slug }}</td>
+                <td field="batch_einvoice_infos">
+                    <div class="font-weight-bold" field="batch_einvoice_id">{{ obj.batch_einvoice_id }}</div>
+                    <div class="datetime" field="batch_einvoice_begin_time" value="{{ obj.batch_einvoice_begin_time }}" format="Y-m-d"></div> ~
+                    <div class="datetime" field="batch_einvoice_end_time_minus_1_second" value="{{ obj.batch_einvoice_end_time_minus_1_second }}" format="Y-m-d"></div>
+                    <div class="font-weight-bold" field="batch_einvoice_track_no">{{ obj.batch_einvoice_track_no }}</div>
+                    <div class="datetime" field="upload_to_ei_time" value="{{ obj.upload_to_ei_time }}" format="Y-m-d H:i:s.sss"></div>
+                </td>
+                <td field="status_and_result_code">
+                    <div field="status" class="font-weight-bold {% ifequal "C" obj.status %}
+                            text-dark
+                        {% else %}{% ifequal "G" obj.status %}
+                            text-light
+                        {% else %}
+                            text-danger
+                        {% endifequal %}{% endifequal %}
+                        ">{{ obj.status }}
+                    </div>
+                    <div field="result_code">{{ obj.result_code }}</div>
+                </td>
+                <td field="body"><pre style="max-width: 600px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

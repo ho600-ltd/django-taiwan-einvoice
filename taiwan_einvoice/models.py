@@ -1,16 +1,18 @@
-import pytz, datetime, hmac, requests, urllib3, logging
+import pytz, datetime, hmac, requests, logging, zlib, json, re
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
 from Crypto.Cipher import AES
 from hashlib import sha1
 from random import random, randint, choice
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models, IntegrityError
-from django.db.models import Max, F
+from django.db.models import Max, F, Count, Q
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils import translation
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext, pgettext
@@ -18,6 +20,7 @@ from simple_history.models import HistoricalRecords
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
 
 from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, integer_from_customize_hex
+from taiwan_einvoice.libs import CounterBasedOTPinRow
 
 
 def _pad(byte_array):
@@ -58,6 +61,34 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
+COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=20)
+NO_NEED_TO_PRINT_TIME_MARGIN = datetime.timedelta(minutes=10)
+MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
+
+
+
+class IdentifierError(Exception):
+    pass
+
+
+
+class IdentifierDuplicateError(Exception):
+    pass
+
+
+
+class CancelEInvoiceMIGError(Exception):
+    pass
+
+
+
+class VoidEInvoiceMIGError(Exception):
+    pass
+
+
+
+class BatchEInvoiceIDsError(Exception):
+    pass
 
 
 
@@ -283,6 +314,11 @@ class GenerateTimeNotFollowNoOrderError(Exception):
 
 
 
+class EInvoiceDetailsError(Exception):
+    pass
+
+
+
 class EInvoiceFieldError(Exception):
     pass
 
@@ -503,6 +539,12 @@ class Seller(models.Model):
         return "{}: {}, {}".format(self.legal_entity,
                                    self.print_with_seller_optional_fields,
                                    self.print_with_buyer_optional_fields)
+    
+
+    def save(self, *args, **kwargs):
+        if not self.pk and Seller.objects.filter(legal_entity__identifier=self.legal_entity.identifier).exists():
+            raise IdentifierDuplicateError(_("{} does exist!").format(self.legal_entity.identifier))
+        super().save(*args, **kwargs)
 
 
 
@@ -531,6 +573,20 @@ class TurnkeyService(models.Model):
     epl_base_set = models.CharField(max_length=64, default='')
     warning_above_amount = models.IntegerField(default=10000)
     forbidden_above_amount = models.IntegerField(default=20000)
+    auto_upload_c0401_einvoice = models.BooleanField(default=False)
+    upload_cronjob_format_choices = (
+      ("*/5 * * * *", _("once per 5 minutes")),
+      ("*/10 * * * *", _("once per 10 minutes")),
+      ("*/15 * * * *", _("once per 15 minutes")),
+      ("*/20 * * * *", _("once per 20 minutes")),
+      ("*/30 * * * *", _("once per 30 minutes")),
+      ("*/60 * * * *", _("once per 60 minutes")),
+    )
+    upload_cronjob_format = models.CharField(max_length=128, default="*/15 * * * *", choices=upload_cronjob_format_choices, db_index=True)
+    @property
+    def upload_cronjob_format__display(self):
+        return self.get_upload_cronjob_format_display()
+    tkw_endpoint = models.TextField()
     history = HistoricalRecords()
     @property
     def groups(self):
@@ -571,10 +627,8 @@ class TurnkeyService(models.Model):
     @property
     def mask_epl_base_set(self):
         return self.epl_base_set[:4] + '*'*(len(self.epl_base_set)-8) + self.epl_base_set[-4:]
-
-
     note = models.TextField()
-
+    
 
     def __str__(self):
         return "{}({}:{}:{})".format(self.name,
@@ -586,29 +640,97 @@ class TurnkeyService(models.Model):
     def save(self, *args, **kwargs):
         if not self.hash_key:
             self.hash_key = sha1(str(random()).encode('utf-8')).hexdigest()
-            
         super(TurnkeyService, self).save(*args, **kwargs)
+
+
+    def generate_counter_based_otp_in_row(self):
+        n_times_in_a_row = 3
+        key = '{}-{}-{}-{}'.format(self.routing_id, self.hash_key, self.transport_id, self.party_id)
+        cbotpr = CounterBasedOTPinRow(SECRET=key.encode('utf-8'), N_TIMES_IN_A_ROW=n_times_in_a_row)
+        return cbotpr.generate_otps()
+    
+
+    def get_and_create_ei_turnkey_daily_summary_result(self):
+        translation.activate(settings.LANGUAGE_CODE)
+        audit_type = AuditType.objects.get(name="EI_SUMMARY_RESULT")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self,
+            content_object=self,
+            is_error=False,
+        )
+        url = self.tkw_endpoint + '{action}/'.format(action="get_ei_turnkey_summary_results")
+        counter_based_otp_in_row = ','.join(self.generate_counter_based_otp_in_row())
+        last_summary_report = self.summaryreport_set.filter(report_type='E').order_by('begin_time').last()
+        payload = {"format": "json"}
+        if last_summary_report:
+            payload["result_date__gte"] = last_summary_report.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d")
+        try:
+            response = requests.get(url,
+                                    params=payload,
+                                    headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "TurnkeyService.get_and_create_ei_turnkey_daily_summary_result",
+                "url": url,
+                "position at": "requests.get(...)",
+                "params": payload,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                for summary_result in result_json['results']:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(summary_result['result_date'], "%Y-%m-%d"))
+                    end_time = begin_time + datetime.timedelta(days=1)
+                    sr, new_creation = SummaryReport.objects.get_or_create(turnkey_service=self,
+                                                                           report_type='E',
+                                                                           begin_time=begin_time,
+                                                                           end_time=end_time,
+                                                                          )
+                    if sr.is_resolved:
+                        continue
+                    sr.generate_ei_daily_summary_report(summary_result)
+                audit_log.is_error = False
+                audit_log.save()
+                return result_json
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
+
 
 
 
     class Meta:
         unique_together = (('seller', 'name'), )
         permissions = (
-            ("edit_te_turnkeyservicegroup", "Edit the groups of TurnkeyService"),
+            ("edit_te_turnkeyservicegroup", "Edit the groups of the TurnkeyService"),
 
-            ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No"),
-            ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No"),
-            ("delete_te_sellerinvoicetrackno", "Delete Seller Invoice Track No"),
+            ("view_te_sellerinvoicetrackno", "View Seller Invoice Track No of the TurnkeyService"),
+            ("add_te_sellerinvoicetrackno", "Add Seller Invoice Track No of the TurnkeyService"),
+            ("delete_te_sellerinvoicetrackno", "Delete Seller Invoice Track No of the TurnkeyService"),
 
-            ("view_te_einvoice", "View E-Invoice"),
+            ("view_te_einvoice", "View E-Invoice of the TurnkeyService"),
 
-            ("view_te_canceleinvoice", "View Cancel E-Invoice"),
-            ("add_te_canceleinvoice", "Add Cancel E-Invoice"),
+            ("view_te_canceleinvoice", "View Cancel E-Invoice of the TurnkeyService"),
+            ("add_te_canceleinvoice", "Add Cancel E-Invoice of the TurnkeyService"),
 
-            ("view_te_voideinvoice", "View Void E-Invoice"),
-            ("add_te_voideinvoice", "Add Void E-Invoice"),
+            ("view_te_voideinvoice", "View Void E-Invoice of the TurnkeyService"),
+            ("add_te_voideinvoice", "Add Void E-Invoice of the TurnkeyService"),
 
-            ("view_te_einvoiceprintlog", "View E-Invoice Print Log"),
+            ("view_te_einvoiceprintlog", "View E-Invoice Print Log of the TurnkeyService"),
+            
+            ("view_te_summaryreport", "View Summary Report of the TurnkeyService"),
+            ("resolve_te_summaryreport", "Resolve Summary Report of the TurnkeyService"),
+
+            ("view_te_alarm_for_general_user", "View Alarm for the General User of the TurnkeyService"),
+            ("view_te_alarm_for_programmer", "View Alarm for the Programmer of the TurnkeyService"),
         )
     
 
@@ -626,15 +748,36 @@ class SellerInvoiceTrackNo(models.Model):
     begin_time = models.DateTimeField(db_index=True)
     end_time = models.DateTimeField(db_index=True)
     @property
-    def year_month_range(self):
+    def pure_year_month_range(self):
         chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
-        end_month = begin_month + 1
+        end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
+        return chmk_year, begin_month, end_month
+    @property
+    def year_month(self):
+        chmk_year, begin_month, end_month = self.pure_year_month_range
+        return "{:03d}{:02d}".format(chmk_year, end_month)
+    @property
+    def year_month_range(self):
+        chmk_year, begin_month, end_month = self.pure_year_month_range
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track = models.CharField(max_length=2, db_index=True)
     begin_no = models.IntegerField(db_index=True)
     end_no = models.IntegerField(db_index=True)
-
+    @property
+    def count_blank_no(self):
+        return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
+    @property
+    def next_blank_no(self):
+        try:
+            new_no = self.get_new_no()
+        except NotEnoughNumberError:
+            new_no = ''
+        return new_no
+    @property
+    def can_be_deleted(self):
+        return not self.einvoice_set.exists()
+    
 
 
     class Meta:
@@ -673,24 +816,35 @@ class SellerInvoiceTrackNo(models.Model):
         return queryset
 
 
-    @property
-    def count_blank_no(self):
-        return self.end_no - self.begin_no + 1 - self.einvoice_set.count()
+    @classmethod
+    def create_blank_numbers_and_upload_batchs(cls, seller_invoice_track_nos, executor=None):
+        if 1 != len(seller_invoice_track_nos.values('turnkey_web__seller__legal_entity__identifier'
+                                                   ).annotate(a_c=Count('turnkey_web__seller__legal_entity__identifier'))):
+            raise IdentifierError(_("Only use the same identifier to create the record for blank numbers!"))
+        elif 1 != len(seller_invoice_track_nos.values('begin_time').annotate(a_c=Count('begin_time'))):
+            raise IdentifierError(_("Only use the same begin_time to create the record for blank numbers!"))
+        elif 1 != len(seller_invoice_track_nos.values('end_time').annotate(a_c=Count('end_time'))):
+            raise IdentifierError(_("Only use the same end_time to create the record for blank numbers!"))
 
+        party_ids = [d['turnkey_web__party_id'] for d in seller_invoice_track_nos.values('turnkey_web__party_id').annotate(dev_null=Count('turnkey_web__party_id'))]
+        tax_types = [d['type'] for d in seller_invoice_track_nos.values('type').annotate(dev_null=Count('type'))]
+        tracks = [d['track'] for d in seller_invoice_track_nos.values('track').annotate(dev_null=Count('track'))]
+        upload_batchs = []
+        for party_id in party_ids:
+            for tax_type in tax_types:
+                for track in tracks:
+                    sitns = seller_invoice_track_nos.filter(turnkey_web__party_id=party_id,
+                                                            type=tax_type,
+                                                            track=track).order_by('track', 'begin_no')
+                    upload_batch = UploadBatch.append_to_the_upload_batch(sitns.first(), executor=executor)
+                    if upload_batch:
+                        upload_batchs.append(upload_batch)
+        return upload_batchs
 
-    @property
-    def next_blank_no(self):
-        return ''
-    
-
-    @property
-    def can_be_deleted(self):
-        return not self.einvoice_set.exists()
-    
 
     def delete(self, *args, **kwargs):
         if self.einvoice_set.exists():
-            ei = self.einvoice_set.first()
+            ei = self.einvoice_set.order_by('id').first()
             raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})"), ei.track_no_)
         return super().delete(*args, **kwargs)
 
@@ -720,10 +874,33 @@ class SellerInvoiceTrackNo(models.Model):
             ei.save()
         except IntegrityError:
             raise GenerateTimeNotFollowNoOrderError("Duplicated no: {}".format(data['no']))
+        except EInvoiceDetailsError as e:
+            raise e
         return ei
 
 
-
+    def export_json_for_mig(self):
+        sitns = SellerInvoiceTrackNo.objects.filter(turnkey_web__seller__legal_entity__identifier=self.turnkey_web.seller.legal_entity.identifier,
+                                                    begin_time=self.begin_time,
+                                                    end_time=self.end_time,
+                                                    turnkey_web__party_id=self.turnkey_web.party_id,
+                                                    type=self.type,
+                                                    track=self.track).order_by('track', 'begin_no')
+        Details = []
+        for sitn in sitns:
+            if sitn.next_blank_no:
+                Details.append((sitn.next_blank_no, sitn.end_no))
+        J = {"E0402": {
+            "Main": {
+                "HeadBan": self.turnkey_web.party_id,
+                "BranchBan": self.turnkey_web.seller.legal_entity.identifier,
+                "InvoiceType": self.type,
+                "YearMonth": self.year_month,
+                "InvoiceTrack": self.track,
+            },
+            "Details": Details
+        }}
+        return J
 
 
 
@@ -759,11 +936,16 @@ class EInvoiceMIG(models.Model):
     no = models.CharField(max_length=5, choices=no_choices, unique=True)
 
 
+    def __str__(self):
+        return self.no
+
 
 
 class EInvoice(models.Model):
-    only_fields_can_update = ['print_mark', 'ei_synced', 'generate_time']
+    only_fields_can_update = ['print_mark', 'ei_synced', 'ei_audited', 'generate_time']
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     seller_invoice_track_no = models.ForeignKey(SellerInvoiceTrackNo, on_delete=models.DO_NOTHING)
@@ -798,6 +980,12 @@ class EInvoice(models.Model):
     print_mark = models.BooleanField(default=False)
     random_number = models.CharField(max_length=4, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    @property
+    def invoice_date(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def invoice_time(self):
+        return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     generate_no = models.CharField(max_length=40, default='', db_index=True)
     generate_no_sha1 = models.CharField(max_length=10, default='', db_index=True)
     batch_id = models.SmallIntegerField(default=0)
@@ -896,10 +1084,19 @@ class EInvoice(models.Model):
             else:
                 break
         return related_einvoices
+    @property
+    def last_batch_einvoice(self):
+        try:
+            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id)
+        except BatchEInvoice.DoesNotExist:
+            return None
+        else:
+            return bei
 
 
     def __str__(self):
-        return self.track_no_
+        return "{}".format(self.track_no)
 
 
 
@@ -1100,6 +1297,54 @@ class EInvoice(models.Model):
         return _d
 
 
+    def get_mig_no(self):
+        return self.mig_type.no
+
+
+    def export_json_for_mig(self):
+        er_field_d = {
+            "identifier": "Identifier",
+            "name": "Name",
+            "address": "Address",
+            "person_in_charge": "PersonInCharge",
+            "telephone_number": "TelephoneNumber",
+            "facsimile_number": "FacsimileNumber",
+            "email_address": "EmailAddress",
+            "customer_number": "CustomerNumber",
+            "role_remark": "RoleRemark"
+        }
+        er_j = {"seller": {}, "buyer": {}}
+        for er in ["seller", "buyer"]:
+            for k, json_k in er_field_d.items():
+                v = getattr(self, "{}_{}".format(er, k))
+                if v:
+                    er_j[er][json_k] = v
+        J = {self.get_mig_no(): {
+                "Main": {
+                    "InvoiceNumber": self.track_no,
+                    "InvoiceDate": self.invoice_date,
+                    "InvoiceTime": self.invoice_time,
+                    "Seller": er_j["seller"],
+                    "Buyer": er_j["buyer"],
+                    "InvoiceType": self.seller_invoice_track_no.type,
+                    "DonateMark": self.donate_mark,
+                    "PrintMark": 'Y' if self.print_mark else 'N',
+                    "RandomNumber": self.random_number,
+                },
+                "Details": self.details,
+                "Amount": self.amounts,
+            }
+        }
+        no = self.get_mig_no()
+        if '1' == J[no]["Main"]["DonateMark"]:
+            J[no]["Main"]["NPOBAN"] = self.npoban
+        if self.carrier_type:
+            J[no]["Main"]["CarrierType"] = self.carrier_type
+            J[no]["Main"]["CarrierId1"] = self.carrier_id1
+            J[no]["Main"]["CarrierId2"] = self.carrier_id2
+        return J
+
+
     def check_before_cancel_einvoice(self):
         return self.content_object.check_before_cancel_einvoice()
 
@@ -1107,6 +1352,11 @@ class EInvoice(models.Model):
     def set_generate_time(self, generate_time):
         if 'generate_time' in self.only_fields_can_update:
             EInvoice.objects.filter(id=self.id).update(generate_time=generate_time)
+
+
+    def set_ei_audited_true(self):
+        if 'ei_audited' in self.only_fields_can_update:
+            EInvoice.objects.filter(id=self.id).update(ei_audited=True)
 
 
     def set_ei_synced_true(self):
@@ -1152,6 +1402,8 @@ class EInvoice(models.Model):
             raise ContentObjectError(_("Content Object: {} has no 'check_before_cancel_einvoice' method").format(self.content_object))
         elif not hasattr(self.content_object, 'post_cancel_einvoice'):
             raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
+        elif 999 <= len(self.details):
+            raise EInvoiceDetailsError(_("Max records in details is 999"))
         elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
@@ -1239,16 +1491,18 @@ class EInvoicePrintLog(models.Model):
 
 
 class CancelEInvoice(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    ei_audited = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    new_einvoice = models.ForeignKey(EInvoice,
-        related_name="new_einvoice_on_cancel_einvoice_set",
-        null=True,
-        on_delete=models.DO_NOTHING)
     @property
     def invoice_date(self):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def track_no(self):
+        return self.einvoice.track_no
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(db_index=True)
@@ -1261,6 +1515,27 @@ class CancelEInvoice(models.Model):
     reason = models.CharField(max_length=20, null=False, db_index=True)
     return_tax_document_number = models.CharField(max_length=60, default='', null=True, blank=True, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    new_einvoice = models.ForeignKey(EInvoice,
+        related_name="new_einvoice_on_cancel_einvoice_set",
+        null=True,
+        on_delete=models.DO_NOTHING)
+    @property
+    def last_batch_einvoice(self):
+        try:
+            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id)
+        except BatchEInvoice.DoesNotExist:
+            return None
+        else:
+            return bei
+
+
+    def __str__(self):
+        return "{}".format(self.einvoice.track_no)
+
+
+    def set_ei_audited_true(self):
+        CancelEInvoice.objects.filter(id=self.id).update(ei_audited=True)
 
 
     def set_ei_synced_true(self):
@@ -1283,6 +1558,9 @@ class CancelEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
+        if not self.mig_type:
+            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+
         if kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
@@ -1291,15 +1569,47 @@ class CancelEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
 
 
+    def get_mig_no(self):
+        no = self.einvoice.get_mig_no()
+        if "C0401" == no:
+            mig = "C0501"
+        else:
+            raise CancelEInvoiceMIGError("MIG for {} is not set".format(no))
+        return mig
+
+
+    def export_json_for_mig(self):
+        mig = self.get_mig_no()
+        J = {mig: {
+            "CancelInvoiceNumber": self.einvoice.track_no,
+            "InvoiceDate": self.einvoice.invoice_date,
+            "BuyerId": self.buyer_identifier,
+            "SellerId": self.seller_identifier,
+            "CancelDate": self.cancel_date,
+            "CancelTime": self.cancel_time,
+            "CancelReason": self.reason,
+            }}
+        if self.return_tax_document_number:
+            J[mig]['ReturnTaxDocumentNumber'] = self.return_tax_document_number
+        if self.remark:
+            J[mig]['Remark'] = self.remark
+        return J
+
+
 
 class VoidEInvoice(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    ei_audited = models.BooleanField(default=False, db_index=True)
+    mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     einvoice = models.ForeignKey(EInvoice, on_delete=models.DO_NOTHING)
-    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
     @property
     def invoice_date(self):
         return self.einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d')
+    @property
+    def track_no(self):
+        return self.einvoice.track_no
     seller_identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
     buyer_identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
     generate_time = models.DateTimeField(db_index=True)
@@ -1311,6 +1621,19 @@ class VoidEInvoice(models.Model):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     reason = models.CharField(max_length=20, null=False, db_index=True)
     remark = models.CharField(max_length=200, default='', null=True, blank=True)
+    new_einvoice = models.ForeignKey(EInvoice, related_name="new_einvoice_on_void_einvoice_set", null=True, on_delete=models.DO_NOTHING)
+    @property
+    def last_batch_einvoice(self):
+        return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id).order_by('id').last()
+
+
+    def __str__(self):
+        return "{}".format(self.einvoice.track_no)
+
+
+    def set_ei_audited_true(self):
+        VoidEInvoice.objects.filter(id=self.id).update(ei_audited=True)
 
 
     def set_ei_synced_true(self):
@@ -1331,6 +1654,9 @@ class VoidEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
+        if not self.mig_type:
+            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+
         if kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
@@ -1338,7 +1664,34 @@ class VoidEInvoice(models.Model):
             super().save(*args, **kwargs)
         UploadBatch.append_to_the_upload_batch(self)
     
+    
+    def get_mig_no(self):
+        no = self.einvoice.get_mig_no()
+        if "C0401" == no:
+            mig = "C0701"
+        else:
+            raise VoidEInvoiceMIGError("MIG for {} is not set".format(no))
+        return mig
 
+
+    def export_json_for_mig(self):
+        mig = self.get_mig_no()
+        J = {mig: {
+            "VoidInvoiceNumber": self.einvoice.track_no,
+            "InvoiceDate": self.einvoice.invoice_date,
+            "BuyerId": self.buyer_identifier,
+            "SellerId": self.seller_identifier,
+            "VoidDate": self.void_date,
+            "VoidTime": self.void_time,
+            "VoidReason": self.reason,
+            }}
+        if self.remark:
+            J[mig]['Remark'] = self.remark
+        return J
+
+
+
+EITurnkeyBatchEndpoint_SUB_RE = re.compile("/EITurnkey/[0-9]+/")
 
 class UploadBatch(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -1347,36 +1700,320 @@ class UploadBatch(models.Model):
     slug = models.CharField(max_length=14, unique=True)
     mig_type = models.ForeignKey(EInvoiceMIG, on_delete=models.DO_NOTHING)
     kind_choices = (
-        ("wp", _("Wait for printed")),
-        ("cp", _("Could print")),
-        ("np", _("No need to print")),
-        ("57", _("Wait for C0501 or C0701")),
+        ("wp", _("Wait for printed")),          # to EInvoice
+        ("cp", _("Could print")),               # to EInvoice
+        ("np", _("No need to print")),          # to EInvoice
+        ("57", _("Wait for C0501 or C0701")),   # to EInvoice
 
-        ("w4", _("Wait for C0401")),
-        ("54", _("Wait for C0501 or C0401")),
+        ("w4", _("Wait for C0401")),            # to CancelEInvoice or VoidEInvoice
+        ("54", _("Wait for C0501 or C0401")),   # to VoidEInvoice
+
+        ("E",  "E0401 ~ E0501"),
     )
-    kind = models.CharField(max_length=2)
+    kind = models.CharField(max_length=2, choices=kind_choices)
     executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
     status_choices = (
         ("0", _("Collecting")),
         ("1", _("Waiting for trigger(Stop Collecting)")),
-        ("2", _("Uploading to TKW")),
-        ("3", _("Uploaded to TKW")),
-        ("p", _("Preparing for EI(P)")),
-        ("g", _("Uploaded to EI or Downloaded from EI(G)")),
-        ("e", _("E Error for EI process(E)")),
-        ("i", _("I Error for EI process(I)")),
-        ("c", _("Successful EI process(C)")),
-        ("m", _("Swith to Successful EI process manually(S-C)")),
+        ("2", _("Noticed to TKW")),
+        ("3", _("Exporting E-Invoice JSON")),
+        ("4", _("Uploaded to TKW")),
+        ("f", _("Finish")),
     )
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
+    ei_turnkey_batch_id = models.PositiveBigIntegerField(default=0)
+    @property
+    def batch_einvoice_count(self):
+        return self.batcheinvoice_set.count()
+    history = HistoricalRecords()
+
+
+    def __str__(self):
+        return "{}-{}@{}".format(self.slug, self.mig_type, self.kind)
+
+
+    def get_mig_no(self):
+        return self.mig_type.no
 
 
     @classmethod
-    def append_to_the_upload_batch(cls, content_object):
+    def status_check(cls, statuss=[]):
+        ubs = []
+        for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
+            while True:
+                function_name = 'check_in_{}_status_then_update_to_the_next'.format(ub.status)
+                pair = [ub, function_name, ub.status]
+                if hasattr(ub, function_name):
+                    getattr(*pair[:2])()
+                    pair.append(ub.status)
+                    ubs.append(pair)
+                if 3 == len(pair) or pair[2] == pair[3]:
+                    break
+        return ubs
+
+
+    def update_to_new_status(self, new_status):
+        status_list = [_i[0] for _i in self.status_choices]
+        if new_status and 1 == status_list.index(new_status) - status_list.index(self.status):
+            self.status = new_status
+            self.save()
+        else:
+            raise Exception('Wrong status flow: {}=>{}'.format(self.status, new_status))
+
+
+    def check_in_4_status_then_update_to_the_next(self, NEXT_STATUS='f'):
+        if '4' != self.status: return
+
+        audit_type = AuditType.objects.get(name="EI_PROCESSING")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+        url = (EITurnkeyBatchEndpoint_SUB_RE.sub("/EITurnkeyBatch/{}/".format(self.ei_turnkey_batch_id),
+                                                self.turnkey_service.tkw_endpoint)
+                + '{action}/'.format(action="get_batch_einvoice_id_status_result_code_set_from_ei_turnkey_batch_einvoices")
+        )
+        counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+        try:
+            response = requests.get(url,
+                                    params=payload,
+                                    headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "UploadBatch.check_in_4_status_then_update_to_the_next",
+                "url": url,
+                "position at": "requests.get(...)",
+                "params": payload,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                is_finish = self.update_batch_einvoice_status_result_code(
+                   status=result_json['status'],
+                   result_code=result_json['result_code'],
+                )
+                if is_finish:
+                    self.update_to_new_status(NEXT_STATUS)
+                    audit_type = AuditType.objects.get(name="EI_PROCESSED")
+                    audit_log.type = audit_type
+                audit_log.is_error = False
+                audit_log.save()
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
+
+    def check_in_3_status_then_update_to_the_next(self, NEXT_STATUS='4'):
+        if '3' != self.status: return
+
+        audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+
+        bodys = [(bei.id,
+                  bei.begin_time.strftime("%Y-%m-%d %H:%M:%S%z"),
+                  bei.end_time.strftime("%Y-%m-%d %H:%M:%S%z"),
+                  bei.track_no,
+                  bei.body) for bei in self.batcheinvoice_set.order_by('object_id')]
+        gz_bodys = zlib.compress(json.dumps(bodys).encode('utf-8'))
+        url = self.turnkey_service.tkw_endpoint + '{action}/'.format(action="upload_eiturnkey_batch_einvoice_bodys")
+        counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+        data = {"slug": self.slug}
+        files = {"gz_bodys": gz_bodys}
+        try:
+            response = requests.post(url,
+                                     params=payload,
+                                     data=data,
+                                     files=files,
+                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "UploadBatch.check_in_3_status_then_update_to_the_next",
+                "url": url,
+                "position at": "requests.post(...)",
+                "params": payload,
+                "data": data,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+            audit_log.type = audit_type
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                audit_log.is_error = False
+                audit_log.save()
+                self.update_to_new_status(NEXT_STATUS)
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
+
+    def check_in_2_status_then_update_to_the_next(self, NEXT_STATUS='3'):
+        if '2' != self.status: return
+
+        audit_type = AuditType.objects.get(name="TEA_CEC_PROCESSING")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+
+        bei_saved = []
+        for bei in self.batcheinvoice_set.filter(body='').order_by('object_id'):
+            bei.body = bei.content_object.export_json_for_mig()
+            try:
+                bei.save()
+            except:
+                audit_log.is_error = True
+                audit_log.log = {
+                    "function": "UploadBatch.check_in_2_status_then_update_to_the_next",
+                    "position at": "bei.save()",
+                    "problem bei": str(bei),
+                    "exception": str(e)
+                }
+                audit_log.save()
+                return
+            else:
+                bei_saved.append(str(bei))
+        audit_log.log = {
+            "saved_count": len(bei_saved),
+            "objects": bei_saved,
+        }
+        audit_log.save()
+        self.update_to_new_status(NEXT_STATUS)
+
+
+    def check_in_1_status_then_update_to_the_next(self, NEXT_STATUS='2'):
+        if '1' != self.status: return
+
+        audit_type = AuditType.objects.get(name="TEA_CEC_PROCESSING")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self.turnkey_service,
+            content_object=self,
+            is_error=False,
+        )
+        url = self.turnkey_service.tkw_endpoint + '{action}/'.format(action="create_eiturnkey_batch")
+        counter_based_otp_in_row = ','.join(self.turnkey_service.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+        data = {
+            "slug": self.slug,
+            "mig": self.get_mig_no(),
+        }
+        try:
+            response = requests.post(url,
+                                     params=payload,
+                                     data=data,
+                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "UploadBatch.check_in_1_status_then_update_to_the_next",
+                "url": url,
+                "position at": "requests.post(...)",
+                "params": payload,
+                "data": data,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            audit_type = AuditType.objects.get(name="UPLOAD_TO_EITURNKEY")
+            audit_log.type = audit_type
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                audit_log.is_error = False
+                audit_log.save()
+                self.update_to_new_status(NEXT_STATUS)
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
+            if 'ei_turnkey_batch_id' in result_json and result_json['ei_turnkey_batch_id']:
+                self.ei_turnkey_batch_id = result_json['ei_turnkey_batch_id']
+                self.save()
+
+
+    def check_in_0_status_then_update_to_the_next(self, NEXT_STATUS='1'):
+        if '0' != self.status: return
+
+        if self.kind in ['wp', 'cp', 'np']:
+            object_ids = self.batcheinvoice_set.all().values('object_id')
+            ids = [_i['object_id'] for _i in object_ids]
+            eis = EInvoice.objects.filter(id__in=ids)
+            if len(object_ids) != eis.count():
+                raise Exception('Some E-Invoices disappear')
+        else:
+            content_object = self.batcheinvoice_set.get().content_object
+        if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
+            self.update_to_new_status(NEXT_STATUS)
+        elif ('cp' == self.kind
+            and (not eis.filter(print_mark=False).exists()
+                or not eis.filter(generate_time__gte=now() - COULD_PRINT_TIME_MARGIN).exists())
+            ):
+            self.update_to_new_status(NEXT_STATUS)
+        elif ('np' == self.kind
+            and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
+            self.update_to_new_status(NEXT_STATUS)
+        elif '57' == self.kind:
+            check_C0501 = False
+            check_C0701 = False
+            if (not content_object.new_einvoice_on_cancel_einvoice_set.exists()
+                or content_object.new_einvoice_on_cancel_einvoice_set.get().ei_synced):
+                check_C0501 = True
+
+            if (not content_object.new_einvoice_on_void_einvoice_set.exists()
+                or content_object.new_einvoice_on_void_einvoice_set.get().ei_synced):
+                check_C0701 = True
+            
+            if check_C0501 and check_C0701:
+                self.update_to_new_status(NEXT_STATUS)
+        elif 'w4' == self.kind and content_object.einvoice.ei_synced:
+            self.update_to_new_status(NEXT_STATUS)
+        elif '54' == self.kind:
+            check_C0401 = False
+            check_C0501 = False
+            if content_object.einvoice.ei_synced:
+                check_C0401 = True
+            
+            if (not content_object.einvoice.canceleinvoice_set.exists()
+                or content_object.einvoice.canceleinvoice_set.get().ei_synced):
+                check_C0501 = True
+            
+            if check_C0401 and check_C0501:
+                self.update_to_new_status(NEXT_STATUS)
+        elif 'E' == self.kind:
+            self.update_to_new_status(NEXT_STATUS)
+
+
+    @classmethod
+    def append_to_the_upload_batch(cls, content_object, executor=None):
         ct = ContentType.objects.get_for_model(content_object)
-        if content_object.ei_synced:
-            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='0000').batch
+        if hasattr(content_object, "ei_synced") and content_object.ei_synced:
+            return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, status='c').batch
         elif BatchEInvoice.objects.filter(content_type=ct, object_id=content_object.id, result_code='').exists():
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
 
@@ -1386,7 +2023,7 @@ class UploadBatch(models.Model):
             _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
             start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
             end_time = start_time + datetime.timedelta(days=1)
-            if content_object.is_canceled or content_object.is_voided:
+            if content_object.new_einvoice_on_cancel_einvoice_set.exists() or content_object.new_einvoice_on_void_einvoice_set.exists():
                 kind = '57'
             elif '3J0002' == content_object.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != content_object.buyer_identifier:
                 kind = 'cp'
@@ -1397,12 +2034,38 @@ class UploadBatch(models.Model):
             else:
                 kind = 'wp'
 
-            if UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).exists():
-                ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status="0", create_time__gte=start_time, create_time__lt=end_time).get()
+            if kind in ["wp", "cp", "np"] and UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                                                         mig_type=mig_type,
+                                                                         kind=kind,
+                                                                         status="0",
+                                                                         create_time__gte=start_time, create_time__lt=end_time).exists():
+                _ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                                 mig_type=mig_type,
+                                                 kind=kind,
+                                                 status="0",
+                                                 create_time__gte=start_time,
+                                                 create_time__lt=end_time).order_by('-id')[0]
+                if _ub.batcheinvoice_set.count() < 1000:
+                    ub = _ub
+                else:
+                    ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                     mig_type=mig_type,
+                                     kind=kind,
+                                     status='0')
+                    ub.save()
             else:
-                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, mig_type=mig_type, kind=kind, status='0')
+                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                                 mig_type=mig_type,
+                                 kind=kind,
+                                 status='0')
                 ub.save()
-            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be = BatchEInvoice(batch=ub,
+                               content_object=content_object,
+                               begin_time=content_object.seller_invoice_track_no.begin_time,
+                               end_time=content_object.seller_invoice_track_no.end_time,
+                               track_no=content_object.track_no,
+                               body="",
+                               )
             be.save()
             return ub
         elif content_object._meta.model_name in ['canceleinvoice', 'voideinvoice']:
@@ -1412,15 +2075,136 @@ class UploadBatch(models.Model):
             elif 'voideinvoice' == content_object._meta.model_name:
                 mig_type = EInvoiceMIG.objects.get(no='C0701')
                 kind = '54'
-            slug_prefix = '{}{}'.format(mig_type.no[2], content_object.track_no)
-            slug = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
-            ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web, slug=slug, mig_type=mig_type, kind=kind, status='0')
+            slug_prefix = '{}{}'.format(mig_type.no[2], content_object.einvoice.track_no)
+            index = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
+            slug = "{}{}".format(slug_prefix, index)
+            ub = UploadBatch(turnkey_service=content_object.einvoice.seller_invoice_track_no.turnkey_web,
+                             slug=slug,
+                             mig_type=mig_type,
+                             kind=kind,
+                             status='0')
             ub.save()
-            be = BatchEInvoice(batch=ub, content_object=content_object)
+            be = BatchEInvoice(batch=ub,
+                               content_object=content_object,
+                               begin_time=content_object.einvoice.seller_invoice_track_no.begin_time,
+                               end_time=content_object.einvoice.seller_invoice_track_no.end_time,
+                               track_no=content_object.einvoice.track_no,
+                               body="",
+                               )
+            be.save()
+            return ub
+        elif content_object._meta.model_name in ['sellerinvoicetrackno',]:
+            mig_type = EInvoiceMIG.objects.get(no='E0402')
+            kind = 'E'
+            slug_prefix = "{year_month}{track}{type}".format(year_month=content_object.year_month,
+                                                             track=content_object.track,
+                                                             type=content_object.type)
+            slug = slug_prefix + "{:05d}".format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
+
+            ub = UploadBatch(turnkey_service=content_object.turnkey_web,
+                             slug=slug,
+                             mig_type=mig_type,
+                             kind=kind,
+                             status='0',
+                             executor=executor,
+                             )
+            ub.save()
+            be = BatchEInvoice(batch=ub,
+                               content_object=content_object,
+                               begin_time=content_object.begin_time,
+                               end_time=content_object.end_time,
+                               track_no="{}{}".format(content_object.track, content_object.begin_no),
+                               body="",
+                               )
             be.save()
             return ub
         else:
             return None
+
+
+    def update_batch_einvoice_status_result_code(self, status={}, result_code={}):
+        lg = logging.getLogger("taiwan_einvoice")
+        for rc, ids in result_code.items():
+            beteis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beteis.count():
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+            else:
+                beteis.update(result_code=rc)
+        
+        ids_in_c = []
+        status['__else__'] = status['__else__'].lower()
+        finish_status = ['i', 'e', 'c']
+        is_finish = True
+        exclude_ids = []
+        lg.debug("status: {}".format(status))
+        for s, ids in status.items():
+            lg.debug("UploadBatch.update_batch_einvoice_status_result_code {}: {}".format(s, ids))
+
+            s = s.lower()
+            if "__else__" == s:
+                continue
+            beteis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beteis.count():
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+            else:
+                beteis.update(status=s)
+                if 'c' == s and not ids_in_c:
+                    ids_in_c = ids
+
+            exclude_ids.extend(ids)
+            if s not in finish_status:
+                is_finish = False
+        beteis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
+        if beteis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
+            raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
+        else:
+            beteis.update(status=status['__else__'])
+            if 'c' == status['__else__']:
+                ids_in_c = beteis.values_list('id', named=False, flat=True)
+
+        if ids_in_c:
+            bei = self.batcheinvoice_set.get(id=ids_in_c[0])
+            content_model = bei.content_type.model_class()
+            if content_model in ["EInvoice", "CancelEInvoice", "VoidEInvoice"]:
+                content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c
+                                                          ).values_list('object_id',
+                                                                        named=False,
+                                                                        flat=True)
+                lg.debug("content_ids: {}".format(content_ids))
+                content_model.objects.filter(id__in=content_ids).update(ei_synced=True)
+
+        if status['__else__'] not in finish_status:
+            is_finish = False
+        
+        for error_bei in self.batcheinvoice_set.filter(Q(status__in=("e", "i"))
+                                                        |~Q(result_code="")
+                                                        ):
+            target_audience_type = "p"
+            title = _("Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}").format(
+                slug=self.slug,
+                content_object=str(error_bei.content_object),
+                target_audience=_("General User") if "g" == target_audience_type else _("Programmer"),
+            )
+            body = _("""Error status: "{status}"
+Result code: "{result_code}"
+            """).format(status=bei.status, result_code=bei.result_code)
+
+            te_alarm, new_creation = TEAlarm.objects.get_or_create(
+                turnkey_service=self.turnkey_service,
+                target_audience_type=target_audience_type,
+                title=title,
+                body=body,
+                content_type=ContentType.objects.get_for_model(self),
+                object_id=self.id,
+            )
+            only_with_perms_in = {"g": ("view_te_alarm_for_general_user", "view_te_alarm_for_programmer", ),
+                                    "p": ("view_te_alarm_for_programmer", ),
+                                    }[target_audience_type]
+            notified_users = get_users_with_perms(self, only_with_perms_in=only_with_perms_in)
+            if notified_users:
+                te_alarm.notified_users.add(notified_users)
+
+        return is_finish
 
 
     def generate_slug(self):
@@ -1447,17 +2231,432 @@ class BatchEInvoice(models.Model):
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
     object_id = models.PositiveIntegerField(default=0)
     content_object = GenericForeignKey('content_type', 'object_id')
-    body_json = models.TextField()
+    begin_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     @property
-    def body(self):
-        if not self.body_json:
-            return {}
-        else:
-            return json.loads(self.body_json)
-    @body.setter
-    def body(self, DICT):
-        self.body_json = json.dumps(DICT)
-        self.save()
+    def year_month_range(self):
+        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
+        end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
+        return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
+    track_no = models.CharField(max_length=10)
+    body = models.JSONField()
+    status_choices = (
+        ("", _("Waiting")),
+        ("p", _("Preparing for EI(P)")),
+        ("g", _("Uploaded to EI or Downloaded from EI(G)")),
+        ("e", _("E Error for EI process(E)")),
+        ("i", _("I Error for EI process(I)")),
+        ("c", _("Successful EI process(C)")),
+    )
+    status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     result_code = models.CharField(max_length=5, default='', db_index=True)
     pass_if_error = models.BooleanField(default=False)
+    history = HistoricalRecords()
+    @property
+    def last_einvoices_content_type(self):
+        eict, new_creation = EInvoicesContentType.objects.get_or_create(
+            content_type=self.content_type,
+            object_id=self.object_id,
+            status=self.status,
+        )
+        return eict
 
+
+    def __str__(self):
+        return "BatchEInvoice {}. {}".format(self.id, self.content_object)
+
+
+
+class AuditType(models.Model):
+    name_choices = (
+        ("TEA_CEC_PROCESSING", "TEA/CEC Processing"),
+        ("UPLOAD_TO_EITURNKEY", "Upload to EITurnkey"),
+        ("EITURNKEY_PROCESSING", "EITurnkey Processing"),
+        ("EI_PROCESSING", "EI Processing"),
+        ("EI_PROCESSED", "EI Processed"),
+        ("EI_SUMMARY_RESULT", "EI Summary Result"),
+    )
+    name = models.CharField(max_length=32, choices=name_choices, unique=True)
+
+
+
+class AuditLog(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    type = models.ForeignKey(AuditType, on_delete=models.DO_NOTHING)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    content_type = models.ForeignKey(ContentType, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    is_error = models.BooleanField(default=False)
+    log = models.JSONField()
+
+
+
+class EInvoicesContentType(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+    status_choices = list(BatchEInvoice.status_choices) + [("-", _("BatchEInvoice does exist"))]
+    status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
+
+
+
+class TEAlarm(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    target_audience_type_choices = (
+        ("g", _("General User"), ),
+        ("p", _("Programmer"), ),
+    )
+    target_audience_type = models.CharField(max_length=1, choices=target_audience_type_choices)
+    notified_users = models.ManyToManyField(User)
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
+    object_id = models.PositiveIntegerField(default=0)
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
+
+def _dict_value_plus_1(dictionary, key):
+    if key in dictionary: dictionary[key] += 1
+    else: dictionary[key] = 1
+
+
+
+class SummaryReport(models.Model):
+    LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE = _("The last Batch E-Invoice does not exist!")
+    NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE = _("The ids in Summary Result do not match BatchEInvoice!")
+    EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE = _("EI Daily Summary Result report it as failed record!")
+
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    begin_time = models.DateTimeField(db_index=True)
+    end_time = models.DateTimeField(db_index=True)
+    report_type_choices = (
+        ("h", _("Hourly Sync")),
+        ("d", _("Daily Sync")),
+        ("w", _("Weekly Sync")),
+        ("m", _("Monthly Sync")),
+        ("o", _("Odd month ~ Even month Sync")),
+        ("y", _("Yearly Sync")),
+        ("a", _("Daily Audit")),
+        ("E", _("Daily Summary from EI")),
+    )
+    report_type = models.CharField(max_length=1, choices=report_type_choices, db_index=True)
+    problems = models.JSONField(default={})
+
+    good_count = models.SmallIntegerField(default=0)
+    failed_count = models.SmallIntegerField(default=0)
+    resolved_count = models.SmallIntegerField(default=0)
+
+    good_counts = models.JSONField(default={})
+    failed_counts = models.JSONField(default={})
+    resolved_counts = models.JSONField(default={})
+
+    good_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_good_object")
+    failed_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_failed_object")
+    resolved_objects = models.ManyToManyField(EInvoicesContentType, related_name="summary_report_set_as_resolved_object")
+
+    is_resolved = models.BooleanField(default=False)
+    resolved_note = models.TextField(default="")
+    resolver = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
+
+    te_alarms = GenericRelation(TEAlarm)
+
+    class Meta:
+        unique_together = (("turnkey_service", "begin_time", "report_type", ), )
+
+
+    
+    @classmethod
+    def generate_report_and_notice(cls, turnkey_service, report_type, begin_time, end_time):
+        if now() - end_time < MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
+            return None
+        lg = logging.getLogger("taiwan_einvoice")
+        translation.activate(settings.LANGUAGE_CODE)
+        if "a" == report_type:
+            ei_check_type = 'ei_audited'
+        else:
+            ei_check_type = 'ei_synced'
+        model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service, 
+                                                 create_time__gte=begin_time,
+                                                 create_time__lt=end_time).order_by('id'),
+                         CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service,
+                                                       create_time__gte=begin_time,
+                                                       create_time__lt=end_time).order_by('id'),
+                         VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service,
+                                                     create_time__gte=begin_time,
+                                                     create_time__lt=end_time).order_by('id')]
+        problems = {}
+        good_count = 0
+        failed_count = 0
+        resolved_count = 0
+        good_counts = {}
+        failed_counts = {}
+        resolved_counts = {}
+        good_objects = []
+        failed_objects = []
+        resolved_objects = []
+        try:
+            summary_report = cls.objects.get(turnkey_service=turnkey_service,
+                                             report_type=report_type,
+                                             begin_time=begin_time,
+                                             end_time=end_time)
+        except cls.DoesNotExist:
+            summary_report = cls(turnkey_service=turnkey_service,
+                                 report_type=report_type,
+                                 begin_time=begin_time,
+                                 end_time=end_time)
+            
+            new_creation = True
+        else:
+            new_creation = False
+        if not new_creation and (summary_report.failed_count <= 0
+            or summary_report.is_resolved
+            ):
+            return summary_report
+
+        vars_list_for_ei_check_type_true_false = {True: {
+                                                    "count_var": good_count,
+                                                    "counts_var": good_counts,
+                                                    "objects_list": good_objects,
+                                              },
+                                              False: {
+                                                    "count_var": failed_count,
+                                                    "counts_var": failed_counts,
+                                                    "objects_list": failed_objects,
+                                              }}
+        if new_creation:
+            for mos in model_objects:
+                for ture_or_false, _vars in vars_list_for_ei_check_type_true_false.items():
+                    for m in mos.filter(**{ei_check_type: ture_or_false}):
+                        _vars["count_var"] += 1
+                        _dict_value_plus_1(_vars["counts_var"], m.get_mig_no())
+                        last_batch_einvoice = m.last_batch_einvoice
+                        if last_batch_einvoice:
+                            last_einvoices_content_type = last_batch_einvoice.last_einvoices_content_type
+                        else:
+                            last_einvoices_content_type = EInvoicesContentType(content_type=ContentType.objects.get_for_model(m),
+                                                                               object_id=m.id,
+                                                                               status="-",
+                                                                              )
+                            last_einvoices_content_type.save()
+                            problem_key = "{mig_no}-{track_no}-{einvoices_content_type_id}".format(
+                                mig_no=m.get_mig_no(),
+                                track_no=m.track_no,
+                                einvoices_content_type_id=last_einvoices_content_type.id,
+                            )
+                            problems.setdefault(problem_key, []).append(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
+                        _vars["objects_list"].append(last_einvoices_content_type)
+            good_count = vars_list_for_ei_check_type_true_false[True]["count_var"]
+            failed_count = vars_list_for_ei_check_type_true_false[False]["count_var"]
+            if 0 >= good_count + failed_count:
+                return None
+            summary_report.problems = problems
+            summary_report.good_count = good_count
+            summary_report.good_counts = vars_list_for_ei_check_type_true_false[True]["counts_var"]
+            summary_report.resolved_count = resolved_count
+            summary_report.failed_count = failed_count
+            summary_report.failed_counts = vars_list_for_ei_check_type_true_false[False]["counts_var"]
+            summary_report.resolved_counts = resolved_counts
+            summary_report.save()
+            summary_report.good_objects.add(*vars_list_for_ei_check_type_true_false[True]["objects_list"])
+            if vars_list_for_ei_check_type_true_false[False]["objects_list"]:
+                summary_report.failed_objects.add(*vars_list_for_ei_check_type_true_false[False]["objects_list"])
+            summary_report.notice(new_creation=True)
+        else:
+            for eict in summary_report.failed_objects.all():
+                if getattr(eict.content_object, ei_check_type):
+                    resolved_count += 1
+                    _dict_value_plus_1(resolved_counts, eict.content_object.get_mig_no())
+                    resolved_objects.append(eict.content_object.last_batch_einvoice.last_einvoices_content_type)
+            summary_report.resolved_count = resolved_count
+            summary_report.resolved_counts = resolved_counts
+            if summary_report.resolved_count >= summary_report.failed_count:
+                summary_report.is_resolved = True
+            summary_report.save()
+            if resolved_objects:
+                summary_report.resolved_objects.add(*resolved_objects)
+            summary_report.notice(new_creation=False)
+
+        return summary_report
+    
+
+    @classmethod
+    def auto_generate_report(cls, generate_at_time=None):
+        if not generate_at_time:
+            generate_at_time = now()
+        timedelta_d = {
+            "h": datetime.timedelta(minutes=91),
+            "d": datetime.timedelta(hours=24 + 8),
+            "a": datetime.timedelta(hours=24 + 8),
+            "w": datetime.timedelta(hours=24 * 7 + 9),
+            "m": datetime.timedelta(hours=24 * 31 + 10),
+            "o": datetime.timedelta(hours=24 * 61 + 11),
+            "y": datetime.timedelta(hours=24 * 365 + 12),
+        }
+        for turnkey_service in TurnkeyService.objects.all().order_by('id'):
+            for report_type, report_type_str in cls.report_type_choices:
+                if not timedelta_d.get(report_type, None):
+                    continue
+                generate_for_time = (generate_at_time - timedelta_d[report_type]).astimezone(TAIPEI_TIMEZONE)
+                _Y, _m, _d, _H, _M, _S = generate_for_time.timetuple()[:6]
+                if "h" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, _H, 0, 0))
+                    end_time = begin_time + datetime.timedelta(minutes=60)
+                elif "d" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                    end_time = begin_time + datetime.timedelta(hours=24)
+                elif "a" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0)) - datetime.timedelta(hours=24)
+                    end_time = begin_time + datetime.timedelta(hours=24)
+                elif "w" == report_type:
+                    _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, _d, 0, 0, 0))
+                    begin_time = _begin_time - datetime.timedelta(days=_begin_time.weekday())
+                    end_time = begin_time + datetime.timedelta(days=7)
+                elif "m" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
+                    _end_time = begin_time + datetime.timedelta(days=45)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
+                elif "o" == report_type:
+                    if 1 == _m % 2:
+                        begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0))
+                    else:
+                        _begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, _m, 1, 0, 0, 0)) - datetime.timedelta(days=10)
+                        begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_begin_time.timetuple()[:2], 1))
+                    _end_time = begin_time + datetime.timedelta(days=75)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:2], 1))
+                elif "y" == report_type:
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(_Y, 1, 1, 0, 0, 0))
+                    _end_time = begin_time + datetime.timedelta(days=540)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(*_end_time.timetuple()[:1], 1, 1))
+
+                if now() - end_time >= MARGIN_TIME_BETWEEN_END_TIME_AND_NOW:
+                    cls.generate_report_and_notice(turnkey_service, report_type, begin_time, end_time)
+    
+
+    def notice(self, new_creation=True):
+        if self.failed_count <= 0 or self.resolved_count >= self.failed_count:
+            return
+
+        translation.activate(settings.LANGUAGE_CODE)
+        target_audience_types = {}
+        for failed_einvoice_ct in self.failed_objects.all():
+            if self.resolved_objects.filter(id=failed_einvoice_ct.id):
+                continue
+
+            mig_no = failed_einvoice_ct.content_object.get_mig_no()
+            track_no = failed_einvoice_ct.content_object.track_no
+            fe_key = "{mig_no}-{track_no}-{einvoices_content_type_id}".format(
+                mig_no=mig_no,
+                track_no=track_no,
+                einvoices_content_type_id=failed_einvoice_ct.id,
+            )
+
+            last_batch_einvoice = failed_einvoice_ct.content_object.last_batch_einvoice
+            if "h" == self.report_type and last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
+                target_audience_types.setdefault("g", {})[fe_key] = _("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no)
+            elif "a" == self.report_type:
+                target_audience_types.setdefault("p", {})[fe_key] = self.EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE
+            elif not last_batch_einvoice:
+                target_audience_types.setdefault("p", {})[fe_key] = self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE
+            elif last_batch_einvoice and last_batch_einvoice.batch.kind in ["cp", "np"]:
+                target_audience_types.setdefault("p", {})[fe_key] = _("Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})").format(track_no=track_no)
+            else:
+                target_audience_types.setdefault("p", {})[fe_key] = _("The {track_no}@{mig_no} has result_code: {status}: '{result_code}'").format(
+                    track_no=track_no,
+                    mig_no=mig_no,
+                    status=last_batch_einvoice.status,
+                    result_code=last_batch_einvoice.result_code,
+                )
+        summary_report_problems = self.problems
+        for target_audience_type, errors_d in target_audience_types.items():
+            _errors_keys = list(errors_d.keys())
+            _errors_keys.sort(key=lambda x: x.split('-')[1])
+            _bodys = []
+            for _ek in _errors_keys:
+                _bodys.append(errors_d[_ek])
+                if _ek in summary_report_problems:
+                    if errors_d[_ek] not in summary_report_problems[_ek]:
+                        summary_report_problems[_ek].append(errors_d[_ek])
+                else:
+                    summary_report_problems[_ek] = [errors_d[_ek]]
+            body = "\n\n".join(_bodys)
+            title = _("Failed-{ei_check_type} E-Invoice(s) in {name} summary report({report_type}@{begin_time}) for {target_audience}").format(
+                ei_check_type=_("Audit") if "a" == self.report_type else _("Sync"),
+                name=self.turnkey_service.name,
+                report_type=self.get_report_type_display(),
+                begin_time=self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
+                target_audience=_("General User") if "g" == target_audience_type else _("Programmer"),
+            )
+
+            te_alarm, new_creation = TEAlarm.objects.get_or_create(
+                turnkey_service=self.turnkey_service,
+                target_audience_type=target_audience_type,
+                title=title,
+                body=body,
+                content_type=ContentType.objects.get_for_model(self),
+                object_id=self.id,
+            )
+            only_with_perms_in = {"g": ("view_te_alarm_for_general_user", "view_te_alarm_for_programmer", ),
+                                  "p": ("view_te_alarm_for_programmer", ),
+                                 }[target_audience_type]
+            notified_users = get_users_with_perms(self, only_with_perms_in=only_with_perms_in)
+            if notified_users:
+                te_alarm.notified_users.add(notified_users)
+        self.problems = summary_report_problems
+        self.save()
+
+
+    def generate_ei_daily_summary_report(self, summary_result):
+        sr = self
+        problems = sr.problems
+        for k in ["total_count", "good_count", "failed_count"]:
+            setattr(sr, k, summary_result[k])
+        field_d = {
+            "good_batch_einvoice_ids": "good_objects",
+            "failed_batch_einvoice_ids": "failed_objects",
+        }
+        for tk in ["good_batch_einvoice_ids", "failed_batch_einvoice_ids"]:
+            beis = BatchEInvoice.objects.filter(id__in=summary_result[tk])
+            if beis.count() != summary_result[tk]:
+                if tk in problems:
+                    problems[tk].append(str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE))
+                else:
+                    problems[tk] = [str(sr.NOT_MATCH_BETWEEN_SUMMARY_RESULT_AND_BATCH_EINVOICE_MESSAGE)]
+            einvoices_content_types = [_bei.last_einvoices_content_type for _bei in beis]
+            remove_ects = []
+            for _ect in getattr(sr, field_d[tk]).all():
+                if _ect not in einvoices_content_types:
+                    remove_ects.append(_ect)
+            add_ects = []
+            for _ect in einvoices_content_types:
+                if not getattr(sr, field_d[tk]).filter(id=_ect.id).exists():
+                    add_ects.append(_ect)
+            if remove_ects:
+                getattr(sr, field_d[tk]).remove(*remove_ects)
+                for _ect in remove_ects:
+                    _ect.content_object.ei_audited = False
+                    _ect.content_object.save()
+            if add_ects:
+                getattr(sr, field_d[tk]).add(*add_ects)
+                if "good_batch_einvoice_ids" == tk:
+                    for _ect in add_ects:
+                        _ect.content_object.set_ei_audited_true()
+        sr.problems = problems
+        good_counts = {}
+        for good_object in sr.good_objects.all():
+            _dict_value_plus_1(good_counts, good_object.content_object.get_mig_no())
+        failed_counts = {}
+        for failed_object in sr.failed_objects.all():
+            _dict_value_plus_1(failed_counts, failed_object.content_object.get_mig_no())
+        sr.good_counts = good_counts
+        sr.failed_counts = failed_counts
+        if not sr.problems and sr.failed_count <= 0:
+            sr.is_resolved = True
+        sr.save()
+        sr.notice()

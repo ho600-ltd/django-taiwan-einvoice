@@ -1,0 +1,140 @@
+{% extends 'turnkey_wrapper/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{% static "turnkey_wrapper/TURNKEY_MESSAGE_LOG_list.js" %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="MESSAGE_DTS__gte">{% trans "MESSAGE_DTS greater than" %}</label>
+                    <div class="input-group date" id="MESSAGE_DTS__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#MESSAGE_DTS__gte"
+                            name="MESSAGE_DTS__gte" id="id_MESSAGE_DTS__gte" />
+                        <div class="input-group-append" data-target="#MESSAGE_DTS__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="MESSAGE_DTS__lt">{% trans "MESSAGE_DTS less than" %}</label>
+                    <div class="input-group date" id="MESSAGE_DTS__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#MESSAGE_DTS__lt"
+                            name="MESSAGE_DTS__lt" id="id_MESSAGE_DTS__lt" />
+                        <div class="input-group-append" data-target="#MESSAGE_DTS__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="SEQNO__icontains">{% trans "SEQNO contains" %}</label>
+                    <div class="input-group" id="SEQNO__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="SEQNO__icontains" id="id_SEQNO__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="SUBSEQNO__icontains">{% trans "SUBSEQNO contains" %}</label>
+                    <div class="input-group" id="SUBSEQNO__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="SUBSEQNO__icontains" id="id_SUBSEQNO__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="STATUS">{% trans "STATUS" %}</label>
+                    <div class="input-group" id="STATUS" data-target-input="nearest">
+                        <select class="form-control" name="STATUS" id="id_STATUS">
+                            <option value=""></option>
+                            {% for sc in ei_statuss %}
+                                <option value="{{ sc }}">{{ sc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="MESSAGE_TYPE">{% trans "MESSAGE_TYPE" %}</label>
+                    <div class="input-group" id="MESSAGE_TYPE" data-target-input="nearest">
+                        <select class="form-control" name="MESSAGE_TYPE" id="id_MESSAGE_TYPE">
+                            <option value=""></option>
+                            {% for mn in mig_nos %}
+                                <option value="{{ mn }}">{{ mn }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="FROM_ROUTING_ID">{% trans "FROM_ROUTING_ID" %}</label>
+                    <div class="input-group" id="FROM_ROUTING_ID" data-target-input="nearest">
+                        <select class="form-control" name="FROM_ROUTING_ID" id="id_FROM_ROUTING_ID">
+                            <option value=""></option>
+                            {% for fc in from_configs %}
+                                <option value="{{ fc.ROUTING_ID }}">{{ fc.ROUTING_ID }}({{ fc.PARTY_ID }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="INVOICE_IDENTIFIER__icontains">{% trans "INVOICE_IDENTIFIER contains" %}</label>
+                    <div class="input-group" id="INVOICE_IDENTIFIER__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="INVOICE_IDENTIFIER__icontains" id="id_INVOICE_IDENTIFIER__icontains" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}

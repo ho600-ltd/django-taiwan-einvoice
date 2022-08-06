@@ -37,6 +37,31 @@ $(function () {
 
     };
 
+    TAIWAN_EINVOICE_SITE.prototype.convert_class_number = function ($self) {
+        return function() {
+            var $obj = $(this);
+            var s = $self.convert_number_str_with_comma($obj.attr('value'));
+            $obj.text(s);
+        };
+    };
+
+    TAIWAN_EINVOICE_SITE.prototype.convert_number_str_with_comma = function (number_str) {
+        number_str = String(number_str).toString().replace(/[^0-9\-\+\.]/g, '').replace(/\.0+$/, '');
+        var list = number_str.split('.');
+        var i = list[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        if (undefined == list[1]) {
+            number_str = i;
+        } else {
+            number_str = i + '.' + list[1].substr(0, 3);
+        }
+        number_str = "" == number_str ? "0" : number_str;
+        if (/^(0$|0\.)/.test(number_str)) {
+            return number_str;
+        } else {
+            return number_str.replace(/^0+/, '');
+        }
+    };
+
     TAIWAN_EINVOICE_SITE.prototype.convert_tastypie_datetime = function (s) {
         var $self = this;
         var re = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.?[0-9]*)$');
@@ -159,6 +184,7 @@ $(function () {
     TAIWAN_EINVOICE_SITE.prototype.after_document_ready = function () {
         var $self = this;
         $('.datetime').each($self.convert_class_datetime($self));
+        $('.number').each($self.convert_class_number($self));
         $.ajaxSetup({
             error: $self.rest_error($self, 'danger_modal')
         });
@@ -167,6 +193,8 @@ $(function () {
         var datetime_kind_params = [
             'create_time__gte', 'create_time__lt',
             'update_time__gte', 'update_time__lt',
+            'begin_time__gte', 'begin_time__lt',
+            'end_time__gte', 'end_time__lt',
             'generate_time__gte', 'generate_time__lt',
             'print_time__gte', 'print_time__lt',
             'date_in_year_month_range'
@@ -201,6 +229,10 @@ $(function () {
             'einvoice__any_words__icontains',
             'identifier__icontains',
             'seller__legal_entity__identifier__icontains',
+            'batch__slug__icontains',
+            'title__icontains',
+            'body__icontains',
+            'no_including',
             'track__icontains'
         ];
         for (var param of string_kind_params) {
@@ -212,7 +244,17 @@ $(function () {
         var select_kind_params = [
             'is_original_copy',
             'is_active',
+            'is_error',
             'print_mark',
+            'carrier_type__regex',
+            'npoban__regex',
+            'ei_synced',
+            'turnkey_service',
+            'turnkey_web',
+            'report_type',
+            'target_audience_type',
+            'type',
+            'turnkey_web__seller__legal_entity__identifier',
             'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {
@@ -269,6 +311,12 @@ $(function () {
 
             var result_url = url_parts[0] + '?' + params.toString();
             window.location.href = result_url;
+        });
+
+        $('td.record_order_no').each(function(){
+            var $td = $(this);
+            var init_page_no = $td.parents('table').attr('init_page_no');
+            $td.text(parseInt(init_page_no) - parseInt($td.attr('counter0')));
         });
     }
 

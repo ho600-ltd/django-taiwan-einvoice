@@ -82,6 +82,12 @@ function show_voideinvoice_modal(taiwan_einvoice_site) {
                         $('td[field="'+k+'"]', $tr_tmpl).attr('value', v).text(v);
                     }
                     $tr_tmpl.show().appendTo($('tbody', $modal_table));
+
+                }
+                if (einvoice['seller_invoice_track_no_dict']['turnkey_web_dict']['in_production']) {
+                    $('#cancel_before_void', $modal).parents('div.form-check').hide();
+                } else {
+                    $('#cancel_before_void', $modal).parents('div.form-check').show();
                 }
                 $('[name=one_dimensional_barcode_for_voiding]', $form).val("");
                 $modal.modal('show');

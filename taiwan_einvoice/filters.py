@@ -20,6 +20,9 @@ from taiwan_einvoice.models import (
     VoidEInvoice,
     UploadBatch,
     BatchEInvoice,
+    AuditLog,
+    SummaryReport,
+    TEAlarm,
 )
 
 
@@ -72,7 +75,7 @@ class LegalEntityFilter(filters.FilterSet):
     class Meta:
         model = LegalEntity
         fields = {
-            'identifier': ('contains', 'icontains'),
+            'identifier': ('exact', 'contains', 'icontains'),
         }
 
 
@@ -97,6 +100,7 @@ class SellerFilter(filters.FilterSet):
     class Meta:
         model = Seller
         fields = {
+            "legal_entity": ("exact", ),
         }
 
 
@@ -121,6 +125,8 @@ class TurnkeyServiceFilter(filters.FilterSet):
         model = TurnkeyService
         fields = {
             'on_working': ('exact', ),
+            'seller': ('exact', ),
+            'party_id': ('exact', ),
         }
 
 
@@ -170,14 +176,17 @@ class TurnkeyServiceGroupFilter(filters.FilterSet):
 
 
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
+    turnkey_web = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_web', queryset=TurnkeyService.objects.all())
     now_use = filters.BooleanFilter(method='filter_now_use')
     date_in_year_month_range = filters.CharFilter(method='filter_date_in_year_month_range')
+    no_including = filters.CharFilter(method='filter_no_including')
 
 
 
     class Meta:
         model = SellerInvoiceTrackNo
         fields = {
+            'turnkey_web': ('exact', ),
             'type': ('exact', ),
             'track': ('icontains', ),
         }
@@ -199,6 +208,15 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return queryset
         else:
             return queryset.filter(begin_time__lte=d, end_time__gte=d)
+    
+
+    def filter_no_including(self, queryset, name, value):
+        try:
+            value = "{:08d}".format(int(value))
+        except ValueError:
+            return queryset
+        else:
+            return queryset.filter(begin_no__lte=value, end_no__gte=value)
 
 
 
@@ -243,7 +261,10 @@ class EInvoiceFilter(filters.FilterSet):
         fields = {
             'generate_time': ('gte', 'lt', ),
             'print_mark': ('exact', ),
+            'carrier_type': ('exact', 'regex'),
+            'npoban': ('regex', ),
             'reverse_void_order': ('exact', 'gte', 'gt', 'lte', 'lt'),
+            'ei_synced': ('exact', ),
         }
 
 
@@ -459,15 +480,70 @@ class UploadBatchFilter(filters.FilterSet):
     class Meta:
         model = UploadBatch
         fields = {
+            "slug": ("exact", "icontains", ),
+            "create_time": ("gte", "lt", ),
         }
 
 
 
 class BatchEInvoiceFilter(filters.FilterSet):
+    batch = filters.RelatedFilter(UploadBatchFilter, field_name='batch', queryset=UploadBatch.objects.all())
 
 
 
     class Meta:
         model = BatchEInvoice
         fields = {
+            "track_no": ("icontains", ),
+        }
+
+
+
+class AuditLogFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = AuditLog
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt"),
+            "turnkey_service": ("exact", ),
+            "is_error": ("exact", ),
+        }
+
+
+
+class SummaryReportFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = SummaryReport
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt"),
+            "turnkey_service": ("exact", ),
+            "begin_time": ("gte", "gt", "lte", "lt"),
+            "end_time": ("gte", "gt", "lte", "lt"),
+            "report_type": ("exact", ),
+            "good_count": ("gte", "gt", "lte", "lt"),
+            "failed_count": ("gte", "gt", "lte", "lt"),
+            "resolved_count": ("gte", "gt", "lte", "lt"),
+            "is_resolved": ("exact", ),
+            "resolved_note": ("exact", "icontains"),
+        }
+
+
+
+class TEAlarmFilter(filters.FilterSet):
+
+
+
+    class Meta:
+        model = TEAlarm
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt"),
+            "turnkey_service": ("exact", ),
+            "target_audience_type": ("exact", ),
+            "title": ("exact", 'icontains', ),
+            "body": ("exact", 'icontains', ),
         }

@@ -436,3 +436,136 @@ class CanViewTurnkeyService(BasePermission):
         lg.debug("CanViewTurnkeyService.has_object_permission with {}: {}".format(request.method, res))
         return res
 
+
+class CanViewBatchEInvoice(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanViewBatchEInvoice.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            for p in CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj.batch.turnkey_service):
+                    res = True
+                    break
+        lg.debug("CanViewBatchEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+class CanViewTEAlarmForProgrammer(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanViewAlarmForProgrammer.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            for p in CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj.turnkey_service):
+                    res = True
+                    break
+        lg.debug("CanViewAlarmForProgrammer.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
+class CanViewTEAlarmForGeneralUser(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_alarm_for_general_user",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).filter(target_audience_type="g").exists()
+        lg.debug("CanViewTEAlarmForGeneralUser.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            for p in CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj.turnkey_service):
+                    res = True
+                    break
+        if res and hasattr(self, 'target_audience_type') and "g" != self.target_audience_type:
+            res = False
+        lg.debug("CanViewTEAlarmForGeneralUser.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+
+
+class CanViewSummaryReport(BasePermission):
+    METHOD_PERMISSION_MAPPING = {
+        "GET": (
+            "taiwan_einvoice.view_te_summaryreport",
+        ),
+    }
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanViewSummaryReport.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('info')
+        res = False
+        if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
+            for p in CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj.turnkey_service):
+                    res = True
+                    break
+        lg.debug("CanViewSummaryReport.has_object_permission with {}: {}".format(request.method, res))
+        return res
+
+

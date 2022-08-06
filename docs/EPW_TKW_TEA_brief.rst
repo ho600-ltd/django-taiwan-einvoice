@@ -61,7 +61,8 @@ TKW 資料設定
     TKW 安裝部份，請見: :doc:`./install_tkw_in_linux` 。
 
 1. 將 TKW 中的 EITurnkey Api Endpoint 登記到 CEC 中，類似 SNS subscribe 模式，先瀏覽 https://<tkw url>/turnkey_wrapper/api/v1/eiturnkey/ ，再使用 HTTP POST 新增 EITurnkey 紀錄，輸入欄位有:
-    * abspath: 以 / 開頭的本地端路徑來指出 EINVTurnkey 程式的 einvTurnkey.sct 的資料夾所在
+    * execute_abspath: 以 / 開頭的本地端路徑來指出 EINVTurnkey 程式的 einvTurnkey.sct 的資料夾所在
+    * data_abspath: 放置 Data 的資料夾所在
     * transport_id: 對應 turnkeyservice 紀錄
     * party_id: 對應 turnkeyservice 紀錄
     * routing_id: 對應 turnkeyservice 紀錄

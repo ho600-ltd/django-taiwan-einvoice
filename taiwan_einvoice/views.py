@@ -5,14 +5,13 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.contrib.auth.models import Permission, User, Group
 from django.contrib.contenttypes.models import ContentType
-from django.utils.timezone import now
+from django.utils.timezone import now, utc
 from django.utils.translation import ugettext_lazy as _
 
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms, remove_perm, assign_perm
 
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -33,6 +32,10 @@ from taiwan_einvoice.permissions import (
     CanEntryVoidEInvoice,
     CanViewLegalEntity,
     CanViewTurnkeyService,
+    CanViewBatchEInvoice,
+    CanViewSummaryReport,
+    CanViewTEAlarmForProgrammer,
+    CanViewTEAlarmForGeneralUser,
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
@@ -47,6 +50,11 @@ from taiwan_einvoice.renderers import (
     EInvoicePrintLogHtmlRenderer,
     CancelEInvoiceHtmlRenderer,
     VoidEInvoiceHtmlRenderer,
+    AuditLogHtmlRenderer,
+    UploadBatchHtmlRenderer,
+    BatchEInvoiceHtmlRenderer,
+    SummaryReportHtmlRenderer,
+    TEAlarmHtmlRenderer,
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -63,6 +71,9 @@ from taiwan_einvoice.models import (
     EInvoiceSellerAPI,
     UploadBatch,
     BatchEInvoice,
+    AuditLog,
+    SummaryReport,
+    TEAlarm,
 )
 from taiwan_einvoice.serializers import (
     StaffProfileSerializer,
@@ -81,6 +92,9 @@ from taiwan_einvoice.serializers import (
     VoidEInvoiceSerializer,
     UploadBatchSerializer,
     BatchEInvoiceSerializer,
+    AuditLogSerializer,
+    SummaryReportSerializer,
+    TEAlarmSerializer,
 )
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
@@ -95,19 +109,21 @@ from taiwan_einvoice.filters import (
     VoidEInvoiceFilter,
     UploadBatchFilter,
     BatchEInvoiceFilter,
+    AuditLogFilter,
+    SummaryReportFilter,
+    TEAlarmFilter,
+)
+from taiwan_einvoice.paginations import (
+    Default30PerPagePagination,
+    TenTo100PerPagePagination,
+    TenTo1000PerPagePagination,
 )
 
 
-class Default30PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 30
-    max_page_size = 30
 
+class OneHundredPerPagePagination(TenTo100PerPagePagination):
+    page_size = 100
 
-class TenTo1000PerPagePagination(PageNumberPagination):
-    page_size_query_param = 'page_size'
-    page_size = 10
-    max_page_size = 1000
 
 
 def index(request):
@@ -187,6 +203,7 @@ class StaffProfileModelViewSet(ModelViewSet):
 
 class ESCPOSWebModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator, CanOperateESCPOSWebOperator), )
+    pagination_class = TenTo100PerPagePagination
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
     filter_class = ESCPOSWebFilter
@@ -219,6 +236,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
 
 class ESCPOSWebOperatorModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditESCPOSWebOperator), )
+    pagination_class = TenTo100PerPagePagination
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebOperatorSerializer
     filter_class = ESCPOSWebFilter
@@ -276,6 +294,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
 
 class LegalEntityModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanViewLegalEntity), )
+    pagination_class = TenTo100PerPagePagination
     queryset = LegalEntity.objects.all().order_by('-id')
     serializer_class = None
     filter_class = LegalEntityFilter
@@ -291,6 +310,7 @@ class LegalEntityModelViewSet(ModelViewSet):
 
 class SellerModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUser, )
+    pagination_class = TenTo100PerPagePagination
     queryset = Seller.objects.all().order_by('-id')
     serializer_class = SellerSerializer
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
@@ -300,6 +320,7 @@ class SellerModelViewSet(ModelViewSet):
 
 class TurnkeyServiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanViewTurnkeyService), )
+    pagination_class = TenTo100PerPagePagination
     queryset = TurnkeyService.objects.all().order_by('-id')
     serializer_class = TurnkeyServiceSerializer
     filter_class = TurnkeyServiceFilter
@@ -377,6 +398,7 @@ class TurnkeyServiceGroupModelViewSet(ModelViewSet):
 
 class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNo, ), )
+    pagination_class = OneHundredPerPagePagination
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-type', '-begin_time', '-track', '-begin_no')
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
@@ -397,6 +419,45 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             return queryset.filter(turnkey_web__in=turnkey_webs)
 
 
+    @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
+    def create_and_upload_blank_numbers(self, request, pk=None):
+        sitn = self.get_object()
+        if sitn:
+            identifier = request.data.get('turnkey_web__seller__legal_entity__identifier', '')
+            date_in_year_month_range = request.data.get('date_in_year_month_range', '')
+            seller_invoice_track_no_ids = request.data.get('seller_invoice_track_no_ids', '')
+            if "" in [identifier, date_in_year_month_range, seller_invoice_track_no_ids]:
+                result = {"error_title": _("Blank Numbers Error"),
+                          "error_message": _("All fields are required!")}
+            date_in_year_month_range = datetime.datetime.strptime(date_in_year_month_range, "%Y-%m-%d %H:%M:%S").astimezone(utc)
+            seller_invoice_track_no_ids = seller_invoice_track_no_ids.split(',')
+            seller_invoice_track_nos = SellerInvoiceTrackNo.objects.filter(turnkey_web__seller__legal_entity__identifier=identifier,
+                                                                           begin_time__lte=date_in_year_month_range,
+                                                                           end_time__gte=date_in_year_month_range)
+            if not seller_invoice_track_nos.exists():
+                result = {"error_title": _("Blank Numbers Error"),
+                          "error_message": _("There is no any seller-invoice-track-no records!")}
+            elif (len(seller_invoice_track_no_ids) != seller_invoice_track_nos.count()
+                    or seller_invoice_track_nos.count() != seller_invoice_track_nos.filter(id__in=seller_invoice_track_no_ids).count()):
+                result = {"error_title": _("Blank Numbers Error"),
+                          "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
+            elif sitn not in seller_invoice_track_nos:
+                result = {"error_title": _("Seller Invoice Track No Error"),
+                          "error_message": _("The first record does not exist!")}
+            
+            try:
+                upload_batchs = SellerInvoiceTrackNo.create_blank_numbers_and_upload_batchs(seller_invoice_track_nos, executor=request.user)
+            except Exception as e:
+                result = {"error_title": _("Create Upload Batch Error"),
+                          "error_message": "{}: {}".format(type(e), str(e))}
+            else:
+                return Response({"slugs": [upload_batch.slug for upload_batch in upload_batchs]}, status=status.HTTP_201_CREATED)
+        else:
+            result = {"error_title": _("Seller Invoice Track No. Error"),
+                      "error_message": _("{} does not ecreate_blank_numbers_and_upload_batchxist").format(pk)}
+        return Response(result, status=status.HTTP_403_FORBIDDEN)
+
+
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
     def upload_csv_to_multiple_create(self, request, *args, **kwargs):
         NOW = now()
@@ -404,7 +465,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
         except TurnkeyService.DoesNotExist:
             er = {
-                "error_title": "TurnkeyService Does Not Exist",
+                "error_title": _("TurnkeyService Does Not Exist"),
                 "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_web),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -452,13 +513,13 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 end_no = cols[6]
                 if begin_no[-2:] not in ('00', '50'):
                     er = {
-                        "error_title": "Begin No. Error",
+                        "error_title": _("Begin No. Error"),
                         "error_message": _("{} has error: \n\n\nThe suffix of begin_no should be 00 or 50.").format(line)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
                 if end_no[-2:] not in ('49', '99'):
                     er = {
-                        "error_title": "End No. Error",
+                        "error_title": _("End No. Error"),
                         "error_message": _("{} has error: \n\n\nThe suffix of end_no should be 49 or 99.").format(line)
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -482,7 +543,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     else:
                         error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
                     er = {
-                        "error_title": "Data Error",
+                        "error_title": _("Data Error"),
                         "error_message": error_message,
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -503,7 +564,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 
                 error_message = _("{} ~ {} has error: \n\n\nnumber overlapping").format(data['begin_no'], data['end_no'])
                 er = {
-                    "error_title": "Data Error",
+                    "error_title": _("Data Error"),
                     "error_message": error_message,
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
@@ -530,6 +591,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 class EInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
     filter_class = EInvoiceFilter
@@ -573,6 +635,7 @@ class EInvoiceModelViewSet(ModelViewSet):
 
 class EInvoicePrintLogModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryEInvoicePrintLog), )
+    pagination_class = TenTo100PerPagePagination
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
     filter_class = EInvoicePrintLogFilter
@@ -596,6 +659,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
 
 class CancelEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryCancelEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
     filter_class = CancelEInvoiceFilter
@@ -681,6 +745,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             del _d['random_number']
             del _d['generate_time']
             _d['creator'] = request.user
+            _d['ei_synced'] = False
             _d['print_mark'] = False
             new_einvoice = EInvoice(**_d)
             new_einvoice.save()
@@ -693,6 +758,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
 
 class VoidEInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryVoidEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = VoidEInvoice.objects.all().order_by('-id')
     serializer_class = VoidEInvoiceSerializer
     filter_class = VoidEInvoiceFilter
@@ -809,6 +875,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         del _d['id']
         del _d['random_number']
         _d['creator'] = request.user
+        _d['ei_synced'] = False
         _d['print_mark'] = False
         data['buyer_identifier'] = _post_buyer_identifier
 
@@ -851,11 +918,12 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
 
 class UploadBatchModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, ), )
+    permission_classes = (Or(IsSuperUser, CanViewTEAlarmForProgrammer), )
+    pagination_class = TenTo100PerPagePagination
     queryset = UploadBatch.objects.all().order_by('-id')
     serializer_class = UploadBatchSerializer
     filter_class = UploadBatchFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (UploadBatchHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
 
@@ -867,18 +935,19 @@ class UploadBatchModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 
 
 
 class BatchEInvoiceModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, ), )
+    permission_classes = (Or(IsSuperUser, CanViewBatchEInvoice), )
+    pagination_class = TenTo100PerPagePagination
     queryset = BatchEInvoice.objects.all().order_by('-id')
     serializer_class = BatchEInvoiceSerializer
     filter_class = BatchEInvoiceFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    renderer_classes = (BatchEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
 
@@ -890,6 +959,78 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(batch__turnkey_web__in=turnkey_webs)
+
+
+
+class AuditLogModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewTEAlarmForProgrammer), )
+    pagination_class = TenTo100PerPagePagination
+    queryset = AuditLog.objects.all().order_by('-id')
+    serializer_class = AuditLogSerializer
+    filter_class = AuditLogFilter
+    renderer_classes = (AuditLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+    
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(AuditLogModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+
+class SummaryReportModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewSummaryReport), )
+    pagination_class = TenTo100PerPagePagination
+    queryset = SummaryReport.objects.all().order_by('-id')
+    serializer_class = SummaryReportSerializer
+    filter_class = SummaryReportFilter
+    renderer_classes = (SummaryReportHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+    
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(SummaryReportModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)
+
+
+
+class TEAlarmModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewTEAlarmForProgrammer, CanViewTEAlarmForGeneralUser), )
+    pagination_class = TenTo100PerPagePagination
+    queryset = TEAlarm.objects.all().order_by('-id')
+    serializer_class = TEAlarmSerializer
+    filter_class = TEAlarmFilter
+    renderer_classes = (TEAlarmHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+    
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(TEAlarmModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        if request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewTEAlarm.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_web__in=turnkey_webs)

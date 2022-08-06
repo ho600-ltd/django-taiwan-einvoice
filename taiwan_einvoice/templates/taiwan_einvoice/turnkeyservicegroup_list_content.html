@@ -13,7 +13,7 @@
     {% endif %}
 </div>
 
-<table class="table search_result">
+<table class="table search_result" init_page_no="{{ data.groups_count }}">
     <thead>
         <tr>
             <th rowspan="2" width="5%">{% trans "No." %}</th>
@@ -25,7 +25,7 @@
         {% for group in data.groups %}
             <tr group_id="{{ group.id }}"
                 permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
-                <td field="no">{{ forloop.counter }}.</td>
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
                 <td field="name">
                     {% if perms.taiwan_einvoice.edit_te_turnkeyservicegroup %}
                         <button class="btn btn-primary update_turnkeyservicegroup_modal">{{ group.display_name }}</button>

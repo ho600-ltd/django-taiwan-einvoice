@@ -12,10 +12,26 @@
             class="btn btn-success upload_csv_to_multiple_create_modal" data-toggle="modal">
             {% trans "Create Seller Invoice Track No" %}
         </button>
+        {% if request.GET.turnkey_web__seller__legal_entity__identifier and request.GET.date_in_year_month_range %}
+            {% if 0 < data.count %}
+                <button id="create_and_upload_blank_numbers_button_0" action="create_and_upload_blank_numbers"
+                    class="btn btn-warning create_and_upload_blank_numbers">
+                    {% trans "Create and Upload Blank Numbers" %}
+                </button>
+            {% else %}
+                <span class="text-warning">
+                    {% trans "No need to upload blank numbers" %}%
+                </span>
+            {% endif %}
+        {% else %}
+            <span class="text-warning">
+                {% trans "Search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' button" %}
+            </span>
+        {% endif %}
     {% endif %}
 </div>
 
-<table class="table search_result">
+<table class="table search_result" init_page_no="{{ data.init_page_no }}">
     <thead>
         <tr>
             <th field="no" width="5%">{% trans "No." %}</th>
@@ -25,6 +41,7 @@
             <th field="track" width="10%">{% trans "Track" %}</th>
             <th field="begin_no" width="10%">{% trans "Begin No." %}</th>
             <th field="end_no" width="10%">{% trans "End No." %}</th>
+            <th field="next_blank_no" width="10%">{% trans "Blank No." %}</th>
             <th field="count_blank_no" width="10%">{% trans "Blank No. Count" %}</th>
             <th field="button" width="10%">{% trans "Delete" %}</th>
         </tr>
@@ -32,13 +49,29 @@
     <tbody>
         {% for sellerinvoicetrackno in data.results %}
             <tr sellerinvoicetrackno_id="{{ sellerinvoicetrackno.id }}" resource_uri='{% url "taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail" pk=sellerinvoicetrackno.id %}'>
-                <td field="no">{{ forloop.counter }}.</td>
-                <td field="turnkey_web">{{ sellerinvoicetrackno.turnkey_web_dict.name }}</td>
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                <td field="turnkey_web">
+                    <div field="turnkey_web__name">{{ sellerinvoicetrackno.turnkey_web_dict.name }}</div>
+                    <div field="turnkey_web__party_id">{{ sellerinvoicetrackno.turnkey_web_dict.party_id }}</div>
+                </td>
                 <td field="type__display">{{ sellerinvoicetrackno.type__display }}</td>
                 <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
                 <td field="track">{{ sellerinvoicetrackno.track }}</td>
                 <td field="begin_no">{{ sellerinvoicetrackno.begin_no }}</td>
                 <td field="end_no">{{ sellerinvoicetrackno.end_no }}</td>
+                <td field="next_blank_no">
+                    {% if sellerinvoicetrackno.next_blank_no %}
+                        {% if sellerinvoicetrackno.next_blank_no == sellerinvoicetrackno.end_no %}
+                            {{ sellerinvoicetrackno.next_blank_no }}
+                        {% else %}
+                            <div>{{ sellerinvoicetrackno.next_blank_no }}</div>
+                             ~
+                            <div>{{ sellerinvoicetrackno.end_no }}</div>
+                        {% endif %}
+                    {% else %}
+                        {% trans "None" %}
+                    {% endif %}
+                </td>
                 <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
                 <td field="button">
                     {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
