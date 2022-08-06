@@ -1093,17 +1093,6 @@ class EInvoice(models.Model):
             return None
         else:
             return bei
-
-
-    def __str__(self):
-        return "{}".format(self.track_no)
-
-
-
-    class Meta:
-        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
-    
-
     @property
     def one_dimension_barcode_str(self):
         chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -1116,14 +1105,6 @@ class EInvoice(models.Model):
             self.random_number,
         )
         return barcode_str
-
-
-    @classmethod
-    def escpos_einvoice_scripts(cls, id=0):
-        _sha1 = sha1(str(id).encode('utf-8')).hexdigest()
-        return "*{}*".format(_sha1)
-
-
     @property
     def _escpos_einvoice_scripts(self):
         def _hex_amount(amount):
@@ -1267,8 +1248,6 @@ class EInvoice(models.Model):
                                 for _p in details[:5]]),
                     },
                 ]
-
-
     @property
     def details_content(self):
         if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
@@ -1278,8 +1257,6 @@ class EInvoice(models.Model):
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
             ]
         return details_content
-
-
     @property
     def escpos_print_scripts(self):
         _d = {
@@ -1295,6 +1272,22 @@ class EInvoice(models.Model):
         }
         _d["details_content"] = self.details_content
         return _d
+
+
+    def __str__(self):
+        return "{}".format(self.track_no)
+
+
+
+    class Meta:
+        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
+    
+
+
+    @classmethod
+    def escpos_einvoice_scripts(cls, id=0):
+        _sha1 = sha1(str(id).encode('utf-8')).hexdigest()
+        return "*{}*".format(_sha1)
 
 
     def get_mig_no(self):
