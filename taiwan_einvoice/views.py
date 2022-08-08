@@ -403,7 +403,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete')
+    http_method_names = ('post', 'get', 'delete', 'patch')
 
 
     def get_queryset(self):

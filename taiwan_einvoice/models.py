@@ -77,6 +77,11 @@ class IdentifierDuplicateError(Exception):
 
 
 
+class SellerInvoiceTrackNoDisableError(Exception):
+    pass
+
+
+
 class CancelEInvoiceMIGError(Exception):
     pass
 
@@ -737,6 +742,7 @@ class TurnkeyService(models.Model):
 
 class SellerInvoiceTrackNo(models.Model):
     turnkey_web = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    is_disabled = models.BooleanField(default=False)
     type_choices = (
         ('07', _('General')),
         ('08', _('Special')),
@@ -766,12 +772,17 @@ class SellerInvoiceTrackNo(models.Model):
     end_no = models.IntegerField(db_index=True)
     @property
     def count_blank_no(self):
-        return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
+        if self.is_disabled:
+            return 0
+        else:
+            return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
     @property
     def next_blank_no(self):
         try:
             new_no = self.get_new_no()
         except NotEnoughNumberError:
+            new_no = ''
+        except SellerInvoiceTrackNoDisableError:
             new_no = ''
         return new_no
     @property
@@ -806,6 +817,7 @@ class SellerInvoiceTrackNo(models.Model):
         _now = now()
         ids = []
         for sitn in queryset.filter(turnkey_web__on_working=True,
+                                    is_disabled=False,
                                     begin_time__lte=_now,
                                     end_time__gt=_now).order_by('track', 'begin_no'):
             if ignore_count_blank_no:
@@ -850,6 +862,9 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def get_new_no(self):
+        if self.is_disabled:
+            raise NotEnoughNumberError(_("{} is disabled").format(self))
+
         max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
         if max_no:
             max_no = int(max_no)
@@ -865,6 +880,9 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def create_einvoice(self, data):
+        if self.is_disabled:
+            raise SellerInvoiceTrackNoDisableError()
+
         data['seller_invoice_track_no'] = self
         data['type'] = self.type
         data['track'] = self.track

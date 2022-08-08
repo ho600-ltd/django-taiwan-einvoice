@@ -320,6 +320,14 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
         return str(instance)
 
 
+    def update(self, instance, validated_data):
+        for key in validated_data:
+            if key in ['is_disabled', ]:
+                pass
+            else:
+                del validated_data[key]
+        return super().update(instance, validated_data)
+
 
 class DetailsContentField(ReadOnlyField):
     def get_attribute(self, instance):

@@ -206,6 +206,9 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         "DELETE": (
             "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
+        "PATCH": (
+            "taiwan_einvoice.add_te_sellerinvoicetrackno",
+        ),
     }
 
 
