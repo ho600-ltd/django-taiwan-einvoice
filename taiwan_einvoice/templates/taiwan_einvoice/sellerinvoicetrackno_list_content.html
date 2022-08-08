@@ -110,7 +110,7 @@
                         <label for="csv_file" class="form-label">{% trans "Choose .csv" %}</label>
                         <input class="form-control" type="file" id="csv_file">
                         <div id="csv_file_help" class="form-text">
-                            .csv 內容格式應如下:
+                            從大平台下載的 .csv 內容格式應如下，<span class="font-weight-bold text-danger">請注意，下載 .csv 後不要編輯該檔</span>，若想保留部份字軌號碼給 B2B 使用，請於匯入成功後，再做刪除:
                             <table border="1">
                                 <thead>
                                     <tr>
@@ -148,6 +148,13 @@
                         </div>
                     </div>
                     <div class="mb-3">
+                        <label for="split_by_numbers" class="form-label">{% trans "Split by numbers" %}</label>
+                        <select name="split_by_numbers" class="form-control">
+                            <option value="100">100 組(2本) - 預設值</option>
+                            <option value="200">200 組(4本)</option>
+                            <option value="500">500 組(10本)</option>
+                            <option value="50">50 組(1本)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">

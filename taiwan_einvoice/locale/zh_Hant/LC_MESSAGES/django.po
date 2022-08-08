@@ -1119,6 +1119,9 @@ msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
 msgid "Choose .csv"
 msgstr "選擇 .csv"
 
+msgid "Split by numbers"
+msgstr "每幾組號碼切為 1 筆紀錄"
+
 msgid "Create"
 msgstr "新增"
 

@@ -524,29 +524,44 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
 
-
-                data = {
-                    "turnkey_web": turnkey_web.id,
-                    "type": '{:02d}'.format(int(cols[1])),
-                    "begin_time": begin_time,
-                    "end_time": end_time,
-                    "track": cols[4],
-                    "begin_no": begin_no,
-                    "end_no": end_no,
-                }
-                sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
-                if sitns.is_valid():
-                    datas.append(data)
-                else:
-                    if 'unique' in str(sitns.errors):
-                        error_message = _("{} exists").format(line)
-                    else:
-                        error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
-                    er = {
-                        "error_title": _("Data Error"),
-                        "error_message": error_message,
+                begin_no = int(begin_no)
+                end_no = int(end_no)
+                split_by_numbers = int(request.POST.get('split_by_numbers', '100'))
+                _begin_no_in_split = begin_no
+                _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
+                if _end_no_in_split > end_no: _end_no_in_split = end_no
+                while _begin_no_in_split < _end_no_in_split:
+                    data = {
+                        "turnkey_web": turnkey_web.id,
+                        "type": '{:02d}'.format(int(cols[1])),
+                        "begin_time": begin_time,
+                        "end_time": end_time,
+                        "track": cols[4],
+                        "begin_no": _begin_no_in_split,
+                        "end_no": _end_no_in_split,
                     }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
+                    if sitns.is_valid():
+                        datas.append(data)
+                    elif 'unique' in str(sitns.errors) and (_begin_no_in_split != begin_no or _end_no_in_split != end_no):
+                        pass
+                    else:
+                        if 'unique' in str(sitns.errors):
+                            error_message = _("{} exists").format(line)
+                        else:
+                            error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
+                        er = {
+                            "error_title": _("Data Error"),
+                            "error_message": error_message,
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                    _begin_no_in_split = _end_no_in_split + 1
+                    if _begin_no_in_split > end_no:
+                        break
+                    _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
+                    if _end_no_in_split > end_no:
+                        _end_no_in_split = end_no
         output_datas = []
         if not datas:
             er = {
