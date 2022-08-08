@@ -442,7 +442,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 result = {"error_title": _("Blank Numbers Error"),
                           "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
             elif sitn not in seller_invoice_track_nos:
-                result = {"error_title": _("Seller Invoice Track No Error"),
+                result = {"error_title": _("Seller Invoice Track No. Error"),
                           "error_message": _("The first record does not exist!")}
             
             try:
@@ -454,7 +454,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 return Response({"slugs": [upload_batch.slug for upload_batch in upload_batchs]}, status=status.HTTP_201_CREATED)
         else:
             result = {"error_title": _("Seller Invoice Track No. Error"),
-                      "error_message": _("{} does not ecreate_blank_numbers_and_upload_batchxist").format(pk)}
+                      "error_message": _("{} does not exist").format(pk)}
         return Response(result, status=status.HTTP_403_FORBIDDEN)
 
 

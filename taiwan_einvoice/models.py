@@ -845,7 +845,7 @@ class SellerInvoiceTrackNo(models.Model):
     def delete(self, *args, **kwargs):
         if self.einvoice_set.exists():
             ei = self.einvoice_set.order_by('id').first()
-            raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})"), ei.track_no_)
+            raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})").format(ei.track_no_), ei.track_no_)
         return super().delete(*args, **kwargs)
 
 

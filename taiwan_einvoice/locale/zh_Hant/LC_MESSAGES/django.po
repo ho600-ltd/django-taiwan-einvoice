@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-05 10:49+0800\n"
+"POT-Creation-Date: 2022-08-08 16:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,6 +115,9 @@ msgstr "58mm 電子發票"
 msgid "80mm Receipt"
 msgstr "80mm 收據"
 
+msgid "{} does exist!"
+msgstr "{} 已存在!"
+
 msgid "once per 5 minutes"
 msgstr "每 5 分鐘 1 次"
 
@@ -138,6 +141,15 @@ msgstr "一般稅額"
 
 msgid "Special"
 msgstr "特種稅額"
+
+msgid "Only use the same identifier to create the record for blank numbers!"
+msgstr "新增「空白未使用字軌號碼」須使用同一個統一編號!"
+
+msgid "Only use the same begin_time to create the record for blank numbers!"
+msgstr "新增「空白未使用字軌號碼」所使用的期別，其起始時間必須相同!"
+
+msgid "Only use the same end_time to create the record for blank numbers!"
+msgstr "新增「空白未使用字軌號碼」所使用的期別，其結束時間必須相同!"
 
 msgid "It could not be deleted, because it had E-Invoice({})"
 msgstr "無法刪除，因為它已開立發票({})"
@@ -1095,6 +1107,15 @@ msgstr "涵蓋此號碼"
 msgid "Create Seller Invoice Track No"
 msgstr "新增字軌號碼檔"
 
+msgid "Create and Upload Blank Numbers"
+msgstr "新增並上傳空白未使用字軌號碼"
+
+msgid "No need to upload blank numbers"
+msgstr "無須上傳未使用字軌號碼"
+
+msgid "Search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' button"
+msgstr "先搜尋'統一編號'及'期別所含括的時間'，方能顯示「新增並上傳空白未使用字軌號碼」按鈕"
+
 msgid "Track"
 msgstr "字軌"
 
@@ -1497,6 +1518,30 @@ msgstr "已存在的群組數量已超過限度({})"
 msgid "Group name exists"
 msgstr "工作人員群組名稱已存在"
 
+msgid "Blank Numbers Error"
+msgstr "空白未使用字軌號碼錯誤"
+
+msgid "All fields are required!"
+msgstr "所有欄位皆必填!"
+
+msgid "There is no any seller-invoice-track-no records!"
+msgstr "無字軌號碼紀錄!"
+
+msgid "Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!"
+msgstr "字軌號碼與資料庫紀錄不符，請只搜尋統一編號及期別所含括的時間，其他搜尋欄位須留空!"
+
+msgid "Seller Invoice Track No. Error"
+msgstr "字軌號碼錯誤"
+
+msgid "The first record does not exist!"
+msgstr "第一筆字軌號碼紀錄不存在!"
+
+msgid "Create Upload Batch Error"
+msgstr "新增上傳批次錯誤"
+
+msgid "{} does not exist"
+msgstr "{} 不存在"
+
 msgid "TurnkeyService Does Not Exist"
 msgstr "Turnkwy 伺服器不存在"
 
@@ -1593,9 +1638,6 @@ msgstr "刪除失敗"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"
-
-msgid "{} does not exist"
-msgstr "{} 不存在"
 
 msgid "E-Invoice(id: {}) does not exist!"
 msgstr "電子發票(id: {})不存在!"
