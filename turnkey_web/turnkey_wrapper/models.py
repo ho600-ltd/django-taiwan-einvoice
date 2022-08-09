@@ -281,7 +281,10 @@ class TURNKEY_MESSAGE_LOG(models.Model):
 
 
     def get_TURNKEY_SYSEVENT_LOG__MESSAGES(self):
-        tsl = TURNKEY_SYSEVENT_LOG.objects.filter(UUID=self.UUID, EVENTDTS__gte=self.MESSAGE_DTS).order_by('EVENTDTS').first()
+        tsl = TURNKEY_SYSEVENT_LOG.objects.filter(EVENTDTS__gte=self.MESSAGE_DTS
+                                                 ).filter(Q(UUID=self.UUID)
+                                                          |Q(SEQNO=self.SEQNO, SUBSEQNO=self.SUBSEQNO)
+                                                         ).order_by('EVENTDTS').first()
         if tsl:
             code = tsl.MESSAGE6.split(' ;')[0]
             message1 = tsl.MESSAGE1
