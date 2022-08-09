@@ -17,7 +17,7 @@
                 <div class="">{% trans "Track No." %}</div>
                 <div class="font-weight-light">{% trans "Upload to EI Time" %}</div>
             </th>
-            <th>status<br/>&amp;result_code</th>
+            <th>status<br/>&amp;result_code<br/>&amp;result_message</th>
             <th>body</th>
         </tr>
     </thead>
@@ -44,6 +44,7 @@
                         ">{{ obj.status }}
                     </div>
                     <div field="result_code">{{ obj.result_code }}</div>
+                    <div field="result_message">{{ obj.result_message }}</div>
                 </td>
                 <td field="body"><pre style="max-width: 600px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
             </tr>

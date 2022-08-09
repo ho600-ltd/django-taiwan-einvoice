@@ -188,7 +188,7 @@ class TURNKEY_SEQUENCEModelViewSet(ModelViewSet):
 class TURNKEY_SYSEVENT_LOGModelViewSet(ModelViewSet):
     permission_classes = (IsSuperUserInLocalhost, )
     pagination_class = TenTo1000PerPagePagination
-    queryset = TURNKEY_SYSEVENT_LOG.objects.all()
+    queryset = TURNKEY_SYSEVENT_LOG.objects.all().order_by('-EVENTDTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_SYSEVENT_LOGSerializer
     filter_class = TURNKEY_SYSEVENT_LOGFilter
     renderer_classes = (TURNKEY_SYSEVENT_LOGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
