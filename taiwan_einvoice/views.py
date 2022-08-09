@@ -154,26 +154,6 @@ class StaffProfileModelViewSet(ModelViewSet):
     http_method_names = ('post', 'get', 'patch')
 
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        user = instance.user
-        ct = ContentType.objects.get_for_model(TurnkeyService)
-        for k, v in request.data.items():
-            if k.startswith('add_group_'):
-                group_id = k.replace('add_group_', '')
-                try:
-                    g = Group.objects.get(id=group_id, name__startswith='ct{}:'.format(ct.id))
-                except Group.DoesNotExist:
-                    continue
-                else:
-                    if v:
-                        user.groups.add(g)
-                    else:
-                        user.groups.remove(g)
-        res = super().update(request, *args, **kwargs)
-        return res
-
-
     def create(self, request, *args, **kwargs):
         data = request.data
         if StaffProfile.objects.filter(user__username=data['user.username']).exists():
@@ -976,7 +956,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         else:
             permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(batch__turnkey_web__in=turnkey_webs)
+            return queryset.filter(batch__turnkey_service__in=turnkey_webs)
 
 
 

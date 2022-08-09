@@ -29,10 +29,27 @@
                 <td field="year_month_range">{{ obj.year_month_range }}</td>
                 <td field="track_no">{{ obj.track_no }}</td>
                 <td field="body"><pre style="max-width: 300px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
-                <td field="status">{{ obj.status }}</td>
-                <td field="result_code">{{ obj.result_code }}</td>
+                <td field="status">
+                    {% if "c" == obj.status or "g" == obj.status or "p" == obj.status %}
+                        {{ obj.status }}
+                    {% else %}
+                        <span class="text-danger font-weight-bold">{{ obj.status }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-danger">
+                    <div field="result_code">{{ obj.result_code }}</div>
+                    <div field="result_message">{{ obj.result_message }}</div>
+                </td>
                 <td field="pass_if_error">
-                    {% if obj.pass_if_error %}{{ obj.pass_if_error }}{% endif %}
+                    {% if "" == obj.status or "p" == obj.status or "g" == obj.status or "c" == obj.status %}
+                        {% comment %}pass{% endcomment %}
+                    {% else %}
+                        {% if obj.pass_if_error %}
+                            {% trans "Ignored" %}
+                        {% else %}
+                            <button class="btn btn-warning">{% trans "Resolve" %}</button>
+                        {% endif %}
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

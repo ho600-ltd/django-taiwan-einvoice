@@ -77,6 +77,23 @@ class StaffProfileSerializer(ModelSerializer):
     def update(self, instance, validated_data):
         if self.context['request'].user == instance.user:
             raise PermissionDenied(detail=_("You can not edit yourself"))
+
+        request = self.context['request']
+        user = instance.user
+        ct = ContentType.objects.get_for_model(TurnkeyService)
+        for k, v in request.data.items():
+            if k.startswith('add_group_'):
+                group_id = k.replace('add_group_', '')
+                try:
+                    g = Group.objects.get(id=group_id, name__startswith='ct{}:'.format(ct.id))
+                except Group.DoesNotExist:
+                    continue
+                else:
+                    if v:
+                        user.groups.add(g)
+                    else:
+                        user.groups.remove(g)
+
         group_dict = {
             "in_printer_admin_group": Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup'),
             "in_manager_group": Group.objects.get(name='TaiwanEInvoiceManagerGroup')

@@ -1811,6 +1811,7 @@ class UploadBatch(models.Model):
                 is_finish = self.update_batch_einvoice_status_result_code(
                    status=result_json['status'],
                    result_code=result_json['result_code'],
+                   result_message=result_json['result_message'],
                 )
                 if is_finish:
                     self.update_to_new_status(NEXT_STATUS)
@@ -2133,7 +2134,7 @@ class UploadBatch(models.Model):
             return None
 
 
-    def update_batch_einvoice_status_result_code(self, status={}, result_code={}):
+    def update_batch_einvoice_status_result_code(self, status={}, result_code={}, result_message={}):
         lg = logging.getLogger("taiwan_einvoice")
         for rc, ids in result_code.items():
             beteis = self.batcheinvoice_set.filter(id__in=ids)
@@ -2141,6 +2142,13 @@ class UploadBatch(models.Model):
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
                 beteis.update(result_code=rc)
+
+        for rc, ids in result_message.items():
+            beteis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beteis.count():
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+            else:
+                beteis.update(result_message=rc)
         
         ids_in_c = []
         status['__else__'] = status['__else__'].lower()
@@ -2198,7 +2206,8 @@ class UploadBatch(models.Model):
             )
             body = _("""Error status: "{status}"
 Result code: "{result_code}"
-            """).format(status=bei.status, result_code=bei.result_code)
+Result message: "{result_message}"
+            """).format(status=error_bei.status, result_code=error_bei.result_code, result_message=error_bei.result_message)
 
             te_alarm, new_creation = TEAlarm.objects.get_or_create(
                 turnkey_service=self.turnkey_service,
@@ -2209,8 +2218,8 @@ Result code: "{result_code}"
                 object_id=self.id,
             )
             only_with_perms_in = {"g": ("view_te_alarm_for_general_user", "view_te_alarm_for_programmer", ),
-                                    "p": ("view_te_alarm_for_programmer", ),
-                                    }[target_audience_type]
+                                  "p": ("view_te_alarm_for_programmer", ),
+                                 }[target_audience_type]
             notified_users = get_users_with_perms(self, only_with_perms_in=only_with_perms_in)
             if notified_users:
                 te_alarm.notified_users.add(notified_users)
@@ -2262,6 +2271,7 @@ class BatchEInvoice(models.Model):
     )
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     result_code = models.CharField(max_length=5, default='', db_index=True)
+    result_message = models.TextField(default='')
     pass_if_error = models.BooleanField(default=False)
     history = HistoricalRecords()
     @property
