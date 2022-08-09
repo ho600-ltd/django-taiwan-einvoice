@@ -91,7 +91,7 @@
                             <th class="text-center">{% trans "Create" %}</th>
                             <th class="text-center">{% trans "Update" %}</th>
                             <th class="text-center">{% trans "Delete" %}</th>
-                            <th class="text-center">{% trans "Resolve" %}</th>
+                            <th class="text-center">{% trans "Handle" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,6 +175,19 @@
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Batch E-Invoice" %}:
+                                <p class="help-block"></p>
+                            </th>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td>
+                                <input type="checkbox" class="form-control" id="input_handle_te_batcheinvoice"
+                                    name="handle_te_batcheinvoice">
+                            </td>
                         </tr>
                         <tr>
                             <th>{% trans "Summary Report" %}:

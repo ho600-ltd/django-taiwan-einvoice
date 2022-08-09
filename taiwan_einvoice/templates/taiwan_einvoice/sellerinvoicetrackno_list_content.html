@@ -57,8 +57,8 @@
                 <td field="type__display">{{ sellerinvoicetrackno.type__display }}</td>
                 <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
                 <td field="track">{{ sellerinvoicetrackno.track }}</td>
-                <td field="begin_no">{{ sellerinvoicetrackno.begin_no }}</td>
-                <td field="end_no">{{ sellerinvoicetrackno.end_no }}</td>
+                <td field="begin_no">{{ sellerinvoicetrackno.begin_no_str }}</td>
+                <td field="end_no">{{ sellerinvoicetrackno.end_no_str }}</td>
                 <td field="next_blank_no">
                     {% if sellerinvoicetrackno.next_blank_no %}
                         {% if sellerinvoicetrackno.next_blank_no == sellerinvoicetrackno.end_no %}
@@ -66,7 +66,7 @@
                         {% else %}
                             <div>{{ sellerinvoicetrackno.next_blank_no }}</div>
                              ~
-                            <div>{{ sellerinvoicetrackno.end_no }}</div>
+                            <div>{{ sellerinvoicetrackno.end_no_str }}</div>
                         {% endif %}
                     {% else %}
                         {% trans "None" %}

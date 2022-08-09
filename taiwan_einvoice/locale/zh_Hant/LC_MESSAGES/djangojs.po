@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-08 16:55+0800\n"
+"POT-Creation-Date: 2022-08-09 16:06+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,18 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Handling Note Error"
+msgstr "處理說明錯誤"
+
+msgid "Limit from 4 to 200 words"
+msgstr "字數限為 4 ~ 200 個字"
+
+msgid "Created the new Upload Batch: "
+msgstr "已創建新的「上傳批次」： "
+
+msgid "Success"
+msgstr "成功"
 
 msgid "Cancel E-Invoice Error"
 msgstr "作廢電子發票錯誤"
@@ -58,9 +70,6 @@ msgstr "作廢並另開: "
 
 msgid "Canceled"
 msgstr "作廢"
-
-msgid "Success"
-msgstr "成功"
 
 msgid "NEW Record"
 msgstr "新紀錄"

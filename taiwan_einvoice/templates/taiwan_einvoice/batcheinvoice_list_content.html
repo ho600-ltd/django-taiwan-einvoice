@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n %}{% load ho600_tags %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.handle_te_batcheinvoice" as "can_handle_batcheinvoice_under_turnkeyservices" %}
 
 <div class="total_count_row">
     {% with data.count as total_count %}
@@ -17,7 +18,7 @@
             <th>{% trans "Body" %}</th>
             <th>{% trans "Status" %}</th>
             <th>{% trans "Result Code" %}</th>
-            <th>{% trans "Pass if error" %}</th>
+            <th>{% trans "Error Handling" %}</th>
         </tr>
     </thead>
     <tbody>
@@ -36,7 +37,7 @@
                         <span class="text-danger font-weight-bold">{{ obj.status }}</span>
                     {% endif %}
                 </td>
-                <td class="text-danger">
+                <td field="result" class="text-danger">
                     <div field="result_code">{{ obj.result_code }}</div>
                     <div field="result_message">{{ obj.result_message }}</div>
                 </td>
@@ -45,9 +46,14 @@
                         {% comment %}pass{% endcomment %}
                     {% else %}
                         {% if obj.pass_if_error %}
-                            {% trans "Ignored" %}
+                            {% trans "Handled" %}
+                            <div>{{ obj.handling_note }}</div>
                         {% else %}
-                            <button class="btn btn-warning">{% trans "Resolve" %}</button>
+                            {% for ts in can_handle_batcheinvoice_under_turnkeyservices %}
+                                {% if ts.id == obj.batch_dict.turnkey_service_dict.id %}
+                                    <button class="btn btn-warning re_create_another_upload_batch_modal">{% trans "Handle" %}</button>
+                                {% endif %}
+                            {% endfor %}
                         {% endif %}
                     {% endif %}
                 </td>

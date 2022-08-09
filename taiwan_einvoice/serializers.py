@@ -322,6 +322,8 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     turnkey_web_dict = TurnkeyServiceSerializer(source='turnkey_web', read_only=True)
     type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
     type__display = CharField(read_only=True)
+    begin_no_str = CharField(read_only=True)
+    end_no_str = CharField(read_only=True)
     next_blank_no = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
     year_month_range = CharField(read_only=True)
