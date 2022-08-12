@@ -160,7 +160,7 @@ class FROM_CONFIG(models.Model):
         managed = False
         verbose_name = 'FROM_CONFIG'
         verbose_name_plural = 'FROM_CONFIG'
-        db_table = 'FROM_CONFIG'
+        db_table = 'FROM_CONFIG_V'
 
 
 class SCHEDULE_CONFIG(models.Model):
@@ -180,7 +180,7 @@ class SCHEDULE_CONFIG(models.Model):
         managed = False
         verbose_name = 'SCHEDULE_CONFIG'
         verbose_name_plural = 'SCHEDULE_CONFIG'
-        db_table = 'SCHEDULE_CONFIG'
+        db_table = 'SCHEDULE_CONFIG_V'
 
 
 class SIGN_CONFIG(models.Model):
@@ -198,7 +198,7 @@ class SIGN_CONFIG(models.Model):
         managed = False
         verbose_name = 'SIGN_CONFIG'
         verbose_name_plural = 'SIGN_CONFIG'
-        db_table = 'SIGN_CONFIG'
+        db_table = 'SIGN_CONFIG_V'
 
 
 class TASK_CONFIG(models.Model):
@@ -331,7 +331,7 @@ class TURNKEY_SEQUENCE(models.Model):
         managed = False
         verbose_name = 'TURNKEY_SEQUENCE'
         verbose_name_plural = 'TURNKEY_SEQUENCE'
-        db_table = 'TURNKEY_SEQUENCE'
+        db_table = 'TURNKEY_SEQUENCE_V'
 
 
 class TURNKEY_SYSEVENT_LOG(models.Model):
@@ -359,7 +359,7 @@ class TURNKEY_SYSEVENT_LOG(models.Model):
         managed = False
         verbose_name = 'TURNKEY_SYSEVENT_LOG'
         verbose_name_plural = 'TURNKEY_SYSEVENT_LOG'
-        db_table = 'TURNKEY_SYSEVENT_LOG'
+        db_table = 'TURNKEY_SYSEVENT_LOG_V'
         index_together = (("SEQNO", "SUBSEQNO"),)
 
 
@@ -375,7 +375,7 @@ class TURNKEY_TRANSPORT_CONFIG(models.Model):
         managed = False
         verbose_name = 'TURNKEY_TRANSPORT_CONFIG'
         verbose_name_plural = 'TURNKEY_TRANSPORT_CONFIG'
-        db_table = 'TURNKEY_TRANSPORT_CONFIG'
+        db_table = 'TURNKEY_TRANSPORT_CONFIG_V'
 
 
 class TURNKEY_USER_PROFILE(models.Model):
@@ -394,7 +394,7 @@ class TURNKEY_USER_PROFILE(models.Model):
         managed = False
         verbose_name = 'TURNKEY_USER_PROFILE'
         verbose_name_plural = 'TURNKEY_USER_PROFILE'
-        db_table = 'TURNKEY_USER_PROFILE'
+        db_table = 'TURNKEY_USER_PROFILE_V'
 
 
 
