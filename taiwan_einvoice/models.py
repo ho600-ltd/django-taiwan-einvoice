@@ -2237,7 +2237,7 @@ class UploadBatch(models.Model):
         if ids_in_c:
             bei = self.batcheinvoice_set.get(id=ids_in_c[0])
             content_model = bei.content_type.model_class()
-            if content_model in ["EInvoice", "CancelEInvoice", "VoidEInvoice"]:
+            if content_model in [EInvoice, CancelEInvoice, VoidEInvoice]:
                 content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c
                                                           ).values_list('object_id',
                                                                         named=False,
