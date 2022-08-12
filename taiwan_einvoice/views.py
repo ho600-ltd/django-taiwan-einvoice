@@ -64,6 +64,7 @@ from taiwan_einvoice.models import (
     Seller,
     TurnkeyService,
     SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError,
+    EInvoiceMIG,
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
@@ -712,6 +713,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
 
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
+        data['mig_type'] = EInvoiceMIG.objects.get(no=CancelEInvoice.MIG_NO_SET[einvoice.get_mig_no()]).id
         data['seller_identifier'] = einvoice.seller_identifier
         data['buyer_identifier'] = einvoice.buyer_identifier
         data['generate_time'] = now()

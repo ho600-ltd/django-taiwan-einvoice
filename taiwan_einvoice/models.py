@@ -1629,11 +1629,13 @@ class CancelEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
 
 
+    MIG_NO_SET = {
+        "C0401": "C0501",
+    }
     def get_mig_no(self):
         no = self.einvoice.get_mig_no()
-        if "C0401" == no:
-            mig = "C0501"
-        else:
+        mig = self.MIG_NO_SET.get(no, "")
+        if not mig:
             raise CancelEInvoiceMIGError("MIG for {} is not set".format(no))
         return mig
 
