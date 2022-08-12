@@ -11,6 +11,7 @@
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_canceleinvoice" as "can_view_canceleinvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_voideinvoice" as "can_view_voideinvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoiceprintlog" as "can_view_einvoiceprintlog_under_turnkeyservices" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.handle_te_batcheinvoice" as "can_handle_batcheinvoice_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_summaryreport" as "can_view_summaryreport_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_alarm_for_general_user" as "can_view_general_user_alarm_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_alarm_for_programmer" as "can_view_programmer_alarm_under_turnkeyservices" %}

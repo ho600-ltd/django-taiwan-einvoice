@@ -15,6 +15,7 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
         var form_data = '';
         form_data = new FormData();
         form_data.append("turnkey_web", $('select[name=turnkey_web]', $modal).val());
+        form_data.append("split_by_numbers", $('select[name=split_by_numbers]', $modal).val());
         var file = $('input[type=file]', $modal)[0].files[0];
         if (! file) {
             taiwan_einvoice_site.show_modal(
@@ -62,8 +63,10 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
                             s += '<td>' + gettext('NEW Record') + '</td>';
                         } else if ('turnkey_web' == field) {
                             s += '<td>' + json[i]['turnkey_web_dict']['name'] + '</td>';
-                        } else {
+                        } else if (json[i][field]) {
                             s += '<td>' + json[i][field] + '</td>';
+                        } else {
+                            s += '<td>&nbsp;</td>';
                         }
                     });
                     s += '</tr>';

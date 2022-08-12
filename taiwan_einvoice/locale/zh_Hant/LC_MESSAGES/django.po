@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-05 10:49+0800\n"
+"POT-Creation-Date: 2022-08-09 16:06+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,6 +115,9 @@ msgstr "58mm 電子發票"
 msgid "80mm Receipt"
 msgstr "80mm 收據"
 
+msgid "{} does exist!"
+msgstr "{} 已存在!"
+
 msgid "once per 5 minutes"
 msgstr "每 5 分鐘 1 次"
 
@@ -139,8 +142,20 @@ msgstr "一般稅額"
 msgid "Special"
 msgstr "特種稅額"
 
+msgid "Only use the same identifier to create the record for blank numbers!"
+msgstr "新增「空白未使用字軌號碼」須使用同一個統一編號!"
+
+msgid "Only use the same begin_time to create the record for blank numbers!"
+msgstr "新增「空白未使用字軌號碼」所使用的期別，其起始時間必須相同!"
+
+msgid "Only use the same end_time to create the record for blank numbers!"
+msgstr "新增「空白未使用字軌號碼」所使用的期別，其結束時間必須相同!"
+
 msgid "It could not be deleted, because it had E-Invoice({})"
 msgstr "無法刪除，因為它已開立發票({})"
+
+msgid "{} is disabled"
+msgstr "{} 已停用"
 
 msgid "Not enough numbers"
 msgstr "號碼不足"
@@ -224,6 +239,12 @@ msgstr "等待C0401"
 msgid "Wait for C0501 or C0401"
 msgstr "等待C0501或C0401"
 
+msgid "Re-Created by error status"
+msgstr "依錯誤狀態重新創建"
+
+msgid "Re-Created by error status with the new track no."
+msgstr "依錯誤狀態使用新的字軌號碼重新創建"
+
 msgid "Collecting"
 msgstr "收集中"
 
@@ -256,10 +277,12 @@ msgstr "開發人員"
 msgid ""
 "Error status: \"{status}\"\n"
 "Result code: \"{result_code}\"\n"
+"Result message: \"{result_message}\"\n"
 "            "
 msgstr ""
 "錯誤狀態: \"{status}\"\n"
 "結果碼: \"{result_code}\"\n"
+"結果訊息: \"{result_message}\"\n"
 "            "
 
 msgid "Waiting"
@@ -495,6 +518,27 @@ msgstr "批次代號包含"
 msgid "Track No. contains"
 msgstr "字軌號碼包含"
 
+msgid "Re-Create Upload Batch"
+msgstr "重新創建「批次上傳紀錄」"
+
+msgid "Handling Type"
+msgstr "處置方式"
+
+msgctxt "taiwan_einvoice_batch_einvoice_handling_type"
+msgid "Re-create the upload batch with the same track no."
+msgstr "使用相同字軌號碼新增新批次上傳紀錄"
+
+msgctxt "taiwan_einvoice_batch_einvoice_handling_type"
+msgid "Re-create the upload batch with the new track no."
+msgstr "使用新的字軌號碼新增新批次上傳紀錄"
+
+msgctxt "batch_einvoice_handling"
+msgid "Note"
+msgstr "處置說明"
+
+msgid "\"Limit from 4 to 200 words\""
+msgstr "字數在 4 ~ 200 個字"
+
 msgid "Batch slug"
 msgstr "批次代號"
 
@@ -507,17 +551,29 @@ msgstr "期別"
 msgid "Track no."
 msgstr "字軌號碼"
 
-msgid "Body"
-msgstr "內文"
-
 msgid "Status"
 msgstr "狀態"
 
 msgid "Result Code"
 msgstr "結果碼"
 
-msgid "Pass if error"
-msgstr "略過錯誤"
+msgid "Re-Create"
+msgstr "重新創建"
+
+msgid "Cancel"
+msgstr "關閉"
+
+msgid "Body"
+msgstr "內文"
+
+msgid "Error Handling"
+msgstr "錯誤處置"
+
+msgid "Handled"
+msgstr "已處置"
+
+msgid "Handle"
+msgstr "處置"
 
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode from the Canceled E-Invoice"
@@ -592,9 +648,6 @@ msgstr "追蹤編號"
 
 msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
 msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
-
-msgid "Cancel"
-msgstr "關閉"
 
 msgid "Please input the one-dimensional barcode for canceling: "
 msgstr "請輸入欲作廢之發票的一維條碼"
@@ -1095,6 +1148,15 @@ msgstr "涵蓋此號碼"
 msgid "Create Seller Invoice Track No"
 msgstr "新增字軌號碼檔"
 
+msgid "Create and Upload Blank Numbers"
+msgstr "新增並上傳空白未使用字軌號碼"
+
+msgid "No need to upload blank numbers"
+msgstr "無須上傳未使用字軌號碼"
+
+msgid "Search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' button"
+msgstr "先搜尋'統一編號'及'期別所含括的時間'，方能顯示「新增並上傳空白未使用字軌號碼」按鈕"
+
 msgid "Track"
 msgstr "字軌"
 
@@ -1118,6 +1180,9 @@ msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
 
 msgid "Choose .csv"
 msgstr "選擇 .csv"
+
+msgid "Split by numbers"
+msgstr "每幾組號碼切為 1 筆紀錄"
 
 msgid "Create"
 msgstr "新增"
@@ -1337,9 +1402,6 @@ msgstr "瀏覽"
 msgid "Edit"
 msgstr "編輯"
 
-msgid "Resolve"
-msgstr "解決"
-
 msgid "Seller Invoice Track No"
 msgstr "字軌號碼"
 
@@ -1494,6 +1556,30 @@ msgstr "已存在的群組數量已超過限度({})"
 msgid "Group name exists"
 msgstr "工作人員群組名稱已存在"
 
+msgid "Blank Numbers Error"
+msgstr "空白未使用字軌號碼錯誤"
+
+msgid "All fields are required!"
+msgstr "所有欄位皆必填!"
+
+msgid "There is no any seller-invoice-track-no records!"
+msgstr "無字軌號碼紀錄!"
+
+msgid "Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!"
+msgstr "字軌號碼與資料庫紀錄不符，請只搜尋統一編號及期別所含括的時間，其他搜尋欄位須留空!"
+
+msgid "Seller Invoice Track No. Error"
+msgstr "字軌號碼錯誤"
+
+msgid "The first record does not exist!"
+msgstr "第一筆字軌號碼紀錄不存在!"
+
+msgid "Create Upload Batch Error"
+msgstr "新增上傳批次錯誤"
+
+msgid "{} does not exist"
+msgstr "{} 不存在"
+
 msgid "TurnkeyService Does Not Exist"
 msgstr "Turnkwy 伺服器不存在"
 
@@ -1591,9 +1677,6 @@ msgstr "刪除失敗"
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"
 
-msgid "{} does not exist"
-msgstr "{} 不存在"
-
 msgid "E-Invoice(id: {}) does not exist!"
 msgstr "電子發票(id: {})不存在!"
 
@@ -1641,3 +1724,15 @@ msgstr "手機條碼錯誤"
 
 msgid "Mobile barcode does not exist."
 msgstr "手機條碼不存在"
+
+msgid "Batch E-Invoice Error"
+msgstr "批次上傳電子發票錯誤"
+
+msgid "Already handled!"
+msgstr "已處理!"
+
+msgid "Empty Hanling Note!"
+msgstr "處理說明為空值!"
+
+msgid "Wrong Hanling Type!"
+msgstr "不正確的處置方式"

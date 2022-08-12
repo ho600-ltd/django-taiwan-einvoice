@@ -160,7 +160,7 @@ class FROM_CONFIG(models.Model):
         managed = False
         verbose_name = 'FROM_CONFIG'
         verbose_name_plural = 'FROM_CONFIG'
-        db_table = 'FROM_CONFIG'
+        db_table = 'FROM_CONFIG_V'
 
 
 class SCHEDULE_CONFIG(models.Model):
@@ -180,7 +180,7 @@ class SCHEDULE_CONFIG(models.Model):
         managed = False
         verbose_name = 'SCHEDULE_CONFIG'
         verbose_name_plural = 'SCHEDULE_CONFIG'
-        db_table = 'SCHEDULE_CONFIG'
+        db_table = 'SCHEDULE_CONFIG_V'
 
 
 class SIGN_CONFIG(models.Model):
@@ -198,7 +198,7 @@ class SIGN_CONFIG(models.Model):
         managed = False
         verbose_name = 'SIGN_CONFIG'
         verbose_name_plural = 'SIGN_CONFIG'
-        db_table = 'SIGN_CONFIG'
+        db_table = 'SIGN_CONFIG_V'
 
 
 class TASK_CONFIG(models.Model):
@@ -280,6 +280,21 @@ class TURNKEY_MESSAGE_LOG(models.Model):
         unique_together = (('SEQNO', 'SUBSEQNO'),)
 
 
+    def get_TURNKEY_SYSEVENT_LOG__MESSAGES(self):
+        tsl = TURNKEY_SYSEVENT_LOG.objects.filter(EVENTDTS__gte=self.MESSAGE_DTS
+                                                 ).filter(Q(UUID=self.UUID)
+                                                          |Q(SEQNO=self.SEQNO, SUBSEQNO=self.SUBSEQNO)
+                                                         ).order_by('EVENTDTS').first()
+        if tsl:
+            code = tsl.MESSAGE6.split(' ;')[0]
+            message1 = tsl.MESSAGE1
+        else:
+            code = ''
+            message1 = ''
+        return code, message1
+
+
+
 class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
     SEQNO_SUBSEQNO_TASK = models.CharField(db_column='SEQNO_SUBSEQNO_TASK', primary_key=True, max_length=45)
     SEQNO = models.CharField(db_column='SEQNO', max_length=8)
@@ -316,7 +331,7 @@ class TURNKEY_SEQUENCE(models.Model):
         managed = False
         verbose_name = 'TURNKEY_SEQUENCE'
         verbose_name_plural = 'TURNKEY_SEQUENCE'
-        db_table = 'TURNKEY_SEQUENCE'
+        db_table = 'TURNKEY_SEQUENCE_V'
 
 
 class TURNKEY_SYSEVENT_LOG(models.Model):
@@ -344,7 +359,7 @@ class TURNKEY_SYSEVENT_LOG(models.Model):
         managed = False
         verbose_name = 'TURNKEY_SYSEVENT_LOG'
         verbose_name_plural = 'TURNKEY_SYSEVENT_LOG'
-        db_table = 'TURNKEY_SYSEVENT_LOG'
+        db_table = 'TURNKEY_SYSEVENT_LOG_V'
         index_together = (("SEQNO", "SUBSEQNO"),)
 
 
@@ -360,7 +375,7 @@ class TURNKEY_TRANSPORT_CONFIG(models.Model):
         managed = False
         verbose_name = 'TURNKEY_TRANSPORT_CONFIG'
         verbose_name_plural = 'TURNKEY_TRANSPORT_CONFIG'
-        db_table = 'TURNKEY_TRANSPORT_CONFIG'
+        db_table = 'TURNKEY_TRANSPORT_CONFIG_V'
 
 
 class TURNKEY_USER_PROFILE(models.Model):
@@ -379,7 +394,7 @@ class TURNKEY_USER_PROFILE(models.Model):
         managed = False
         verbose_name = 'TURNKEY_USER_PROFILE'
         verbose_name_plural = 'TURNKEY_USER_PROFILE'
-        db_table = 'TURNKEY_USER_PROFILE'
+        db_table = 'TURNKEY_USER_PROFILE_V'
 
 
 
@@ -815,9 +830,18 @@ class EITurnkeyBatch(models.Model):
                                                                                                   named=False,
                                                                                                   flat=True)
 
+        result_message_d = {}
+        for d in self.eiturnkeybatcheinvoice_set.exclude(result_message=''
+                                                        ).values('result_message'
+                                                                ).annotate(result_message_count=Count('result_message')):
+            result_message_d[d['result_message']] = self.eiturnkeybatcheinvoice_set.filter(result_message=d['result_message']
+                                                                                          ).values_list('batch_einvoice_id',
+                                                                                                        named=False,
+                                                                                                        flat=True)
         return {
             "status": status_d,
             "result_code": result_code_d,
+            "result_message": result_message_d,
         }
 
 
@@ -845,6 +869,7 @@ class EITurnkeyBatchEInvoice(models.Model):
     upload_to_ei_time = models.DateTimeField(null=True)
     body = models.JSONField(default="")
     result_code = models.CharField(max_length=5, default="", db_index=True)
+    result_message = models.TextField(default='')
 
 
     @property
@@ -904,10 +929,10 @@ class EITurnkeyBatchEInvoice(models.Model):
                 self.status = nearest_TURNKEY_MESSAGE_LOG.STATUS
             elif nearest_TURNKEY_MESSAGE_LOG.STATUS.startswith('E'):
                 self.status = 'E'
-                self.result_code = nearest_TURNKEY_MESSAGE_LOG.STATUS
             else:
                 self.status = 'I'
-                self.result_code = nearest_TURNKEY_MESSAGE_LOG.STATUS
+            if self.status in ['E', 'I']:
+                self.result_code, self.result_message = nearest_TURNKEY_MESSAGE_LOG.get_TURNKEY_SYSEVENT_LOG__MESSAGES()
             self.upload_to_ei_time = nearest_TURNKEY_MESSAGE_LOG.MESSAGE_DTS_datetime
             self.save()
             return self.status

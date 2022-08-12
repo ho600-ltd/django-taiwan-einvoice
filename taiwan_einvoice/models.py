@@ -77,6 +77,11 @@ class IdentifierDuplicateError(Exception):
 
 
 
+class SellerInvoiceTrackNoDisableError(Exception):
+    pass
+
+
+
 class CancelEInvoiceMIGError(Exception):
     pass
 
@@ -724,6 +729,8 @@ class TurnkeyService(models.Model):
             ("view_te_voideinvoice", "View Void E-Invoice of the TurnkeyService"),
             ("add_te_voideinvoice", "Add Void E-Invoice of the TurnkeyService"),
 
+            ("handle_te_batcheinvoice", "Handle Batch E-Invoice of the TurnkeyService"),
+
             ("view_te_einvoiceprintlog", "View E-Invoice Print Log of the TurnkeyService"),
             
             ("view_te_summaryreport", "View Summary Report of the TurnkeyService"),
@@ -737,6 +744,7 @@ class TurnkeyService(models.Model):
 
 class SellerInvoiceTrackNo(models.Model):
     turnkey_web = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    is_disabled = models.BooleanField(default=False)
     type_choices = (
         ('07', _('General')),
         ('08', _('Special')),
@@ -763,15 +771,26 @@ class SellerInvoiceTrackNo(models.Model):
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
     track = models.CharField(max_length=2, db_index=True)
     begin_no = models.IntegerField(db_index=True)
+    @property
+    def begin_no_str(self):
+        return "{:08d}".format(self.begin_no)
     end_no = models.IntegerField(db_index=True)
     @property
+    def end_no_str(self):
+        return "{:08d}".format(self.end_no)
+    @property
     def count_blank_no(self):
-        return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
+        if self.is_disabled:
+            return 0
+        else:
+            return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
     @property
     def next_blank_no(self):
         try:
             new_no = self.get_new_no()
         except NotEnoughNumberError:
+            new_no = ''
+        except SellerInvoiceTrackNoDisableError:
             new_no = ''
         return new_no
     @property
@@ -806,6 +825,7 @@ class SellerInvoiceTrackNo(models.Model):
         _now = now()
         ids = []
         for sitn in queryset.filter(turnkey_web__on_working=True,
+                                    is_disabled=False,
                                     begin_time__lte=_now,
                                     end_time__gt=_now).order_by('track', 'begin_no'):
             if ignore_count_blank_no:
@@ -845,11 +865,14 @@ class SellerInvoiceTrackNo(models.Model):
     def delete(self, *args, **kwargs):
         if self.einvoice_set.exists():
             ei = self.einvoice_set.order_by('id').first()
-            raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})"), ei.track_no_)
+            raise UsedSellerInvoiceTrackNoError(_("It could not be deleted, because it had E-Invoice({})").format(ei.track_no_), ei.track_no_)
         return super().delete(*args, **kwargs)
 
 
     def get_new_no(self):
+        if self.is_disabled:
+            raise NotEnoughNumberError(_("{} is disabled").format(self))
+
         max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
         if max_no:
             max_no = int(max_no)
@@ -865,6 +888,9 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def create_einvoice(self, data):
+        if self.is_disabled:
+            raise SellerInvoiceTrackNoDisableError()
+
         data['seller_invoice_track_no'] = self
         data['type'] = self.type
         data['track'] = self.track
@@ -1093,17 +1119,6 @@ class EInvoice(models.Model):
             return None
         else:
             return bei
-
-
-    def __str__(self):
-        return "{}".format(self.track_no)
-
-
-
-    class Meta:
-        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
-    
-
     @property
     def one_dimension_barcode_str(self):
         chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -1116,14 +1131,6 @@ class EInvoice(models.Model):
             self.random_number,
         )
         return barcode_str
-
-
-    @classmethod
-    def escpos_einvoice_scripts(cls, id=0):
-        _sha1 = sha1(str(id).encode('utf-8')).hexdigest()
-        return "*{}*".format(_sha1)
-
-
     @property
     def _escpos_einvoice_scripts(self):
         def _hex_amount(amount):
@@ -1267,8 +1274,6 @@ class EInvoice(models.Model):
                                 for _p in details[:5]]),
                     },
                 ]
-
-
     @property
     def details_content(self):
         if hasattr(self.content_object, 'escpos_print_scripts_of_details'):
@@ -1278,8 +1283,6 @@ class EInvoice(models.Model):
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": _("No details")},
             ]
         return details_content
-
-
     @property
     def escpos_print_scripts(self):
         _d = {
@@ -1295,6 +1298,56 @@ class EInvoice(models.Model):
         }
         _d["details_content"] = self.details_content
         return _d
+
+
+    def __str__(self):
+        return "{}".format(self.track_no)
+
+
+    def post_new_track_no(self):
+        lg = logging.getLogger('taiwan_einvoice')
+        lg.debug('EInvoice(id:{}) post_new_track_no'.format(self.id))
+        message = ""
+        if hasattr(self.content_object, "post_new_track_no"):
+            message = self.content_object.post_new_track_no(self)
+        return message
+
+
+    def renew_track_no_and_sitn_obj(self):
+        turnkey_service = self.seller_invoice_track_no.turnkey_web
+        sitn = ''
+        no = ''
+        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=turnkey_service):
+            new_no = sitn.get_new_no()
+            if new_no:
+                no = new_no
+                break
+        if '' == no:
+            raise NotEnoughNumberError(_('Not enough numbers'))
+        else:
+            self.random_number = ''
+            random_number = self.get_or_generate_random_number()
+            EInvoice.objects.filter(id=self.id).update(
+                seller_invoice_track_no=sitn,
+                track=sitn.track,
+                no=no,
+                random_number=random_number,
+                generate_time=now(),
+            )
+            new_track_no_self = EInvoice.objects.get(id=self.id)
+            new_track_no_self.post_new_track_no(new_track_no_self)
+            return new_track_no_self
+
+
+    class Meta:
+        unique_together = (('seller_invoice_track_no', 'track', 'no', 'reverse_void_order'), )
+    
+
+
+    @classmethod
+    def escpos_einvoice_scripts(cls, id=0):
+        _sha1 = sha1(str(id).encode('utf-8')).hexdigest()
+        return "*{}*".format(_sha1)
 
 
     def get_mig_no(self):
@@ -1393,6 +1446,30 @@ class EInvoice(models.Model):
 
     def delete(self, *args, **kwargs):
         raise Exception('Can not delete')
+    
+
+    def get_or_generate_random_number(self):
+        if self.random_number:
+            return self.random_number
+        turnkey_web = self.seller_invoice_track_no.turnkey_web
+        while True:
+            random_number = '{:04d}'.format(randint(0, 10000))
+            objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
+            if not objs.exists():
+                break
+            else:
+                obj = objs[len(objs)-1]
+                if not (self._meta.model.objects.filter(id__gte=obj.id,
+                                                        seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                        random_number=random_number).exists()
+                        or self._meta.model.objects.filter(reverse_void_order__gt=0,
+                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
+                                                            track=self.track,
+                                                            no=self.no,
+                                                            random_number=random_number,
+                                                            ).exists()):
+                    break
+        return random_number
 
 
     def save(self, *args, **kwargs):
@@ -1416,24 +1493,7 @@ class EInvoice(models.Model):
                 #TODO: grab staff group, and send notice mail to them.
                 pass
 
-            while True:
-                random_number = '{:04d}'.format(randint(0, 10000))
-                objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
-                if not objs.exists():
-                    break
-                else:
-                    obj = objs[len(objs)-1]
-                    if not (self._meta.model.objects.filter(id__gte=obj.id,
-                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                            random_number=random_number).exists()
-                            or self._meta.model.objects.filter(reverse_void_order__gt=0,
-                                                               seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                               track=self.track,
-                                                               no=self.no,
-                                                               random_number=random_number,
-                                                               ).exists()):
-                        break
-            self.random_number = random_number
+            self.random_number = self.get_or_generate_random_number()
             self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
             super().save(*args, **kwargs)
         UploadBatch.append_to_the_upload_batch(self)
@@ -1709,6 +1769,8 @@ class UploadBatch(models.Model):
         ("54", _("Wait for C0501 or C0401")),   # to VoidEInvoice
 
         ("E",  "E0401 ~ E0501"),
+        ("R",  _("Re-Created by error status")),
+        ("RN", _("Re-Created by error status with the new track no.")),
     )
     kind = models.CharField(max_length=2, choices=kind_choices)
     executor = models.ForeignKey(User, null=True, on_delete=models.DO_NOTHING)
@@ -1800,6 +1862,7 @@ class UploadBatch(models.Model):
                 is_finish = self.update_batch_einvoice_status_result_code(
                    status=result_json['status'],
                    result_code=result_json['result_code'],
+                   result_message=result_json['result_message'],
                 )
                 if is_finish:
                     self.update_to_new_status(NEXT_STATUS)
@@ -2005,7 +2068,7 @@ class UploadBatch(models.Model):
             
             if check_C0401 and check_C0501:
                 self.update_to_new_status(NEXT_STATUS)
-        elif 'E' == self.kind:
+        elif self.kind in ['E', 'R', 'RN']:
             self.update_to_new_status(NEXT_STATUS)
 
 
@@ -2122,7 +2185,7 @@ class UploadBatch(models.Model):
             return None
 
 
-    def update_batch_einvoice_status_result_code(self, status={}, result_code={}):
+    def update_batch_einvoice_status_result_code(self, status={}, result_code={}, result_message={}):
         lg = logging.getLogger("taiwan_einvoice")
         for rc, ids in result_code.items():
             beteis = self.batcheinvoice_set.filter(id__in=ids)
@@ -2130,6 +2193,13 @@ class UploadBatch(models.Model):
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
                 beteis.update(result_code=rc)
+
+        for rc, ids in result_message.items():
+            beteis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beteis.count():
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+            else:
+                beteis.update(result_message=rc)
         
         ids_in_c = []
         status['__else__'] = status['__else__'].lower()
@@ -2187,7 +2257,8 @@ class UploadBatch(models.Model):
             )
             body = _("""Error status: "{status}"
 Result code: "{result_code}"
-            """).format(status=bei.status, result_code=bei.result_code)
+Result message: "{result_message}"
+            """).format(status=error_bei.status, result_code=error_bei.result_code, result_message=error_bei.result_message)
 
             te_alarm, new_creation = TEAlarm.objects.get_or_create(
                 turnkey_service=self.turnkey_service,
@@ -2198,8 +2269,8 @@ Result code: "{result_code}"
                 object_id=self.id,
             )
             only_with_perms_in = {"g": ("view_te_alarm_for_general_user", "view_te_alarm_for_programmer", ),
-                                    "p": ("view_te_alarm_for_programmer", ),
-                                    }[target_audience_type]
+                                  "p": ("view_te_alarm_for_programmer", ),
+                                 }[target_audience_type]
             notified_users = get_users_with_perms(self, only_with_perms_in=only_with_perms_in)
             if notified_users:
                 te_alarm.notified_users.add(notified_users)
@@ -2251,6 +2322,8 @@ class BatchEInvoice(models.Model):
     )
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     result_code = models.CharField(max_length=5, default='', db_index=True)
+    result_message = models.TextField(default='')
+    handling_note = models.CharField(max_length=200, default='')
     pass_if_error = models.BooleanField(default=False)
     history = HistoricalRecords()
     @property

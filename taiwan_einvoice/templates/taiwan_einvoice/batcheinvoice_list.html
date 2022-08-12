@@ -1,5 +1,5 @@
 {% extends 'taiwan_einvoice/base.html' %}
-{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}{% load ho600_tags %}
 
 {% block css %}
 {% endblock %}
@@ -65,4 +65,76 @@
 {% endblock %}
 
 {% block modals %}
+
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.handle_te_batcheinvoice" as "can_handle_batcheinvoice_under_turnkeyservices" %}
+
+{% if can_handle_batcheinvoice_under_turnkeyservices.exists %}
+
+    <div class="modal fade" id="re_create_another_upload_batch_modal" tabindex="-1" role="dialog"
+        resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-re-create-another-upload-batch' pk=0 %}"
+        aria-labelledby="show_batcheinvoice_modal_label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="show_batcheinvoice_modal_label">{% trans "Re-Create Upload Batch" %}</h4>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="handling_type" class="col-4 col-form-label"><span class="text-danger">*</span> {% trans "Handling Type" %}</label>
+                        <div class="input-group col-8" id="handling_type" data-target-input="nearest">
+                            <select class="form-control" data-target="#handling_type"
+                                name="handling_type" id="id_handling_type">
+                                <option value="the_same_track_no">
+                                    {% trans "Re-create the upload batch with the same track no." context "taiwan_einvoice_batch_einvoice_handling_type" %}
+                                </option>
+                                <option value="with_new_track_no">
+                                    {% trans "Re-create the upload batch with the new track no." context "taiwan_einvoice_batch_einvoice_handling_type" %}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="handling_note" class="col-4 col-form-label"><span class="text-danger">*</span> {% trans "Note" context "batch_einvoice_handling" %}</label>
+                        <div class="col-8">
+                            <textarea class="form-control" name="handling_note" id="handling_note" rows="3" placeholder="{% trans '"Limit from 4 to 200 words"' %}"></textarea>
+                        </div>
+                    </div>
+                    <table class="table table-hover table-striped">
+                        <thead>
+                                <tr>
+                                    <th field="batch">{% trans "Batch slug" %}</th>
+                                    <th field="content_object_dict">{% trans "Content Object" %}</th>
+                                    <th field="year_month_range">{% trans "Year Month Range" %}</th>
+                                    <th field="track_no">{% trans "Track no." %}</th>
+                                    <th field="status">{% trans "Status" %}</th>
+                                    <th field="result">{% trans "Result Code" %}</th>
+                                </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td field="batch"></td>
+                                <td field="content_object_dict">@{{ obj.batch_dict.mig_type_dict.no }}</td>
+                                <td field="year_month_range"></td>
+                                <td field="track_no"></td>
+                                <td field="status"></td>
+                                <td field="result" class="text-danger">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button id="cancel_einvoice_button_1" type="button" class="re_create_another_upload_batch btn btn-warning">{% trans "Re-Create" %}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
 {% endblock %}

@@ -77,6 +77,23 @@ class StaffProfileSerializer(ModelSerializer):
     def update(self, instance, validated_data):
         if self.context['request'].user == instance.user:
             raise PermissionDenied(detail=_("You can not edit yourself"))
+
+        request = self.context['request']
+        user = instance.user
+        ct = ContentType.objects.get_for_model(TurnkeyService)
+        for k, v in request.data.items():
+            if k.startswith('add_group_'):
+                group_id = k.replace('add_group_', '')
+                try:
+                    g = Group.objects.get(id=group_id, name__startswith='ct{}:'.format(ct.id))
+                except Group.DoesNotExist:
+                    continue
+                else:
+                    if v:
+                        user.groups.add(g)
+                    else:
+                        user.groups.remove(g)
+
         group_dict = {
             "in_printer_admin_group": Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup'),
             "in_manager_group": Group.objects.get(name='TaiwanEInvoiceManagerGroup')
@@ -305,6 +322,8 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     turnkey_web_dict = TurnkeyServiceSerializer(source='turnkey_web', read_only=True)
     type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
     type__display = CharField(read_only=True)
+    begin_no_str = CharField(read_only=True)
+    end_no_str = CharField(read_only=True)
     next_blank_no = CharField(read_only=True)
     count_blank_no = IntegerField(read_only=True)
     year_month_range = CharField(read_only=True)
@@ -319,6 +338,14 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     def get_str_name(self, instance):
         return str(instance)
 
+
+    def update(self, instance, validated_data):
+        for key in validated_data:
+            if key in ['is_disabled', ]:
+                pass
+            else:
+                del validated_data[key]
+        return super().update(instance, validated_data)
 
 
 class DetailsContentField(ReadOnlyField):

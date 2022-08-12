@@ -154,26 +154,6 @@ class StaffProfileModelViewSet(ModelViewSet):
     http_method_names = ('post', 'get', 'patch')
 
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        user = instance.user
-        ct = ContentType.objects.get_for_model(TurnkeyService)
-        for k, v in request.data.items():
-            if k.startswith('add_group_'):
-                group_id = k.replace('add_group_', '')
-                try:
-                    g = Group.objects.get(id=group_id, name__startswith='ct{}:'.format(ct.id))
-                except Group.DoesNotExist:
-                    continue
-                else:
-                    if v:
-                        user.groups.add(g)
-                    else:
-                        user.groups.remove(g)
-        res = super().update(request, *args, **kwargs)
-        return res
-
-
     def create(self, request, *args, **kwargs):
         data = request.data
         if StaffProfile.objects.filter(user__username=data['user.username']).exists():
@@ -403,7 +383,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     serializer_class = SellerInvoiceTrackNoSerializer
     filter_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('post', 'get', 'delete')
+    http_method_names = ('post', 'get', 'delete', 'patch')
 
 
     def get_queryset(self):
@@ -442,7 +422,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 result = {"error_title": _("Blank Numbers Error"),
                           "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
             elif sitn not in seller_invoice_track_nos:
-                result = {"error_title": _("Seller Invoice Track No Error"),
+                result = {"error_title": _("Seller Invoice Track No. Error"),
                           "error_message": _("The first record does not exist!")}
             
             try:
@@ -454,7 +434,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 return Response({"slugs": [upload_batch.slug for upload_batch in upload_batchs]}, status=status.HTTP_201_CREATED)
         else:
             result = {"error_title": _("Seller Invoice Track No. Error"),
-                      "error_message": _("{} does not ecreate_blank_numbers_and_upload_batchxist").format(pk)}
+                      "error_message": _("{} does not exist").format(pk)}
         return Response(result, status=status.HTTP_403_FORBIDDEN)
 
 
@@ -524,29 +504,44 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
 
-
-                data = {
-                    "turnkey_web": turnkey_web.id,
-                    "type": '{:02d}'.format(int(cols[1])),
-                    "begin_time": begin_time,
-                    "end_time": end_time,
-                    "track": cols[4],
-                    "begin_no": begin_no,
-                    "end_no": end_no,
-                }
-                sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
-                if sitns.is_valid():
-                    datas.append(data)
-                else:
-                    if 'unique' in str(sitns.errors):
-                        error_message = _("{} exists").format(line)
-                    else:
-                        error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
-                    er = {
-                        "error_title": _("Data Error"),
-                        "error_message": error_message,
+                begin_no = int(begin_no)
+                end_no = int(end_no)
+                split_by_numbers = int(request.POST.get('split_by_numbers', '100'))
+                _begin_no_in_split = begin_no
+                _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
+                if _end_no_in_split > end_no: _end_no_in_split = end_no
+                while _begin_no_in_split < _end_no_in_split:
+                    data = {
+                        "turnkey_web": turnkey_web.id,
+                        "type": '{:02d}'.format(int(cols[1])),
+                        "begin_time": begin_time,
+                        "end_time": end_time,
+                        "track": cols[4],
+                        "begin_no": _begin_no_in_split,
+                        "end_no": _end_no_in_split,
                     }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
+                    if sitns.is_valid():
+                        datas.append(data)
+                    elif 'unique' in str(sitns.errors) and (_begin_no_in_split != begin_no or _end_no_in_split != end_no):
+                        pass
+                    else:
+                        if 'unique' in str(sitns.errors):
+                            error_message = _("{} exists").format(line)
+                        else:
+                            error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
+                        er = {
+                            "error_title": _("Data Error"),
+                            "error_message": error_message,
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                    _begin_no_in_split = _end_no_in_split + 1
+                    if _begin_no_in_split > end_no:
+                        break
+                    _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
+                    if _end_no_in_split > end_no:
+                        _end_no_in_split = end_no
         output_datas = []
         if not datas:
             er = {
@@ -948,7 +943,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
     serializer_class = BatchEInvoiceSerializer
     filter_class = BatchEInvoiceFilter
     renderer_classes = (BatchEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('get', )
+    http_method_names = ('get', 'post')
 
 
     def get_queryset(self):
@@ -961,8 +956,64 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         else:
             permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(batch__turnkey_web__in=turnkey_webs)
+            return queryset.filter(batch__turnkey_service__in=turnkey_webs)
 
+
+    @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
+    def re_create_another_upload_batch(self, request, pk=None):
+        batch_einvoice = self.get_object()
+        handling_type = request.data.get("handling_type", "")
+        handling_note = request.data.get("handling_note", "")
+        if batch_einvoice.pass_if_error:
+            er = {
+                "error_title": _("Batch E-Invoice Error"),
+                "error_message": _('Already handled!')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif not handling_note:
+            er = {
+                "error_title": _("Data Error"),
+                "error_message": _('Empty Hanling Note!')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+        elif handling_type not in ["the_same_track_no", "with_new_track_no"]:
+            er = {
+                "error_title": _("Data Error"),
+                "error_message": _('Wrong Hanling Type!')
+            }
+            return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        content_object = batch_einvoice.content_object
+        if "the_same_track_no" == handling_type:
+            kind = 'R'
+        elif "with_new_track_no" == handling_type:
+            kind = 'RN'
+            content_object = content_object.renew_track_no_and_sitn_obj()
+
+        i = 0 
+        while i < 10000:
+            slug = "{}{:04d}".format(content_object.track_no, i)
+            if not UploadBatch.objects.filter(slug=slug).exists():
+                break
+            i += 1
+        new_ub = UploadBatch(turnkey_service=batch_einvoice.batch.turnkey_service,
+                             slug=slug,
+                             mig_type=batch_einvoice.batch.mig_type,
+                             kind=kind,
+                             status='0')
+        new_ub.save()
+        new_be = BatchEInvoice(batch=new_ub,
+                               content_object=content_object,
+                               begin_time=content_object.seller_invoice_track_no.begin_time,
+                               end_time=content_object.seller_invoice_track_no.end_time,
+                               track_no=content_object.track_no,
+                               body="",
+                              )
+        new_be.save()
+        batch_einvoice.handling_note = handling_note
+        batch_einvoice.pass_if_error = True
+        batch_einvoice.save()
+        return Response({"slug": new_ub.slug}, status=status.HTTP_201_CREATED)
 
 
 class AuditLogModelViewSet(ModelViewSet):
