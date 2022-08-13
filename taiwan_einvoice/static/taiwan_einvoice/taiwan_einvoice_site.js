@@ -254,7 +254,11 @@ $(function () {
             'report_type',
             'target_audience_type',
             'type',
+            'status',
+            'status__regex',
+            'pass_if_error',
             'turnkey_web__seller__legal_entity__identifier',
+            'batch__turnkey_service',
             'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {

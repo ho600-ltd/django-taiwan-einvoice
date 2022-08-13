@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-13 10:07+0800\n"
+"POT-Creation-Date: 2022-08-13 13:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -263,6 +263,9 @@ msgstr "已上傳到 TKW"
 msgid "Finish"
 msgstr "完成"
 
+msgid "{} not in [EInvoice, CancelEInvoice, VoidEInvoice]"
+msgstr "{} 非發票、作廢發票、註銷發票"
+
 #, python-brace-format
 msgid "Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}"
 msgstr "{target_audience}注意: {slug} 中的發票({content_object})無法完成同步"
@@ -512,6 +515,18 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
+msgid "Status"
+msgstr "狀態"
+
+msgid "Error Handling"
+msgstr "錯誤處置"
+
+msgid "Handled"
+msgstr "已處置"
+
+msgid "Not yet"
+msgstr "尚未"
+
 msgid "Batch Slug contains"
 msgstr "批次代號包含"
 
@@ -555,9 +570,6 @@ msgstr "期別"
 msgid "Track no."
 msgstr "字軌號碼"
 
-msgid "Status"
-msgstr "狀態"
-
 msgid "Result Code"
 msgstr "結果碼"
 
@@ -569,12 +581,6 @@ msgstr "關閉"
 
 msgid "Body"
 msgstr "內文"
-
-msgid "Error Handling"
-msgstr "錯誤處置"
-
-msgid "Handled"
-msgstr "已處置"
 
 msgid "Handle"
 msgstr "處置"
@@ -1295,9 +1301,6 @@ msgstr "失敗"
 msgid "Resolved"
 msgstr "已解決"
 
-msgid "Not yet"
-msgstr "尚未"
-
 msgid "Only display in the hourly report"
 msgstr "非「每小時報表」，無須顯示"
 
@@ -1450,7 +1453,7 @@ msgid "EI Turnkey Batch ID"
 msgstr "EI Turnkey 批次 ID"
 
 msgid "Batch E-Invoice Count"
-msgstr "上傳發票數"
+msgstr "批次發票數"
 
 msgid "Auto-Executed"
 msgstr "自動執行"
