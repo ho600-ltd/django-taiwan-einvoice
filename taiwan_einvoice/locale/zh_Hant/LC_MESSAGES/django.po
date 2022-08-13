@@ -532,6 +532,10 @@ msgctxt "taiwan_einvoice_batch_einvoice_handling_type"
 msgid "Re-create the upload batch with the new track no."
 msgstr "使用新的字軌號碼新增新批次上傳紀錄"
 
+msgctxt "taiwan_einvoice_batch_einvoice_handling_type"
+msgid "Only write the handling note, because it done the handing work in the EI Turnkey application manually."
+msgstr "單純填寫處理說明，因為已在 EI Turnkey 應用程式手動處理。"
+
 msgctxt "batch_einvoice_handling"
 msgid "Note"
 msgstr "處置說明"
