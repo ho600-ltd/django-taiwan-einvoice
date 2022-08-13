@@ -848,6 +848,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                                  seller_identifier=einvoice.seller_identifier,
                                  buyer_identifier=einvoice.buyer_identifier,
                                  generate_time=now(),
+                                 mig_type=EInvoiceMIG.objects.get(no=CancelEInvoice.MIG_NO_SET[einvoice.get_mig_no()]),
                                  reason=data['reason'],
                                  remark=data['remark']
                                 )
@@ -855,6 +856,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
+        data['mig_type'] = EInvoiceMIG.objects.get(no=VoidEInvoice.MIG_NO_SET[einvoice.get_mig_no()]).id
         data['seller_identifier'] = einvoice.seller_identifier
         _post_buyer_identifier = data['buyer_identifier']
         data['buyer_identifier'] = einvoice.buyer_identifier
