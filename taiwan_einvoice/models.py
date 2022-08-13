@@ -1458,23 +1458,30 @@ class EInvoice(models.Model):
         if self.random_number:
             return self.random_number
         turnkey_web = self.seller_invoice_track_no.turnkey_web
+        same_routeing_id_objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web__party_id=turnkey_web.party_id,
+                                                                seller_invoice_track_no__turnkey_web__transport_id=turnkey_web.transport_id,
+                                                                seller_invoice_track_no__turnkey_web__routing_id=turnkey_web.routing_id,)
+
+        ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
+
+        _ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True).order_by('-upload_to_ei_time')[:1000]
+        if _ei_synced_true_objs.exists():
+            first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
+            ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
+        else:
+            ei_synced_true_objs = _ei_synced_true_objs
+
         while True:
             random_number = '{:04d}'.format(randint(0, 10000))
-            objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
-            if not objs.exists():
+            if not (ei_synced_false_objs.filter(random_number=random_number).exists()
+                    or ei_synced_true_objs.filter(random_number=random_number).exists()
+                    or same_routeing_id_objs.filter(seller_invoice_track_no__begin_time=self.seller_invoice_track_no.begin_time,
+                                                    track=self.track,
+                                                    no=self.no,
+                                                    random_number=random_number,
+                                                   ).exists()
+                ):
                 break
-            else:
-                obj = objs[len(objs)-1]
-                if not (self._meta.model.objects.filter(id__gte=obj.id,
-                                                        seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                        random_number=random_number).exists()
-                        or self._meta.model.objects.filter(reverse_void_order__gt=0,
-                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                            track=self.track,
-                                                            no=self.no,
-                                                            random_number=random_number,
-                                                            ).exists()):
-                    break
         return random_number
 
 
