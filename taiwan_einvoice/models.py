@@ -1118,13 +1118,8 @@ class EInvoice(models.Model):
         return related_einvoices
     @property
     def last_batch_einvoice(self):
-        try:
-            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
-                                            object_id=self.id)
-        except BatchEInvoice.DoesNotExist:
-            return None
-        else:
-            return bei
+        return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id).order_by('id').last()
     @property
     def one_dimension_barcode_str(self):
         chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -1595,13 +1590,8 @@ class CancelEInvoice(models.Model):
         on_delete=models.DO_NOTHING)
     @property
     def last_batch_einvoice(self):
-        try:
-            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
-                                            object_id=self.id)
-        except BatchEInvoice.DoesNotExist:
-            return None
-        else:
-            return bei
+        return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id).order_by('id').last()
 
 
     def __str__(self):
@@ -1632,8 +1622,7 @@ class CancelEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.mig_type:
-            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+        self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
 
         if kwargs.get('force_save', False):
             del kwargs['force_save']
@@ -1731,8 +1720,7 @@ class VoidEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.mig_type:
-            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+        self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
 
         if kwargs.get('force_save', False):
             del kwargs['force_save']
@@ -1742,11 +1730,13 @@ class VoidEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
     
     
+    MIG_NO_SET = {
+        "C0401": "C0701",
+    }
     def get_mig_no(self):
         no = self.einvoice.get_mig_no()
-        if "C0401" == no:
-            mig = "C0701"
-        else:
+        mig = self.MIG_NO_SET.get(no, "")
+        if not mig:
             raise VoidEInvoiceMIGError("MIG for {} is not set".format(no))
         return mig
 
