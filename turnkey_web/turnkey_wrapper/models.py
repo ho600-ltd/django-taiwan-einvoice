@@ -821,6 +821,25 @@ class EITurnkeyBatch(models.Model):
             else:
                 status_d['__else__'] = max_count_on_status
         
+        upload_to_ei_times = []
+        max_count_on_upload_to_ei_time = ''
+        max_count = 0
+        for d in self.eiturnkeybatcheinvoice_set.values('upload_to_ei_time').annotate(upload_to_ei_time_count=Count('upload_to_ei_time')):
+            if d['upload_to_ei_time_count'] > max_count:
+                max_count = d['upload_to_ei_time_count']
+                max_count_on_upload_to_ei_time = d['upload_to_ei_time']
+            upload_to_ei_times.append(d['upload_to_ei_time'])
+        
+        upload_to_ei_time_d = {}
+        for upload_to_ei_time in upload_to_ei_times:
+            if upload_to_ei_time != max_count_on_upload_to_ei_time:
+                upload_to_ei_time_d[str(upload_to_ei_time)] = self.eiturnkeybatcheinvoice_set.filter(upload_to_ei_time=upload_to_ei_time
+                                                                                               ).values_list('batch_einvoice_id',
+                                                                                                             named=False,
+                                                                                                             flat=True)
+            else:
+                upload_to_ei_time_d['__else__'] = max_count_on_upload_to_ei_time
+        
         result_code_d = {}
         for d in self.eiturnkeybatcheinvoice_set.exclude(result_code=''
                                                         ).values('result_code'
@@ -840,6 +859,7 @@ class EITurnkeyBatch(models.Model):
                                                                                                         flat=True)
         return {
             "status": status_d,
+            "upload_to_ei_time": upload_to_ei_time_d,
             "result_code": result_code_d,
             "result_message": result_message_d,
         }

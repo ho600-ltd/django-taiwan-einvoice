@@ -13,7 +13,7 @@ from django.db.models import Max, F, Count, Q
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import translation
-from django.utils.timezone import now
+from django.utils.timezone import now, utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext, pgettext
 from simple_history.models import HistoricalRecords
@@ -93,6 +93,11 @@ class VoidEInvoiceMIGError(Exception):
 
 
 class BatchEInvoiceIDsError(Exception):
+    pass
+
+
+
+class BatchEInvoiceContentTypeError(Exception):
     pass
 
 
@@ -971,6 +976,7 @@ class EInvoice(models.Model):
     only_fields_can_update = ['print_mark', 'ei_synced', 'ei_audited', 'generate_time']
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    upload_to_ei_time = models.DateTimeField(null=True, db_index=True)
     ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1553,6 +1559,7 @@ class EInvoicePrintLog(models.Model):
 class CancelEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    upload_to_ei_time = models.DateTimeField(null=True, db_index=True)
     ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1662,6 +1669,7 @@ class CancelEInvoice(models.Model):
 class VoidEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    upload_to_ei_time = models.DateTimeField(null=True, db_index=True)
     ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1863,6 +1871,7 @@ class UploadBatch(models.Model):
             if 200 == response.status_code and "0" == result_json['return_code']:
                 is_finish = self.update_batch_einvoice_status_result_code(
                    status=result_json['status'],
+                   upload_to_ei_time=result_json['upload_to_ei_time'],
                    result_code=result_json['result_code'],
                    result_message=result_json['result_message'],
                 )
@@ -2187,21 +2196,66 @@ class UploadBatch(models.Model):
             return None
 
 
-    def update_batch_einvoice_status_result_code(self, status={}, result_code={}, result_message={}):
+    def update_batch_einvoice_status_result_code(self, status={}, upload_to_ei_time={}, result_code={}, result_message={}):
         lg = logging.getLogger("taiwan_einvoice")
+        def _update_upload_to_ei_time(self, upload_to_ei_time={}):
+            bei = self.batcheinvoice_set.all()[0]
+            content_model = bei.content_type.model_class()
+            if SellerInvoiceTrackNo == content_model:
+                return
+            elif content_model not in [EInvoice, CancelEInvoice, VoidEInvoice]:
+                raise BatchEInvoiceContentTypeError(_("{} not in [EInvoice, CancelEInvoice, VoidEInvoice]").format(content_model))
+
+            exclude_ids = []
+            for s, ids in upload_to_ei_time.items():
+                lg.debug("UploadBatch.update_batch_einvoice_status_result_code._update_upload_to_ei_time {}: {}".format(s, ids))
+
+                if "__else__" == s:
+                    continue
+                else:
+                    try:
+                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
+                    except ValueError:
+                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
+                beis = self.batcheinvoice_set.filter(id__in=ids)
+                if len(ids) != beis.count():
+                    raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+                else:
+                    content_ids = BatchEInvoice.objects.filter(id__in=ids,
+                                                              ).values_list('object_id',
+                                                                            named=False,
+                                                                            flat=True)
+                    lg.debug("_update_upload_to_ei_time {} content_ids: {}".format(s, content_ids))
+                    content_model.objects.filter(ei_synced=True, id__in=content_ids).update(upload_to_ei_time=upload_to_ei_time_datetime)
+                exclude_ids.extend(ids)
+            beis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
+            if beis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
+                raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
+            else:
+                try:
+                    upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
+                except ValueError:
+                    upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
+                content_ids = self.batcheinvoice_set.exclude(id__in=exclude_ids
+                                                            ).values_list('object_id',
+                                                                          named=False,
+                                                                          flat=True)
+                lg.debug("_update_upload_to_ei_time {} content_ids: {}".format(upload_to_ei_time['__else__'], content_ids))
+                content_model.objects.filter(ei_synced=True, id__in=content_ids).update(upload_to_ei_time=upload_to_ei_time_datetime)
+
         for rc, ids in result_code.items():
-            beteis = self.batcheinvoice_set.filter(id__in=ids)
-            if len(ids) != beteis.count():
+            beis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beis.count():
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
-                beteis.update(result_code=rc)
+                beis.update(result_code=rc)
 
         for rc, ids in result_message.items():
-            beteis = self.batcheinvoice_set.filter(id__in=ids)
-            if len(ids) != beteis.count():
+            beis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beis.count():
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
-                beteis.update(result_message=rc)
+                beis.update(result_message=rc)
         
         ids_in_c = []
         status['__else__'] = status['__else__'].lower()
@@ -2215,24 +2269,24 @@ class UploadBatch(models.Model):
             s = s.lower()
             if "__else__" == s:
                 continue
-            beteis = self.batcheinvoice_set.filter(id__in=ids)
-            if len(ids) != beteis.count():
+            beis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beis.count():
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
-                beteis.update(status=s)
+                beis.update(status=s)
                 if 'c' == s and not ids_in_c:
                     ids_in_c = ids
 
             exclude_ids.extend(ids)
             if s not in finish_status:
                 is_finish = False
-        beteis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
-        if beteis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
+        beis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
+        if beis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
             raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
         else:
-            beteis.update(status=status['__else__'])
+            beis.update(status=status['__else__'])
             if 'c' == status['__else__']:
-                ids_in_c = beteis.values_list('id', named=False, flat=True)
+                ids_in_c = beis.values_list('id', named=False, flat=True)
 
         if ids_in_c:
             bei = self.batcheinvoice_set.get(id=ids_in_c[0])
@@ -2244,6 +2298,8 @@ class UploadBatch(models.Model):
                                                                         flat=True)
                 lg.debug("content_ids: {}".format(content_ids))
                 content_model.objects.filter(id__in=content_ids).update(ei_synced=True)
+
+        _update_upload_to_ei_time(self, upload_to_ei_time)
 
         if status['__else__'] not in finish_status:
             is_finish = False
