@@ -2082,12 +2082,12 @@ class UploadBatch(models.Model):
             self.update_to_new_status(NEXT_STATUS)
 
         if NEXT_STATUS != self.status and eis:
-            print_mark_falsse_all_has_voided = True
+            print_mark_falsse_all_has_canceled_or_voided = True
             for _ei in eis.filter(print_mark=False):
-                if not _ei.is_voided:
-                    print_mark_falsse_all_has_voided = False
+                if not _ei.is_canceled and not _ei.is_voided:
+                    print_mark_falsse_all_has_canceled_or_voided = False
                     break
-            if print_mark_falsse_all_has_voided:
+            if print_mark_falsse_all_has_canceled_or_voided:
                 self.update_to_new_status(NEXT_STATUS)
 
 
