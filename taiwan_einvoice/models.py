@@ -61,7 +61,7 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
-COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=20)
+COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=15)
 NO_NEED_TO_PRINT_TIME_MARGIN = datetime.timedelta(minutes=10)
 MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
 
@@ -2038,16 +2038,17 @@ class UploadBatch(models.Model):
             if len(object_ids) != eis.count():
                 raise Exception('Some E-Invoices disappear')
         else:
+            eis = []
             content_object = self.batcheinvoice_set.get().content_object
+
         if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
             self.update_to_new_status(NEXT_STATUS)
-        elif ('cp' == self.kind
-            and (not eis.filter(print_mark=False).exists()
-                or not eis.filter(generate_time__gte=now() - COULD_PRINT_TIME_MARGIN).exists())
-            ):
+        elif ('cp' == self.kind and (not eis.filter(print_mark=False).exists()
+                                     or not eis.filter(generate_time__gte=now() - COULD_PRINT_TIME_MARGIN).exists())
+                                    ):
             self.update_to_new_status(NEXT_STATUS)
         elif ('np' == self.kind
-            and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
+              and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
             self.update_to_new_status(NEXT_STATUS)
         elif '57' == self.kind:
             check_C0501 = False
@@ -2078,6 +2079,15 @@ class UploadBatch(models.Model):
                 self.update_to_new_status(NEXT_STATUS)
         elif self.kind in ['E', 'R', 'RN']:
             self.update_to_new_status(NEXT_STATUS)
+
+        if NEXT_STATUS != self.status and eis:
+            print_mark_falsse_all_has_voided = True
+            for _ei in eis.filter(print_mark=False):
+                if not _ei.is_voided:
+                    print_mark_falsse_all_has_voided = False
+                    break
+            if print_mark_falsse_all_has_voided:
+                self.update_to_new_status(NEXT_STATUS)
 
 
     @classmethod
