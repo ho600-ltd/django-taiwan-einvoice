@@ -2222,10 +2222,13 @@ class UploadBatch(models.Model):
                 elif 'None' == s:
                     continue
                 else:
-                    try:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
-                    except ValueError:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
+                    for format in ["%Y-%m-%d %H:%M:%S.%f%z", "%Y-%m-%d %H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]:
+                        try:
+                            upload_to_ei_time_datetime = datetime.datetime.strptime(s, format).astimezone(utc)
+                        except ValueError:
+                            pass
+                        else:
+                            break
                 beis = self.batcheinvoice_set.filter(id__in=ids)
                 if len(ids) != beis.count():
                     raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
@@ -2243,10 +2246,13 @@ class UploadBatch(models.Model):
                 if beis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
                     raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
                 else:
-                    try:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
-                    except ValueError:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
+                    for format in ["%Y-%m-%d %H:%M:%S.%f%z", "%Y-%m-%d %H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]:
+                        try:
+                            upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], format).astimezone(utc)
+                        except ValueError:
+                            pass
+                        else:
+                            break
                     content_ids = self.batcheinvoice_set.exclude(id__in=exclude_ids
                                                                 ).values_list('object_id',
                                                                             named=False,
