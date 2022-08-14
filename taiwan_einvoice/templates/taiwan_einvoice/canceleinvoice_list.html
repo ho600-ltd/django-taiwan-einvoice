@@ -94,6 +94,79 @@
 
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeyservices" %}
 
+<div class="modal fade" id="print_sales_return_receipt_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts_for_sales_return_receipt/"
+    aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="print_einvoice_modal_label">{% trans "Print Sales Return Receipt" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <li>{% trans "58mm Sales Return Receipt" %}:
+                        <select name="einvoice_printer" class="form-control">
+                        </select>
+                    </li>
+                    <li>{% trans "Interval seconds of printing" %}:
+                        <select name="interval_seconds_of_printing" class="form-control">
+                            <option value="10000">{% trans "10 seconds" %}</option>
+                            <option value="5000">{% trans "5 seconds" %}</option>
+                            <option value="3000">{% trans "3 seconds" %}</option>
+                            <option value="2000">{% trans "2 seconds" %}</option>
+                            <option value="30000">{% trans "30 seconds" %}</option>
+                        </select>
+                    </li>
+                    <li style="display: none;">
+                        <span field="reason"></span>
+                    </li>
+                </ul>
+                <table class="table table-hover table-striped">
+                    <thead>
+                            <tr>
+                                <th field="no">{% trans "No." %}</th>
+                                <th field="year_month_range">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                                <th field="track_no_">{% trans "Track No." %}</th>
+                                <th field="SalesAmount">{% trans "Sales Amount" %}</th>
+                                <th field="TaxAmount">{% trans "Tax Amount" %}</th>
+                                <th field="TotalAmount">{% trans "Total Amount" %}</th>
+                                <th field="generate_no">{% trans "Footprint No." %}</th>
+                                <th field="creator_first_name_id" width="10%">{% trans "Canceler" context "taiwan_einvoice" %}</th>
+                                <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Cancel Time" %}</th>
+                                <th field="print_mark">{% trans "Re-Print" %}</th>
+                                <th field="print_status">{% trans "Status" %}</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="tr_tmpl" style="display: none;">
+                            <td field="no"></td>
+                            <td field="year_month_range"></td>
+                            <td field="track_no_"></td>
+                            <td field="SalesAmount"></td>
+                            <td field="TaxAmount"></td>
+                            <td field="TotalAmount"></td>
+                            <td field="generate_no"></td>
+                            <td field="creator_first_name_id"></td>
+                            <td field="generate_time"></td>
+                            <td field="print_mark"></td>
+                            <td field="print_status"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default suspend_print_einvoice" data-dismiss="modal">{% trans "Cancel" %}</button>
+                <button id="print_einvoice_button_0" type="button" class="print_einvoice btn btn-secondary">{% trans "Print" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% if can_add_canceleinvoice_under_turnkeyservices.exists %}
 
     <div class="modal fade" id="show_canceleinvoice_modal" tabindex="-1" role="dialog"

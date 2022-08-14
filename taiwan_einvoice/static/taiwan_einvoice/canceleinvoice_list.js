@@ -197,6 +197,80 @@ $(function () {
 
     adjust_pagination_html();
 
+    var escposweb_cookie_name = taiwan_einvoice_site.default_escposweb_cookie_name;
+    var pass_key_name = escposweb_cookie_name + '_pass_key';
+    var escposweb_id_name = $.cookie.get(escposweb_cookie_name);
+    var pass_key = $.cookie.get(pass_key_name);
+    if (escposweb_id_name) {
+        var escposweb_id = escposweb_id_name.split(':')[0];
+        var escposweb_name = escposweb_id_name.split(':')[1].replace(/%3A/g, ':');
+        var $btn = $('button.print_einvoice_modal');
+        var ws_escposweb_status_url = $btn.attr('ws_escposweb_status_url_tmpl').replace('{id}', escposweb_id);
+        var ws_escposweb_url = $btn.attr('ws_escposweb_url_tmpl').replace('{id}', escposweb_id);
+        var ws_escposweb_print_result_url = $btn.attr('ws_escposweb_print_result_url_tmpl').replace('{id}', escposweb_id);
+        var fmts = ngettext('%(escposweb_name)s - Pass Key: %(pass_key)s', '%(escposweb_name)s(Pass Key: %(pass_key)s)', 1);
+        var button_text = interpolate(fmts, {escposweb_name: escposweb_name, pass_key: pass_key}, true);
+        $('span#default_escpos_print_name', $btn).text(button_text);
+        var $table = $('table.search_result');
+        var $modal = $('#print_sales_return_receipt_modal');
+        $modal.data({
+            ws_escposweb_status_url: ws_escposweb_status_url,
+            ws_escposweb_url: ws_escposweb_url,
+            ws_escposweb_print_result_url: ws_escposweb_print_result_url
+        });
+        var $print_einvoice_button = $('.print_einvoice', $modal);
+        $print_einvoice_button.click(print_einvoice(taiwan_einvoice_site, ws_escposweb_url, ws_escposweb_print_result_url));
+        $btn.removeClass('btn-danger').addClass('btn-secondary').click(function () {
+            var $b = $(this);
+            $('button.print_einvoice', $modal).show();
+            $('select, input', $modal).removeAttr("disabled");
+            if (0 >= $('img.status-on:visible', $b).length) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNING_MODAL,
+                    pgettext('taiwan_einvoice', 'Error'),
+                    gettext('It can not connect ESC/POS Printer Server'));
+                return false;
+            } else if ($('input[name=print_einvoice]:checked', $table).length == 0) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNING_MODAL,
+                    pgettext('taiwan_einvoice', 'WARNING'),
+                    gettext('Please choose one record at least'));
+                return false;
+            }
+            var $modal_table = $('table', $modal);
+            $('tbody tr.data', $modal_table).remove();
+            var no = 1;
+            $('input[name=print_einvoice]:checked', $table).each(function () {
+                var $i = $(this);
+                var $tr = $i.parents('tr');
+                var $tr_tmpl = $('tr.tr_tmpl', $modal_table).clone().removeClass('tr_tmpl').addClass('data');
+                $tr_tmpl.attr('einvoice_id', $tr.attr('einvoice_id'));
+                $('td[field=no]', $tr_tmpl).text(no);
+                var keys = [];
+                $('td', $tr_tmpl).each(function () {
+                    var field = $(this).attr('field');
+                    if (field && field != 'no') {
+                        keys.push(field);
+                    }
+                })
+                for (var i = 0; i < keys.length; i++) {
+                    var t = $('td[field=' + keys[i] + ']', $tr).text();
+                    $('td[field=' + keys[i] + ']', $tr_tmpl).attr('value', t).text(t);
+                }
+                $('tbody', $modal_table).prepend($tr_tmpl.show());
+                no += 1;
+            });
+            $modal.modal('show');
+        });
+        check_receive_escpos_printer_status_timestamp();
+        set_up_the_escpos_printer(taiwan_einvoice_site, $btn, $modal, ws_escposweb_status_url);
+    } else {
+        $('button.print_einvoice_modal').removeClass('btn-secondary').addClass('btn-danger'
+        ).text(gettext("Set up 'Default ESC/POS Printer first'")).click(function () {
+            window.location = $(this).attr('set_up_default_escpos_printer_url');
+        });
+    }
+
     $('button.show_canceleinvoice_modal').click(show_canceleinvoice_modal(taiwan_einvoice_site));
     $('button.cancel_einvoice').click(cancel_einvoice(taiwan_einvoice_site));
 });

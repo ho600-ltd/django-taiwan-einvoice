@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-13 13:00+0800\n"
+"POT-Creation-Date: 2022-08-14 11:15+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -598,6 +598,59 @@ msgstr "作廢時間晚於"
 msgid "Cancel time earlier than"
 msgstr "作廢時間早於"
 
+msgid "Print Sales Return Receipt"
+msgstr "列印銷貨退回簽收單"
+
+msgid "58mm Sales Return Receipt"
+msgstr "58mm 銷貨退回簽收單"
+
+msgid "Interval seconds of printing"
+msgstr "列印間隔秒數"
+
+msgid "10 seconds"
+msgstr "10秒"
+
+msgid "5 seconds"
+msgstr "5秒"
+
+msgid "3 seconds"
+msgstr "3秒"
+
+msgid "2 seconds"
+msgstr "2秒"
+
+msgid "30 seconds"
+msgstr "30秒"
+
+msgctxt "taiwan_einvoice"
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Sales Amount"
+msgstr "銷售額"
+
+msgid "Tax Amount"
+msgstr "稅額"
+
+msgid "Total Amount"
+msgstr "總金額"
+
+msgid "Footprint No."
+msgstr "追蹤編號"
+
+msgctxt "taiwan_einvoice"
+msgid "Canceler"
+msgstr "作廢者"
+
+msgid "Cancel Time"
+msgstr "作廢時間"
+
+msgid "Re-Print"
+msgstr "重印"
+
+msgid "Print"
+msgstr "列印"
+
 msgid "Cancel E-Invoice"
 msgstr "作廢電子發票"
 
@@ -640,22 +693,6 @@ msgstr "備註(選填)"
 msgid "Limit to 200 words"
 msgstr "上限200個字"
 
-msgctxt "taiwan_einvoice"
-msgid "Year Month Range"
-msgstr "期別"
-
-msgid "Sales Amount"
-msgstr "銷售額"
-
-msgid "Tax Amount"
-msgstr "稅額"
-
-msgid "Total Amount"
-msgstr "總金額"
-
-msgid "Footprint No."
-msgstr "追蹤編號"
-
 msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
 msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
 
@@ -671,24 +708,27 @@ msgstr ""
 "作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
 "            "
 
+msgid "Print Return Order Receipt with \"<span id=\"default_escpos_print_name\"></span>\""
+msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印銷貨退回簽收單"
+
+msgid "Choose"
+msgstr "勾選"
+
 msgid "Canceled Track No."
 msgstr "作廢發票的字軌號碼"
 
 msgid "Tax Type"
 msgstr "稅額類別"
 
-msgctxt "taiwan_einvoice"
-msgid "Canceler"
-msgstr "作廢者"
-
-msgid "Cancel Time"
-msgstr "作廢時間"
-
 msgid "New E-Invoice Track No."
 msgstr "另開發票字軌"
 
 msgid "Synced"
 msgstr "同步"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Donated"
+msgstr "已捐贈"
 
 msgid "Done"
 msgstr "完成"
@@ -785,29 +825,8 @@ msgstr "明細"
 msgid "Print details at the same time"
 msgstr "同時列印明細"
 
-msgid "Interval seconds of printing"
-msgstr "列印間隔秒數"
-
-msgid "10 seconds"
-msgstr "10秒"
-
-msgid "5 seconds"
-msgstr "5秒"
-
-msgid "3 seconds"
-msgstr "3秒"
-
-msgid "2 seconds"
-msgstr "2秒"
-
-msgid "30 seconds"
-msgstr "30秒"
-
 msgid "Print Mark"
 msgstr "正本已列印"
-
-msgid "Print"
-msgstr "列印"
 
 msgctxt "taiwan_einvoice"
 msgid "Creator"
@@ -906,17 +925,11 @@ msgstr "確定列印電子發票正本?"
 msgid "Re-Print Original Copy Reason"
 msgstr "再列印正本理由"
 
-msgid "Re-Print"
-msgstr "重印"
-
 msgid "Print Duplication"
 msgstr "列印副本"
 
 msgid "Print E-Invoice with \"<span id=\"default_escpos_print_name\"></span>\""
 msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電子發票"
-
-msgid "Choose"
-msgstr "勾選"
 
 msgid "Generate Time"
 msgstr "開立時間"
@@ -926,10 +939,6 @@ msgstr "作<br/>廢<br/>?"
 
 msgid "Voided?"
 msgstr "註<br/>銷<br/>?"
-
-msgctxt "taiwan_einvoice_donate_mark"
-msgid "Donated"
-msgstr "已捐贈"
 
 msgctxt "taiwan_einvoice"
 msgid "Print ID or Hex"
@@ -1686,6 +1695,9 @@ msgstr "刪除失敗"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"
+
+msgid "E-Invoice(id:{}) does not exist"
+msgstr "電子發票(id: {})不存在!"
 
 msgid "E-Invoice(id: {}) does not exist!"
 msgstr "電子發票(id: {})不存在!"

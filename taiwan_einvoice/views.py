@@ -628,6 +628,18 @@ class EInvoiceModelViewSet(ModelViewSet):
                             }, status=status.HTTP_403_FORBIDDEN)
 
 
+    @action(detail=True, methods=['get'], renderer_classes=[JSONRenderer, ])
+    def get_escpos_print_scripts_for_sales_return_receipt(self, request, pk=None):
+        ei = self.get_object()
+        if ei:
+            escpos_print_scripts_for_sales_return_receipt = ei.escpos_print_scripts_for_sales_return_receipt
+            return Response(escpos_print_scripts_for_sales_return_receipt)
+        else:
+            return Response({"error_title": _("E-Invoice Error"),
+                             "error_message": _("E-Invoice(id:{}) does not exist").format(pk),
+                            }, status=status.HTTP_403_FORBIDDEN)
+
+
 
 class EInvoicePrintLogModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryEInvoicePrintLog), )

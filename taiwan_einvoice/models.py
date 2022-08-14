@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, logging, zlib, json, re
+import pytz, datetime, hmac, requests, logging, zlib, json, re, decimal
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -357,6 +357,14 @@ class SellerDoesNotEnableEInvoice(Exception):
 class IdentifierDoesNotExist(Exception):
     pass
 
+
+TAIWAN_EI_TAX_TYPES = {
+    "1": "應稅",
+    "2": "零稅率",
+    "3": "免稅",
+    "4": "應稅(特種稅率)",
+    "9": "混合應稅與免稅或零稅率",
+}
 
 
 class EInvoiceAPIResult(models.Model):
@@ -1299,6 +1307,26 @@ class EInvoice(models.Model):
         }
         _d["details_content"] = self.details_content
         return _d
+    @property
+    def escpos_print_scripts_for_sales_return_receipt(self):
+        try:
+            canceleinvoice = self.canceleinvoice_set.get(new_einvoice__isnull=True)
+        except CancelEInvoice.DoesNotExist:
+            _d = {}
+        else:
+            _d = {
+                "meet_to_tw_einvoice_standard": False,
+                "is_canceled": True,
+                "buyer_is_business_entity": self.buyer_is_business_entity,
+                "print_mark": self.print_mark,
+                "id": self.id,
+                "track_no": self.track_no,
+                "generate_time": canceleinvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
+                "width": "58mm",
+                "content": canceleinvoice._escpos_sales_return_receipt_scripts,
+                "details_content": [],
+            }
+        return _d
 
 
     def __str__(self):
@@ -1592,6 +1620,72 @@ class CancelEInvoice(models.Model):
     def last_batch_einvoice(self):
         return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
                                             object_id=self.id).order_by('id').last()
+    @property
+    def _escpos_sales_return_receipt_scripts(self):
+        def _untax_amount(tax_rate, amount):
+            tax_rate, amount = decimal.Decimal(tax_rate), decimal.Decimal(amount)
+            if 0 == tax_rate:
+                return amount
+            else:
+                return decimal.Decimal(round(amount / (1+tax_rate)))
+
+        einvoice = self.einvoice
+        details = einvoice.details
+        amounts = einvoice.amounts
+        generate_time = einvoice.generate_time.astimezone(TAIPEI_TIMEZONE)
+        cancel_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
+        tax_rate = amounts['TaxRate']
+        tax_type = amounts['TaxType']
+        total_amount = amounts['TotalAmount']
+        untax_amount = _untax_amount(tax_rate, total_amount)
+        tax_amount = decimal.Decimal(total_amount) - untax_amount
+        if einvoice.seller_invoice_track_no.turnkey_web.in_production:
+            test_str = ''
+        else:
+            test_str = '測 試 '
+        details_list = []
+        for i, d in enumerate(details):
+            details_list.extend([
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "{}. {} : {} {} {}".format(
+                    i+1, d['Description'], d['Quantity'], d['UnitPrice'], _untax_amount(tax_rate, d['Amount']))},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                ])
+
+        return [
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "center", "text": test_str + "營業人銷貨退回、進貨退出或折讓證明單"},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "center", "text": cancel_time.strftime("%Y-%m-%d")},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "賣方統編：{}".format(einvoice.seller_identifier)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "賣方名稱：{}".format(einvoice.seller_name)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "發票開立日期：{}".format(generate_time.strftime('%Y-%m-%d'))},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 2, "height": 1, "align": "left", "bold": True, "text": "{}".format(einvoice.track_no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text":
+                    "買方統編：{}".format("" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == einvoice.buyer_identifier else einvoice.buyer_identifier)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text":
+                    "買方名稱：{}".format("" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == einvoice.buyer_identifier else einvoice.buyer_name)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "No. 品名 : 數量 單價 金額(不含稅之進貨額)"},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                
+                *details_list,
+
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "課稅別：{}".format(TAIWAN_EI_TAX_TYPES[tax_type])},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "營業稅額合計：{}".format(tax_amount)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "金額(不含稅之進貨額)：{}".format(untax_amount)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "合計：{}".format(total_amount)},
+
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "簽收人："},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+            ]
 
 
     def __str__(self):
