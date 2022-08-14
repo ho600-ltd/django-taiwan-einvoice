@@ -1464,7 +1464,7 @@ class EInvoice(models.Model):
             first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
             ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
         else:
-            ei_synced_true_objs = _ei_synced_true_objs
+            ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True)
 
         while True:
             random_number = '{:04d}'.format(randint(0, 10000))
