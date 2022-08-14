@@ -1456,25 +1456,26 @@ class EInvoice(models.Model):
         same_routeing_id_objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web__party_id=turnkey_web.party_id,
                                                                 seller_invoice_track_no__turnkey_web__transport_id=turnkey_web.transport_id,
                                                                 seller_invoice_track_no__turnkey_web__routing_id=turnkey_web.routing_id,)
+        same_routeing_id_objs_count = same_routeing_id_objs.count()
+        if 0 < same_routeing_id_objs_count:
+            ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
 
-        ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
-
-        _ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True).order_by('-upload_to_ei_time')[:1000]
-        if _ei_synced_true_objs.exists():
-            first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
-            ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
-        else:
-            ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True)
+            _ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True).order_by('-upload_to_ei_time')[:1000]
+            if _ei_synced_true_objs.exists():
+                first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
+                ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
+            else:
+                ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True)
 
         while True:
             random_number = '{:04d}'.format(randint(0, 10000))
-            if not (ei_synced_false_objs.filter(random_number=random_number).exists()
-                    or ei_synced_true_objs.filter(random_number=random_number).exists()
-                    or same_routeing_id_objs.filter(seller_invoice_track_no__begin_time=self.seller_invoice_track_no.begin_time,
-                                                    track=self.track,
-                                                    no=self.no,
-                                                    random_number=random_number,
-                                                   ).exists()
+            if 0 >= same_routeing_id_objs_count or not (ei_synced_false_objs.filter(random_number=random_number).exists()
+                                                        or ei_synced_true_objs.filter(random_number=random_number).exists()
+                                                        or same_routeing_id_objs.filter(seller_invoice_track_no__begin_time=self.seller_invoice_track_no.begin_time,
+                                                                                        track=self.track,
+                                                                                        no=self.no,
+                                                                                        random_number=random_number,
+                                                                                       ).exists()
                 ):
                 break
         return random_number
