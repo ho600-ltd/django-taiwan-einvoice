@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, logging, zlib, json, re
+import pytz, datetime, hmac, requests, logging, zlib, json, re, decimal
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -13,7 +13,7 @@ from django.db.models import Max, F, Count, Q
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import translation
-from django.utils.timezone import now
+from django.utils.timezone import now, utc
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import gettext, pgettext
 from simple_history.models import HistoricalRecords
@@ -93,6 +93,11 @@ class VoidEInvoiceMIGError(Exception):
 
 
 class BatchEInvoiceIDsError(Exception):
+    pass
+
+
+
+class BatchEInvoiceContentTypeError(Exception):
     pass
 
 
@@ -352,6 +357,14 @@ class SellerDoesNotEnableEInvoice(Exception):
 class IdentifierDoesNotExist(Exception):
     pass
 
+
+TAIWAN_EI_TAX_TYPES = {
+    "1": "應稅",
+    "2": "零稅率",
+    "3": "免稅",
+    "4": "應稅(特種稅率)",
+    "9": "混合應稅與免稅或零稅率",
+}
 
 
 class EInvoiceAPIResult(models.Model):
@@ -971,6 +984,7 @@ class EInvoice(models.Model):
     only_fields_can_update = ['print_mark', 'ei_synced', 'ei_audited', 'generate_time']
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    upload_to_ei_time = models.DateTimeField(null=True, db_index=True)
     ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1112,13 +1126,8 @@ class EInvoice(models.Model):
         return related_einvoices
     @property
     def last_batch_einvoice(self):
-        try:
-            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
-                                            object_id=self.id)
-        except BatchEInvoice.DoesNotExist:
-            return None
-        else:
-            return bei
+        return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id).order_by('id').last()
     @property
     def one_dimension_barcode_str(self):
         chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
@@ -1298,6 +1307,26 @@ class EInvoice(models.Model):
         }
         _d["details_content"] = self.details_content
         return _d
+    @property
+    def escpos_print_scripts_for_sales_return_receipt(self):
+        try:
+            canceleinvoice = self.canceleinvoice_set.get(new_einvoice__isnull=True)
+        except CancelEInvoice.DoesNotExist:
+            _d = {}
+        else:
+            _d = {
+                "meet_to_tw_einvoice_standard": False,
+                "is_canceled": True,
+                "buyer_is_business_entity": self.buyer_is_business_entity,
+                "print_mark": self.print_mark,
+                "id": self.id,
+                "track_no": self.track_no,
+                "generate_time": canceleinvoice.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d %H:%M:%S%z'),
+                "width": "58mm",
+                "content": canceleinvoice._escpos_sales_return_receipt_scripts,
+                "details_content": [],
+            }
+        return _d
 
 
     def __str__(self):
@@ -1452,23 +1481,30 @@ class EInvoice(models.Model):
         if self.random_number:
             return self.random_number
         turnkey_web = self.seller_invoice_track_no.turnkey_web
+        same_routeing_id_objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web__party_id=turnkey_web.party_id,
+                                                                seller_invoice_track_no__turnkey_web__transport_id=turnkey_web.transport_id,
+                                                                seller_invoice_track_no__turnkey_web__routing_id=turnkey_web.routing_id,)
+
+        ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
+
+        _ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True).order_by('-upload_to_ei_time')[:1000]
+        if _ei_synced_true_objs.exists():
+            first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
+            ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
+        else:
+            ei_synced_true_objs = _ei_synced_true_objs
+
         while True:
             random_number = '{:04d}'.format(randint(0, 10000))
-            objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_web).order_by('-id')[:1000]
-            if not objs.exists():
+            if not (ei_synced_false_objs.filter(random_number=random_number).exists()
+                    or ei_synced_true_objs.filter(random_number=random_number).exists()
+                    or same_routeing_id_objs.filter(seller_invoice_track_no__begin_time=self.seller_invoice_track_no.begin_time,
+                                                    track=self.track,
+                                                    no=self.no,
+                                                    random_number=random_number,
+                                                   ).exists()
+                ):
                 break
-            else:
-                obj = objs[len(objs)-1]
-                if not (self._meta.model.objects.filter(id__gte=obj.id,
-                                                        seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                        random_number=random_number).exists()
-                        or self._meta.model.objects.filter(reverse_void_order__gt=0,
-                                                            seller_invoice_track_no__turnkey_web=turnkey_web,
-                                                            track=self.track,
-                                                            no=self.no,
-                                                            random_number=random_number,
-                                                            ).exists()):
-                    break
         return random_number
 
 
@@ -1553,6 +1589,7 @@ class EInvoicePrintLog(models.Model):
 class CancelEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    upload_to_ei_time = models.DateTimeField(null=True, db_index=True)
     ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1581,13 +1618,74 @@ class CancelEInvoice(models.Model):
         on_delete=models.DO_NOTHING)
     @property
     def last_batch_einvoice(self):
-        try:
-            bei = BatchEInvoice.objects.get(content_type=ContentType.objects.get_for_model(self),
-                                            object_id=self.id)
-        except BatchEInvoice.DoesNotExist:
-            return None
+        return BatchEInvoice.objects.filter(content_type=ContentType.objects.get_for_model(self),
+                                            object_id=self.id).order_by('id').last()
+    @property
+    def _escpos_sales_return_receipt_scripts(self):
+        def _untax_amount(tax_rate, amount):
+            tax_rate, amount = decimal.Decimal(tax_rate), decimal.Decimal(amount)
+            if 0 == tax_rate:
+                return amount
+            else:
+                return decimal.Decimal(round(amount / (1+tax_rate)))
+
+        einvoice = self.einvoice
+        details = einvoice.details
+        amounts = einvoice.amounts
+        generate_time = einvoice.generate_time.astimezone(TAIPEI_TIMEZONE)
+        cancel_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
+        tax_rate = amounts['TaxRate']
+        tax_type = amounts['TaxType']
+        total_amount = amounts['TotalAmount']
+        untax_amount = _untax_amount(tax_rate, total_amount)
+        tax_amount = decimal.Decimal(total_amount) - untax_amount
+        if einvoice.seller_invoice_track_no.turnkey_web.in_production:
+            test_str = ''
         else:
-            return bei
+            test_str = '測 試 '
+        details_list = []
+        for i, d in enumerate(details):
+            details_list.extend([
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "{}. {} : {} {} {}".format(
+                    i+1, d['Description'], d['Quantity'], d['UnitPrice'], _untax_amount(tax_rate, d['Amount']))},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                ])
+
+        return [
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "center", "text": test_str + "營業人銷貨退回、進貨退出或折讓證明單"},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "center", "text": cancel_time.strftime("%Y-%m-%d")},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "賣方統編：{}".format(einvoice.seller_identifier)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "賣方名稱：{}".format(einvoice.seller_name)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "發票開立日期：{}".format(generate_time.strftime('%Y-%m-%d'))},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 2, "height": 1, "align": "left", "bold": True, "text": "{}".format(einvoice.track_no)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text":
+                    "買方統編：{}".format("" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == einvoice.buyer_identifier else einvoice.buyer_identifier)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text":
+                    "買方名稱：{}".format("" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == einvoice.buyer_identifier else einvoice.buyer_name)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "No. 品名 : 數量 單價 金額(不含稅之進貨額)"},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                
+                *details_list,
+
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "課稅別：{}".format(TAIWAN_EI_TAX_TYPES[tax_type])},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "營業稅額合計：{}".format(tax_amount)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "金額(不含稅之進貨額)：{}".format(untax_amount)},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "合計：{}".format(total_amount)},
+
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+                {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": "簽收人："},
+                {"type": "text", "custom_size": True, "width": 1, "height": 6, "align": "left", "text": " "},
+            ]
 
 
     def __str__(self):
@@ -1618,8 +1716,7 @@ class CancelEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.mig_type:
-            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+        self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
 
         if kwargs.get('force_save', False):
             del kwargs['force_save']
@@ -1662,6 +1759,7 @@ class CancelEInvoice(models.Model):
 class VoidEInvoice(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     ei_synced = models.BooleanField(default=False, db_index=True)
+    upload_to_ei_time = models.DateTimeField(null=True, db_index=True)
     ei_audited = models.BooleanField(default=False, db_index=True)
     mig_type = models.ForeignKey(EInvoiceMIG, null=False, on_delete=models.DO_NOTHING)
     creator = models.ForeignKey(User, on_delete=models.DO_NOTHING)
@@ -1716,8 +1814,7 @@ class VoidEInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.mig_type:
-            self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
+        self.mig_type = EInvoiceMIG.objects.get(no=self.get_mig_no())
 
         if kwargs.get('force_save', False):
             del kwargs['force_save']
@@ -1727,11 +1824,13 @@ class VoidEInvoice(models.Model):
         UploadBatch.append_to_the_upload_batch(self)
     
     
+    MIG_NO_SET = {
+        "C0401": "C0701",
+    }
     def get_mig_no(self):
         no = self.einvoice.get_mig_no()
-        if "C0401" == no:
-            mig = "C0701"
-        else:
+        mig = self.MIG_NO_SET.get(no, "")
+        if not mig:
             raise VoidEInvoiceMIGError("MIG for {} is not set".format(no))
         return mig
 
@@ -1863,6 +1962,7 @@ class UploadBatch(models.Model):
             if 200 == response.status_code and "0" == result_json['return_code']:
                 is_finish = self.update_batch_einvoice_status_result_code(
                    status=result_json['status'],
+                   upload_to_ei_time=result_json['upload_to_ei_time'],
                    result_code=result_json['result_code'],
                    result_message=result_json['result_message'],
                 )
@@ -2187,21 +2287,70 @@ class UploadBatch(models.Model):
             return None
 
 
-    def update_batch_einvoice_status_result_code(self, status={}, result_code={}, result_message={}):
+    def update_batch_einvoice_status_result_code(self, status={}, upload_to_ei_time={}, result_code={}, result_message={}):
         lg = logging.getLogger("taiwan_einvoice")
+        def _update_upload_to_ei_time(self, upload_to_ei_time={}):
+            bei = self.batcheinvoice_set.all()[0]
+            content_model = bei.content_type.model_class()
+            if SellerInvoiceTrackNo == content_model:
+                return
+            elif content_model not in [EInvoice, CancelEInvoice, VoidEInvoice]:
+                raise BatchEInvoiceContentTypeError(_("{} not in [EInvoice, CancelEInvoice, VoidEInvoice]").format(content_model))
+
+            exclude_ids = []
+            for s, ids in upload_to_ei_time.items():
+                lg.debug("UploadBatch.update_batch_einvoice_status_result_code._update_upload_to_ei_time {}: {}".format(s, ids))
+
+                if "__else__" == s:
+                    continue
+                elif 'None' == s:
+                    continue
+                else:
+                    try:
+                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
+                    except ValueError:
+                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
+                beis = self.batcheinvoice_set.filter(id__in=ids)
+                if len(ids) != beis.count():
+                    raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
+                else:
+                    content_ids = BatchEInvoice.objects.filter(id__in=ids,
+                                                              ).values_list('object_id',
+                                                                            named=False,
+                                                                            flat=True)
+                    lg.debug("_update_upload_to_ei_time {} content_ids: {}".format(s, content_ids))
+                    content_model.objects.filter(ei_synced=True, id__in=content_ids).update(upload_to_ei_time=upload_to_ei_time_datetime)
+                exclude_ids.extend(ids)
+            
+            if "None" != upload_to_ei_time.get('__else__', "None"):
+                beis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
+                if beis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
+                    raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
+                else:
+                    try:
+                        upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
+                    except ValueError:
+                        upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
+                    content_ids = self.batcheinvoice_set.exclude(id__in=exclude_ids
+                                                                ).values_list('object_id',
+                                                                            named=False,
+                                                                            flat=True)
+                    lg.debug("_update_upload_to_ei_time {} content_ids: {}".format(upload_to_ei_time['__else__'], content_ids))
+                    content_model.objects.filter(ei_synced=True, id__in=content_ids).update(upload_to_ei_time=upload_to_ei_time_datetime)
+
         for rc, ids in result_code.items():
-            beteis = self.batcheinvoice_set.filter(id__in=ids)
-            if len(ids) != beteis.count():
+            beis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beis.count():
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
-                beteis.update(result_code=rc)
+                beis.update(result_code=rc)
 
         for rc, ids in result_message.items():
-            beteis = self.batcheinvoice_set.filter(id__in=ids)
-            if len(ids) != beteis.count():
+            beis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beis.count():
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
-                beteis.update(result_message=rc)
+                beis.update(result_message=rc)
         
         ids_in_c = []
         status['__else__'] = status['__else__'].lower()
@@ -2215,24 +2364,24 @@ class UploadBatch(models.Model):
             s = s.lower()
             if "__else__" == s:
                 continue
-            beteis = self.batcheinvoice_set.filter(id__in=ids)
-            if len(ids) != beteis.count():
+            beis = self.batcheinvoice_set.filter(id__in=ids)
+            if len(ids) != beis.count():
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
-                beteis.update(status=s)
+                beis.update(status=s)
                 if 'c' == s and not ids_in_c:
                     ids_in_c = ids
 
             exclude_ids.extend(ids)
             if s not in finish_status:
                 is_finish = False
-        beteis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
-        if beteis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
+        beis = self.batcheinvoice_set.exclude(id__in=exclude_ids)
+        if beis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
             raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
         else:
-            beteis.update(status=status['__else__'])
+            beis.update(status=status['__else__'])
             if 'c' == status['__else__']:
-                ids_in_c = beteis.values_list('id', named=False, flat=True)
+                ids_in_c = beis.values_list('id', named=False, flat=True)
 
         if ids_in_c:
             bei = self.batcheinvoice_set.get(id=ids_in_c[0])
@@ -2244,6 +2393,8 @@ class UploadBatch(models.Model):
                                                                         flat=True)
                 lg.debug("content_ids: {}".format(content_ids))
                 content_model.objects.filter(id__in=content_ids).update(ei_synced=True)
+
+        _update_upload_to_ei_time(self, upload_to_ei_time)
 
         if status['__else__'] not in finish_status:
             is_finish = False

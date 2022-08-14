@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-09 16:06+0800\n"
+"POT-Creation-Date: 2022-08-14 11:15+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -263,6 +263,9 @@ msgstr "已上傳到 TKW"
 msgid "Finish"
 msgstr "完成"
 
+msgid "{} not in [EInvoice, CancelEInvoice, VoidEInvoice]"
+msgstr "{} 非發票、作廢發票、註銷發票"
+
 #, python-brace-format
 msgid "Error in sync the E-Invoice({content_object}) of {slug} for {target_audience}"
 msgstr "{target_audience}注意: {slug} 中的發票({content_object})無法完成同步"
@@ -512,6 +515,18 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
+msgid "Status"
+msgstr "狀態"
+
+msgid "Error Handling"
+msgstr "錯誤處置"
+
+msgid "Handled"
+msgstr "已處置"
+
+msgid "Not yet"
+msgstr "尚未"
+
 msgid "Batch Slug contains"
 msgstr "批次代號包含"
 
@@ -532,6 +547,10 @@ msgctxt "taiwan_einvoice_batch_einvoice_handling_type"
 msgid "Re-create the upload batch with the new track no."
 msgstr "使用新的字軌號碼新增新批次上傳紀錄"
 
+msgctxt "taiwan_einvoice_batch_einvoice_handling_type"
+msgid "Only write the handling note, because it done the handing work in the EI Turnkey application manually."
+msgstr "單純填寫處理說明，因為已在 EI Turnkey 應用程式手動處理。"
+
 msgctxt "batch_einvoice_handling"
 msgid "Note"
 msgstr "處置說明"
@@ -551,9 +570,6 @@ msgstr "期別"
 msgid "Track no."
 msgstr "字軌號碼"
 
-msgid "Status"
-msgstr "狀態"
-
 msgid "Result Code"
 msgstr "結果碼"
 
@@ -565,12 +581,6 @@ msgstr "關閉"
 
 msgid "Body"
 msgstr "內文"
-
-msgid "Error Handling"
-msgstr "錯誤處置"
-
-msgid "Handled"
-msgstr "已處置"
 
 msgid "Handle"
 msgstr "處置"
@@ -587,6 +597,59 @@ msgstr "作廢時間晚於"
 
 msgid "Cancel time earlier than"
 msgstr "作廢時間早於"
+
+msgid "Print Sales Return Receipt"
+msgstr "列印銷貨退回簽收單"
+
+msgid "58mm Sales Return Receipt"
+msgstr "58mm 銷貨退回簽收單"
+
+msgid "Interval seconds of printing"
+msgstr "列印間隔秒數"
+
+msgid "10 seconds"
+msgstr "10秒"
+
+msgid "5 seconds"
+msgstr "5秒"
+
+msgid "3 seconds"
+msgstr "3秒"
+
+msgid "2 seconds"
+msgstr "2秒"
+
+msgid "30 seconds"
+msgstr "30秒"
+
+msgctxt "taiwan_einvoice"
+msgid "Year Month Range"
+msgstr "期別"
+
+msgid "Sales Amount"
+msgstr "銷售額"
+
+msgid "Tax Amount"
+msgstr "稅額"
+
+msgid "Total Amount"
+msgstr "總金額"
+
+msgid "Footprint No."
+msgstr "追蹤編號"
+
+msgctxt "taiwan_einvoice"
+msgid "Canceler"
+msgstr "作廢者"
+
+msgid "Cancel Time"
+msgstr "作廢時間"
+
+msgid "Re-Print"
+msgstr "重印"
+
+msgid "Print"
+msgstr "列印"
 
 msgid "Cancel E-Invoice"
 msgstr "作廢電子發票"
@@ -630,22 +693,6 @@ msgstr "備註(選填)"
 msgid "Limit to 200 words"
 msgstr "上限200個字"
 
-msgctxt "taiwan_einvoice"
-msgid "Year Month Range"
-msgstr "期別"
-
-msgid "Sales Amount"
-msgstr "銷售額"
-
-msgid "Tax Amount"
-msgstr "稅額"
-
-msgid "Total Amount"
-msgstr "總金額"
-
-msgid "Footprint No."
-msgstr "追蹤編號"
-
 msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
 msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
 
@@ -661,24 +708,27 @@ msgstr ""
 "作廢電子發票後，若同時有開立的新電子發票，其字軌號碼會是<b>不同</b>於被作廢的電子發票。\n"
 "            "
 
+msgid "Print Return Order Receipt with \"<span id=\"default_escpos_print_name\"></span>\""
+msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印銷貨退回簽收單"
+
+msgid "Choose"
+msgstr "勾選"
+
 msgid "Canceled Track No."
 msgstr "作廢發票的字軌號碼"
 
 msgid "Tax Type"
 msgstr "稅額類別"
 
-msgctxt "taiwan_einvoice"
-msgid "Canceler"
-msgstr "作廢者"
-
-msgid "Cancel Time"
-msgstr "作廢時間"
-
 msgid "New E-Invoice Track No."
 msgstr "另開發票字軌"
 
 msgid "Synced"
 msgstr "同步"
+
+msgctxt "taiwan_einvoice_donate_mark"
+msgid "Donated"
+msgstr "已捐贈"
 
 msgid "Done"
 msgstr "完成"
@@ -775,29 +825,8 @@ msgstr "明細"
 msgid "Print details at the same time"
 msgstr "同時列印明細"
 
-msgid "Interval seconds of printing"
-msgstr "列印間隔秒數"
-
-msgid "10 seconds"
-msgstr "10秒"
-
-msgid "5 seconds"
-msgstr "5秒"
-
-msgid "3 seconds"
-msgstr "3秒"
-
-msgid "2 seconds"
-msgstr "2秒"
-
-msgid "30 seconds"
-msgstr "30秒"
-
 msgid "Print Mark"
 msgstr "正本已列印"
-
-msgid "Print"
-msgstr "列印"
 
 msgctxt "taiwan_einvoice"
 msgid "Creator"
@@ -896,17 +925,11 @@ msgstr "確定列印電子發票正本?"
 msgid "Re-Print Original Copy Reason"
 msgstr "再列印正本理由"
 
-msgid "Re-Print"
-msgstr "重印"
-
 msgid "Print Duplication"
 msgstr "列印副本"
 
 msgid "Print E-Invoice with \"<span id=\"default_escpos_print_name\"></span>\""
 msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電子發票"
-
-msgid "Choose"
-msgstr "勾選"
 
 msgid "Generate Time"
 msgstr "開立時間"
@@ -916,10 +939,6 @@ msgstr "作<br/>廢<br/>?"
 
 msgid "Voided?"
 msgstr "註<br/>銷<br/>?"
-
-msgctxt "taiwan_einvoice_donate_mark"
-msgid "Donated"
-msgstr "已捐贈"
 
 msgctxt "taiwan_einvoice"
 msgid "Print ID or Hex"
@@ -1291,9 +1310,6 @@ msgstr "失敗"
 msgid "Resolved"
 msgstr "已解決"
 
-msgid "Not yet"
-msgstr "尚未"
-
 msgid "Only display in the hourly report"
 msgstr "非「每小時報表」，無須顯示"
 
@@ -1444,6 +1460,9 @@ msgstr "執行者"
 
 msgid "EI Turnkey Batch ID"
 msgstr "EI Turnkey 批次 ID"
+
+msgid "Batch E-Invoice Count"
+msgstr "批次發票數"
 
 msgid "Auto-Executed"
 msgstr "自動執行"
@@ -1676,6 +1695,9 @@ msgstr "刪除失敗"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"
+
+msgid "E-Invoice(id:{}) does not exist"
+msgstr "電子發票(id: {})不存在!"
 
 msgid "E-Invoice(id: {}) does not exist!"
 msgstr "電子發票(id: {})不存在!"

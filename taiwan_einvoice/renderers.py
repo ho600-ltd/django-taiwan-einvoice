@@ -10,7 +10,7 @@ from django.utils.translation import pgettext_lazy
 
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
-from taiwan_einvoice.models import Seller, TurnkeyService, SellerInvoiceTrackNo, SummaryReport, TEAlarm
+from taiwan_einvoice.models import Seller, TurnkeyService, SellerInvoiceTrackNo, BatchEInvoice, SummaryReport, TEAlarm
 
 
 def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
@@ -210,6 +210,12 @@ class BatchEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('batcheinvoice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('batcheinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        res['status_choices'] = BatchEInvoice.status_choices
+        return  res
 
 
 class SummaryReportHtmlRenderer(TEOriginHTMLRenderer):

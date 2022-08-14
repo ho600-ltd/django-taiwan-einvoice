@@ -480,6 +480,7 @@ class UploadBatchFilter(filters.FilterSet):
     class Meta:
         model = UploadBatch
         fields = {
+            "turnkey_service": ("exact", ),
             "slug": ("exact", "icontains", ),
             "create_time": ("gte", "lt", ),
         }
@@ -495,6 +496,8 @@ class BatchEInvoiceFilter(filters.FilterSet):
         model = BatchEInvoice
         fields = {
             "track_no": ("icontains", ),
+            "status": ("exact", "regex", ),
+            "pass_if_error": ("exact", ),
         }
 
 

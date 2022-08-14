@@ -17,14 +17,15 @@
             <th>{% trans "MIG Type" %}</th>
             <th>{% trans "Kind" %}</th>
             <th>{% trans "Executor" %}</th>
-            <th>{% trans "Status" %}</th>
             <th>{% trans "EI Turnkey Batch ID" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Batch E-Invoice Count" %}</th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
-                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
                 <td field="create_time" class="datetime" value="{{ obj.create_time }}"></td>
                 <td field="update_time" class="datetime" value="{{ obj.update_time }}"></td>
                 <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
@@ -38,8 +39,11 @@
                         {% trans "Auto-Executed" %}
                     {% endif %}
                 </td>
-                <td field="status" title="{{ obj.status }}">{{ obj.get_status_display }}</td>
                 <td field="ei_turnkey_batch_id">{{ obj.ei_turnkey_batch_id }}</td>
+                <td field="status" title="{{ obj.status }}">{{ obj.get_status_display }}</td>
+                <td field="batch_einvoice_count">
+                    <a href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html&batch={{ obj.id }}">{{ obj.batch_einvoice_count }}</a>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
