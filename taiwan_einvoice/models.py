@@ -2599,7 +2599,7 @@ class SummaryReport(models.Model):
                                 track_no=m.track_no,
                                 einvoices_content_type_id=last_einvoices_content_type.id,
                             )
-                            problems.setdefault(problem_key, []).append(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
+                            problems.setdefault(problem_key, []).append(str(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE))
                         _vars["objects_list"].append(last_einvoices_content_type)
             good_count = vars_list_for_ei_check_type_true_false[True]["count_var"]
             failed_count = vars_list_for_ei_check_type_true_false[False]["count_var"]
@@ -2708,20 +2708,20 @@ class SummaryReport(models.Model):
 
             last_batch_einvoice = failed_einvoice_ct.content_object.last_batch_einvoice
             if "h" == self.report_type and last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
-                target_audience_types.setdefault("g", {})[fe_key] = _("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no)
+                target_audience_types.setdefault("g", {})[fe_key] = str(_("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no))
             elif "a" == self.report_type:
-                target_audience_types.setdefault("p", {})[fe_key] = self.EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE
+                target_audience_types.setdefault("p", {})[fe_key] = str(self.EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE)
             elif not last_batch_einvoice:
-                target_audience_types.setdefault("p", {})[fe_key] = self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE
+                target_audience_types.setdefault("p", {})[fe_key] = str(self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
             elif last_batch_einvoice and last_batch_einvoice.batch.kind in ["cp", "np"]:
-                target_audience_types.setdefault("p", {})[fe_key] = _("Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})").format(track_no=track_no)
+                target_audience_types.setdefault("p", {})[fe_key] = str(_("Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})").format(track_no=track_no))
             else:
-                target_audience_types.setdefault("p", {})[fe_key] = _("The {track_no}@{mig_no} has result_code: {status}: '{result_code}'").format(
+                target_audience_types.setdefault("p", {})[fe_key] = str(_("The {track_no}@{mig_no} has result_code: {status}: '{result_code}'").format(
                     track_no=track_no,
                     mig_no=mig_no,
                     status=last_batch_einvoice.status,
                     result_code=last_batch_einvoice.result_code,
-                )
+                ))
         summary_report_problems = self.problems
         for target_audience_type, errors_d in target_audience_types.items():
             _errors_keys = list(errors_d.keys())
