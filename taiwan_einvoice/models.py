@@ -1336,7 +1336,7 @@ class EInvoice(models.Model):
                 generate_time=now(),
             )
             new_track_no_self = EInvoice.objects.get(id=self.id)
-            new_track_no_self.post_new_track_no(new_track_no_self)
+            new_track_no_self.post_new_track_no()
             return new_track_no_self
 
 
