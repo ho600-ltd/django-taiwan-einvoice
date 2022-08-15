@@ -1256,7 +1256,9 @@ class EInvoice(models.Model):
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'))},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {} {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'),
+                                                                                                                            "" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else "格式 25"
+                                                                                                                           )},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
                         "text": " 賣方 {} {}".format(self.seller_identifier,
