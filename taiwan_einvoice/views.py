@@ -395,7 +395,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 

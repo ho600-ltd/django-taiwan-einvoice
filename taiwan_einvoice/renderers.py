@@ -8,6 +8,7 @@ from django.template.loader import get_template
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
+from guardian.shortcuts import get_objects_for_user, get_perms
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
 from taiwan_einvoice.models import Seller, TurnkeyService, SellerInvoiceTrackNo, BatchEInvoice, SummaryReport, TEAlarm
@@ -144,8 +145,10 @@ class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        res['seller__legal_entity__identifiers'] = Seller.objects.all().order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
-        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_sellerinvoicetrackno",], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
+        seller_ids = turnkey_services.values_list('seller', flat=True)
+        res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
         res['type_choices'] = SellerInvoiceTrackNo.type_choices
         return  res
 

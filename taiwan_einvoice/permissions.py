@@ -196,18 +196,24 @@ class CanEditTurnkeyServiceGroup(BasePermission):
 
 
 class CanEntrySellerInvoiceTrackNo(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.view_te_sellerinvoicetrackno",
         ),
-        "POST": (
+        "retrieve": (
+            "taiwan_einvoice.view_te_sellerinvoicetrackno",
+        ),
+        "upload_csv_to_multiple_create": (
             "taiwan_einvoice.add_te_sellerinvoicetrackno",
         ),
-        "DELETE": (
+        "destory": (
             "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
-        "PATCH": (
+        "partial_update": (
             "taiwan_einvoice.add_te_sellerinvoicetrackno",
+        ),
+        "create_and_upload_blank_numbers": (
+            "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
     }
 
@@ -216,7 +222,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
         lg.debug("CanEntrySellerInvoiceTrackNo.has_permission with {}: {}".format(request.method, res))
@@ -227,7 +233,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for p in CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_web):
                     res = True

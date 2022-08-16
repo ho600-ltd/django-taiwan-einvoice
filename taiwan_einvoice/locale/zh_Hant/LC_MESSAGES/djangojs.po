@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-09 16:06+0800\n"
+"POT-Creation-Date: 2022-08-16 15:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -179,6 +179,12 @@ msgstr[0] "匯入 %(count)s 筆"
 
 msgid "Importing Successfully"
 msgstr "成功匯入"
+
+msgid "Date Error"
+msgstr "日期錯誤"
+
+msgid "Upload the blank numbers only works in the first 10 days of the odd month."
+msgstr "上傳空白未使用字軌號碼僅於奇數月的前 10 天可作業。"
 
 msgid "Data Error"
 msgstr "資料錯誤"
