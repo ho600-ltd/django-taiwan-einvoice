@@ -15,6 +15,7 @@ from taiwan_einvoice.models import (
     TurnkeyService,
     SellerInvoiceTrackNo,
     EInvoice,
+    Printer,
     EInvoicePrintLog,
     CancelEInvoice,
     VoidEInvoice,
@@ -31,6 +32,15 @@ class UserFilter(filters.FilterSet):
         model = User
         fields = {
             'username': ('icontains', ),
+        }
+
+
+
+class PrinterFilter(filters.FilterSet):
+    class Meta:
+        model = Printer
+        fields = {
+            'id': ('exact', ),
         }
 
 
@@ -248,6 +258,7 @@ class EInvoiceFilter(filters.FilterSet):
         'details__8__Description',
         'details__9__Description',
     )
+    seller_invoice_track_no = filters.RelatedFilter(SellerInvoiceTrackNoFilter, field_name='seller_invoice_track_no', queryset=SellerInvoiceTrackNo.objects.all())
     track_no__icontains = filters.CharFilter(method='filter_track_no__icontains')
     details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')
     code39__exact = filters.CharFilter(method='filter_code39__exact')
@@ -338,8 +349,10 @@ class EInvoiceFilter(filters.FilterSet):
         return queryset.filter(query)
 
 
+
 class EInvoicePrintLogFilter(filters.FilterSet):
     einvoice = filters.RelatedFilter(EInvoiceFilter, field_name='einvoice', queryset=EInvoice.objects.all())
+    printer = filters.RelatedFilter(PrinterFilter, field_name='printer', queryset=Printer.objects.all())
     id_or_hex = filters.CharFilter(method='filter_id_or_hex')
 
 
@@ -372,7 +385,10 @@ class EInvoicePrintLogFilter(filters.FilterSet):
 
 class CancelEInvoiceFilter(filters.FilterSet):
     einvoice__track_no__icontains = filters.CharFilter(method='filter_einvoice__track_no__icontains')
+    einvoice__details__description__icontains = filters.CharFilter(method='filter_einvoice__details__description__icontains')
     einvoice__code39__exact = filters.CharFilter(method='filter_einvoice__code39__exact')
+    einvoice__any_words__icontains = filters.CharFilter(method='filter_einvoice__any_words__icontains')
+    new_einvoice__track_no__icontains = filters.CharFilter(method='filter_new_einvoice__track_no__icontains')
 
 
 
@@ -380,7 +396,26 @@ class CancelEInvoiceFilter(filters.FilterSet):
         model = CancelEInvoice
         fields = {
             'generate_time': ('gte', 'lt', ),
+            'ei_synced': ('exact', ),
         }
+
+
+    def filter_einvoice__any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"einvoice__{}__icontains".format(field): value})
+                  for field in EInvoiceFilter.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
+    def filter_einvoice__details__description__icontains(self, queryset, name, value):
+        querys = [Q(**{"einvoice__{}__icontains".format(field): value})
+                  for field in EInvoiceFilter.filter_product_descriptions]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
 
 
     def filter_einvoice__code39__exact(self, queryset, name, value):
@@ -421,9 +456,33 @@ class CancelEInvoiceFilter(filters.FilterSet):
         return queryset
 
 
+    def filter_new_einvoice__track_no__icontains(self, queryset, name, value):
+        if value:
+            alphabet = ''
+            digit = ''
+            re_alphabet_re = RE_ALPHABET.search(value)
+            if re_alphabet_re:
+                alphabet = re_alphabet_re.groups()[0]
+            re_digit_re = RE_DIGIT.search(value)
+            if re_digit_re:
+                digit = re_digit_re.groups()[0]
+
+            if alphabet and digit:
+                queryset = queryset.filter(new_einvoice__track__iendswith=alphabet, new_einvoice__no__startswith=digit)
+            else:
+                if digit:
+                    queryset = queryset.filter(new_einvoice__no__contains=digit)
+                if alphabet:
+                    queryset = queryset.filter(new_einvoice__track__icontains=alphabet)
+        return queryset
+
+
+
 class VoidEInvoiceFilter(filters.FilterSet):
     einvoice__track_no__icontains = filters.CharFilter(method='filter_einvoice__track_no__icontains')
     einvoice__code39__exact = filters.CharFilter(method='filter_einvoice__code39__exact')
+    einvoice__details__description__icontains = filters.CharFilter(method='filter_einvoice__details__description__icontains')
+    einvoice__any_words__icontains = filters.CharFilter(method='filter_einvoice__any_words__icontains')
 
 
 
@@ -431,7 +490,26 @@ class VoidEInvoiceFilter(filters.FilterSet):
         model = VoidEInvoice
         fields = {
             'generate_time': ('gte', 'lt', ),
+            'ei_synced': ('exact', ),
         }
+
+
+    def filter_einvoice__any_words__icontains(self, queryset, name, value):
+        querys = [Q(**{"einvoice__{}__icontains".format(field): value})
+                  for field in EInvoiceFilter.filter_any_words_in_those_fields]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
+
+
+    def filter_einvoice__details__description__icontains(self, queryset, name, value):
+        querys = [Q(**{"einvoice__{}__icontains".format(field): value})
+                  for field in EInvoiceFilter.filter_product_descriptions]
+        query = querys.pop()
+        for q in querys:
+            query |= q
+        return queryset.filter(query)
 
 
     def filter_einvoice__code39__exact(self, queryset, name, value):
@@ -474,18 +552,25 @@ class VoidEInvoiceFilter(filters.FilterSet):
 
 
 class UploadBatchFilter(filters.FilterSet):
+    turnkey_service = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_service', queryset=TurnkeyService.objects.all())
+    mig_type__no = filters.CharFilter(method='filter_mig_type__no')
 
 
 
     class Meta:
         model = UploadBatch
         fields = {
-            "turnkey_service": ("exact", ),
             "slug": ("exact", "icontains", ),
             "create_time": ("gte", "lt", ),
         }
 
 
+    def filter_mig_type__no(self, queryset, name, value):
+        if value:
+            queryset = queryset.filter(mig_type__no=value)
+        return queryset
+
+        
 
 class BatchEInvoiceFilter(filters.FilterSet):
     batch = filters.RelatedFilter(UploadBatchFilter, field_name='batch', queryset=UploadBatch.objects.all())

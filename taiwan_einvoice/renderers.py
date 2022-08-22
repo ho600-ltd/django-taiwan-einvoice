@@ -11,7 +11,7 @@ from django.utils.translation import pgettext_lazy
 from guardian.shortcuts import get_objects_for_user, get_perms
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
-from taiwan_einvoice.models import Seller, TurnkeyService, SellerInvoiceTrackNo, BatchEInvoice, SummaryReport, TEAlarm
+from taiwan_einvoice.models import User, Seller, TurnkeyService, SellerInvoiceTrackNo, EInvoice, CancelEInvoice, VoidEInvoice, Printer, EInvoicePrintLog, UploadBatch, BatchEInvoice, SummaryReport, TEAlarm
 
 
 def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
@@ -171,10 +171,33 @@ class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('einvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_einvoice",], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
+        seller_ids = turnkey_services.values_list('seller', flat=True)
+        res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
+        res['type_choices'] = SellerInvoiceTrackNo.type_choices
+        creator_ids = EInvoice.objects.all().values_list("creator", flat=True)
+        res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
+        return  res
+
+
 
 class EInvoicePrintLogHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('einvoiceprintlog_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('einvoiceprintlog_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        user_ids = EInvoicePrintLog.objects.all().values_list("user", flat=True)
+        res['users'] = User.objects.filter(id__in=user_ids).order_by('first_name')
+        printer_ids = EInvoicePrintLog.objects.all().values_list("printer", flat=True)
+        res['printers'] = Printer.objects.filter(id__in=printer_ids).order_by('nickname')
+        creator_ids = EInvoicePrintLog.objects.all().values_list("einvoice__creator", flat=True)
+        res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
+        return  res
 
 
 
@@ -183,10 +206,24 @@ class CancelEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('canceleinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        creator_ids = CancelEInvoice.objects.all().values_list("creator", flat=True)
+        res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
+        return  res
+
+
 
 class VoidEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('voideinvoice_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('voideinvoice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        creator_ids = VoidEInvoice.objects.all().values_list("creator", flat=True)
+        res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
+        return  res
 
 
 
@@ -206,6 +243,14 @@ class AuditLogHtmlRenderer(TEOriginHTMLRenderer):
 class UploadBatchHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('uploadbatch_list', sub_dir='taiwan_einvoice', show_template_filename=True)
     content_template = _get_template_name('uploadbatch_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        res['status_choices'] = UploadBatch.status_choices
+        res['kind_choices'] = UploadBatch.kind_choices
+        return  res
 
 
 
