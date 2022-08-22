@@ -395,7 +395,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
             turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_web__in=turnkey_webs)
 
@@ -1080,8 +1080,8 @@ class SummaryReportModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_service__in=turnkey_services)
 
 
 
@@ -1103,6 +1103,8 @@ class TEAlarmModelViewSet(ModelViewSet):
         if request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewTEAlarm.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(turnkey_web__in=turnkey_webs)
+            programmer_permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            general_user_permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = list(programmer_permissions) + list(general_user_permissions)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_service__in=turnkey_services)
