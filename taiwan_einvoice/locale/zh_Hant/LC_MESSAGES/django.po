@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-22 14:06+0800\n"
+"POT-Creation-Date: 2022-08-22 18:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -515,6 +515,10 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
+msgctxt "sellerinvoicetrackno"
+msgid "Seller Party ID"
+msgstr "賣家統一編號"
+
 msgid "Status"
 msgstr "狀態"
 
@@ -722,10 +726,6 @@ msgstr "完成"
 msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode"
 msgstr "一維條碼"
-
-msgctxt "sellerinvoicetrackno"
-msgid "Seller Party ID"
-msgstr "賣家統一編號"
 
 msgctxt "taiwan_einvoice_einvoiceprintlog"
 msgid "Creator"
@@ -1463,14 +1463,17 @@ msgstr "工作人員群組名稱"
 msgid "Staffs"
 msgstr "工作人員"
 
+msgid "MIG No."
+msgstr ""
+
+msgid "Kind"
+msgstr "類別"
+
 msgid "Update Time"
 msgstr "更新時間"
 
 msgid "MIG Type"
 msgstr "MIG類型"
-
-msgid "Kind"
-msgstr "類別"
 
 msgid "Executor"
 msgstr "執行者"
