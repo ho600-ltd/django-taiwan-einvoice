@@ -118,6 +118,14 @@ class TurnkeyServiceHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('turnkeyservice_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_turnkeyservice",], any_perm=True)
+        seller_ids = turnkey_services.values_list('seller', flat=True)
+        res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
+        return  res
+
+
 
 class TurnkeyServiceGroupHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('turnkeyservicegroup_list', sub_dir='taiwan_einvoice', show_template_filename=True)
@@ -191,6 +199,10 @@ class EInvoicePrintLogHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_einvoice",], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
+        seller_ids = turnkey_services.values_list('seller', flat=True)
+        res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
         user_ids = EInvoicePrintLog.objects.all().values_list("user", flat=True)
         res['users'] = User.objects.filter(id__in=user_ids).order_by('first_name')
         printer_ids = EInvoicePrintLog.objects.all().values_list("printer", flat=True)
@@ -247,7 +259,10 @@ class UploadBatchHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_alarm_for_programmer",], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
+        seller_ids = turnkey_services.values_list('seller', flat=True)
+        res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
         res['status_choices'] = UploadBatch.status_choices
         res['kind_choices'] = UploadBatch.kind_choices
         return  res
@@ -261,7 +276,10 @@ class BatchEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_alarm_for_programmer",], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
+        seller_ids = turnkey_services.values_list('seller', flat=True)
+        res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
         res['status_choices'] = BatchEInvoice.status_choices
         return  res
 

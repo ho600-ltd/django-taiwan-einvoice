@@ -17,7 +17,21 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="batch__turnkey_service__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
+                    <div class="input-group" id="batch__turnkey_service__seller__legal_entity__identifier" data-target-input="nearest">
+                        <select class="form-control" data-target="#batch__turnkey_service__seller__legal_entity__identifier"
+                            name="batch__turnkey_service__seller__legal_entity__identifier" id="id_batch__turnkey_service__seller__legal_entity__identifier">
+                            <option value=""></option>
+                            {% for slei in seller__legal_entity__identifiers %}
+                                <option value="{{ slei }}">{{ slei }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="batch__turnkey_service">{% trans "Turnkey Service" %}</label>
                     <div class="input-group date" id="batch__turnkey_service" data-target-input="nearest">
@@ -31,7 +45,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="status__regex">{% trans "Status" %}</label>
                     <div class="input-group" id="status__regex" data-target-input="nearest">
@@ -44,7 +58,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="pass_if_error">{% trans "Error Handling" %}</label>
                     <div class="input-group" id="pass_if_error" data-target-input="nearest">

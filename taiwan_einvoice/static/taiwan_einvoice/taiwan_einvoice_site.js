@@ -265,9 +265,14 @@ $(function () {
             'kind',
             'status__regex',
             'pass_if_error',
+            'seller__legal_entity__identifier',
             'turnkey_web__seller__legal_entity__identifier',
-            'seller_invoice_track_no__turnkey_web',
+            'turnkey_service__seller__legal_entity__identifier',
+            'batch__turnkey_service__seller__legal_entity__identifier',
             'seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier',
+            'einvoice__seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier',
+            'seller_invoice_track_no__turnkey_web',
+            'einvoice__seller_invoice_track_no__turnkey_web',
             'batch__turnkey_service',
             'cancel_einvoice_type'
         ];

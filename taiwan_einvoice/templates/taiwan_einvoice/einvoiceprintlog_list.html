@@ -52,7 +52,35 @@
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-md-4">
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
+                        <div class="input-group" id="einvoice__seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier" data-target-input="nearest">
+                            <select class="form-control" data-target="#einvoice__seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier"
+                                name="einvoice__seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier" id="id_einvoice__seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier">
+                                <option value=""></option>
+                                {% for slei in seller__legal_entity__identifiers %}
+                                    <option value="{{ slei }}">{{ slei }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__seller_invoice_track_no__turnkey_web">{% trans "Turnkey Service" %}</label>
+                        <div class="input-group" id="einvoice__seller_invoice_track_no__turnkey_web" data-target-input="nearest">
+                            <select class="form-control" data-target="#einvoice__seller_invoice_track_no__turnkey_web"
+                                name="einvoice__seller_invoice_track_no__turnkey_web" id="id_seller_invoice_track_no__turnkey_web">
+                                <option value=""></option>
+                                {% for ts in turnkey_services %}
+                                    <option value="{{ ts.id }}">{{ ts.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="print_time__gte">{% trans "Print time later than" %}</label>
                         <div class="input-group date" id="print_time__gte" data-target-input="nearest">
@@ -64,7 +92,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-4">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="print_time__lt">{% trans "Print time earlier than" %}</label>
                         <div class="input-group date" id="print_time__lt" data-target-input="nearest">
@@ -76,7 +104,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-4">
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="is_original_copy">{% trans "Original Copy?" context "taiwan_einvoice_einvoiceprintlog" %}</label>
                         <div class="input-group date" id="is_original_copy" data-target-input="nearest">
@@ -88,10 +119,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12 col-md-4">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="printer">{% trans "Printer" context "taiwan_einvoice_einvoiceprintlog" %}</label>
                         <div class="input-group" id="printer" data-target-input="nearest">
@@ -104,7 +132,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-4">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="einvoice__creator">{% trans "Creator" context "taiwan_einvoice_einvoiceprintlog" %}</label>
                         <div class="input-group" id="einvoice__creator" data-target-input="nearest">
@@ -117,7 +145,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-4">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="user">{% trans "User" context "taiwan_einvoice_einvoiceprintlog" %}</label>
                         <div class="input-group" id="user" data-target-input="nearest">
