@@ -17,7 +17,7 @@
             <input type='hidden' name='format' value='html' />
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="einvoice__code39__exact">{% trans "One-dimensional Barcode from the Canceled E-Invoice" context "taiwan_einvoice" %} <i class="fa fa-barcode" aria-hidden="true"></i></label>
                         <div class="input-group" id="einvoice__code39__exact" data-target-input="nearest">
@@ -25,7 +25,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="einvoice__track_no__icontains">{% trans "Track No. from the Canceled E-Invoice contains" %}</label>
                         <div class="input-group" id="einvoice__track_no__icontains" data-target-input="nearest">
@@ -33,10 +33,27 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__details__description__icontains">{% trans "Product Details contains" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="einvoice__details__description__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__details__description__icontains" id="id_einvoice__details__description__icontains" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__any_words__icontains">{% trans "Any Words(Exclude Track No., Product Details) contains" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="einvoice__any_words__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__any_words__icontains" id="id_einvoice__any_words__icontains" />
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="generate_time__gte">{% trans "Cancel time later than" %}</label>
                         <div class="input-group date" id="generate_time__gte" data-target-input="nearest">
@@ -48,7 +65,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="generate_time__lt">{% trans "Cancel time earlier than" %}</label>
                         <div class="input-group date" id="generate_time__lt" data-target-input="nearest">
@@ -57,6 +74,41 @@
                             <div class="input-group-append" data-target="#generate_time__lt" data-toggle="datetimepicker">
                                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="new_einvoice__track_no__icontains">{% trans "New E-Invoice Track No. contains" %}</label>
+                        <div class="input-group" id="new_einvoice__track_no__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="new_einvoice__track_no__icontains" id="id_new_einvoice__track_no__icontains" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="creator">{% trans "Creator" context "taiwan_einvoice_canceleinvoice" %}</label>
+                        <div class="input-group" id="creator" data-target-input="nearest">
+                            <select class="form-control" data-target="#creator"
+                                name="creator" id="id_creator">
+                                <option value=""></option>
+                                {% for cs in creators %}
+                                    <option value="{{ cs.id }}">{{ cs.first_name }}:{{ cs.id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="ei_synced">{% trans "Is Synced to EI?" %}</label>
+                        <div class="input-group" id="ei_synced" data-target-input="nearest">
+                            <select class="form-control" data-target="#ei_synced"
+                                name="ei_synced" id="id_ei_synced">
+                                <option value=""></option>
+                                <option value="0">{% trans "Not Yet" context "taiwan_einvoice_ei_synced" %}</option>
+                                <option value="1">{% trans "Done" context "taiwan_einvoice_ei_synced" %}</option>
+                            </select>
                         </div>
                     </div>
                 </div>

@@ -19,7 +19,7 @@
             <input type='hidden' name='format' value='html' />
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="code39__exact">{% trans "One-dimensional Barcode" context "taiwan_einvoice" %} <i class="fa fa-barcode" aria-hidden="true"></i></label>
                         <div class="input-group" id="code39__exact" data-target-input="nearest">
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="track_no__icontains">{% trans "Track No. contains" %}</label>
                         <div class="input-group" id="track_no__icontains" data-target-input="nearest">
@@ -35,10 +35,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="details__description__icontains">{% trans "Product Details contains" context "taiwan_einvoice" %}</label>
                         <div class="input-group" id="details__description__icontains" data-target-input="nearest">
@@ -46,7 +43,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="any_words__icontains">{% trans "Any Words(Exclude Track No., Product Details) contains" context "taiwan_einvoice" %}</label>
                         <div class="input-group" id="any_words__icontains" data-target-input="nearest">
@@ -57,7 +54,49 @@
             </div>
 
             <div class="row">
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
+                        <div class="input-group" id="seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier" data-target-input="nearest">
+                            <select class="form-control" data-target="#seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier"
+                                name="seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier" id="id_seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier">
+                                <option value=""></option>
+                                {% for slei in seller__legal_entity__identifiers %}
+                                    <option value="{{ slei }}">{{ slei }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="seller_invoice_track_no__turnkey_web">{% trans "Turnkey Service" %}</label>
+                        <div class="input-group" id="seller_invoice_track_no__turnkey_web" data-target-input="nearest">
+                            <select class="form-control" data-target="#seller_invoice_track_no__turnkey_web"
+                                name="seller_invoice_track_no__turnkey_web" id="id_seller_invoice_track_no__turnkey_web">
+                                <option value=""></option>
+                                {% for ts in turnkey_services %}
+                                    <option value="{{ ts.id }}">{{ ts.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="creator">{% trans "Creator" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group" id="creator" data-target-input="nearest">
+                            <select class="form-control" data-target="#creator"
+                                name="creator" id="id_creator">
+                                <option value=""></option>
+                                {% for cs in creators %}
+                                    <option value="{{ cs.id }}">{{ cs.first_name }}:{{ cs.id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="generate_time__gte">{% trans "Generate time later than" %}</label>
                         <div class="input-group date" id="generate_time__gte" data-target-input="nearest">
@@ -69,7 +108,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-6">
+                <div class="col-sm-12 col-md-3">
                     <div class="form-group">
                         <label for="generate_time__lt">{% trans "Generate time earlier than" %}</label>
                         <div class="input-group date" id="generate_time__lt" data-target-input="nearest">

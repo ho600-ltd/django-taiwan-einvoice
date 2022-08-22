@@ -17,7 +17,7 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="create_time__gte">{% trans "Create time later than" %}</label>
                     <div class="input-group date" id="create_time__gte" data-target-input="nearest">
@@ -29,7 +29,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="create_time__lt">{% trans "Create time earlier than" %}</label>
                     <div class="input-group date" id="create_time__lt" data-target-input="nearest">
@@ -41,11 +41,85 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_service__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
+                    <div class="input-group" id="turnkey_service__seller__legal_entity__identifier" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_service__seller__legal_entity__identifier"
+                            name="turnkey_service__seller__legal_entity__identifier" id="id_turnkey_service__seller__legal_entity__identifier">
+                            <option value=""></option>
+                            {% for slei in seller__legal_entity__identifiers %}
+                                <option value="{{ slei }}">{{ slei }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_service">{% trans "Turnkey Service" %}</label>
+                    <div class="input-group date" id="turnkey_service" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_service"
+                            name="turnkey_service" id="id_turnkey_service">
+                            <option value=""></option>
+                            {% for ts in turnkey_services %}
+                                <option value="{{ ts.id }}">{{ ts.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="mig_type__no">{% trans "MIG No." %}</label>
+                    <div class="input-group" id="mig_type__no" data-target-input="nearest">
+                        <select class="form-control" data-target="#mig_type__no"
+                            name="mig_type__no" id="id_mig_type__no">
+                            <option value=""></option>
+                            <option value="C0401">C0401</option>
+                            <option value="C0501">C0501</option>
+                            <option value="C0701">C0701</option>
+                            <option value="E0402">E0402</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="slug__icontains">{% trans "Slug contains" %}</label>
                     <div class="input-group" id="slug__icontains" data-target-input="nearest">
                         <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="kind">{% trans "Kind" %}</label>
+                    <div class="input-group" id="kind" data-target-input="nearest">
+                        <select class="form-control" data-target="#kind"
+                            name="kind" id="id_kind">
+                            <option value=""></option>
+                            {% for s in kind_choices %}
+                                <option value="{{ s.0 }}">{{ s.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="status">{% trans "Status" %}</label>
+                    <div class="input-group" id="status" data-target-input="nearest">
+                        <select class="form-control" data-target="#status"
+                            name="status" id="id_status">
+                            <option value=""></option>
+                            {% for s in status_choices %}
+                                <option value="{{ s.0 }}">{{ s.0 }}. {{ s.1 }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
