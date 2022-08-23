@@ -78,6 +78,40 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
 }
 
 
+function create_and_upload_blank_numbers_modal(taiwan_einvoice_site) {
+    return function () {
+        var today = new Date();
+        var month = today.getMonth() + 1;
+        var date = today.getDate();
+        if (month % 2 == 0 || date > 10) {
+            taiwan_einvoice_site.show_modal(
+                taiwan_einvoice_site.$ERROR_MODAL,
+                gettext("Date Error"),
+                gettext("Upload the blank numbers only works in the first 10 days of the odd month.")
+            );
+            return false;
+        }
+        var $btn = $(this);
+        var $modal = $('#create_and_upload_blank_numbers_modal');
+        var $modal_table = $('table.modal_table', $modal);
+        $('thead tr', $modal_table).remove();
+        $('tbody tr', $modal_table).remove();
+        var $search_result_head_tr_clone = $('table.search_result thead tr:first').clone();
+        $('th[field="button"]', $search_result_head_tr_clone).remove();
+        $('thead', $modal_table).append($search_result_head_tr_clone);
+
+        var $table = $("table.search_result");
+        $('tbody tr', $table).each(function(){
+            var $tr = $(this);
+            var $tr_clone = $tr.clone();
+            $('td[field="button"]', $tr_clone).remove();
+            $('tbody', $modal_table).append($tr_clone);
+        });
+        $modal.modal('show');
+    }
+}
+
+
 function create_and_upload_blank_numbers(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
@@ -197,6 +231,7 @@ $(function () {
 
     $('button.upload_csv_to_multiple_create_modal').click(upload_csv_to_multiple_create_modal(taiwan_einvoice_site));
     $('button.upload_csv_to_multiple_create').click(upload_csv_to_multiple_create(taiwan_einvoice_site));
+    $('button.create_and_upload_blank_numbers_modal').click(create_and_upload_blank_numbers_modal(taiwan_einvoice_site));
     $('button.create_and_upload_blank_numbers').click(create_and_upload_blank_numbers(taiwan_einvoice_site));
     $('button.delete_seller_invoice_track_no_modal').click(delete_seller_invoice_track_no_modal(taiwan_einvoice_site));
     $('button.delete_seller_invoice_track_no').click(delete_seller_invoice_track_no(taiwan_einvoice_site));

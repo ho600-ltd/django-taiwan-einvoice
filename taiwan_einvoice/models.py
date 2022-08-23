@@ -61,7 +61,7 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
-COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=20)
+COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=15)
 NO_NEED_TO_PRINT_TIME_MARGIN = datetime.timedelta(minutes=10)
 MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
 
@@ -1250,13 +1250,14 @@ class EInvoice(models.Model):
                 test_str = ''
             else:
                 test_str = '測 試 '
+            tax_code = "" if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else "格式 25"
             return [
                     {"type": "text", "custom_size": True, "width": 1, "height": 2, "align": "center", "text": test_str + "電 子 發 票 證 明 聯"},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
                     {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'))},
+                    {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " {} {}".format(generate_time.strftime('%Y-%m-%d %H:%M:%S'), tax_code)},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": " 隨機碼 {} 總計 {}".format(self.random_number, amounts['TotalAmount'])},
                     {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left",
                         "text": " 賣方 {} {}".format(self.seller_identifier,
@@ -1364,7 +1365,7 @@ class EInvoice(models.Model):
                 generate_time=now(),
             )
             new_track_no_self = EInvoice.objects.get(id=self.id)
-            new_track_no_self.post_new_track_no(new_track_no_self)
+            new_track_no_self.post_new_track_no()
             return new_track_no_self
 
 
@@ -1484,25 +1485,26 @@ class EInvoice(models.Model):
         same_routeing_id_objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web__party_id=turnkey_web.party_id,
                                                                 seller_invoice_track_no__turnkey_web__transport_id=turnkey_web.transport_id,
                                                                 seller_invoice_track_no__turnkey_web__routing_id=turnkey_web.routing_id,)
+        same_routeing_id_objs_count = same_routeing_id_objs.count()
+        if 0 < same_routeing_id_objs_count:
+            ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
 
-        ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
-
-        _ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True).order_by('-upload_to_ei_time')[:1000]
-        if _ei_synced_true_objs.exists():
-            first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
-            ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
-        else:
-            ei_synced_true_objs = _ei_synced_true_objs
+            _ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True).order_by('-upload_to_ei_time')[:1000]
+            if _ei_synced_true_objs.exists():
+                first_ei_synced_true_obj = _ei_synced_true_objs[len(_ei_synced_true_objs)-1]
+                ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True, upload_to_ei_time__gte=first_ei_synced_true_obj.upload_to_ei_time)
+            else:
+                ei_synced_true_objs = same_routeing_id_objs.filter(ei_synced=True)
 
         while True:
             random_number = '{:04d}'.format(randint(0, 10000))
-            if not (ei_synced_false_objs.filter(random_number=random_number).exists()
-                    or ei_synced_true_objs.filter(random_number=random_number).exists()
-                    or same_routeing_id_objs.filter(seller_invoice_track_no__begin_time=self.seller_invoice_track_no.begin_time,
-                                                    track=self.track,
-                                                    no=self.no,
-                                                    random_number=random_number,
-                                                   ).exists()
+            if 0 >= same_routeing_id_objs_count or not (ei_synced_false_objs.filter(random_number=random_number).exists()
+                                                        or ei_synced_true_objs.filter(random_number=random_number).exists()
+                                                        or same_routeing_id_objs.filter(seller_invoice_track_no__begin_time=self.seller_invoice_track_no.begin_time,
+                                                                                        track=self.track,
+                                                                                        no=self.no,
+                                                                                        random_number=random_number,
+                                                                                       ).exists()
                 ):
                 break
         return random_number
@@ -2132,16 +2134,17 @@ class UploadBatch(models.Model):
             if len(object_ids) != eis.count():
                 raise Exception('Some E-Invoices disappear')
         else:
+            eis = []
             content_object = self.batcheinvoice_set.get().content_object
+
         if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
             self.update_to_new_status(NEXT_STATUS)
-        elif ('cp' == self.kind
-            and (not eis.filter(print_mark=False).exists()
-                or not eis.filter(generate_time__gte=now() - COULD_PRINT_TIME_MARGIN).exists())
-            ):
+        elif ('cp' == self.kind and (not eis.filter(print_mark=False).exists()
+                                     or not eis.filter(generate_time__gte=now() - COULD_PRINT_TIME_MARGIN).exists())
+                                    ):
             self.update_to_new_status(NEXT_STATUS)
         elif ('np' == self.kind
-            and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
+              and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
             self.update_to_new_status(NEXT_STATUS)
         elif '57' == self.kind:
             check_C0501 = False
@@ -2172,6 +2175,15 @@ class UploadBatch(models.Model):
                 self.update_to_new_status(NEXT_STATUS)
         elif self.kind in ['E', 'R', 'RN']:
             self.update_to_new_status(NEXT_STATUS)
+
+        if NEXT_STATUS != self.status and eis:
+            print_mark_falsse_all_has_canceled_or_voided = True
+            for _ei in eis.filter(print_mark=False):
+                if not _ei.is_canceled and not _ei.is_voided:
+                    print_mark_falsse_all_has_canceled_or_voided = False
+                    break
+            if print_mark_falsse_all_has_canceled_or_voided:
+                self.update_to_new_status(NEXT_STATUS)
 
 
     @classmethod
@@ -2306,10 +2318,13 @@ class UploadBatch(models.Model):
                 elif 'None' == s:
                     continue
                 else:
-                    try:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
-                    except ValueError:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
+                    for format in ["%Y-%m-%d %H:%M:%S.%f%z", "%Y-%m-%d %H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]:
+                        try:
+                            upload_to_ei_time_datetime = datetime.datetime.strptime(s, format).astimezone(utc)
+                        except ValueError:
+                            pass
+                        else:
+                            break
                 beis = self.batcheinvoice_set.filter(id__in=ids)
                 if len(ids) != beis.count():
                     raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
@@ -2327,10 +2342,13 @@ class UploadBatch(models.Model):
                 if beis.count() != self.batcheinvoice_set.count() - len(exclude_ids):
                     raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
                 else:
-                    try:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%dT%H:%M:%S.%fZ").astimezone(utc)
-                    except ValueError:
-                        upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], "%Y-%m-%d %H:%M:%S.%f%z").astimezone(utc)
+                    for format in ["%Y-%m-%d %H:%M:%S.%f%z", "%Y-%m-%d %H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"]:
+                        try:
+                            upload_to_ei_time_datetime = datetime.datetime.strptime(upload_to_ei_time['__else__'], format).astimezone(utc)
+                        except ValueError:
+                            pass
+                        else:
+                            break
                     content_ids = self.batcheinvoice_set.exclude(id__in=exclude_ids
                                                                 ).values_list('object_id',
                                                                             named=False,
@@ -2676,7 +2694,7 @@ class SummaryReport(models.Model):
                                 track_no=m.track_no,
                                 einvoices_content_type_id=last_einvoices_content_type.id,
                             )
-                            problems.setdefault(problem_key, []).append(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
+                            problems.setdefault(problem_key, []).append(str(summary_report.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE))
                         _vars["objects_list"].append(last_einvoices_content_type)
             good_count = vars_list_for_ei_check_type_true_false[True]["count_var"]
             failed_count = vars_list_for_ei_check_type_true_false[False]["count_var"]
@@ -2785,20 +2803,20 @@ class SummaryReport(models.Model):
 
             last_batch_einvoice = failed_einvoice_ct.content_object.last_batch_einvoice
             if "h" == self.report_type and last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
-                target_audience_types.setdefault("g", {})[fe_key] = _("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no)
+                target_audience_types.setdefault("g", {})[fe_key] = str(_("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no))
             elif "a" == self.report_type:
-                target_audience_types.setdefault("p", {})[fe_key] = self.EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE
+                target_audience_types.setdefault("p", {})[fe_key] = str(self.EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE)
             elif not last_batch_einvoice:
-                target_audience_types.setdefault("p", {})[fe_key] = self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE
+                target_audience_types.setdefault("p", {})[fe_key] = str(self.LAST_BATCH_EINVOICE_DOES_NOT_EXIST_MESSAGE)
             elif last_batch_einvoice and last_batch_einvoice.batch.kind in ["cp", "np"]:
-                target_audience_types.setdefault("p", {})[fe_key] = _("Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})").format(track_no=track_no)
+                target_audience_types.setdefault("p", {})[fe_key] = str(_("Please check taiwan_einvoice.crontabs.polling_upload_batch for the E-Invoice({track_no})").format(track_no=track_no))
             else:
-                target_audience_types.setdefault("p", {})[fe_key] = _("The {track_no}@{mig_no} has result_code: {status}: '{result_code}'").format(
+                target_audience_types.setdefault("p", {})[fe_key] = str(_("The {track_no}@{mig_no} has result_code: {status}: '{result_code}'").format(
                     track_no=track_no,
                     mig_no=mig_no,
                     status=last_batch_einvoice.status,
                     result_code=last_batch_einvoice.result_code,
-                )
+                ))
         summary_report_problems = self.problems
         for target_audience_type, errors_d in target_audience_types.items():
             _errors_keys = list(errors_d.keys())

@@ -3,7 +3,7 @@ import logging
 from rest_framework.permissions import BasePermission, IsAdminUser
 from guardian.shortcuts import get_objects_for_user, get_perms
 
-from taiwan_einvoice.models import ESCPOSWeb
+from taiwan_einvoice.models import ESCPOSWeb, TEAlarm
 
 
 
@@ -196,18 +196,24 @@ class CanEditTurnkeyServiceGroup(BasePermission):
 
 
 class CanEntrySellerInvoiceTrackNo(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.view_te_sellerinvoicetrackno",
         ),
-        "POST": (
+        "retrieve": (
+            "taiwan_einvoice.view_te_sellerinvoicetrackno",
+        ),
+        "upload_csv_to_multiple_create": (
             "taiwan_einvoice.add_te_sellerinvoicetrackno",
         ),
-        "DELETE": (
+        "destory": (
             "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
-        "PATCH": (
+        "partial_update": (
             "taiwan_einvoice.add_te_sellerinvoicetrackno",
+        ),
+        "create_and_upload_blank_numbers": (
+            "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
     }
 
@@ -216,7 +222,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            permissions = CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
         lg.debug("CanEntrySellerInvoiceTrackNo.has_permission with {}: {}".format(request.method, res))
@@ -227,7 +233,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for p in CanEntrySellerInvoiceTrackNo.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_web):
                     res = True
@@ -433,7 +439,7 @@ class CanViewTurnkeyService(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanViewTurnkeyService.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
-                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                if codename in get_perms(request.user, obj):
                     res = True
                     break
         lg.debug("CanViewTurnkeyService.has_object_permission with {}: {}".format(request.method, res))
@@ -484,10 +490,11 @@ class CanViewTEAlarmForProgrammer(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            permissions = CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
-                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewAlarmForProgrammer.has_permission with {}: {}".format(request.method, res))
+                turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+                return TEAlarm.objects.filter(turnkey_service__in=turnkey_services, target_audience_type="p").exists()
+        lg.debug("CanViewTEAlarmForProgrammer.has_permission with {}: {}".format(request.method, res))
         return res
         
 
@@ -495,12 +502,12 @@ class CanViewTEAlarmForProgrammer(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for p in CanViewAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
-        lg.debug("CanViewAlarmForProgrammer.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTEAlarmForProgrammer.has_object_permission with {}: {}".format(request.method, res))
         return res
 
 
@@ -519,7 +526,8 @@ class CanViewTEAlarmForGeneralUser(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
-                res = get_objects_for_user(request.user, permissions, any_perm=True).filter(target_audience_type="g").exists()
+                turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+                return TEAlarm.objects.filter(turnkey_service__in=turnkey_services, target_audience_type="g").exists()
         lg.debug("CanViewTEAlarmForGeneralUser.has_permission with {}: {}".format(request.method, res))
         return res
         

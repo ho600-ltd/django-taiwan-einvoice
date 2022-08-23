@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-14 11:15+0800\n"
+"POT-Creation-Date: 2022-08-23 16:08+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -515,6 +515,10 @@ msgstr ""
 msgid "System Build Version"
 msgstr "系統編譯版面"
 
+msgctxt "sellerinvoicetrackno"
+msgid "Seller Party ID"
+msgstr "賣家統一編號"
+
 msgid "Status"
 msgstr "狀態"
 
@@ -592,11 +596,37 @@ msgstr "被作廢發票的一維條碼"
 msgid "Track No. from the Canceled E-Invoice contains"
 msgstr "被作廢發票的字軌號碼包含"
 
+msgctxt "taiwan_einvoice"
+msgid "Product Details contains"
+msgstr "商品明細包含"
+
+msgctxt "taiwan_einvoice"
+msgid "Any Words(Exclude Track No., Product Details) contains"
+msgstr "除字軌號碼、商品明細外的其他文數字欄位包含"
+
 msgid "Cancel time later than"
 msgstr "作廢時間晚於"
 
 msgid "Cancel time earlier than"
 msgstr "作廢時間早於"
+
+msgid "New E-Invoice Track No. contains"
+msgstr "另開發票字軌包含"
+
+msgctxt "taiwan_einvoice_canceleinvoice"
+msgid "Creator"
+msgstr "作廢者"
+
+msgid "Is Synced to EI?"
+msgstr "是否同步至EI?"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Not Yet"
+msgstr "未同步"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Done"
+msgstr "已完成"
 
 msgid "Print Sales Return Receipt"
 msgstr "列印銷貨退回簽收單"
@@ -737,13 +767,9 @@ msgctxt "taiwan_einvoice"
 msgid "One-dimensional Barcode"
 msgstr "一維條碼"
 
-msgctxt "taiwan_einvoice"
-msgid "Product Details contains"
-msgstr "商品明細包含"
-
-msgctxt "taiwan_einvoice"
-msgid "Any Words(Exclude Track No., Product Details) contains"
-msgstr "除字軌號碼、商品明細外的其他文數字欄位包含"
+msgctxt "taiwan_einvoice_einvoiceprintlog"
+msgid "Creator"
+msgstr "開立者"
 
 msgid "Generate time later than"
 msgstr "開立時間晚於"
@@ -804,17 +830,6 @@ msgstr "未註銷"
 msgctxt "taiwan_einvoice_void_einvoice_type"
 msgid "Voided"
 msgstr "已註銷"
-
-msgid "Is Synced to EI?"
-msgstr "是否同步至EI?"
-
-msgctxt "taiwan_einvoice_ei_synced"
-msgid "Not Yet"
-msgstr "未同步"
-
-msgctxt "taiwan_einvoice_ei_synced"
-msgid "Done"
-msgstr "已完成"
 
 msgid "Print E-Invoice"
 msgstr "列印電子發票"
@@ -965,10 +980,6 @@ msgstr "副本"
 msgctxt "taiwan_einvoice_einvoiceprintlog"
 msgid "Printer"
 msgstr "印表機"
-
-msgctxt "taiwan_einvoice_einvoiceprintlog"
-msgid "Creator"
-msgstr "開立者"
 
 msgctxt "taiwan_einvoice_einvoiceprintlog"
 msgid "User"
@@ -1218,6 +1229,21 @@ msgstr ""
 "                        <p>您確定要刪除上述紀錄?</p>\n"
 "                    "
 
+msgid "Upload Blank Numbers"
+msgstr "新增並上傳空白未使用字軌號碼"
+
+msgid ""
+"\n"
+"                        <p>Do you sure to upload the above record?</p>\n"
+"                    "
+msgstr ""
+"\n"
+"                        <p>您確定要上傳上述紀錄?</p>\n"
+"                    "
+
+msgid "Create and Upload"
+msgstr "新增並上傳"
+
 msgid "Create Staff"
 msgstr "新增工作人員"
 
@@ -1446,14 +1472,17 @@ msgstr "工作人員群組名稱"
 msgid "Staffs"
 msgstr "工作人員"
 
+msgid "MIG No."
+msgstr ""
+
+msgid "Kind"
+msgstr "類別"
+
 msgid "Update Time"
 msgstr "更新時間"
 
 msgid "MIG Type"
 msgstr "MIG類型"
-
-msgid "Kind"
-msgstr "類別"
 
 msgid "Executor"
 msgstr "執行者"
@@ -1479,6 +1508,10 @@ msgstr "註銷時間晚於"
 
 msgid "Void time earlier than"
 msgstr "註銷時間早於"
+
+msgctxt "taiwan_einvoice_voideinvoice"
+msgid "Creator"
+msgstr "註銷者"
 
 msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
 msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
