@@ -562,6 +562,8 @@ class UploadBatchFilter(filters.FilterSet):
         fields = {
             "slug": ("exact", "icontains", ),
             "create_time": ("gte", "lt", ),
+            "kind": ("exact", ),
+            "status": ("exact", ),
         }
 
 
