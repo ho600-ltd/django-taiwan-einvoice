@@ -100,6 +100,7 @@ from taiwan_einvoice.serializers import (
 from taiwan_einvoice.filters import (
     StaffProfileFilter,
     ESCPOSWebFilter,
+    SellerFilter,
     LegalEntityFilter,
     TurnkeyServiceFilter,
     TurnkeyServiceGroupFilter,
@@ -294,6 +295,7 @@ class SellerModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = Seller.objects.all().order_by('-id')
     serializer_class = SellerSerializer
+    filter_class = SellerFilter
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
 

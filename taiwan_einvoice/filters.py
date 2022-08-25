@@ -1,10 +1,11 @@
-import re, datetime
+import re, datetime, logging
 import rest_framework_filters as filters
 
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
+from guardian.shortcuts import get_objects_for_user
 
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
@@ -45,8 +46,16 @@ class PrinterFilter(filters.FilterSet):
 
 
 
+def can_view_users_by_some_TODO_groups(request):
+    #TODO: Don't let managers can see all users
+    lg = logging.getLogger('taiwan_einvoice')
+    users = User.objects.filter(staffprofile__isnull=False)
+    lg.debug("#TODO can_view_users_by_some_TODO_groups: {}".format(users)) 
+    return users
+
+
 class StaffProfileFilter(filters.FilterSet):
-    user = filters.RelatedFilter(UserFilter, field_name='user', queryset=User.objects.filter(staffprofile__isnull=False))
+    user = filters.RelatedFilter(UserFilter, field_name='user', queryset=can_view_users_by_some_TODO_groups)
 
 
 
@@ -100,10 +109,21 @@ class LegalEntityFilter(filters.FilterSet):
 
 
 
+def legal_entity_under_can_view_turnkey_services(request):
+    from taiwan_einvoice.permissions import CanViewTurnkeyService
+    lg = logging.getLogger('taiwan_einvoice')
+    ts = get_objects_for_user(request.user,
+                              CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get("list", []),
+                              any_perm=True,
+                             )
+    legal_entitys = LegalEntity.objects.filter(id__in=ts.values_list('seller__legal_entity', flat=True))
+    lg.debug("legal_entity_under_can_view_turnkey_services: {}".format(legal_entitys)) 
+    return legal_entitys
+
 
 
 class SellerFilter(filters.FilterSet):
-    legal_entity = filters.RelatedFilter(LegalEntityFilter, field_name='legal_entity', queryset=LegalEntity.objects.all())
+    legal_entity = filters.RelatedFilter(LegalEntityFilter, field_name='legal_entity', queryset=legal_entity_under_can_view_turnkey_services)
 
 
 
@@ -112,6 +132,19 @@ class SellerFilter(filters.FilterSet):
         fields = {
             "legal_entity": ("exact", ),
         }
+
+
+
+def sellers_under_can_view_turnkey_services(request):
+    from taiwan_einvoice.permissions import CanViewTurnkeyService
+    lg = logging.getLogger('taiwan_einvoice')
+    ts = get_objects_for_user(request.user,
+                              CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get("list", []),
+                              any_perm=True,
+                             )
+    sellers = Seller.objects.filter(id__in=ts.values_list('seller', flat=True))
+    lg.debug("sellers_under_can_view_turnkey_services: {}".format(sellers)) 
+    return sellers
 
 
 
@@ -126,7 +159,7 @@ class TurnkeyServiceFilter(filters.FilterSet):
         'turnkey_seed',
         'download_seed',
     )
-    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=Seller.objects.all())
+    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=sellers_under_can_view_turnkey_services)
     any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
 
 
@@ -162,7 +195,7 @@ class TurnkeyServiceGroupFilter(filters.FilterSet):
         'turnkey_seed',
         'download_seed',
     )
-    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=Seller.objects.all())
+    seller = filters.RelatedFilter(SellerFilter, field_name='seller', queryset=sellers_under_can_view_turnkey_services)
     any_words__icontains = filters.CharFilter(method='filter_any_words__icontains')
 
 
@@ -185,8 +218,20 @@ class TurnkeyServiceGroupFilter(filters.FilterSet):
 
 
 
+def can_view_turnkey_services(request):
+    from taiwan_einvoice.permissions import CanViewTurnkeyService
+    lg = logging.getLogger('taiwan_einvoice')
+    ts =  get_objects_for_user(request.user,
+                               CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get("list", []),
+                               any_perm=True,
+                              )
+    lg.debug("can_view_turnkey_services: {}".format(ts)) 
+    return ts
+
+
+
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
-    turnkey_service = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_service', queryset=TurnkeyService.objects.all())
+    turnkey_service = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_service', queryset=can_view_turnkey_services)
     now_use = filters.BooleanFilter(method='filter_now_use')
     date_in_year_month_range = filters.CharFilter(method='filter_date_in_year_month_range')
     no_including = filters.CharFilter(method='filter_no_including')
@@ -230,6 +275,19 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
 
 
 
+def sitns_under_can_view_turnkey_services(request):
+    from taiwan_einvoice.permissions import CanViewTurnkeyService
+    lg = logging.getLogger('taiwan_einvoice')
+    ts =  get_objects_for_user(request.user,
+                               CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get("list", []),
+                               any_perm=True,
+                              )
+    sitns = SellerInvoiceTrackNo.objects.filter(turnkey_service__in=ts)
+    lg.debug("sitns_under_can_view_turnkey_services: {}".format(sitns)) 
+    return sitns
+
+
+
 RE_ALPHABET = re.compile('([a-zA-Z]+)', flags=re.I)
 RE_DIGIT = re.compile('([0-9]+)')
 RE_CODE39_BARCODE = re.compile('^([0-9]{3})([0-1][0-9])([A-Z][A-Z])([0-9]{8})([0-9]{4})$')
@@ -258,7 +316,7 @@ class EInvoiceFilter(filters.FilterSet):
         'details__8__Description',
         'details__9__Description',
     )
-    seller_invoice_track_no = filters.RelatedFilter(SellerInvoiceTrackNoFilter, field_name='seller_invoice_track_no', queryset=SellerInvoiceTrackNo.objects.all())
+    seller_invoice_track_no = filters.RelatedFilter(SellerInvoiceTrackNoFilter, field_name='seller_invoice_track_no', queryset=sitns_under_can_view_turnkey_services)
     track_no__icontains = filters.CharFilter(method='filter_track_no__icontains')
     details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')
     code39__exact = filters.CharFilter(method='filter_code39__exact')
@@ -350,8 +408,21 @@ class EInvoiceFilter(filters.FilterSet):
 
 
 
+def einvoices_under_can_view_turnkey_services(request):
+    from taiwan_einvoice.permissions import CanViewTurnkeyService
+    lg = logging.getLogger('taiwan_einvoice')
+    ts =  get_objects_for_user(request.user,
+                               CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get("list", []),
+                               any_perm=True,
+                              )
+    einvoices = EInvoice.objects.filter(seller_invoice_track_no__turnkey_service__in=ts)
+    lg.debug("einvoices_under_can_view_turnkey_services: {}".format(einvoices)) 
+    return einvoices
+
+
+
 class EInvoicePrintLogFilter(filters.FilterSet):
-    einvoice = filters.RelatedFilter(EInvoiceFilter, field_name='einvoice', queryset=EInvoice.objects.all())
+    einvoice = filters.RelatedFilter(EInvoiceFilter, field_name='einvoice', queryset=einvoices_under_can_view_turnkey_services)
     printer = filters.RelatedFilter(PrinterFilter, field_name='printer', queryset=Printer.objects.all())
     id_or_hex = filters.CharFilter(method='filter_id_or_hex')
 
@@ -552,7 +623,7 @@ class VoidEInvoiceFilter(filters.FilterSet):
 
 
 class UploadBatchFilter(filters.FilterSet):
-    turnkey_service = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_service', queryset=TurnkeyService.objects.all())
+    turnkey_service = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_service', queryset=can_view_turnkey_services)
     mig_type__no = filters.CharFilter(method='filter_mig_type__no')
 
 
@@ -574,8 +645,21 @@ class UploadBatchFilter(filters.FilterSet):
 
         
 
+def upload_batchs_under_can_view_turnkey_services(request):
+    from taiwan_einvoice.permissions import CanViewTurnkeyService
+    lg = logging.getLogger('taiwan_einvoice')
+    ts =  get_objects_for_user(request.user,
+                               CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get("list", []),
+                               any_perm=True,
+                              )
+    ubs = UploadBatch.objects.filter(turnkey_service__in=ts)
+    lg.debug("upload_batchs_under_can_view_turnkey_services: {}".format(ubs)) 
+    return ubs
+
+
+
 class BatchEInvoiceFilter(filters.FilterSet):
-    batch = filters.RelatedFilter(UploadBatchFilter, field_name='batch', queryset=UploadBatch.objects.all())
+    batch = filters.RelatedFilter(UploadBatchFilter, field_name='batch', queryset=upload_batchs_under_can_view_turnkey_services)
 
 
 
@@ -590,9 +674,6 @@ class BatchEInvoiceFilter(filters.FilterSet):
 
 
 class AuditLogFilter(filters.FilterSet):
-
-
-
     class Meta:
         model = AuditLog
         fields = {
@@ -604,9 +685,6 @@ class AuditLogFilter(filters.FilterSet):
 
 
 class SummaryReportFilter(filters.FilterSet):
-
-
-
     class Meta:
         model = SummaryReport
         fields = {
@@ -625,9 +703,6 @@ class SummaryReportFilter(filters.FilterSet):
 
 
 class TEAlarmFilter(filters.FilterSet):
-
-
-
     class Meta:
         model = TEAlarm
         fields = {
