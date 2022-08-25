@@ -396,15 +396,15 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_service__in=turnkey_services)
 
 
     @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
     def create_and_upload_blank_numbers(self, request, pk=None):
         sitn = self.get_object()
         if sitn:
-            identifier = request.data.get('turnkey_web__seller__legal_entity__identifier', '')
+            identifier = request.data.get('turnkey_service__seller__legal_entity__identifier', '')
             date_in_year_month_range = request.data.get('date_in_year_month_range', '')
             seller_invoice_track_no_ids = request.data.get('seller_invoice_track_no_ids', '')
             if "" in [identifier, date_in_year_month_range, seller_invoice_track_no_ids]:
@@ -412,7 +412,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                           "error_message": _("All fields are required!")}
             date_in_year_month_range = datetime.datetime.strptime(date_in_year_month_range, "%Y-%m-%d %H:%M:%S").astimezone(utc)
             seller_invoice_track_no_ids = seller_invoice_track_no_ids.split(',')
-            seller_invoice_track_nos = SellerInvoiceTrackNo.objects.filter(turnkey_web__seller__legal_entity__identifier=identifier,
+            seller_invoice_track_nos = SellerInvoiceTrackNo.objects.filter(turnkey_service__seller__legal_entity__identifier=identifier,
                                                                            begin_time__lte=date_in_year_month_range,
                                                                            end_time__gte=date_in_year_month_range)
             if not seller_invoice_track_nos.exists():
@@ -443,11 +443,11 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     def upload_csv_to_multiple_create(self, request, *args, **kwargs):
         NOW = now()
         try:
-            turnkey_web = TurnkeyService.objects.get(id=request.POST['turnkey_web'])
+            turnkey_service = TurnkeyService.objects.get(id=request.POST['turnkey_service'])
         except TurnkeyService.DoesNotExist:
             er = {
                 "error_title": _("TurnkeyService Does Not Exist"),
-                "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_web),
+                "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_service),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         csv_file = request.FILES['file']
@@ -456,7 +456,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             line = csv_file.readline().decode('cp950').rstrip("\r\n")
             if not line:
                 break
-            elif turnkey_web.seller.legal_entity.identifier in line:
+            elif turnkey_service.seller.legal_entity.identifier in line:
                 cols = line.split(',')
 
                 try:
@@ -513,7 +513,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 if _end_no_in_split > end_no: _end_no_in_split = end_no
                 while _begin_no_in_split < _end_no_in_split:
                     data = {
-                        "turnkey_web": turnkey_web.id,
+                        "turnkey_service": turnkey_service.id,
                         "type": '{:02d}'.format(int(cols[1])),
                         "begin_time": begin_time,
                         "end_time": end_time,
@@ -604,8 +604,8 @@ class EInvoiceModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(seller_invoice_track_no__turnkey_service__in=turnkey_services)
 
 
     @action(detail=True, methods=['get'], renderer_classes=[JSONRenderer, ])
@@ -660,8 +660,8 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services)
 
 
 
@@ -684,8 +684,8 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services)
     
 
     def create(self, request, *args, **kwargs):
@@ -738,7 +738,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                 for f in EInvoice._meta.fields
             }
             for seller_invoice_track_no in SellerInvoiceTrackNo.filter_now_use_sitns(
-                                                    turnkey_web=einvoice.seller_invoice_track_no.turnkey_web,
+                                                    turnkey_service=einvoice.seller_invoice_track_no.turnkey_service,
                                                     type=einvoice.seller_invoice_track_no.type
                                            ).order_by('-begin_no'):
                 try:
@@ -784,8 +784,8 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services)
     
 
     def create(self, request, *args, **kwargs):
@@ -876,7 +876,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        for _ei in EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=einvoice.seller_invoice_track_no.turnkey_web,
+        for _ei in EInvoice.objects.filter(seller_invoice_track_no__turnkey_service=einvoice.seller_invoice_track_no.turnkey_service,
                                            track=einvoice.track,
                                            no=einvoice.no).order_by('-reverse_void_order'):
             _ei.increase_reverse_void_order()
@@ -947,8 +947,8 @@ class UploadBatchModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_service__in=turnkey_services)
 
 
 
@@ -971,8 +971,8 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(batch__turnkey_service__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(batch__turnkey_service__in=turnkey_services)
 
 
     @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
@@ -1056,8 +1056,8 @@ class AuditLogModelViewSet(ModelViewSet):
             return queryset
         else:
             permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            turnkey_webs = get_objects_for_user(request.user, permissions, any_perm=True)
-            return queryset.filter(turnkey_web__in=turnkey_webs)
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(turnkey_service__in=turnkey_services)
 
 
 

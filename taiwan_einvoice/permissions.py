@@ -235,7 +235,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
-                if codename in get_perms(request.user, obj.turnkey_web):
+                if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
         lg.debug("CanEntrySellerInvoiceTrackNo.has_object_permission with {}: {}".format(request.method, res))
@@ -268,7 +268,7 @@ class CanEntryEInvoice(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
-                if codename in get_perms(request.user, obj.seller_invoice_track_no.turnkey_web):
+                if codename in get_perms(request.user, obj.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
         lg.debug("CanEntryEInvoice.has_object_permission with {}: {}".format(request.method, res))
@@ -301,7 +301,7 @@ class CanEntryEInvoicePrintLog(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
-                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
         lg.debug("CanEntryEInvoicePrintLog.has_object_permission with {}: {}".format(request.method, res))
@@ -337,7 +337,7 @@ class CanEntryCancelEInvoice(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
-                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
         lg.debug("CanEntryCancelEInvoice.has_object_permission with {}: {}".format(request.method, res))
@@ -373,7 +373,7 @@ class CanEntryVoidEInvoice(BasePermission):
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
                 app, codename = p.split('.')
-                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_web):
+                if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
         lg.debug("CanEntryVoidEInvoice.has_object_permission with {}: {}".format(request.method, res))

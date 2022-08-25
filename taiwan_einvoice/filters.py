@@ -186,7 +186,7 @@ class TurnkeyServiceGroupFilter(filters.FilterSet):
 
 
 class SellerInvoiceTrackNoFilter(filters.FilterSet):
-    turnkey_web = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_web', queryset=TurnkeyService.objects.all())
+    turnkey_service = filters.RelatedFilter(TurnkeyServiceFilter, field_name='turnkey_service', queryset=TurnkeyService.objects.all())
     now_use = filters.BooleanFilter(method='filter_now_use')
     date_in_year_month_range = filters.CharFilter(method='filter_date_in_year_month_range')
     no_including = filters.CharFilter(method='filter_no_including')
@@ -196,7 +196,7 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
     class Meta:
         model = SellerInvoiceTrackNo
         fields = {
-            'turnkey_web': ('exact', ),
+            'turnkey_service': ('exact', ),
             'type': ('exact', ),
             'track': ('icontains', ),
         }

@@ -621,13 +621,13 @@ class TurnkeyService(models.Model):
     @property
     def count_now_use_07_sellerinvoicetrackno_blank_no(self):
         count = 0
-        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='07'):
+        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_service=self).filter(type='07'):
             count += sitn.count_blank_no
         return count
     @property
     def count_now_use_08_sellerinvoicetrackno_blank_no(self):
         count = 0
-        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=self).filter(type='08'):
+        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_service=self).filter(type='08'):
             count += sitn.count_blank_no
         return count
     @property
@@ -756,7 +756,7 @@ class TurnkeyService(models.Model):
 
 
 class SellerInvoiceTrackNo(models.Model):
-    turnkey_web = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
+    turnkey_service = models.ForeignKey(TurnkeyService, on_delete=models.DO_NOTHING)
     is_disabled = models.BooleanField(default=False)
     type_choices = (
         ('07', _('General')),
@@ -818,7 +818,7 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def __str__(self):
-        return "{}{}({}~{}: {}{:08d}-{:08d})".format(self.turnkey_web,
+        return "{}{}({}~{}: {}{:08d}-{:08d})".format(self.turnkey_service,
                                              self.type,
                                              self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
                                              (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
@@ -837,7 +837,7 @@ class SellerInvoiceTrackNo(models.Model):
         queryset = cls.objects.filter(**kwargs)
         _now = now()
         ids = []
-        for sitn in queryset.filter(turnkey_web__on_working=True,
+        for sitn in queryset.filter(turnkey_service__on_working=True,
                                     is_disabled=False,
                                     begin_time__lte=_now,
                                     end_time__gt=_now).order_by('track', 'begin_no'):
@@ -851,22 +851,22 @@ class SellerInvoiceTrackNo(models.Model):
 
     @classmethod
     def create_blank_numbers_and_upload_batchs(cls, seller_invoice_track_nos, executor=None):
-        if 1 != len(seller_invoice_track_nos.values('turnkey_web__seller__legal_entity__identifier'
-                                                   ).annotate(a_c=Count('turnkey_web__seller__legal_entity__identifier'))):
+        if 1 != len(seller_invoice_track_nos.values('turnkey_service__seller__legal_entity__identifier'
+                                                   ).annotate(a_c=Count('turnkey_service__seller__legal_entity__identifier'))):
             raise IdentifierError(_("Only use the same identifier to create the record for blank numbers!"))
         elif 1 != len(seller_invoice_track_nos.values('begin_time').annotate(a_c=Count('begin_time'))):
             raise IdentifierError(_("Only use the same begin_time to create the record for blank numbers!"))
         elif 1 != len(seller_invoice_track_nos.values('end_time').annotate(a_c=Count('end_time'))):
             raise IdentifierError(_("Only use the same end_time to create the record for blank numbers!"))
 
-        party_ids = [d['turnkey_web__party_id'] for d in seller_invoice_track_nos.values('turnkey_web__party_id').annotate(dev_null=Count('turnkey_web__party_id'))]
+        party_ids = [d['turnkey_service__party_id'] for d in seller_invoice_track_nos.values('turnkey_service__party_id').annotate(dev_null=Count('turnkey_service__party_id'))]
         tax_types = [d['type'] for d in seller_invoice_track_nos.values('type').annotate(dev_null=Count('type'))]
         tracks = [d['track'] for d in seller_invoice_track_nos.values('track').annotate(dev_null=Count('track'))]
         upload_batchs = []
         for party_id in party_ids:
             for tax_type in tax_types:
                 for track in tracks:
-                    sitns = seller_invoice_track_nos.filter(turnkey_web__party_id=party_id,
+                    sitns = seller_invoice_track_nos.filter(turnkey_service__party_id=party_id,
                                                             type=tax_type,
                                                             track=track).order_by('track', 'begin_no')
                     upload_batch = UploadBatch.append_to_the_upload_batch(sitns.first(), executor=executor)
@@ -919,10 +919,10 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def export_json_for_mig(self):
-        sitns = SellerInvoiceTrackNo.objects.filter(turnkey_web__seller__legal_entity__identifier=self.turnkey_web.seller.legal_entity.identifier,
+        sitns = SellerInvoiceTrackNo.objects.filter(turnkey_service__seller__legal_entity__identifier=self.turnkey_service.seller.legal_entity.identifier,
                                                     begin_time=self.begin_time,
                                                     end_time=self.end_time,
-                                                    turnkey_web__party_id=self.turnkey_web.party_id,
+                                                    turnkey_service__party_id=self.turnkey_service.party_id,
                                                     type=self.type,
                                                     track=self.track).order_by('track', 'begin_no')
         Details = []
@@ -931,8 +931,8 @@ class SellerInvoiceTrackNo(models.Model):
                 Details.append((sitn.next_blank_no, sitn.end_no))
         J = {"E0402": {
             "Main": {
-                "HeadBan": self.turnkey_web.party_id,
-                "BranchBan": self.turnkey_web.seller.legal_entity.identifier,
+                "HeadBan": self.turnkey_service.party_id,
+                "BranchBan": self.turnkey_service.seller.legal_entity.identifier,
                 "InvoiceType": self.type,
                 "YearMonth": self.year_month,
                 "InvoiceTrack": self.track,
@@ -1057,7 +1057,7 @@ class EInvoice(models.Model):
     amounts = models.JSONField(null=False)
     @property
     def amount_is_warning(self):
-        if float(self.amounts['TotalAmount']) > self.seller_invoice_track_no.turnkey_web.warning_above_amount:
+        if float(self.amounts['TotalAmount']) > self.seller_invoice_track_no.turnkey_service.warning_above_amount:
             return True
         else:
             return False
@@ -1246,7 +1246,7 @@ class EInvoice(models.Model):
             generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
             sales_amount_str = _hex_amount(amounts['SalesAmount'])
             total_amount_str = _hex_amount(amounts['TotalAmount'])
-            if self.seller_invoice_track_no.turnkey_web.in_production:
+            if self.seller_invoice_track_no.turnkey_service.in_production:
                 test_str = ''
             else:
                 test_str = '測 試 '
@@ -1274,7 +1274,7 @@ class EInvoice(models.Model):
                             buyer_identifier=(LegalEntity.GENERAL_CONSUMER_IDENTIFIER if LegalEntity.GENERAL_CONSUMER_IDENTIFIER == self.buyer_identifier else self.buyer_identifier)[:8],
                             seller_identifier=self.seller_identifier,
                             generate_no_sha1=self.generate_no_sha1,
-                            qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_web.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
+                            qrcode_aes_encrypt_str=qrcode_aes_encrypt(self.seller_invoice_track_no.turnkey_service.qrcode_seed, "{}{}".format(self.track_no, self.random_number)),
                             product_in_einvoice_count=len(details[:5]),
                             product_in_order_count=len(details),
                             codepage='1' if 'utf-8' else '0',
@@ -1344,10 +1344,10 @@ class EInvoice(models.Model):
 
 
     def renew_track_no_and_sitn_obj(self):
-        turnkey_service = self.seller_invoice_track_no.turnkey_web
+        turnkey_service = self.seller_invoice_track_no.turnkey_service
         sitn = ''
         no = ''
-        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_web=turnkey_service):
+        for sitn in SellerInvoiceTrackNo.filter_now_use_sitns(turnkey_service=turnkey_service):
             new_no = sitn.get_new_no()
             if new_no:
                 no = new_no
@@ -1481,10 +1481,10 @@ class EInvoice(models.Model):
     def get_or_generate_random_number(self):
         if self.random_number:
             return self.random_number
-        turnkey_web = self.seller_invoice_track_no.turnkey_web
-        same_routeing_id_objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_web__party_id=turnkey_web.party_id,
-                                                                seller_invoice_track_no__turnkey_web__transport_id=turnkey_web.transport_id,
-                                                                seller_invoice_track_no__turnkey_web__routing_id=turnkey_web.routing_id,)
+        turnkey_service = self.seller_invoice_track_no.turnkey_service
+        same_routeing_id_objs = self._meta.model.objects.filter(seller_invoice_track_no__turnkey_service__party_id=turnkey_service.party_id,
+                                                                seller_invoice_track_no__turnkey_service__transport_id=turnkey_service.transport_id,
+                                                                seller_invoice_track_no__turnkey_service__routing_id=turnkey_service.routing_id,)
         same_routeing_id_objs_count = same_routeing_id_objs.count()
         if 0 < same_routeing_id_objs_count:
             ei_synced_false_objs = same_routeing_id_objs.filter(ei_synced=False)
@@ -1523,11 +1523,11 @@ class EInvoice(models.Model):
             del kwargs['force_save']
             super().save(*args, **kwargs)
         elif not self.pk:
-            turnkey_web = self.seller_invoice_track_no.turnkey_web
-            if float(self.amounts['TotalAmount']) > turnkey_web.forbidden_above_amount:
+            turnkey_service = self.seller_invoice_track_no.turnkey_service
+            if float(self.amounts['TotalAmount']) > turnkey_service.forbidden_above_amount:
                 raise ForbiddenAboveAmountError(_("{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})").format(
-                    total_amount=self.amounts['TotalAmount'], forbidden_above_amount=turnkey_web.forbidden_above_amount))
-            elif float(self.amounts['TotalAmount']) > turnkey_web.warning_above_amount:
+                    total_amount=self.amounts['TotalAmount'], forbidden_above_amount=turnkey_service.forbidden_above_amount))
+            elif float(self.amounts['TotalAmount']) > turnkey_service.warning_above_amount:
                 #TODO: grab staff group, and send notice mail to them.
                 pass
 
@@ -1551,7 +1551,7 @@ class EInvoicePrintLog(models.Model):
     base_set = 'GHIJKLMNOPQRSTUVWXYZ'
     @property
     def customize_hex_from_id(self):
-        base_set = self.einvoice.seller_invoice_track_no.turnkey_web.epl_base_set
+        base_set = self.einvoice.seller_invoice_track_no.turnkey_service.epl_base_set
         if not base_set:
             base_set = self.base_set
         return customize_hex_from_integer(self.id, base=base_set)
@@ -1641,7 +1641,7 @@ class CancelEInvoice(models.Model):
         total_amount = amounts['TotalAmount']
         untax_amount = _untax_amount(tax_rate, total_amount)
         tax_amount = decimal.Decimal(total_amount) - untax_amount
-        if einvoice.seller_invoice_track_no.turnkey_web.in_production:
+        if einvoice.seller_invoice_track_no.turnkey_service.in_production:
             test_str = ''
         else:
             test_str = '測 試 '
@@ -2211,12 +2211,12 @@ class UploadBatch(models.Model):
             else:
                 kind = 'wp'
 
-            if kind in ["wp", "cp", "np"] and UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+            if kind in ["wp", "cp", "np"] and UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                                                          mig_type=mig_type,
                                                                          kind=kind,
                                                                          status="0",
                                                                          create_time__gte=start_time, create_time__lt=end_time).exists():
-                _ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                _ub = UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                                  mig_type=mig_type,
                                                  kind=kind,
                                                  status="0",
@@ -2225,13 +2225,13 @@ class UploadBatch(models.Model):
                 if _ub.batcheinvoice_set.count() < 1000:
                     ub = _ub
                 else:
-                    ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                    ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                      mig_type=mig_type,
                                      kind=kind,
                                      status='0')
                     ub.save()
             else:
-                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_web,
+                ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                  mig_type=mig_type,
                                  kind=kind,
                                  status='0')
@@ -2255,7 +2255,7 @@ class UploadBatch(models.Model):
             slug_prefix = '{}{}'.format(mig_type.no[2], content_object.einvoice.track_no)
             index = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
             slug = "{}{}".format(slug_prefix, index)
-            ub = UploadBatch(turnkey_service=content_object.einvoice.seller_invoice_track_no.turnkey_web,
+            ub = UploadBatch(turnkey_service=content_object.einvoice.seller_invoice_track_no.turnkey_service,
                              slug=slug,
                              mig_type=mig_type,
                              kind=kind,
@@ -2278,7 +2278,7 @@ class UploadBatch(models.Model):
                                                              type=content_object.type)
             slug = slug_prefix + "{:05d}".format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
 
-            ub = UploadBatch(turnkey_service=content_object.turnkey_web,
+            ub = UploadBatch(turnkey_service=content_object.turnkey_service,
                              slug=slug,
                              mig_type=mig_type,
                              kind=kind,
@@ -2626,13 +2626,13 @@ class SummaryReport(models.Model):
             ei_check_type = 'ei_audited'
         else:
             ei_check_type = 'ei_synced'
-        model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_web=turnkey_service, 
+        model_objects = [EInvoice.objects.filter(seller_invoice_track_no__turnkey_service=turnkey_service, 
                                                  create_time__gte=begin_time,
                                                  create_time__lt=end_time).order_by('id'),
-                         CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service,
+                         CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_service=turnkey_service,
                                                        create_time__gte=begin_time,
                                                        create_time__lt=end_time).order_by('id'),
-                         VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_web=turnkey_service,
+                         VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_service=turnkey_service,
                                                      create_time__gte=begin_time,
                                                      create_time__lt=end_time).order_by('id')]
         problems = {}

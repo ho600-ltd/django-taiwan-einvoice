@@ -318,8 +318,8 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail", lookup_field='pk')
     str_name = SerializerMethodField()
-    turnkey_web = TurnkeyServiceRelatedField(required=True, allow_null=False)
-    turnkey_web_dict = TurnkeyServiceSerializer(source='turnkey_web', read_only=True)
+    turnkey_service = TurnkeyServiceRelatedField(required=True, allow_null=False)
+    turnkey_service_dict = TurnkeyServiceSerializer(source='turnkey_service', read_only=True)
     type = ChoiceField(choices=SellerInvoiceTrackNo.type_choices)
     type__display = CharField(read_only=True)
     begin_no_str = CharField(read_only=True)
