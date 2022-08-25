@@ -74,6 +74,27 @@ class StaffProfileSerializer(ModelSerializer):
 
 
 
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        request = self.context.get('request', None)
+        if request and request.user:
+            turnkey_services = get_objects_for_user(request.user,
+                                                    ["taiwan_einvoice.view_turnkeyservice", ],
+                                                    any_perm=True)
+            groups = {}
+            count_within_groups = {}
+            for ts in turnkey_services:
+                group = res['groups'].get(ts.name, None)
+                count_within_group = res['groups'].get(ts.name, None)
+                if group:
+                    groups[ts.name] = group
+                if count_within_group:
+                    count_within_groups[ts.name] = count_within_group
+            res["groups"] = groups
+            res["count_within_groups"] = count_within_groups
+        return res
+
+
     def update(self, instance, validated_data):
         if self.context['request'].user == instance.user:
             raise PermissionDenied(detail=_("You can not edit yourself"))

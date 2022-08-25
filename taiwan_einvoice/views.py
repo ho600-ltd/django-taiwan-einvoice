@@ -1,7 +1,7 @@
 import json, datetime, logging, re
 from django.conf import settings
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.models import Permission, User, Group
 from django.contrib.contenttypes.models import ContentType
@@ -309,6 +309,22 @@ class TurnkeyServiceModelViewSet(ModelViewSet):
     http_method_names = ('post', 'get', 'patch')
 
 
+    def get_queryset(self):
+        request = self.request
+        queryset = super(TurnkeyServiceModelViewSet, self).get_queryset()
+        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+            return queryset.none()
+        elif request.user.is_superuser:
+            return queryset
+        else:
+            permissions = CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get(self.action, [])
+            turnkey_service_ids = get_objects_for_user(request.user,
+                                                       permissions,
+                                                       any_perm=True).values_list('id',
+                                                                                  flat=True)
+            return queryset.filter(id__in=turnkey_service_ids)
+
+
 
 class TurnkeyServiceGroupModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditTurnkeyServiceGroup), )
@@ -362,6 +378,9 @@ class TurnkeyServiceGroupModelViewSet(ModelViewSet):
                 g.name = group_name
                 g.save()
                 for k, v in data['permissions'].items():
+                    if "edit_te_turnkeyservicegroup" == k and not request.user.is_superuser:
+                        continue
+
                     try:
                         p = Permission.objects.get(content_type=ct, codename=k)
                     except Permission.DoesNotExist:
@@ -392,7 +411,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
         queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
@@ -600,7 +619,7 @@ class EInvoiceModelViewSet(ModelViewSet):
         queryset = super(EInvoiceModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -656,7 +675,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
         queryset = super(EInvoicePrintLogModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -680,7 +699,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         queryset = super(CancelEInvoiceModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -780,7 +799,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         queryset = super(VoidEInvoiceModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -943,7 +962,7 @@ class UploadBatchModelViewSet(ModelViewSet):
         queryset = super(UploadBatchModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -967,7 +986,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         queryset = super(BatchEInvoiceModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -1052,7 +1071,7 @@ class AuditLogModelViewSet(ModelViewSet):
         queryset = super(AuditLogModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -1076,7 +1095,7 @@ class SummaryReportModelViewSet(ModelViewSet):
         queryset = super(SummaryReportModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -1100,7 +1119,7 @@ class TEAlarmModelViewSet(ModelViewSet):
         queryset = super(TEAlarmModelViewSet, self).get_queryset()
         if not request.user.staffprofile or not request.user.staffprofile.is_active:
             return queryset.none()
-        if request.user.is_superuser:
+        elif request.user.is_superuser:
             return queryset
         else:
             programmer_permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])

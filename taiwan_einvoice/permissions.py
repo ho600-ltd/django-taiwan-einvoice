@@ -161,11 +161,14 @@ class CanOperateESCPOSWebOperator(BasePermission):
 
 
 class CanEditTurnkeyServiceGroup(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.edit_te_turnkeyservicegroup",
         ),
-        "PATCH": (
+        "retrieve": (
+            "taiwan_einvoice.edit_te_turnkeyservicegroup",
+        ),
+        "partial_update": (
             "taiwan_einvoice.edit_te_turnkeyservicegroup",
         ),
     }
@@ -175,10 +178,9 @@ class CanEditTurnkeyServiceGroup(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
-                res = request.user.has_perm(_p)
-                if res:
-                    break
+            permissions = self.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
         lg.debug("CanEditTurnkeyServiceGroup.has_permission with {}: {}".format(request.method, res))
         return res
         
@@ -187,9 +189,10 @@ class CanEditTurnkeyServiceGroup(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
-                res = request.user.has_perm(_p)
-                if res:
+            for p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
+                app, codename = p.split('.')
+                if codename in get_perms(request.user, obj):
+                    res = True
                     break
         lg.debug("CanEditTurnkeyServiceGroup.has_object_permission with {}: {}".format(request.method, res))
         return res
@@ -415,18 +418,23 @@ class CanViewLegalEntity(BasePermission):
 
 
 class CanViewTurnkeyService(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_turnkeyservice",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_turnkeyservice",
         ),
     }
+
+
 
 
     def has_permission(self, request, view):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            permissions = CanViewTurnkeyService.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
         lg.debug("CanViewTurnkeyService.has_permission with {}: {}".format(request.method, res))
@@ -437,7 +445,8 @@ class CanViewTurnkeyService(BasePermission):
         lg = logging.getLogger('info')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
-            for p in CanViewTurnkeyService.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            permissions = CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            for p in permissions:
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj):
                     res = True

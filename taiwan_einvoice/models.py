@@ -117,13 +117,13 @@ class StaffProfile(models.Model):
         ct_id = ContentType.objects.get_for_model(TurnkeyService).id
         groups = {}
         for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)).order_by('name'):
-            turnkeyservice_id = g.name.split(':')[1]
-            turnkeyservice = TurnkeyService.objects.get(id=turnkeyservice_id)
+            turnkey_service_id = g.name.split(':')[1]
+            turnkey_service = TurnkeyService.objects.get(id=turnkey_service_id)
             g.display_name = ''.join(g.name.split(':')[2:])
             is_member = self.user.groups.filter(id=g.id).exists()
-            groups.setdefault(turnkeyservice.name, []).append({"id": g.id,
-                                                           "display_name": g.display_name,
-                                                           "is_member": is_member})
+            groups.setdefault(turnkey_service.name, []).append({"id": g.id,
+                                                               "display_name": g.display_name,
+                                                               "is_member": is_member})
         return groups
     @property
     def count_within_groups(self):

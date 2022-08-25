@@ -143,7 +143,6 @@
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
                         </tr>
-                        {% if request.user.is_superuser %}
                         <tr>
                             <th>{% trans "Void E-Invoice" %}:
                                 <p class="help-block"></p>
@@ -160,7 +159,6 @@
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
                         </tr>
-                        {% endif %}
                         <tr>
                             <th>{% trans "Print Log" %}:
                                 <p class="help-block"></p>
@@ -265,6 +263,16 @@
                             </td>
                             <td>&nbsp;</td>
                             <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Group under Turnkey Service" %}:
+                                <p class="help-block">{% trans "Edit(R/C/U/D) the permissions of staff group" %}</p>
+                            </th>
+                            <td colspan="4">
+                                <input type="checkbox" class="form-control" id="input_edit_te_turnkeyservicegroup"
+                                    name="edit_te_turnkeyservicegroup" {% if not request.user.is_superuser %}disabled="disabled"{% endif %}>
+                            </td>
                             <td>&nbsp;</td>
                         </tr>
                     </tbody>

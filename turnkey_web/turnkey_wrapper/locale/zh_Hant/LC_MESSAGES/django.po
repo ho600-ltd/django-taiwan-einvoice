@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-03 21:03+0800\n"
+"POT-Creation-Date: 2022-08-25 11:52+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -356,8 +356,14 @@ msgstr "未"
 msgid "File path contains"
 msgstr "檔案路徑包含"
 
+msgid "Error Note"
+msgstr ""
+
 msgid "File path"
 msgstr "檔案路徑"
+
+msgid "None"
+msgstr ""
 
 #~ msgid "Result Date greater than"
 #~ msgstr "報表時間晚於"
