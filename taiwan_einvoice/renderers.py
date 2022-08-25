@@ -106,6 +106,16 @@ class StaffProfileHtmlRenderer(TEOriginHTMLRenderer):
     content_template = _get_template_name('staffprofile_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
+    def get_content(self, renderer, data, accepted_media_type, renderer_context):
+        if getattr(data.get('detail', ''), 'code', ''):
+            return data['detail']
+        request = renderer_context['request']
+        turnkey_services = get_objects_for_user(request.user, ["taiwan_einvoice.view_turnkeyservice",], any_perm=True)
+        t = get_template(self.content_template)
+        html = t.render({"data": data, "turnkey_service_names": [ts.name for ts in turnkey_services]}, request)
+        return html
+
+
 
 class LegalEntityHtmlRenderer(TEOriginHTMLRenderer):
     template = _get_template_name('legalentity_list', sub_dir='taiwan_einvoice', show_template_filename=True)
@@ -136,14 +146,21 @@ class TurnkeyServiceGroupHtmlRenderer(TEOriginHTMLRenderer):
         if getattr(data.get('detail', ''), 'code', ''):
             return data['detail']
         from taiwan_einvoice.models import TurnkeyService
+        from taiwan_einvoice.permissions import CanEditTurnkeyServiceGroup
         request = renderer_context['request']
         t = get_template(self.content_template)
         if data.get('id', None):
-            object = TurnkeyService.objects.get(id=data['id'])
+            permissions = CanEditTurnkeyServiceGroup.ACTION_PERMISSION_MAPPING.get("partial_update", [])
+            res = get_objects_for_user(request.user, permissions, any_perm=True).filter(id=data['id'])
+            if res:
+                object_can_edit_te_turnkeyservicegroup = res.get()
+            else:
+                object_can_edit_te_turnkeyservicegroup = None
         else:
-            object = None
-        html = t.render({"data": data, "object": object}, request)
+            object_can_edit_te_turnkeyservicegroup = None
+        html = t.render({"data": data, "object_can_edit_te_turnkeyservicegroup": object_can_edit_te_turnkeyservicegroup}, request)
         return html
+
 
 
 class SellerInvoiceTrackNoHtmlRenderer(TEOriginHTMLRenderer):

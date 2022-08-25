@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-22 18:10+0800\n"
+"POT-Creation-Date: 2022-08-25 16:18+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -610,6 +610,24 @@ msgstr "作廢時間晚於"
 msgid "Cancel time earlier than"
 msgstr "作廢時間早於"
 
+msgid "New E-Invoice Track No. contains"
+msgstr "另開發票字軌包含"
+
+msgctxt "taiwan_einvoice_canceleinvoice"
+msgid "Creator"
+msgstr "作廢者"
+
+msgid "Is Synced to EI?"
+msgstr "是否同步至EI?"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Not Yet"
+msgstr "未同步"
+
+msgctxt "taiwan_einvoice_ei_synced"
+msgid "Done"
+msgstr "已完成"
+
 msgid "Print Sales Return Receipt"
 msgstr "列印銷貨退回簽收單"
 
@@ -662,24 +680,6 @@ msgstr "重印"
 
 msgid "Print"
 msgstr "列印"
-
-msgid "New E-Invoice Track No. contains"
-msgstr "另開發票字軌包含"
-
-msgctxt "taiwan_einvoice_canceleinvoice"
-msgid "Creator"
-msgstr "作廢者"
-
-msgid "Is Synced to EI?"
-msgstr "是否同步至EI?"
-
-msgctxt "taiwan_einvoice_ei_synced"
-msgid "Not Yet"
-msgstr "未同步"
-
-msgctxt "taiwan_einvoice_ei_synced"
-msgid "Done"
-msgstr "已完成"
 
 msgid "Cancel E-Invoice"
 msgstr "作廢電子發票"
@@ -1247,6 +1247,9 @@ msgstr "新增並上傳"
 msgid "Create Staff"
 msgstr "新增工作人員"
 
+msgid "The actived user can entry the Taiwan E-Invoice Management Systemc(this system). Only super user can edit this field."
+msgstr "已啟用的工作人員才能進入「臺灣電子發票管理系統(本系統)」。只有超級管理員可以編輯此欄位。"
+
 msgid "Add to the Printer Admin Group"
 msgstr "加入發票機管理員群組"
 
@@ -1458,6 +1461,12 @@ msgstr "使用者警示"
 
 msgid "Alarm for programmer and general user"
 msgstr "開發者及使用者警示"
+
+msgid "Group under Turnkey Service"
+msgstr "屬於 Turnkey 服務的工作人員群組"
+
+msgid "Edit(R/C/U/D) the permissions of staff group"
+msgstr "編輯(瀏覽/新增/更新/刪除)工作人員群組的權限"
 
 msgid "Delete Staff Group"
 msgstr "刪除工作人員群組"

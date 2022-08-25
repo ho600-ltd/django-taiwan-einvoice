@@ -14,7 +14,7 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
         var csrfmiddlewaretoken = $('input[name=csrfmiddlewaretoken]:first').val();
         var form_data = '';
         form_data = new FormData();
-        form_data.append("turnkey_web", $('select[name=turnkey_web]', $modal).val());
+        form_data.append("turnkey_service", $('select[name=turnkey_service]', $modal).val());
         form_data.append("split_by_numbers", $('select[name=split_by_numbers]', $modal).val());
         var file = $('input[type=file]', $modal)[0].files[0];
         if (! file) {
@@ -61,8 +61,8 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
                         var field = $th.attr('field');
                         if ('no' == field) {
                             s += '<td>' + gettext('NEW Record') + '</td>';
-                        } else if ('turnkey_web' == field) {
-                            s += '<td>' + json[i]['turnkey_web_dict']['name'] + '</td>';
+                        } else if ('turnkey_service' == field) {
+                            s += '<td>' + json[i]['turnkey_service_dict']['name'] + '</td>';
                         } else if (json[i][field]) {
                             s += '<td>' + json[i][field] + '</td>';
                         } else {
@@ -116,7 +116,7 @@ function create_and_upload_blank_numbers(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var second_offset = taiwan_einvoice_site.get_second_offset_by_timezone_id_value(taiwan_einvoice_site);
-        var turnkey_web__seller__legal_entity__identifier = $('select[name=turnkey_web__seller__legal_entity__identifier]').val();
+        var turnkey_service__seller__legal_entity__identifier = $('select[name=turnkey_service__seller__legal_entity__identifier]').val();
         var date_in_year_month_range = $('input[name=date_in_year_month_range]').val();
         var date_in_year_month_range = taiwan_einvoice_site.convert_time_from_utc_str(date_in_year_month_range,
                                                                                       -1 * second_offset,
@@ -142,7 +142,7 @@ function create_and_upload_blank_numbers(taiwan_einvoice_site) {
         $.ajax({
             type: "POST",
             url: $first_tr.attr("resource_uri") + $btn.attr('action') + '/',
-            data: JSON.stringify({"turnkey_web__seller__legal_entity__identifier": turnkey_web__seller__legal_entity__identifier,
+            data: JSON.stringify({"turnkey_service__seller__legal_entity__identifier": turnkey_service__seller__legal_entity__identifier,
                    "date_in_year_month_range": date_in_year_month_range,
                    "seller_invoice_track_no_ids": ids.join(",")
                   }),

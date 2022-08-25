@@ -5,7 +5,7 @@
 <div class="total_count_row">
     {% blocktrans with groups_count=data.groups_count %}<span class="count">{{ groups_count }}</span> records{% endblocktrans %}
 
-    {% if perms.taiwan_einvoice.edit_te_turnkeyservicegroup %}
+    {% if object_can_edit_te_turnkeyservicegroup %}
         <button id="add_turnkeyservicegroup_button"
             class="btn btn-success add_turnkeyservicegroup_modal" data-toggle="modal">
             {% trans "Create Staff Group" %}
@@ -27,7 +27,7 @@
                 permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
                 <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
                 <td field="name">
-                    {% if perms.taiwan_einvoice.edit_te_turnkeyservicegroup %}
+                    {% if object_can_edit_te_turnkeyservicegroup %}
                         <button class="btn btn-primary update_turnkeyservicegroup_modal">{{ group.display_name }}</button>
                     {% else %}
                         {{ group.display_name }}

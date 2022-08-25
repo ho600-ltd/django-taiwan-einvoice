@@ -55,16 +55,18 @@
                 <td>
                     {% with turnkeyservice_length=staffprofile.groups|length %}
                         {% for turnkeyservice_name, groups in staffprofile.groups.items %}
-                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyservice_name %}
-                                {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
-                                {% for group in groups %}
-                                    {% if group.is_member %}
-                                        <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
-                                            {{ group.display_name }}
-                                        </span></h5>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endwith %}
+                            {% if turnkeyservice_name in turnkey_service_names %}
+                                {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyservice_name %}
+                                    {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
+                                    {% for group in groups %}
+                                        {% if group.is_member %}
+                                            <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                                {{ group.display_name }}
+                                            </span></h5>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            {% endif %}
                         {% endfor %}
                     {% endwith %}
                 </td>
@@ -89,16 +91,18 @@
                 <td field="groups">
                     {% with turnkeyservice_length=staffprofile.groups|length %}
                         {% for turnkeyservice_name, groups in staffprofile.groups.items %}
-                            {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyservice_name %}
-                                {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
-                                {% for group in groups %}
-                                    {% if group.is_member %}
-                                        <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
-                                            {{ group.display_name }}
-                                        </span></h5>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endwith %}
+                            {% if turnkeyservice_name in turnkey_service_names %}
+                                {% with within_group_length=staffprofile.count_within_groups|hash:turnkeyservice_name %}
+                                    {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
+                                    {% for group in groups %}
+                                        {% if group.is_member %}
+                                            <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                                {{ group.display_name }}
+                                            </span></h5>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            {% endif %}
                         {% endfor %}
                     {% endwith %}
                 </td>

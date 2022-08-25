@@ -13,7 +13,7 @@
             {% trans "Create Seller Invoice Track No" %}
         </button>
         {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
-            {% if request.GET.turnkey_web__seller__legal_entity__identifier and request.GET.date_in_year_month_range %}
+            {% if request.GET.turnkey_service__seller__legal_entity__identifier and request.GET.date_in_year_month_range %}
                 {% if 0 < data.count %}
                     <button id="create_and_upload_blank_numbers_button_0" 
                         class="btn btn-warning create_and_upload_blank_numbers_modal">
@@ -37,7 +37,7 @@
     <thead>
         <tr>
             <th field="no" width="5%">{% trans "No." %}</th>
-            <th field="turnkey_web" width="10%">{% trans "Turnkey Service" %}</th>
+            <th field="turnkey_service" width="10%">{% trans "Turnkey Service" %}</th>
             <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
             <th field="year_month_range" width="10%">{% trans "Year Month Range" %}</th>
             <th field="track" width="10%">{% trans "Track" %}</th>
@@ -54,9 +54,9 @@
         {% for sellerinvoicetrackno in data.results %}
             <tr sellerinvoicetrackno_id="{{ sellerinvoicetrackno.id }}" resource_uri='{% url "taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail" pk=sellerinvoicetrackno.id %}'>
                 <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ sellerinvoicetrackno.id }}">{{ forloop.counter }}.</td>
-                <td field="turnkey_web">
-                    <div field="turnkey_web__name">{{ sellerinvoicetrackno.turnkey_web_dict.name }}</div>
-                    <div field="turnkey_web__party_id">{{ sellerinvoicetrackno.turnkey_web_dict.party_id }}</div>
+                <td field="turnkey_service">
+                    <div field="turnkey_service__name">{{ sellerinvoicetrackno.turnkey_service_dict.name }}</div>
+                    <div field="turnkey_service__party_id">{{ sellerinvoicetrackno.turnkey_service_dict.party_id }}</div>
                 </td>
                 <td field="type__display">{{ sellerinvoicetrackno.type__display }}</td>
                 <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
@@ -103,8 +103,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="turnkey_web" class="form-label">{% trans "Turnkey Service" %}</label>
-                        <select name="turnkey_web" class="form-control">
+                        <label for="turnkey_service" class="form-label">{% trans "Turnkey Service" %}</label>
+                        <select name="turnkey_service" class="form-control">
                             {% for two in can_add_sellerinvoicetrackno_under_turnkeyservices %}
                                 <option value="{{ two.id }}">{{ two.name }}</option>
                             {% endfor %}

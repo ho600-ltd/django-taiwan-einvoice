@@ -56,10 +56,10 @@
             <div class="row">
                 <div class="col-sm-12 col-md-2">
                     <div class="form-group">
-                        <label for="seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
-                        <div class="input-group" id="seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier" data-target-input="nearest">
-                            <select class="form-control" data-target="#seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier"
-                                name="seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier" id="id_seller_invoice_track_no__turnkey_web__seller__legal_entity__identifier">
+                        <label for="seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
+                        <div class="input-group" id="seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier" data-target-input="nearest">
+                            <select class="form-control" data-target="#seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier"
+                                name="seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier" id="id_seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier">
                                 <option value=""></option>
                                 {% for slei in seller__legal_entity__identifiers %}
                                     <option value="{{ slei }}">{{ slei }}</option>
@@ -70,10 +70,10 @@
                 </div>
                 <div class="col-sm-12 col-md-2">
                     <div class="form-group">
-                        <label for="seller_invoice_track_no__turnkey_web">{% trans "Turnkey Service" %}</label>
-                        <div class="input-group" id="seller_invoice_track_no__turnkey_web" data-target-input="nearest">
-                            <select class="form-control" data-target="#seller_invoice_track_no__turnkey_web"
-                                name="seller_invoice_track_no__turnkey_web" id="id_seller_invoice_track_no__turnkey_web">
+                        <label for="seller_invoice_track_no__turnkey_service">{% trans "Turnkey Service" %}</label>
+                        <div class="input-group" id="seller_invoice_track_no__turnkey_service" data-target-input="nearest">
+                            <select class="form-control" data-target="#seller_invoice_track_no__turnkey_service"
+                                name="seller_invoice_track_no__turnkey_service" id="id_seller_invoice_track_no__turnkey_service">
                                 <option value=""></option>
                                 {% for ts in turnkey_services %}
                                     <option value="{{ ts.id }}">{{ ts.name }}</option>

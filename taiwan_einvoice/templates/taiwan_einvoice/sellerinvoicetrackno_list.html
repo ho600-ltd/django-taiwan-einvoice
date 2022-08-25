@@ -20,10 +20,10 @@
         <div class="row">
             <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="turnkey_web__seller__legal_entity__identifier">{% trans "Party ID" context "sellerinvoicetrackno" %}</label>
-                    <div class="input-group date" id="turnkey_web__seller__legal_entity__identifier" data-target-input="nearest">
-                        <select class="form-control" data-target="#turnkey_web__seller__legal_entity__identifier"
-                            name="turnkey_web__seller__legal_entity__identifier" id="id_turnkey_web__seller__legal_entity__identifier">
+                    <label for="turnkey_service__seller__legal_entity__identifier">{% trans "Party ID" context "sellerinvoicetrackno" %}</label>
+                    <div class="input-group date" id="turnkey_service__seller__legal_entity__identifier" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_service__seller__legal_entity__identifier"
+                            name="turnkey_service__seller__legal_entity__identifier" id="id_turnkey_service__seller__legal_entity__identifier">
                             <option value=""></option>
                             {% for slei in seller__legal_entity__identifiers %}
                                 <option value="{{ slei }}">{{ slei }}</option>
@@ -34,10 +34,10 @@
             </div>
             <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="turnkey_web">{% trans "Turnkey Service" %}</label>
-                    <div class="input-group date" id="turnkey_web" data-target-input="nearest">
-                        <select class="form-control" data-target="#turnkey_web"
-                            name="turnkey_web" id="id_turnkey_web">
+                    <label for="turnkey_service">{% trans "Turnkey Service" %}</label>
+                    <div class="input-group date" id="turnkey_service" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_service"
+                            name="turnkey_service" id="id_turnkey_service">
                             <option value=""></option>
                             {% for ts in turnkey_services %}
                                 <option value="{{ ts.id }}">{{ ts.name }}</option>
