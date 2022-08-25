@@ -32,7 +32,7 @@ class CanEditStaffProfile(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -44,7 +44,7 @@ class CanEditStaffProfile(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -65,7 +65,7 @@ class CanViewSelfStaffProfile(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -78,7 +78,7 @@ class CanViewSelfStaffProfile(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -103,7 +103,7 @@ class CanEditESCPOSWebOperator(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -115,7 +115,7 @@ class CanEditESCPOSWebOperator(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -136,7 +136,7 @@ class CanOperateESCPOSWebOperator(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -147,7 +147,7 @@ class CanOperateESCPOSWebOperator(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -175,7 +175,7 @@ class CanEditTurnkeyServiceGroup(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = self.ACTION_PERMISSION_MAPPING.get(view.action, [])
@@ -186,7 +186,7 @@ class CanEditTurnkeyServiceGroup(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
@@ -222,7 +222,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
@@ -233,7 +233,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, []):
@@ -255,7 +255,7 @@ class CanEntryEInvoice(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -266,7 +266,7 @@ class CanEntryEInvoice(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -288,7 +288,7 @@ class CanEntryEInvoicePrintLog(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -299,7 +299,7 @@ class CanEntryEInvoicePrintLog(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -324,7 +324,7 @@ class CanEntryCancelEInvoice(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -335,7 +335,7 @@ class CanEntryCancelEInvoice(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -360,7 +360,7 @@ class CanEntryVoidEInvoice(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -371,7 +371,7 @@ class CanEntryVoidEInvoice(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -393,7 +393,7 @@ class CanViewLegalEntity(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -405,7 +405,7 @@ class CanViewLegalEntity(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -431,7 +431,7 @@ class CanViewTurnkeyService(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get(view.action, [])
@@ -442,7 +442,7 @@ class CanViewTurnkeyService(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get(view.action, [])
@@ -464,7 +464,7 @@ class CanViewBatchEInvoice(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -475,7 +475,7 @@ class CanViewBatchEInvoice(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -496,19 +496,19 @@ class CanViewTEAlarmForProgrammer(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
             if permissions:
                 turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
-                return TEAlarm.objects.filter(turnkey_service__in=turnkey_services, target_audience_type="p").exists()
+                return turnkey_services.exists()
         lg.debug("CanViewTEAlarmForProgrammer.has_permission with {}: {}".format(request.method, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -530,7 +530,7 @@ class CanViewTEAlarmForGeneralUser(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -542,7 +542,7 @@ class CanViewTEAlarmForGeneralUser(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -566,7 +566,7 @@ class CanViewSummaryReport(BasePermission):
 
 
     def has_permission(self, request, view):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
@@ -577,7 +577,7 @@ class CanViewSummaryReport(BasePermission):
         
 
     def has_object_permission(self, request, view, obj):
-        lg = logging.getLogger('info')
+        lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and request.user.staffprofile and request.user.staffprofile.is_active:
             for p in CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, []):
