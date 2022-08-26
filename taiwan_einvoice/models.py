@@ -82,6 +82,11 @@ class SellerInvoiceTrackNoDisableError(Exception):
 
 
 
+class NotCurrentSellerInvoiceTrackNoError(Exception):
+    pass
+
+
+
 class CancelEInvoiceMIGError(Exception):
     pass
 
@@ -903,6 +908,10 @@ class SellerInvoiceTrackNo(models.Model):
     def create_einvoice(self, data):
         if self.is_disabled:
             raise SellerInvoiceTrackNoDisableError()
+
+        _now = now()
+        if _now < self.begin_time or _now > self.end_time:
+            raise NotCurrentSellerInvoiceTrackNoError(_("{now} does not between {begin_time} and {end_time}").format(now=_now, begin_time=self.begin_time, end_time=self.end_time))
 
         data['seller_invoice_track_no'] = self
         data['type'] = self.type
