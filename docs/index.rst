@@ -60,18 +60,19 @@
     所謂 B2B 、 B2C ，並不完全套用以字面上的 Business 及 Customer 。\
     因為 B2B 發票可以開給機關、組織，而 B2C 發票也可以開給一般營利公司。
 
-    我這邊提供比較適當的解釋， B 是法人、準法人(商業行號)， C 則是除自然人外，也包含法人、準法人。
+    我這邊提供比較適當的解釋， B 是法人、準法人(商業行號)， C 則是除自然人外，也包含法人、準法人。\
+    所以 B2B 一定是買賣雙方都有統編方可使用的服務，而 B2C 則是買方可以是自然人(無統編)也可以是法人、準法人。
 
 名詞定義
 -------------------------------------------------------------------------------
 
-* EI: 財政部電子發票整合服務平台
+* EI: 財政部電子發票整合服務平台，也稱「大平台」
 * EPW: 使用 Django-based escpos_web App 建構的發票列印管理系統
 * TKW: 使用 Django-based turnkey_web 程式來擴充 Turnkey 系統，使其提供 Web Api 功能的電子發票管理系統
 * CEC: 叫用 EPW 及 TKW 系統的自架電子商務銷售系統(Customize E-Commercial system)
 * TEA: 提供 CEC 系統叫用的 Django-based taiwan_einvoice App 。
   如果說 CEC 是 CPython 撰寫的，那 CEC 就直接利用 TEA 函式庫去跟 EPW/TKW 互動，若 CEC 是 PHP/.Net/Java/... 撰寫的，
-  那就先叫用整合 TEA 的 Web Api Service (TEAWEB 或 taiwan_einvoice_web)，間接與 EPW/TKW 互動
+  那就先叫用導入(import) TEA 的 Web Api Service (TEAWEB 或 taiwan_einvoice_web)，間接與 EPW/TKW 互動
 
 事前準備說明
 -------------------------------------------------------------------------------
@@ -110,10 +111,16 @@
         * 文件下載
             * 營業人常用文件
                 * 電子發票整合服務平台營業人導入與操作說明
+                * 電子發票整合服務平台服務申請表
+                * 電子發票營業人應用API(V1.7)
+                * 軟體憑證製作手冊
+                * 電子發票資料交換標準文件與範例(V3.2.1)
+                * 電子發票Turnkey上線前自行檢測作業(V4.6)
+                * 營業人比對上傳發票結果流程說明
                 * 電子發票證明聯一維及二維條碼規格說明(V1.8)
                 * 加解密API使用說明書(V1.12)
                 * 電子發票QRCode加解密工具/營業人啟用第2層資訊防偽機制流程說明文件v20160817
-                * 軟體憑證製作手冊
+                * 電子發票字軌號碼申請書(含電子發票開立系統自行檢測表)
 * `財政部北區國稅局>主題專區>稅務專區>營業稅>電子發票專區 <https://www.ntbna.gov.tw/multiplehtml/724e140e325f497d82ba12d7509ec6ec>`_
     * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-初級: `初級簡報 <https://www.ntbna.gov.tw/download/16a9f7f7937000009138a0f265d996cb>`_、`初級影片 <https://youtu.be/XuMKrTba-KI>`_
     * 財政部財政資訊中心電子發票服務躍升計畫教育訓練-中級: `中級簡報 <https://www.ntbna.gov.tw/download/16a9f7fca430000051f5a5d72c858058>`_、`中級影片 <https://youtu.be/SGrMUKy_LeM>`_
@@ -132,6 +139,8 @@
     install_epw_in_pi
     install_tkw_in_linux
     merchant_create_b2c_invoice
+    self_checklist_before_turnkey_online
+    self_checklist_before_applying_track_no
     import_django_taiwan_einvoice
     agent
     inquire_api
