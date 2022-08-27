@@ -910,7 +910,7 @@ class SellerInvoiceTrackNo(models.Model):
             raise SellerInvoiceTrackNoDisableError()
 
         _now = now()
-        if _now < self.begin_time or _now > self.end_time:
+        if _now < self.begin_time or _now > (self.end_time - datetime.timedelta(minutes=3)):
             raise NotCurrentSellerInvoiceTrackNoError(_("{now} does not between {begin_time} and {end_time}").format(now=_now, begin_time=self.begin_time, end_time=self.end_time))
 
         data['seller_invoice_track_no'] = self
