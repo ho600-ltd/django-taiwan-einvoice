@@ -956,7 +956,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             _d["buyer_role_remark"] = buyer_legal_entity.role_remark if buyer_legal_entity else ''
 
         new_einvoice = EInvoice(**_d)
-        new_einvoice.save()
+        new_einvoice.save(upload_batch_kind='57')
         new_einvoice.set_generate_time(einvoice.generate_time)
         serializer.instance.set_new_einvoice(new_einvoice)
         serializer.instance.save()

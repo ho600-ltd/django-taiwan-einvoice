@@ -1522,6 +1522,11 @@ class EInvoice(models.Model):
 
 
     def save(self, *args, **kwargs):
+        if 'upload_batch_kind' in kwargs:
+            upload_batch_kind = kwargs.get('upload_batch_kind', '')
+            del kwargs['upload_batch_kind']
+        else:
+            upload_batch_kind = ''
         if not self.content_object:
             raise ContentObjectError(_("Content object is not existed"))
         elif not hasattr(self.content_object, 'check_before_cancel_einvoice'):
@@ -1545,7 +1550,7 @@ class EInvoice(models.Model):
             self.random_number = self.get_or_generate_random_number()
             self.generate_no_sha1 = sha1(self.generate_no.encode('utf-8')).hexdigest()[:10]
             super().save(*args, **kwargs)
-        UploadBatch.append_to_the_upload_batch(self)
+        UploadBatch.append_to_the_upload_batch(self, upload_batch_kind=upload_batch_kind)
         
 
 
@@ -2201,7 +2206,7 @@ class UploadBatch(models.Model):
 
 
     @classmethod
-    def append_to_the_upload_batch(cls, content_object, executor=None):
+    def append_to_the_upload_batch(cls, content_object, upload_batch_kind='', executor=None):
         ct = ContentType.objects.get_for_model(content_object)
         if hasattr(content_object, "ei_synced") and content_object.ei_synced:
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, status='c').batch
@@ -2214,7 +2219,7 @@ class UploadBatch(models.Model):
             _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
             start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
             end_time = start_time + datetime.timedelta(days=1)
-            if content_object.new_einvoice_on_cancel_einvoice_set.exists() or content_object.new_einvoice_on_void_einvoice_set.exists():
+            if '57' == upload_batch_kind or content_object.new_einvoice_on_cancel_einvoice_set.exists() or content_object.new_einvoice_on_void_einvoice_set.exists():
                 kind = '57'
             elif '3J0002' == content_object.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != content_object.buyer_identifier:
                 kind = 'cp'
