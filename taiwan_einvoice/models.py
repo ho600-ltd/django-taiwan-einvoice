@@ -1956,7 +1956,7 @@ class UploadBatch(models.Model):
         payload = {"format": "json"}
         try:
             response = requests.get(url,
-                                    verify=self.verify_tkw_ssl,
+                                    verify=self.turnkey_service.verify_tkw_ssl,
                                     params=payload,
                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
         except Exception as e:
@@ -2016,7 +2016,7 @@ class UploadBatch(models.Model):
         files = {"gz_bodys": gz_bodys}
         try:
             response = requests.post(url,
-                                     verify=self.verify_tkw_ssl,
+                                     verify=self.turnkey_service.verify_tkw_ssl,
                                      params=payload,
                                      data=data,
                                      files=files,
@@ -2104,7 +2104,7 @@ class UploadBatch(models.Model):
         }
         try:
             response = requests.post(url,
-                                     verify=self.verify_tkw_ssl,
+                                     verify=self.turnkey_service.verify_tkw_ssl,
                                      params=payload,
                                      data=data,
                                      headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
