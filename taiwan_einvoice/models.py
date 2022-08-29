@@ -610,6 +610,7 @@ class TurnkeyService(models.Model):
     def upload_cronjob_format__display(self):
         return self.get_upload_cronjob_format_display()
     tkw_endpoint = models.TextField()
+    verify_tkw_ssl = models.BooleanField(default=True)
     history = HistoricalRecords()
     @property
     def groups(self):
@@ -691,6 +692,7 @@ class TurnkeyService(models.Model):
             payload["result_date__gte"] = last_summary_report.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d")
         try:
             response = requests.get(url,
+                                    verify=self.verify_tkw_ssl,
                                     params=payload,
                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
         except Exception as e:
@@ -1954,6 +1956,7 @@ class UploadBatch(models.Model):
         payload = {"format": "json"}
         try:
             response = requests.get(url,
+                                    verify=self.verify_tkw_ssl,
                                     params=payload,
                                     headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
         except Exception as e:
@@ -2013,6 +2016,7 @@ class UploadBatch(models.Model):
         files = {"gz_bodys": gz_bodys}
         try:
             response = requests.post(url,
+                                     verify=self.verify_tkw_ssl,
                                      params=payload,
                                      data=data,
                                      files=files,
@@ -2100,6 +2104,7 @@ class UploadBatch(models.Model):
         }
         try:
             response = requests.post(url,
+                                     verify=self.verify_tkw_ssl,
                                      params=payload,
                                      data=data,
                                      headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
