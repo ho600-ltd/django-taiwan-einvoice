@@ -30,12 +30,12 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 .. code-block:: sql 
 
     # create database tkw Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
-    # create  user tkw with password 'tkw';
+    # create user tkw with password 'tkw';
     # alter database tkw owner to tkw;
 
 .. code-block:: sh 
 
-    $ psql -h dtei-db.ho600.com -U dtei -W dtei < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
+    $ psql -h dtei-db.ho600.com -U tkw -W tkw < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
 
 創建 MariaDB 資料庫:
 
@@ -49,7 +49,7 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
 .. code-block:: sh 
 
-    $ psql -h dtei-db.ho600.com -U dtei -W dtei < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
+    $ mysql -h dtei-db.ho600.com -u tkw -p tkw < EINVTurnkey2.0.2-linux/DBSchema/MySQL/MySQL.sql
 
 設定 Turnkey 所需基本參數:
 
@@ -104,10 +104,10 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
 .. code-block:: sh
 
-    $ sudo yum install python3-dev python-virtualenv git zsh util-linux-user jq mariadb-devel
+    $ sudo yum install python3-devel python-virtualenv git zsh util-linux-user jq mariadb-devel
         * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
-    $ sudo yum install make glibc-devel gcc patch python3-devel
+    $ sudo yum install make glibc-devel gcc patch
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
     $ pip install --upgrade pip
@@ -122,7 +122,9 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
     Password (again): 
     Superuser created successfully.
     $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TEA service
-    $ cp -rf Django-taiwan-einvoice/turnkey_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ cp -rf Django-taiwan-einvoice/turnkey_web/*.int /etc/supervisor/conf.d/ # then update the wss url
     $ sudo apt install supervisor
+    $ sudo systemctl enable supervisord.service
+    $ sudo systemctl start supervisord.service
     $ sudo supervisorctl reread
     $ sudo supervisorctl start all
