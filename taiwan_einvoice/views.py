@@ -909,6 +909,23 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         _d['creator'] = request.user
         _d['ei_synced'] = False
         _d['print_mark'] = False
+        _d['buyer'] = LegalEntity.objects.get(identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER)
+        _d['buyer_identifier'] = LegalEntity.GENERAL_CONSUMER_IDENTIFIER
+        for clear_value in [
+            'carrier_type',
+            'carrier_id1',
+            'carrier_id2',
+            'npoban',
+            "buyer_name",
+            "buyer_address",
+            "buyer_person_in_charge",
+            "buyer_telephone_number",
+            "buyer_facsimile_number",
+            "buyer_email_address",
+            "buyer_customer_number",
+            "buyer_role_remark",
+        ]:
+            _d[clear_value] = ''
         data['buyer_identifier'] = _post_buyer_identifier
 
         if data['mobile_barcode']:
