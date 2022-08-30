@@ -263,15 +263,27 @@ class Printer(models.Model):
 
 
 class TEAWeb(models.Model):
+    name = models.CharField(max_length=8)
     url = models.CharField(max_length=755)
     slug = models.CharField(max_length=4)
     hash_key = models.CharField(max_length=40)
+    now_use = models.BooleanField(default=False)
 
 
     def generate_token_auth(self):
         seed = sha1(str(random()).encode('utf-8')).hexdigest()[:15]
         verify_value = sha1("{}-{}".format(self.slug, seed).encode('utf-8')).hexdigest()
         return "{}-{}-{}".format(self.slug, seed, verify_value)
+    
+
+    def save(self, *args, **kwargs):
+        if True == self.now_use:
+            if self.id:
+                TEAWeb.objects.exclude(id=self.id).update(now_use=False)
+            else:
+                TEAWeb.objects.all().update(now_use=False)
+        return super().save(*args, **kwargs)
+
 
 
 
