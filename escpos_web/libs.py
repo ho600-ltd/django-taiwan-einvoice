@@ -3,6 +3,11 @@
 import time, netifaces, urllib.request, datetime
 
 
+def get_tea_web_name():
+    count = int(datetime.datetime.now().strftime('%H')) % 8 + 1
+    return '○' * 8
+
+
 def get_public_ip():
     no_ip = '?.?.?.?'
     i = 0
