@@ -1048,6 +1048,15 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
 
         if '' == kind:
             new_ub = False
+            batch_einvoice.batch.status = '4'
+            batch_einvoice.batch.save()
+            batch_einvoice.batch.check_in_4_status_then_update_to_the_next()
+            if 'f' != batch_einvoice.batch.status:
+                er = {
+                    "error_title": _("UploadBatch Status Error"),
+                    "error_message": _('Upload Batch Status != "f"'),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
             i = 0 
             while i < 10000:

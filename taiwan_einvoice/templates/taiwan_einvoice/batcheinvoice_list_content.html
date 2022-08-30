@@ -42,19 +42,19 @@
                     <div field="result_message">{{ obj.result_message }}</div>
                 </td>
                 <td field="pass_if_error">
-                    {% if "" == obj.status or "p" == obj.status or "g" == obj.status or "c" == obj.status %}
+                    {% if "" == obj.status or "p" == obj.status or "g" == obj.status %}
                         {% comment %}pass{% endcomment %}
                     {% else %}
-                        {% if obj.pass_if_error %}
+                        {% if obj.handling_note %}
                             {% trans "Handled" %}
                             <div>{{ obj.handling_note }}</div>
-                        {% else %}
+                        {% else %}{% if not obj.pass_if_error and "c" != obj.status %}
                             {% for ts in can_handle_batcheinvoice_under_turnkeyservices %}
                                 {% if ts.id == obj.batch_dict.turnkey_service_dict.id %}
                                     <button class="btn btn-warning re_create_another_upload_batch_modal">{% trans "Handle" %}</button>
                                 {% endif %}
                             {% endfor %}
-                        {% endif %}
+                        {% endif %}{% endif %}
                     {% endif %}
                 </td>
             </tr>
