@@ -26,7 +26,7 @@
             <tr obj_id="{{ obj.id }}">
                 <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
                 <td field="batch">{{ obj.batch_dict.slug }}</td>
-                <td field="content_object_dict">{{ obj.content_object_dict.str_name }}@{{ obj.batch_dict.mig_type_dict.no }}</td>
+                <td field="content_object_dict">{{ obj.content_object_dict.id }}.{{ obj.content_object_dict.str_name }}@{{ obj.batch_dict.mig_type_dict.no }}</td>
                 <td field="year_month_range">{{ obj.year_month_range }}</td>
                 <td field="track_no">{{ obj.track_no }}</td>
                 <td field="body"><pre style="max-width: 300px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
@@ -42,19 +42,19 @@
                     <div field="result_message">{{ obj.result_message }}</div>
                 </td>
                 <td field="pass_if_error">
-                    {% if "" == obj.status or "p" == obj.status or "g" == obj.status or "c" == obj.status %}
+                    {% if "" == obj.status or "p" == obj.status or "g" == obj.status %}
                         {% comment %}pass{% endcomment %}
                     {% else %}
-                        {% if obj.pass_if_error %}
+                        {% if obj.handling_note %}
                             {% trans "Handled" %}
                             <div>{{ obj.handling_note }}</div>
-                        {% else %}
+                        {% else %}{% if not obj.pass_if_error and "c" != obj.status %}
                             {% for ts in can_handle_batcheinvoice_under_turnkeyservices %}
                                 {% if ts.id == obj.batch_dict.turnkey_service_dict.id %}
                                     <button class="btn btn-warning re_create_another_upload_batch_modal">{% trans "Handle" %}</button>
                                 {% endif %}
                             {% endfor %}
-                        {% endif %}
+                        {% endif %}{% endif %}
                     {% endif %}
                 </td>
             </tr>

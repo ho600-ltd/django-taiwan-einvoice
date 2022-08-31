@@ -42,7 +42,7 @@
                 <td field="ei_turnkey_batch_id">{{ obj.ei_turnkey_batch_id }}</td>
                 <td field="status" title="{{ obj.status }}">{{ obj.get_status_display }}</td>
                 <td field="batch_einvoice_count">
-                    <a href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html&batch={{ obj.id }}">{{ obj.batch_einvoice_count }}</a>
+                    <a href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html&batch__slug__icontains={{ obj.slug }}">{{ obj.batch_einvoice_count }}</a>
                 </td>
             </tr>
         {% endfor %}

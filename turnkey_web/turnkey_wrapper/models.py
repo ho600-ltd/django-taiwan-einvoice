@@ -287,11 +287,11 @@ class TURNKEY_MESSAGE_LOG(models.Model):
                                                          ).order_by('EVENTDTS').first()
         if tsl:
             code = tsl.MESSAGE6.split(' ;')[0]
-            message1 = tsl.MESSAGE1
+            message = tsl.MESSAGE1 + tsl.MESSAGE2 + tsl.MESSAGE3 + tsl.MESSAGE4 + tsl.MESSAGE5 + tsl.MESSAGE6 
         else:
             code = ''
-            message1 = ''
-        return code, message1
+            message = ''
+        return code, message
 
 
 

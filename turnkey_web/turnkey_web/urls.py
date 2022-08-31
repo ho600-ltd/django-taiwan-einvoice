@@ -3,22 +3,26 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.i18n import JavaScriptCatalog
+from django.views.static import serve
+from django.conf import settings
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import JSONRenderer
 from rest_framework.schemas import get_schema_view
 from turnkey_wrapper import permissions
 from turnkey_wrapper.renderers import TKWBrowsableAPIRenderer
-from turnkey_wrapper.permissions import IsSuperUserInLocalhost
+from turnkey_wrapper.permissions import IsSuperUserInLocalhost, IsSuperUserInIntranet
 
 from turnkey_wrapper import views
+
+from ho600_lib.permissions import Or
 
 class TurnkeyWrapperAPIRootView(routers.APIRootView):
     """ Endpoints of Turnkey Wrapper Api
     """
     version = 'v1'
     renderer_classes = (JSONRenderer, )
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
 
 
     def initial(self, request, *args, **kwargs):
@@ -66,4 +70,6 @@ urlpatterns = [
     path('crontab_monitor/', include('crontab_monitor.urls'), name='crontab_monitor'),
     path('i18n/', include('django.conf.urls.i18n'), name='i18n'),
     path('jsi18n.js', JavaScriptCatalog.as_view(), name='javascript-catalog'),
+    re_path(r'^statics/(.*)', serve,
+        {'document_root': settings.STATIC_ROOT}, name='statics'),
 ]
