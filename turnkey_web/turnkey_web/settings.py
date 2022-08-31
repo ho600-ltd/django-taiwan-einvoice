@@ -30,7 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'tkw',
     'ttkw',
-]
+] + os.environ.get("ALLOWED_HOSTS", [])
 
 
 # Application definition
@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'turnkey_web.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dev_tkw',
-        'USER': 'dev_tkw',
-        'PASSWORD': 'dev_tkw',
-        'HOST': 'dtei-db.ho600.com',
+        'ENGINE': os.environ.get("DEFAULT_DB_ENGINE", 'django.db.backends.mysql'),
+        'NAME': os.environ.get("DEFAULT_DB_NAME", 'dev_tkw'),
+        'USER': os.environ.get("DEFAULT_DB_USER", 'dev_tkw'),
+        'PASSWORD': os.environ.get("DEFAULT_DB_PASSWORD", 'dev_tkw'),
+        'HOST': os.environ.get("DEFAULT_DB_HOST", "dtei-db.ho600.com"),
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8',
