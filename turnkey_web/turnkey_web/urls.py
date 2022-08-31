@@ -3,6 +3,8 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.i18n import JavaScriptCatalog
+from django.views.static import serve
+from django.conf import settings
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import JSONRenderer
@@ -66,4 +68,6 @@ urlpatterns = [
     path('crontab_monitor/', include('crontab_monitor.urls'), name='crontab_monitor'),
     path('i18n/', include('django.conf.urls.i18n'), name='i18n'),
     path('jsi18n.js', JavaScriptCatalog.as_view(), name='javascript-catalog'),
+    re_path(r'^statics/(.*)', serve,
+        {'document_root': settings.STATIC_ROOT}, name='statics'),
 ]
