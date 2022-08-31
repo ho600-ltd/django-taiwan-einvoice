@@ -11,16 +11,18 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.schemas import get_schema_view
 from turnkey_wrapper import permissions
 from turnkey_wrapper.renderers import TKWBrowsableAPIRenderer
-from turnkey_wrapper.permissions import IsSuperUserInLocalhost
+from turnkey_wrapper.permissions import IsSuperUserInLocalhost, IsSuperUserInIntranet
 
 from turnkey_wrapper import views
+
+from ho600_lib.permissions import Or
 
 class TurnkeyWrapperAPIRootView(routers.APIRootView):
     """ Endpoints of Turnkey Wrapper Api
     """
     version = 'v1'
     renderer_classes = (JSONRenderer, )
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
 
 
     def initial(self, request, *args, **kwargs):
