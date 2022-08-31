@@ -27,7 +27,9 @@ class IsSuperUserInIntranet(IsAdminUser):
 
 
     def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger("turnkey_web")
         remote_addr = request.META['REMOTE_ADDR']
+        lg.debug("IsSuperUserInIntranet.has_object_permission remote_addr: {}".format(remote_addr))
         if bool(request.user and request.user.is_superuser):
             if remote_addr.startswith("10.") or remote_addr.startswith("192.168."):
                 pass
@@ -46,6 +48,7 @@ class IsSuperUserInIntranet(IsAdminUser):
                 allow_ips = []
                 for eit in EITurnkey.objects.filter(can_sync_to_ei=True):
                     allow_ips.extend(eit.allow_ips)
+            lg.debug("IsSuperUserInIntranet.has_object_permission allow_ips: {}".format(allow_ips))
             if [] == allow_ips or remote_addr in allow_ips:
                 return True
         return False
