@@ -533,9 +533,9 @@ class LegalEntity(models.Model, IdentifierRule):
     @property
     def customer_number(self):
         if not self.customer_number_char:
-            return str(self.pk)
+            return ("$:{}".format(self.pk))[:20]
         else:
-            return self.customer_number_char
+            return self.customer_number_char[:20]
     @customer_number.setter
     def customer_number(self, char):
         self.customer_number_char = char

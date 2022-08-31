@@ -909,20 +909,21 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         _d['creator'] = request.user
         _d['ei_synced'] = False
         _d['print_mark'] = False
-        _d['buyer'] = LegalEntity.objects.get(identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER)
-        _d['buyer_identifier'] = LegalEntity.GENERAL_CONSUMER_IDENTIFIER
+        gci = LegalEntity.objects.get(identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER)
+        _d['buyer'] = gci
+        _d['buyer_identifier'] = gci.identifier
+        _d['buyer_name'] = gci.name
+        _d['buyer_customer_number'] = gci.customer_number
         for clear_value in [
             'carrier_type',
             'carrier_id1',
             'carrier_id2',
             'npoban',
-            "buyer_name",
             "buyer_address",
             "buyer_person_in_charge",
             "buyer_telephone_number",
             "buyer_facsimile_number",
             "buyer_email_address",
-            "buyer_customer_number",
             "buyer_role_remark",
         ]:
             _d[clear_value] = ''
@@ -946,14 +947,14 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                 buyer_legal_entity = LegalEntity(identifier=_d['buyer_identifier'], name=_d['buyer_identifier'])
                 buyer_legal_entity.save()
             _d["buyer"] = buyer_legal_entity
-            _d["buyer_name"] = buyer_legal_entity.name if buyer_legal_entity else ''
-            _d["buyer_address"] = buyer_legal_entity.address if buyer_legal_entity else ''
-            _d["buyer_person_in_charge"] = buyer_legal_entity.person_in_charge if buyer_legal_entity else ''
-            _d["buyer_telephone_number"] = buyer_legal_entity.telephone_number if buyer_legal_entity else ''
-            _d["buyer_facsimile_number"] = buyer_legal_entity.facsimile_number if buyer_legal_entity else ''
-            _d["buyer_email_address"] = buyer_legal_entity.email_address if buyer_legal_entity else ''
-            _d["buyer_customer_number"] = buyer_legal_entity.customer_number if buyer_legal_entity else ''
-            _d["buyer_role_remark"] = buyer_legal_entity.role_remark if buyer_legal_entity else ''
+            _d["buyer_name"] = buyer_legal_entity.name
+            _d["buyer_address"] = buyer_legal_entity.address
+            _d["buyer_person_in_charge"] = buyer_legal_entity.person_in_charge
+            _d["buyer_telephone_number"] = buyer_legal_entity.telephone_number
+            _d["buyer_facsimile_number"] = buyer_legal_entity.facsimile_number
+            _d["buyer_email_address"] = buyer_legal_entity.email_address
+            _d["buyer_customer_number"] = buyer_legal_entity.customer_number
+            _d["buyer_role_remark"] = buyer_legal_entity.role_remark
 
         new_einvoice = EInvoice(**_d)
         new_einvoice.save(upload_batch_kind='57')
