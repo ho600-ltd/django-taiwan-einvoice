@@ -26,7 +26,7 @@
             <tr obj_id="{{ obj.id }}">
                 <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
                 <td field="batch">{{ obj.batch_dict.slug }}</td>
-                <td field="content_object_dict">{{ obj.content_object_dict.str_name }}@{{ obj.batch_dict.mig_type_dict.no }}</td>
+                <td field="content_object_dict">{{ obj.content_object_dict.id }}.{{ obj.content_object_dict.str_name }}@{{ obj.batch_dict.mig_type_dict.no }}</td>
                 <td field="year_month_range">{{ obj.year_month_range }}</td>
                 <td field="track_no">{{ obj.track_no }}</td>
                 <td field="body"><pre style="max-width: 300px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
