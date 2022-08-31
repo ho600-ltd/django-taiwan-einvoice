@@ -1345,6 +1345,18 @@ class EInvoice(models.Model):
         return "{}".format(self.track_no)
 
 
+    def in_cp_np_or_wp(self):
+        if '3J0002' == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
+            kind = 'cp'
+        elif "" != self.carrier_type:
+            kind = 'np'
+        elif "1" == self.donate_mark:
+            kind = 'np'
+        else:
+            kind = 'wp'
+        return kind
+
+
     def post_new_track_no(self):
         lg = logging.getLogger('taiwan_einvoice')
         lg.debug('EInvoice(id:{}) post_new_track_no'.format(self.id))
@@ -1432,6 +1444,7 @@ class EInvoice(models.Model):
         no = self.get_mig_no()
         if '1' == J[no]["Main"]["DonateMark"]:
             J[no]["Main"]["NPOBAN"] = self.npoban
+
         if self.carrier_type:
             J[no]["Main"]["CarrierType"] = self.carrier_type
             J[no]["Main"]["CarrierId1"] = self.carrier_id1
@@ -2177,7 +2190,11 @@ class UploadBatch(models.Model):
                 check_C0701 = True
             
             if check_C0501 and check_C0701:
-                self.update_to_new_status(NEXT_STATUS)
+                kind = content_object.in_cp_np_or_wp()
+                if content_object.print_mark or "np" == kind:
+                    self.update_to_new_status(NEXT_STATUS)
+                elif "cp" == kind and content_object.generate_time <= now() - COULD_PRINT_TIME_MARGIN:
+                    self.update_to_new_status(NEXT_STATUS)
         elif 'w4' == self.kind and content_object.einvoice.ei_synced:
             self.update_to_new_status(NEXT_STATUS)
         elif '54' == self.kind:
@@ -2221,14 +2238,8 @@ class UploadBatch(models.Model):
             end_time = start_time + datetime.timedelta(days=1)
             if '57' == upload_batch_kind or content_object.new_einvoice_on_cancel_einvoice_set.exists() or content_object.new_einvoice_on_void_einvoice_set.exists():
                 kind = '57'
-            elif '3J0002' == content_object.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != content_object.buyer_identifier:
-                kind = 'cp'
-            elif "" != content_object.carrier_type:
-                kind = 'np'
-            elif "1" == content_object.donate_mark:
-                kind = 'np'
             else:
-                kind = 'wp'
+                kind = content_object.in_cp_np_or_wp()
 
             if kind in ["wp", "cp", "np"] and UploadBatch.objects.filter(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                                                          mig_type=mig_type,
