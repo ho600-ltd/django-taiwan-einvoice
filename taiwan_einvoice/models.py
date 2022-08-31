@@ -1449,6 +1449,11 @@ class EInvoice(models.Model):
             J[no]["Main"]["CarrierType"] = self.carrier_type
             J[no]["Main"]["CarrierId1"] = self.carrier_id1
             J[no]["Main"]["CarrierId2"] = self.carrier_id2
+        elif ("N" == J[no]["Main"]["PrintMark"]
+              and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != J[no]["Main"]["Buyer"]["Identifier"]
+              and (self.is_voided or self.is_canceled)
+             ):
+              J[no]["Main"]["PrintMark"] = "Y"
         return J
 
 
@@ -2191,7 +2196,7 @@ class UploadBatch(models.Model):
             
             if check_C0501 and check_C0701:
                 kind = content_object.in_cp_np_or_wp()
-                if content_object.print_mark or "np" == kind:
+                if content_object.print_mark or "np" == kind or content_object.is_voided or content_object.is_canceled:
                     self.update_to_new_status(NEXT_STATUS)
                 elif "cp" == kind and content_object.generate_time <= now() - COULD_PRINT_TIME_MARGIN:
                     self.update_to_new_status(NEXT_STATUS)
