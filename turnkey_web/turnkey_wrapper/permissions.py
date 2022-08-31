@@ -20,8 +20,18 @@ class IsSuperUserInIntranet(IsAdminUser):
         if bool(request.user and request.user.is_superuser):
             remote_addr = request.META['REMOTE_ADDR']
             if remote_addr.startswith("10.") or remote_addr.startswith("192.168."):
-                return True
+                pass
             elif remote_addr.startswith("172.") and remote_addr.split('.')[1] in [str(i) for i in range(16, 32)]:
+                pass
+            else:
+                return False
+            allow_ips = []
+            for eit in EITurnkey.objects.filter(can_sync_to_ei=True):
+                allow_ips.extend(eit.allow_ips)
+            lg = logging.getLogger("turnkey_web")
+            lg.debug("IsSuperUserInIntranet.has_permission remote_addr: {}".format(remote_addr))
+            lg.debug("IsSuperUserInIntranet.has_permission allow_ips: {}".format(allow_ips))
+            if [] == allow_ips or remote_addr in allow_ips:
                 return True
         return False
 
