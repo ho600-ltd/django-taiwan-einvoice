@@ -30,7 +30,11 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'tkw',
     'ttkw',
-] + os.environ.get("ALLOWED_HOSTS", [])
+]
+
+os_allowed_hosts = os.environ.get("ALLOWED_HOSTS", False)
+if os_allowed_hosts:
+    ALLOWED_HOSTS += os_allowed_hosts.split(',')
 
 
 # Application definition
