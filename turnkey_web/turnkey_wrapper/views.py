@@ -16,6 +16,7 @@ from taiwan_einvoice.paginations import (
 
 from turnkey_wrapper.permissions import (
     IsSuperUserInLocalhost,
+    IsSuperUserInIntranet,
     CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission,
     CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission,
 )
@@ -100,7 +101,7 @@ from turnkey_wrapper.renderers import (
 
 
 class FROM_CONFIGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = FROM_CONFIG.objects.all()
     serializer_class = FROM_CONFIGSerializer
@@ -110,7 +111,7 @@ class FROM_CONFIGModelViewSet(ModelViewSet):
 
 
 class SCHEDULE_CONFIGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = SCHEDULE_CONFIG.objects.all()
     serializer_class = SCHEDULE_CONFIGSerializer
@@ -120,7 +121,7 @@ class SCHEDULE_CONFIGModelViewSet(ModelViewSet):
 
 
 class SIGN_CONFIGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = SIGN_CONFIG.objects.all()
     serializer_class = SIGN_CONFIGSerializer
@@ -131,7 +132,7 @@ class SIGN_CONFIGModelViewSet(ModelViewSet):
 
 
 class TASK_CONFIGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TASK_CONFIG.objects.all()
     serializer_class = TASK_CONFIGSerializer
@@ -142,7 +143,7 @@ class TASK_CONFIGModelViewSet(ModelViewSet):
 
 
 class TO_CONFIGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TO_CONFIG.objects.all()
     serializer_class = TO_CONFIGSerializer
@@ -153,7 +154,7 @@ class TO_CONFIGModelViewSet(ModelViewSet):
 
 
 class TURNKEY_MESSAGE_LOGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_MESSAGE_LOG.objects.all().order_by('-MESSAGE_DTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_MESSAGE_LOGSerializer
@@ -164,7 +165,7 @@ class TURNKEY_MESSAGE_LOGModelViewSet(ModelViewSet):
 
 
 class TURNKEY_MESSAGE_LOG_DETAILModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_MESSAGE_LOG_DETAIL.objects.all().order_by('-PROCESS_DTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_MESSAGE_LOG_DETAILSerializer
@@ -175,7 +176,7 @@ class TURNKEY_MESSAGE_LOG_DETAILModelViewSet(ModelViewSet):
 
 
 class TURNKEY_SEQUENCEModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_SEQUENCE.objects.all()
     serializer_class = TURNKEY_SEQUENCESerializer
@@ -186,7 +187,7 @@ class TURNKEY_SEQUENCEModelViewSet(ModelViewSet):
 
 
 class TURNKEY_SYSEVENT_LOGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_SYSEVENT_LOG.objects.all().order_by('-EVENTDTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_SYSEVENT_LOGSerializer
@@ -197,7 +198,7 @@ class TURNKEY_SYSEVENT_LOGModelViewSet(ModelViewSet):
 
 
 class TURNKEY_TRANSPORT_CONFIGModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_TRANSPORT_CONFIG.objects.all()
     serializer_class = TURNKEY_TRANSPORT_CONFIGSerializer
@@ -208,7 +209,7 @@ class TURNKEY_TRANSPORT_CONFIGModelViewSet(ModelViewSet):
 
 
 class TURNKEY_USER_PROFILEModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_USER_PROFILE.objects.all()
     serializer_class = TURNKEY_USER_PROFILESerializer
@@ -219,7 +220,7 @@ class TURNKEY_USER_PROFILEModelViewSet(ModelViewSet):
 
 
 class EITurnkeyModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkey.objects.all()
     serializer_class = EITurnkeySerializer
@@ -231,7 +232,7 @@ class EITurnkeyModelViewSet(ModelViewSet):
 
     def get_permissions(self):
         if CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
-            self.permission_classes = (Or(IsSuperUserInLocalhost, CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission), )
+            self.permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet, CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission), )
         return super(self.__class__, self).get_permissions()
 
     
@@ -331,7 +332,7 @@ class EITurnkeyModelViewSet(ModelViewSet):
 
 
 class EITurnkeyBatchModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyBatch.objects.all().order_by('-id')
     serializer_class = EITurnkeyBatchSerializer
@@ -342,7 +343,7 @@ class EITurnkeyBatchModelViewSet(ModelViewSet):
 
     def get_permissions(self):
         if CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission.ACTION_PERMISSION_MAPPING.get(self.action, ()):
-            self.permission_classes = (Or(IsSuperUserInLocalhost, CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission), )
+            self.permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet, CounterBasedOTPinRowAndIpCheckForEITurnkeyBatchPermission), )
         return super(self.__class__, self).get_permissions()
 
     
@@ -356,7 +357,7 @@ class EITurnkeyBatchModelViewSet(ModelViewSet):
 
 
 class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyBatchEInvoice.objects.all().order_by('-id')
     serializer_class = EITurnkeyBatchEInvoiceSerializer
@@ -367,7 +368,7 @@ class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
 
 
 class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyDailySummaryResultXML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
     serializer_class = EITurnkeyDailySummaryResultXMLSerializer
@@ -378,7 +379,7 @@ class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
 
 
 class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
-    permission_classes = (IsSuperUserInLocalhost, )
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyDailySummaryResult.objects.all().order_by('-result_date')
     serializer_class = EITurnkeyDailySummaryResultSerializer
