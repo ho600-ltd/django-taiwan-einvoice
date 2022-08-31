@@ -13,8 +13,7 @@
             <th>EVENTDTS</th>
             <th>PARTY_ID</th>
             <th>
-                <div>SEQNO</div>
-                <div>SUBSEQNO</div>
+                <div>SEQNO-SUBSEQNO</div>
                 <div>UUID</div>
             </th>
             <th>ERRORCODE</th>
@@ -29,8 +28,7 @@
                 <td field="EVENTDTS">{{ obj.EVENTDTS }}</td>
                 <td field="PARTY_ID">{{ obj.PARTY_ID }}</td>
                 <td>
-                    <div field="SEQNO">{{ obj.SEQNO }}</div>
-                    <div field="SUBSEQNO">{{ obj.SUBSEQNO }}</div>
+                    <span field="SEQNO">{{ obj.SEQNO }}</span>-<span field="SUBSEQNO">{{ obj.SUBSEQNO }}</span>
                     <div field="UUID">{{ obj.UUID }}</div>
                 </td>
                 <td field="ERRORCODE">{{ obj.ERRORCODE }}</td>
