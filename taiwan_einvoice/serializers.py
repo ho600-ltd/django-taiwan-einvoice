@@ -261,7 +261,8 @@ class TurnkeyServiceSerializer(ModelSerializer):
             'download_seed',
             'epl_base_set',
             'note',
-            'seller'
+            'seller',
+            'verify_tkw_ssl',
         )
         extra_kwargs = {
             'hash_key': {'write_only': True},

@@ -758,6 +758,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d = {f.name: getattr(einvoice, f.name)
                 for f in EInvoice._meta.fields
             }
+            seller_invoice_track_no = None
             for seller_invoice_track_no in SellerInvoiceTrackNo.filter_now_use_sitns(
                                                     turnkey_service=einvoice.seller_invoice_track_no.turnkey_service,
                                                     type=einvoice.seller_invoice_track_no.type
@@ -771,6 +772,12 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                     _d['seller_invoice_track_no'] = seller_invoice_track_no
                     break
                 return cei
+            if not seller_invoice_track_no:
+                er = {
+                    "error_title": _("No Seller Invoice Track No. Error"),
+                    "error_message": _("Canceled E-Invoice, but it could not create the new E-Invoice"),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
             del _d['id']
             del _d['random_number']
             del _d['generate_time']

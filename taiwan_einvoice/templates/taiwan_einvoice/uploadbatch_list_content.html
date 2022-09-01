@@ -10,8 +10,10 @@
     <thead>
         <tr>
             <th>{% trans "No." %}</th>
-            <th>{% trans "Create Time" %}</th>
-            <th>{% trans "Update Time" %}</th>
+            <th width="180px">
+                <div>{% trans "Create Time" %}</div>
+                <div>{% trans "Update Time" %}</div>
+            </th>
             <th>{% trans "Turnkey Service" %}</th>
             <th>{% trans "Slug" %}</th>
             <th>{% trans "MIG Type" %}</th>
@@ -26,8 +28,10 @@
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
                 <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
-                <td field="create_time" class="datetime" value="{{ obj.create_time }}"></td>
-                <td field="update_time" class="datetime" value="{{ obj.update_time }}"></td>
+                <td>
+                    <div field="create_time" class="datetime" value="{{ obj.create_time }}"></div>
+                    <div field="update_time" class="datetime" value="{{ obj.update_time }}"></div>
+                </td>
                 <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
                 <td field="slug">{{ obj.slug }}</td>
                 <td field="mig_type">{{ obj.mig_type_dict.no }}</td>
