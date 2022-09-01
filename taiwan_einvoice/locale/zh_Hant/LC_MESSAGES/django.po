@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-25 12:35+0800\n"
+"POT-Creation-Date: 2022-09-02 04:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -159,6 +159,10 @@ msgstr "{} 已停用"
 
 msgid "Not enough numbers"
 msgstr "號碼不足"
+
+#, python-brace-format
+msgid "{now} does not between {begin_time} and {end_time}"
+msgstr "{now} 並不介於 {begin_time} 及 {end_time} 之間"
 
 msgid "Mobile barcode"
 msgstr "手機條碼"
@@ -582,6 +586,12 @@ msgstr "重新創建"
 
 msgid "Cancel"
 msgstr "關閉"
+
+msgid "Content Object Create Time"
+msgstr "內容物件創建時間"
+
+msgid "Upload to EI Time"
+msgstr "上傳 EI 時間"
 
 msgid "Body"
 msgstr "內文"
@@ -1753,6 +1763,12 @@ msgstr "電子發票({})已被作廢!"
 msgid "E-Invoice({}) was already voieded and has created the new one!"
 msgstr "電子發票({})已被註銷且另有開立!"
 
+msgid "No Seller Invoice Track No. Error"
+msgstr "無字軌號碼錯誤"
+
+msgid "Canceled E-Invoice, but it could not create the new E-Invoice"
+msgstr "已作廢電子發票，但無法另開新的電子發票"
+
 msgid "Void Error"
 msgstr "註銷發票錯誤"
 
@@ -1800,3 +1816,9 @@ msgstr "處理說明為空值!"
 
 msgid "Wrong Hanling Type!"
 msgstr "不正確的處置方式"
+
+msgid "UploadBatch Status Error"
+msgstr "上傳批次狀態錯誤"
+
+msgid "Upload Batch Status != \"f\""
+msgstr "上傳批次狀態 != \"f\""
