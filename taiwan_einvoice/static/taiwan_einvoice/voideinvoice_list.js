@@ -231,7 +231,8 @@ function void_einvoice(taiwan_einvoice_site) {
                     "TotalAmount": json['einvoice_dict']['amounts']['TotalAmount'],
                     "generate_no": json['einvoice_dict']['generate_no'],
                     "creator_first_name_id": json['creator_dict']['first_name']+':'+json['creator_dict']['id'],
-                    "generate_time": json['generate_time']
+                    "generate_time": json['generate_time'],
+                    "ei_synced": ""
                 };
                 var $table = $('table.search_result');
                 var s = '<tr>';

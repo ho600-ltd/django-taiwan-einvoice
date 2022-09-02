@@ -11,51 +11,61 @@
     <thead>
         <tr>
             <th>{% trans "No." %}</th>
-            <th>{% trans "Batch slug" %}</th>
-            <th>{% trans "Content Object" %}</th>
-            <th>{% trans "Year Month Range" %}</th>
-            <th>{% trans "Track no." %}</th>
             <th>{% trans "Body" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Result Code" %}</th>
-            <th>{% trans "Error Handling" %}</th>
+            <th>
+                <div>{% trans "Batch slug" %}</div>
+                <div class="text-warning">{% trans "Content Object" %}</div>
+                <div>{% trans "Year Month Range" %}</div>
+                <div class="text-primary">{% trans "Content Object Create Time" %}</div>
+                <div>{% trans "Upload to EI Time" %}</div>
+            </th>
+            <th>
+                <div>{% trans "Status" %}</div>
+                <div>{% trans "Result Code" %}</div>
+                <div>{% trans "Error Handling" %}</div>
+            </th>
         </tr>
     </thead>
     <tbody>
         {% for obj in data.results %}
             <tr obj_id="{{ obj.id }}">
                 <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
-                <td field="batch">{{ obj.batch_dict.slug }}</td>
-                <td field="content_object_dict">{{ obj.content_object_dict.str_name }}@{{ obj.batch_dict.mig_type_dict.no }}</td>
-                <td field="year_month_range">{{ obj.year_month_range }}</td>
-                <td field="track_no">{{ obj.track_no }}</td>
-                <td field="body"><pre style="max-width: 300px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
-                <td field="status">
-                    {% if "c" == obj.status or "g" == obj.status or "p" == obj.status %}
-                        {{ obj.status }}
-                    {% else %}
-                        <span class="text-danger font-weight-bold">{{ obj.status }}</span>
-                    {% endif %}
+                <td field="body"><pre style="max-width: 600px; max-height: 200px; overflow: auto;">{{ obj.body | pprint }}</pre></td>
+                <td>
+                    <div field="batch">{{ obj.batch_dict.slug }}</div>
+                    <div class="text-warning" field="content_object_dict">{{ obj.content_object_dict.id }}. {{ obj.batch_dict.mig_type_dict.no }}:{{ obj.content_object_dict.str_name }}</div>
+                    <div field="year_month_range">{{ obj.year_month_range }}</div>
+                    <div class="text-primary datetime" field="create_time" value="{{ obj.content_object_dict.create_time }}" format="Y-m-d H:i:s"></div>
+                    <div class="datetime" field="upload_to_ei_time" value="{{ obj.content_object_dict.upload_to_ei_time }}" format="Y-m-d H:i:s"></div>
                 </td>
-                <td field="result" class="text-danger">
-                    <div field="result_code">{{ obj.result_code }}</div>
-                    <div field="result_message">{{ obj.result_message }}</div>
-                </td>
-                <td field="pass_if_error">
-                    {% if "" == obj.status or "p" == obj.status or "g" == obj.status or "c" == obj.status %}
-                        {% comment %}pass{% endcomment %}
-                    {% else %}
-                        {% if obj.pass_if_error %}
-                            {% trans "Handled" %}
-                            <div>{{ obj.handling_note }}</div>
+                <td>
+                    <div field="status">
+                        {% if "c" == obj.status or "g" == obj.status or "p" == obj.status %}
+                            {{ obj.status }}
                         {% else %}
-                            {% for ts in can_handle_batcheinvoice_under_turnkeyservices %}
-                                {% if ts.id == obj.batch_dict.turnkey_service_dict.id %}
-                                    <button class="btn btn-warning re_create_another_upload_batch_modal">{% trans "Handle" %}</button>
-                                {% endif %}
-                            {% endfor %}
+                            <span class="text-danger font-weight-bold">{{ obj.status }}</span>
                         {% endif %}
-                    {% endif %}
+                    </div>
+                    <div field="result" class="text-danger">
+                        <div field="result_code">{{ obj.result_code }}</div>
+                        <div field="result_message">{{ obj.result_message }}</div>
+                    </div>
+                    <div field="pass_if_error">
+                        {% if "" == obj.status or "p" == obj.status or "g" == obj.status %}
+                            {% comment %}pass{% endcomment %}
+                        {% else %}
+                            {% if obj.handling_note %}
+                                {% trans "Handled" %}
+                                <div>{{ obj.handling_note }}</div>
+                            {% else %}{% if not obj.pass_if_error and "c" != obj.status %}
+                                {% for ts in can_handle_batcheinvoice_under_turnkeyservices %}
+                                    {% if ts.id == obj.batch_dict.turnkey_service_dict.id %}
+                                        <button class="btn btn-warning re_create_another_upload_batch_modal">{% trans "Handle" %}</button>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}{% endif %}
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
         {% endfor %}

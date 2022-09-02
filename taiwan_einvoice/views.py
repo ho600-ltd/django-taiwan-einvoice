@@ -758,6 +758,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d = {f.name: getattr(einvoice, f.name)
                 for f in EInvoice._meta.fields
             }
+            seller_invoice_track_no = None
             for seller_invoice_track_no in SellerInvoiceTrackNo.filter_now_use_sitns(
                                                     turnkey_service=einvoice.seller_invoice_track_no.turnkey_service,
                                                     type=einvoice.seller_invoice_track_no.type
@@ -771,6 +772,12 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                     _d['seller_invoice_track_no'] = seller_invoice_track_no
                     break
                 return cei
+            if not seller_invoice_track_no:
+                er = {
+                    "error_title": _("No Seller Invoice Track No. Error"),
+                    "error_message": _("Canceled E-Invoice, but it could not create the new E-Invoice"),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
             del _d['id']
             del _d['random_number']
             del _d['generate_time']
@@ -909,20 +916,21 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         _d['creator'] = request.user
         _d['ei_synced'] = False
         _d['print_mark'] = False
-        _d['buyer'] = LegalEntity.objects.get(identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER)
-        _d['buyer_identifier'] = LegalEntity.GENERAL_CONSUMER_IDENTIFIER
+        gci = LegalEntity.objects.get(identifier=LegalEntity.GENERAL_CONSUMER_IDENTIFIER)
+        _d['buyer'] = gci
+        _d['buyer_identifier'] = gci.identifier
+        _d['buyer_name'] = gci.name
+        _d['buyer_customer_number'] = gci.customer_number
         for clear_value in [
             'carrier_type',
             'carrier_id1',
             'carrier_id2',
             'npoban',
-            "buyer_name",
             "buyer_address",
             "buyer_person_in_charge",
             "buyer_telephone_number",
             "buyer_facsimile_number",
             "buyer_email_address",
-            "buyer_customer_number",
             "buyer_role_remark",
         ]:
             _d[clear_value] = ''
@@ -946,14 +954,14 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                 buyer_legal_entity = LegalEntity(identifier=_d['buyer_identifier'], name=_d['buyer_identifier'])
                 buyer_legal_entity.save()
             _d["buyer"] = buyer_legal_entity
-            _d["buyer_name"] = buyer_legal_entity.name if buyer_legal_entity else ''
-            _d["buyer_address"] = buyer_legal_entity.address if buyer_legal_entity else ''
-            _d["buyer_person_in_charge"] = buyer_legal_entity.person_in_charge if buyer_legal_entity else ''
-            _d["buyer_telephone_number"] = buyer_legal_entity.telephone_number if buyer_legal_entity else ''
-            _d["buyer_facsimile_number"] = buyer_legal_entity.facsimile_number if buyer_legal_entity else ''
-            _d["buyer_email_address"] = buyer_legal_entity.email_address if buyer_legal_entity else ''
-            _d["buyer_customer_number"] = buyer_legal_entity.customer_number if buyer_legal_entity else ''
-            _d["buyer_role_remark"] = buyer_legal_entity.role_remark if buyer_legal_entity else ''
+            _d["buyer_name"] = buyer_legal_entity.name
+            _d["buyer_address"] = buyer_legal_entity.address
+            _d["buyer_person_in_charge"] = buyer_legal_entity.person_in_charge
+            _d["buyer_telephone_number"] = buyer_legal_entity.telephone_number
+            _d["buyer_facsimile_number"] = buyer_legal_entity.facsimile_number
+            _d["buyer_email_address"] = buyer_legal_entity.email_address
+            _d["buyer_customer_number"] = buyer_legal_entity.customer_number
+            _d["buyer_role_remark"] = buyer_legal_entity.role_remark
 
         new_einvoice = EInvoice(**_d)
         new_einvoice.save(upload_batch_kind='57')
@@ -1048,6 +1056,15 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
 
         if '' == kind:
             new_ub = False
+            batch_einvoice.batch.status = '4'
+            batch_einvoice.batch.save()
+            batch_einvoice.batch.check_in_4_status_then_update_to_the_next()
+            if 'f' != batch_einvoice.batch.status:
+                er = {
+                    "error_title": _("UploadBatch Status Error"),
+                    "error_message": _('Upload Batch Status != "f"'),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
             i = 0 
             while i < 10000:

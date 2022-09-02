@@ -36,7 +36,7 @@
                 <td field="turnkey_version">{{ obj.turnkey_version }}</td>
                 <td field="status">{{ obj.status }}</td>
                 <td field="count">
-                    <a href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}?format=html&ei_turnkey_batch={{ obj.id }}">{{ obj.count }}</a>
+                    <a href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}?format=html&ei_turnkey_batch__slug__icontains={{ obj.slug }}">{{ obj.count }}</a>
                 </td>
             </tr>
         {% endfor %}

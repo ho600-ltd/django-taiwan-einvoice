@@ -265,7 +265,7 @@ class Printer(models.Model):
 class TEAWeb(models.Model):
     name = models.CharField(max_length=8)
     url = models.CharField(max_length=755)
-    slug = models.CharField(max_length=4)
+    slug = models.CharField(max_length=5, unique=True)
     hash_key = models.CharField(max_length=40)
     now_use = models.BooleanField(default=False)
 

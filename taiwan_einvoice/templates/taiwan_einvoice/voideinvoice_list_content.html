@@ -51,7 +51,8 @@
             {% for voideinvoice in data.results %}
                 {% with voideinvoice.id as einvoice_id %}
                     <tr voideinvoice_id="{{ voideinvoice.id }}" >
-                        <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                        <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}"
+                            title="obj id: {{ voideinvoice.id }}; create_time: {{ voideinvoice.create_time }}">{{ forloop.counter }}.</td>
                         <td field="year_month_range">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
                         <td field="track_no_">{{ voideinvoice.einvoice_dict.track_no_ }}</td>
                         <td field="einvoice_dict.random_number">{{ voideinvoice.einvoice_dict.random_number }}</td>
