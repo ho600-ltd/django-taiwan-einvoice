@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-02 04:50+0800\n"
+"POT-Creation-Date: 2022-09-02 11:27+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -587,14 +587,14 @@ msgstr "重新創建"
 msgid "Cancel"
 msgstr "關閉"
 
+msgid "Body"
+msgstr "內文"
+
 msgid "Content Object Create Time"
 msgstr "內容物件創建時間"
 
 msgid "Upload to EI Time"
 msgstr "上傳 EI 時間"
-
-msgid "Body"
-msgstr "內文"
 
 msgid "Handle"
 msgstr "處置"
@@ -1790,8 +1790,8 @@ msgstr "電子發票({})已被註銷!"
 msgid "Buyer Identifier Error"
 msgstr "買方統編錯誤"
 
-msgid "Buyer identifier does not exist."
-msgstr "買方統編不存在"
+msgid "Buyer identifier is not valid."
+msgstr "買方統編無效。"
 
 msgid "NPOBan Error"
 msgstr "捐贈碼錯誤"
