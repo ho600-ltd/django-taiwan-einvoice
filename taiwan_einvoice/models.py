@@ -502,14 +502,14 @@ class IdentifierRule(object):
     Now, the rules use pass_rule_has_7_times_10, pass_rule_has_no_7_times_10.
     After 2023-Apr-01, the rules use pass_rule_has_7_times_5, pass_rule_has_no_7_times_5.
     """ 
-    def pass_rule_has_7_times_10(no):
-        pass
-    def pass_rule_has_no_7_times_10(no):
-        pass
-    def pass_rule_has_7_times_5(no):
-        pass
-    def pass_rule_has_no_7_times_5(no):
-        pass
+    def pass_rule_has_7_times_10(self, no):
+        return True
+    def pass_rule_has_no_7_times_10(self, no):
+        return True
+    def pass_rule_has_7_times_5(self, no):
+        return True
+    def pass_rule_has_no_7_times_5(self, no):
+        return True
     def verify_identifier(self, identifier):
         if (self.pass_rule_has_7_times_10(identifier)
             or self.pass_rule_has_no_7_times_10(identifier)

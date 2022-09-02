@@ -69,7 +69,7 @@ from taiwan_einvoice.models import (
     EInvoicePrintLog,
     CancelEInvoice,
     VoidEInvoice,
-    EInvoiceSellerAPI,
+    IdentifierRule,
     UploadBatch,
     BatchEInvoice,
     AuditLog,
@@ -862,11 +862,11 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
 
-        eisa = EInvoiceSellerAPI.objects.get(AppId=settings.TAIWAN_EINVOICE_APP_ID)
-        if data['buyer_identifier'] and False == eisa.inquery('seller-identifier', data['buyer_identifier']):
+        ir = IdentifierRule()
+        if data['buyer_identifier'] and False == ir.verify_identifier(data['buyer_identifier']):
             er = {
                 "error_title": _("Buyer Identifier Error"),
-                "error_message": _('Buyer identifier does not exist.')
+                "error_message": _('Buyer identifier is not valid.')
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         elif data['npoban'] and False == eisa.inquery('donate-mark', data['npoban']):

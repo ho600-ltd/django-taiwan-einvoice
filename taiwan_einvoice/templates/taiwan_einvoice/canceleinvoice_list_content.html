@@ -86,7 +86,8 @@
                                 </td>
                             {% endif %}
                         {% endif %}
-                        <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}" title="obj id:{{ canceleinvoice.id }}">{{ forloop.counter }}.</td>
+                        <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}"
+                            title="obj id: {{ canceleinvoice.id }}; create_time: {{ canceleinvoice.create_time }}">{{ forloop.counter }}.</td>
                         <td field="year_month_range">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
                         <td field="track_no_">{{ canceleinvoice.einvoice_dict.track_no_ }}</td>
                         <td field="type__display">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>
