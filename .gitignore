@@ -8,6 +8,7 @@ assets/*/
 .vscode/
 docs/_build
 turnkey_web/statics/
+escpos_web/statics/
 .py3env/
 *.pyc
 *.mo

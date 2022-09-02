@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import sys
+import sys, os, netifaces
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,7 +26,14 @@ SECRET_KEY = 'django-insecure-g!lji1tt4^(bg%7h(da%x3jrb3u73l+y3z$*mv&4n^_b6&j@ms
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ips = []
+for eth in netifaces.interfaces():
+    if 'lo' == eth: continue
+    i = netifaces.ifaddresses(eth)
+    try: ip = netifaces.ifaddresses(eth)[netifaces.AF_INET][0]['addr']
+    except: pass
+    else: ips.append(ip)
+ALLOWED_HOSTS = [] + ips
 
 
 # Application definition
@@ -38,6 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework_filters',
+    'django_extensions',
     'escpos_printer',
 ]
 
@@ -70,6 +80,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'escpos_web.wsgi.application'
+ASGI_APPLICATION = 'escpos_web.asgi.application'
 
 
 # Database
@@ -105,9 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Taipei'
 
 USE_I18N = True
 
@@ -115,13 +124,61 @@ USE_L10N = True
 
 USE_TZ = True
 
+LANGUAGE_CODE = 'zh-hant'
+
+LANGUAGES = (
+    ('zh-hant', u'\u6b63\u9ad4\u4e2d\u6587(Taiwan, R.O.C.)'),
+    ('en-us', 'English(United States)'),
+)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/statics/'
+STATIC_ROOT = BASE_DIR / 'statics'
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+) 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format': '%(levelname)-5s [%(asctime)s] %(name)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        'escpos_printer': {
+            'handlers': ['console'],
+            'propagate': True,
+            'level': os.getenv('ESCPOSWeb_LOG_LEVEL', 'INFO'),
+        },
+    }
+}
+
+LOGIN_URL = '/api/api-auth/login/'
+LOGIN_REDIRECT_URL = '/'
+
+# djangorestframework
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': ('rest_framework.renderers.JSONRenderer', ),
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework_filters.backends.RestFrameworkFilterBackend', ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'PAGE_SIZE': 10,
+}

@@ -5,6 +5,7 @@ from PIL import Image
 from escpos.printer import Usb
 from django.db import models
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 
 
@@ -128,10 +129,10 @@ class Printer(models.Model):
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
     RECEIPT_TYPES = (
-        ('0', "DOES NOT WORK"),
-        ('5', '58mm Receipt'),
-        ('6', '58mm E-Invoice'),
-        ('8', '80mm Receipt'),
+        ('0', _("DOES NOT WORK")),
+        ('5', _('58mm Receipt')),
+        ('6', _('58mm E-Invoice')),
+        ('8', _('80mm Receipt')),
     )
     ENCODINGS = (
         ('B', 'CP950'),
@@ -267,6 +268,9 @@ class TEAWeb(models.Model):
     url = models.CharField(max_length=755)
     slug = models.CharField(max_length=5, unique=True)
     hash_key = models.CharField(max_length=40)
+    @property
+    def mask_hash_key(self):
+        return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
     now_use = models.BooleanField(default=False)
 
 

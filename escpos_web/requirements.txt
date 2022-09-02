@@ -1,5 +1,7 @@
 # Only for escpos_web
 Django>=3.2,<3.3
+djangorestframework>=3.12,<3.13
+djangorestframework-filters==1.0.0.dev0
 channels>=3.0,<3.1
 netifaces>=0.11,<0.12
 python-escpos==v3.0a8
