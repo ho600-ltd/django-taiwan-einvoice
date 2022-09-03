@@ -40,7 +40,7 @@ def index(request, *args, **kwargs):
 class PrinterModelViewSet(ModelViewSet):
     permission_classes = (IsInIntranet, IsAdminUser, )
     pagination_class = TenTo1000PerPagePagination
-    queryset = Printer.objects.all()
+    queryset = Printer.objects.all().order_by('-id')
     serializer_class = PrinterSerializer
     filter_class = PrinterFilter
     renderer_classes = (PrinterHtmlRenderer, EPWBrowsableAPIRenderer, JSONRenderer, )
@@ -51,7 +51,7 @@ class PrinterModelViewSet(ModelViewSet):
 class TEAWebModelViewSet(ModelViewSet):
     permission_classes = (IsInIntranet, IsAdminUser, )
     pagination_class = Default30PerPagePagination
-    queryset = TEAWeb.objects.all()
+    queryset = TEAWeb.objects.all().order_by('-id')
     serializer_class = TEAWebSerializer
     filter_class = TEAWebFilter
     renderer_classes = (TEAWebHtmlRenderer, EPWBrowsableAPIRenderer, JSONRenderer, )
