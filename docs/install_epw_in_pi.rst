@@ -1,15 +1,15 @@
 在 PI 安裝設定 EPW 伺服器
 ===============================================================================
 
-建議使用 Raspberry PI + Linux OS 為 EPW 的伺服器，\
-雖然 EPW 是由 Django-based 程式碼及相關 python 函式庫所組成的應用程式，\
+建議使用 Raspberry Pi + Linux OS 為 EPW 的伺服器。\
+EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用程式，\
 要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用；\
 若要在 Windows 上，則需修改部份硬體控制相關的程式碼。\
-考慮長期運作的高可用性，還是應以 pi 來執行 EPW 。
+考慮長期運作的高可用性，還是應以 Pi 來執行 EPW 。
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，而有實機測試過的機型僅有 TM-T88IV 及 TM-T88V 。
 
-安裝 raspberry OS 時，須將時區設為 Asia/Taipei
+安裝 Raspberry OS 時，須將時區設為 Asia/Taipei 。
 
 ESC/POS 印表機設定
 -------------------------------------------------------------------------------
@@ -26,13 +26,19 @@ ESC/POS 印表機設定
         # 04b8, 0202 是 TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
 
-Set up EPW Service
+設定 EPW 基本服務
 -------------------------------------------------------------------------------
+
+服務有:
+
+1. 列印發票/收據
+2. 檢查感熱式印表機狀態
 
 .. code-block:: sh
 
     $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
-    $ sudo apt install build-essential libssl-dev libffi-dev python3-dev cargo aptitude python-virtualenv python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate
+    $ sudo apt install build-essential libssl-dev libffi-dev python3-dev cargo aptitude python-virtualenv python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate zsh
+        * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
@@ -46,7 +52,7 @@ Set up EPW Service
     $ sudo supervisorctl reread
     $ sudo supervisorctl start all
 
-Display with waveshare LCD(Optional)
+使用 Waveshare LCD 顯示資訊(非必要)
 ...............................................................................
 
 設定 SPI 介面:
@@ -109,93 +115,10 @@ LCD 顯示成果:
 
     IP: 4.5.6.7 為出口 IP
 
-
-TEA supports ASGI with daphne, supervisor and nginx
+讓 EPW WebSocket API 支援驗證
 -------------------------------------------------------------------------------
 
-.. code-block:: sh
-
-    $ sudo apt install nginx supervisor
-    $ sudo mkdir /run/daphne/
-    $ sudo chown jenkins:jenkins /run/daphne/ # I use jenkins user to execute app
-    $ cat << 'EOF' > /usr/lib/tmpfiles.d/daphne.conf
-    d /run/daphne 0755 jenkins jenkins
-    EOF
-
-.. code-block:: text
-
-    #/etc/supervisor/conf.d/my-site.com.conf
-    [fcgi-program:my_site]
-    # TCP socket used by Nginx backend upstream
-    socket=tcp://localhost:8001
-
-    # Directory where your site's project files are located
-    directory=/var/www/my-site.com
-
-    # Each process needs to have a separate socket file, so we use process_num
-    # Make sure to update "mysite.asgi" to match your project name
-    command=/var/www/my-site.com-py3-env/bin/daphne -u /run/daphne/daphne%(process_num)d.sock --fd 0 --access-log - --proxy-headers my_site.asgi:application
-
-    # Number of processes to startup, roughly the number of CPUs you have
-    numprocs=4
-
-    # Give each process a unique name so they can be told apart
-    process_name=asgi%(process_num)d
-
-    # Automatically start and recover processes
-    autostart=true
-    autorestart=true
-
-    # Choose where you want your log to go
-    stdout_logfile=/var/www/my-site.com.asgi.log
-    redirect_stderr=true
-
-.. code-block:: sh
-
-    $ sudo supervisorctl reread
-    $ sudo supervisorctl update
-
-.. code-block:: text
-
-    #/etc/nginx/site-enabled/my-site.conf
-    server {
-        server_name     www.my-site.com;
-        access_log      /var/log/nginx/my-site.log;
-        error_log       /var/log/nginx/my-site_error.log;
-
-        listen          443 ssl;       # Listen on port 80 for IPv4 requests
-
-        include         /native-nginx/conf.d/ssl.conf;
-        ssl_certificate /native-nginx/certs/my-site.com/fullchain.pem; # managed by Certbot
-        ssl_certificate_key /native-nginx/certs/my-site.com/privkey.pem; # managed by Certbot
-
-        add_header      Content-Security-Policy "frame-ancestors 'self' hwww.my-site.com hwww.bio-pipe.com";
-
-        location / {
-            proxy_pass http://127.0.0.1:8001;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_read_timeout 631;
-            proxy_send_timeout 631;
-            proxy_set_header    Host $host;
-            proxy_set_header    X-Real-IP $remote_addr;
-            proxy_set_header    X-Forwarded-For $remote_addr;
-            proxy_set_header    REMOTE_ADDR $remote_addr;
-            proxy_set_header    HTTP_HOST $host;
-        }
-    }
-
-.. code-block:: sh
-
-    $ sudo nginx -t
-    $ sudo systemctl restart nginx
-
-
-讓 EPW 支援 Web API 關機
--------------------------------------------------------------------------------
-
-先讓 EPW 在每次開機時，產製出驗證碼，供 Web API 執行時驗證用:
+先讓 EPW 在每次開機時，產製出驗證碼供 WS API 驗證用:
 
 .. code-block:: sh
 
@@ -210,3 +133,11 @@ TEA supports ASGI with daphne, supervisor and nginx
     EOF
     $ exit
     $ chmod a+x /etc/rc.local
+
+如未使用 Waveshare LCD 來顯示驗證碼，則建議寫入固定值到 /var/run/boot_random_seed ，如:
+
+.. code-block:: sh
+
+    echo "31a36a1b579fc1f1349183390d5b0a46  -" >  /var/run/boot_random_seed
+
+這樣驗證碼會保持在 31A 。
