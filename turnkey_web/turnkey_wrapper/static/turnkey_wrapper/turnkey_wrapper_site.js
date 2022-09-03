@@ -263,6 +263,7 @@ $(function () {
             'MESSAGE_TYPE',
             'FROM_ROUTING_ID',
             'is_parsed',
+            'ei_turnkey',
             'ei_turnkey_batch__mig',
             'ei_turnkey__party_id',
             'ei_turnkey_batch__ei_turnkey__party_id'
