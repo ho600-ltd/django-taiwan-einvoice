@@ -248,7 +248,7 @@ class Receipt(models.Model):
 
     
     class Meta:
-        unique_together = (('meet_to_tw_einvoice_standard', 'track_no', ), )
+        unique_together = (('meet_to_tw_einvoice_standard', 'track_no', 'random_number', ), )
 
 
     @classmethod

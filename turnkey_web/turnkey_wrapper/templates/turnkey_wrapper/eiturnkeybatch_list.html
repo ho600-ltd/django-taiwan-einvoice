@@ -38,7 +38,20 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-2">
+                <div class="form-group">
+                    <label for="ei_turnkey__party_id">{% trans "Seller Party ID" %}</label>
+                    <div class="input-group" id="ei_turnkey__party_id" data-target-input="nearest">
+                        <select class="form-control" data-target="#ei_turnkey__party_id" name="ei_turnkey__party_id" id="id_ei_turnkey__party_id">
+                            <option value=""></option>
+                            {% for pi in party_ids %}
+                                <option value="{{ pi }}">{{ pi }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-2">
                 <div class="form-group">
                     <label for="turnkey_version">{% trans "Turnkey MIG Version" %}</label>
                     <div class="input-group" id="turnkey_version" data-target-input="nearest">
@@ -48,7 +61,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-2">
                 <div class="form-group">
                     <label for="status">{% trans "Status" %}</label>
                     <div class="input-group" id="status" data-target-input="nearest">

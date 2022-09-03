@@ -57,11 +57,11 @@
                     <pre class="text-danger" field="failed_batch_einvoice_ids" style="max-width: 200px; max-height: 100px;">{{ obj.failed_batch_einvoice_ids|pprint }}</pre>
                 </td>
                 <td field="error_note">
-                    {% if not obj.is_parsed and obj.error_note %}
+                    {% if obj.error_note %}
                         <span class="text-danger">{{ obj.error_note }}</span>
-                    {% else %}
+                    {% else %}{% if obj.is_parsed %}
                         <span class="font-weight-light">{% trans "None" %}</span>
-                    {% endif %}
+                    {% endif %}{% endif %}
                 </td>
                 <td field="abspath">{{ obj.abspath }}</td>
             </tr>

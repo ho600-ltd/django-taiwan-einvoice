@@ -12,7 +12,7 @@ def forward(apps, schema_editor):
         cf_so.save()
 
     insp = Inspection(
-        cron_format='37 0-4,17-23 * * *',
+        cron_format='20,50 0-4,17-23 * * *',
         name="polling_TK_to_get_ei_turnkey_daily_summary_result",
         function_option=cf_so,
         function_note="Polling TurnkeyService to get and create summary report"

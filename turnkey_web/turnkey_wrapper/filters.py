@@ -175,13 +175,17 @@ class EITurnkeyFilter(filters.FilterSet):
         model = EITurnkey
         fields = {
             "transport_id": ("icontains", ),
-            "party_id": ("icontains", ),
+            "party_id": ("exact", "icontains", ),
             "routing_id": ("icontains", ),
         }
 
 
 
 class EITurnkeyBatchFilter(filters.FilterSet):
+    ei_turnkey = filters.RelatedFilter(EITurnkeyFilter, field_name='ei_turnkey', queryset=EITurnkey.objects.all())
+
+
+
     class Meta:
         model = EITurnkeyBatch
         fields = {
@@ -196,6 +200,7 @@ class EITurnkeyBatchFilter(filters.FilterSet):
 
 
 class EITurnkeyBatchEInvoiceFilter(filters.FilterSet):
+    ei_turnkey_batch__ei_turnkey__party_id = filters.CharFilter(method='filter_ei_turnkey_batch__ei_turnkey__party_id')
     ei_turnkey_batch__slug__icontains = filters.CharFilter(method='filter_ei_turnkey_batch__slug__icontains')
     ei_turnkey_batch__mig = filters.CharFilter(method='filter_ei_turnkey_batch__mig')
     in_year_month_range_time = filters.DateTimeFilter(method='filter_in_year_month_range_time')
@@ -208,10 +213,15 @@ class EITurnkeyBatchEInvoiceFilter(filters.FilterSet):
             "ei_turnkey_batch": ("exact", ),
             "batch_einvoice_id": ("exact", ),
             "batch_einvoice_track_no": ("exact", "icontains", ),
+            "status": ("exact", ),
             "result_code": ("exact", "icontains", ),
         }
     
 
+
+    def filter_ei_turnkey_batch__ei_turnkey__party_id(self, queryset, name, value):
+        return queryset.filter(ei_turnkey_batch__ei_turnkey__party_id=value)
+    
 
     def filter_ei_turnkey_batch__slug__icontains(self, queryset, name, value):
         return queryset.filter(ei_turnkey_batch__slug__icontains=value)
