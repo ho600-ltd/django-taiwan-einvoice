@@ -233,6 +233,7 @@ class Receipt(models.Model):
     tea_web = models.ForeignKey(TEAWeb, on_delete=models.DO_NOTHING)
     meet_to_tw_einvoice_standard = models.BooleanField(default=False)
     track_no = models.CharField(max_length=32)
+    random_number = models.CharField(max_length=4, default='')
     generate_time = models.DateTimeField()
     WIDTHS = (
         ('5', '58mm'),
@@ -253,13 +254,15 @@ class Receipt(models.Model):
     @classmethod
     def create_receipt(cls, tea_web, message, re_print_original_copy=False):
         J = json.loads(message)
+        random_number = J.get('random_number', '')
         try:
             obj = cls.objects.get(meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
-                                  track_no=J['track_no'])
+                                  track_no=J['track_no'], random_number=random_number)
         except cls.DoesNotExist:
             obj = cls(tea_web=tea_web,
                       meet_to_tw_einvoice_standard=J['meet_to_tw_einvoice_standard'],
                       track_no=J['track_no'],
+                      random_number=random_number,
                       generate_time=J['generate_time'],
                       original_width=cls.WIDTHS_DICT[J['width']],
                       content=J["content"])
