@@ -1,114 +1,10 @@
-import usb.core, usb.util, re, json, qrcode
+import usb.core, usb.util, re, json, qrcode, os, subprocess
 from random import random
 from hashlib import sha1
 from PIL import Image
-from escpos.printer import Usb
 from django.db import models
 from django.utils.timezone import now
-
-
-
-class UsbZhHant(Usb):
-    def __init__(self, *args, **kwargs):
-        super(UsbZhHant, self).__init__(*args, **kwargs)
-        self.default_encoding = kwargs.get('default_encoding', 'CP950').upper()
-        if 'CP950' == self.default_encoding:
-            self.charcode(code='CP1252')
-        elif 'GB18030' == self.default_encoding:
-            self.charcode(code='ISO_8859-2')
-        else:
-            self.default_encoding = 'CP950'
-            self.charcode(code='CP1252')
-
-
-    def text(self, text, *args, **kwargs):
-        if 'CP950' == self.default_encoding:
-            return super(UsbZhHant, self).text(text.encode(self.default_encoding.lower()).decode('latin1'), *args, **kwargs)
-        elif 'GB18030' == self.default_encoding:
-            return super(UsbZhHant, self).text(text.encode(self.default_encoding.lower()).decode('latin2'), *args, **kwargs)
-
-    
-    def barcode(self, code, bc, height=64, width=3, pos="BELOW", font="A",
-                align_ct=True, function_type=None, check=True):
-        from escpos.escpos import (six, BARCODE_TYPES, NUL,
-                                   BarcodeTypeError, BarcodeCodeError, BarcodeSizeError,
-                                   BARCODE_WIDTH, BARCODE_HEIGHT,
-                                   BARCODE_FONT_A, BARCODE_FONT_B,
-                                   TXT_STYLE,
-                                   BARCODE_TXT_OFF, BARCODE_TXT_BTH, BARCODE_TXT_ABV, BARCODE_TXT_BLW,)
-
-        if function_type is None:
-            # Choose the function type automatically.
-            if bc in BARCODE_TYPES['A']:
-                function_type = 'A'
-            else:
-                if bc in BARCODE_TYPES['B']:
-                    if not self.profile.supports(BARCODE_B):
-                        raise BarcodeTypeError((
-                            "Barcode type '{bc} not supported for "
-                            "the current printer profile").format(bc=bc))
-                    function_type = 'B'
-                else:
-                    raise BarcodeTypeError((
-                        "Barcode type '{bc} is not valid").format(bc=bc))
-
-        bc_types = BARCODE_TYPES[function_type.upper()]
-        if bc.upper() not in bc_types.keys():
-            raise BarcodeTypeError((
-                "Barcode '{bc}' not valid for barcode function type "
-                "{function_type}").format(
-                    bc=bc,
-                    function_type=function_type,
-                ))
-
-        if check and not self.check_barcode(bc, code):
-            raise BarcodeCodeError((
-                "Barcode '{code}' not in a valid format for type '{bc}'").format(
-                code=code,
-                bc=bc,
-            ))
-
-        # Align Bar Code()
-        if align_ct:
-            self._raw(TXT_STYLE['align']['center'])
-        # Height
-        if 1 <= height <= 255:
-            self._raw(BARCODE_HEIGHT + six.int2byte(height))
-        else:
-            raise BarcodeSizeError("height = {height}".format(height=height))
-        # Width
-        if 1 <= width <= 6:
-            self._raw(BARCODE_WIDTH + six.int2byte(width))
-        else:
-            raise BarcodeSizeError("width = {width}".format(width=width))
-        # Font
-        if font.upper() == "B":
-            self._raw(BARCODE_FONT_B)
-        else:  # DEFAULT FONT: A
-            self._raw(BARCODE_FONT_A)
-        # Position
-        if pos.upper() == "OFF":
-            self._raw(BARCODE_TXT_OFF)
-        elif pos.upper() == "BOTH":
-            self._raw(BARCODE_TXT_BTH)
-        elif pos.upper() == "ABOVE":
-            self._raw(BARCODE_TXT_ABV)
-        else:  # DEFAULT POSITION: BELOW
-            self._raw(BARCODE_TXT_BLW)
-
-        self._raw(bc_types[bc.upper()])
-
-        if function_type.upper() == "B":
-            self._raw(six.int2byte(len(code)))
-
-        # Print Code
-        if code:
-            self._raw(code.encode())
-        else:
-            raise BarcodeCodeError()
-
-        if function_type.upper() == "A":
-            self._raw(NUL)
+from django.utils.translation import gettext_lazy as _
 
 
 
@@ -128,10 +24,10 @@ class Printer(models.Model):
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
     RECEIPT_TYPES = (
-        ('0', "DOES NOT WORK"),
-        ('5', '58mm Receipt'),
-        ('6', '58mm E-Invoice'),
-        ('8', '80mm Receipt'),
+        ('0', _("DOES NOT WORK")),
+        ('5', _('58mm Receipt')),
+        ('6', _('58mm E-Invoice')),
+        ('8', _('80mm Receipt')),
     )
     ENCODINGS = (
         ('B', 'CP950'),
@@ -155,6 +51,7 @@ class Printer(models.Model):
 
     @classmethod
     def load_printers(cls, idVendor_idProduct_set=((0x04b8, 0x0202),), setup=True):
+        from libs import UsbZhHant
         for k, v in cls.PRINTERS.items():
             if isinstance(v.get('printer_device', None), UsbZhHant):
                 v['printer_device'].close()
@@ -196,6 +93,7 @@ class Printer(models.Model):
 
     def get_escpos_printer(self, setup=True):
         if 'u' == self.type:
+            from libs import UsbZhHant
             usb_zhhant = Printer.PRINTERS.get(self.serial_number, {}).get('printer_device', None)
             if usb_zhhant:
                 usb_zhhant.close()
@@ -232,6 +130,7 @@ class Printer(models.Model):
     @property
     def is_connected(self, setup=True):
         if 'u' == self.type:
+            from libs import UsbZhHant
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if self.serial_number not in Printer.PRINTERS:
@@ -263,15 +162,34 @@ class Printer(models.Model):
 
 
 class TEAWeb(models.Model):
+    name = models.CharField(max_length=8)
     url = models.CharField(max_length=755)
     slug = models.CharField(max_length=5, unique=True)
     hash_key = models.CharField(max_length=40)
+    @property
+    def mask_hash_key(self):
+        return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    now_use = models.BooleanField(default=True)
 
 
     def generate_token_auth(self):
         seed = sha1(str(random()).encode('utf-8')).hexdigest()[:15]
         verify_value = sha1("{}-{}".format(self.slug, seed).encode('utf-8')).hexdigest()
         return "{}-{}-{}".format(self.slug, seed, verify_value)
+    
+
+    def save(self, *args, **kwargs):
+        if True == self.now_use:
+            if self.id:
+                TEAWeb.objects.exclude(id=self.id).update(now_use=False)
+            else:
+                TEAWeb.objects.all().update(now_use=False)
+            RESTART_PROCESSES_AFTER_SET_NOW_USE = os.getenv("RESTART_PROCESSES_AFTER_SET_NOW_USE", "")
+            print(RESTART_PROCESSES_AFTER_SET_NOW_USE)
+            if RESTART_PROCESSES_AFTER_SET_NOW_USE and "asgi0" in RESTART_PROCESSES_AFTER_SET_NOW_USE:
+                subprocess.run(['sudo', 'supervisorctl', 'restart', RESTART_PROCESSES_AFTER_SET_NOW_USE])
+        return super().save(*args, **kwargs)
+
 
 
 
