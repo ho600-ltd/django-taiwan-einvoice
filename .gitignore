@@ -1,5 +1,6 @@
 *.sqlite3
 .DS_Store
+assets/*.key
 assets/*.pdf
 assets/*.zip
 assets/*.docx
@@ -10,5 +11,6 @@ docs/_build
 turnkey_web/statics/
 escpos_web/statics/
 .py3env/
+*.log
 *.pyc
 *.mo
