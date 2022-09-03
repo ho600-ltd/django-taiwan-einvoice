@@ -1050,16 +1050,12 @@ class EITurnkeyDailySummaryResultXML(models.Model):
         self.good_batch_einvoice_ids = batch_einvoice_idss['Good']
         self.failed_batch_einvoice_ids = batch_einvoice_idss['Failed']
 
-        if "" == error_message:
-            self.is_parsed = True
-            summary_result, new_creation = EITurnkeyDailySummaryResult.objects.get_or_create(
-                ei_turnkey=self.ei_turnkey,
-                result_date=self.result_date
-            )
-        else:
-            self.error_note = error_message
-            self.is_parsed = False
-            summary_result = None
+        self.error_note = error_message
+        self.is_parsed = True
+        summary_result, new_creation = EITurnkeyDailySummaryResult.objects.get_or_create(
+            ei_turnkey=self.ei_turnkey,
+            result_date=self.result_date
+        )
         return summary_result
 
 
