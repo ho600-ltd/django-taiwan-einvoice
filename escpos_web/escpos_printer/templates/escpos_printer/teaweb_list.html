@@ -1,0 +1,109 @@
+{% extends 'escpos_printer/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    <script src="{% static "escpos_printer/teaweb_list.js" %}"></script>
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="name__icontains">{% trans "Name contains" %}</label>
+                    <div class="input-group" id="name__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="name__icontains" id="id_name__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="slug__icontains">{% trans "Slug contains" %}</label>
+                    <div class="input-group" id="slug__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="slug__icontains" id="id_slug__icontains" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+<div class="modal fade" id="update_teaweb_modal" tabindex="-1" role="dialog"
+    aria-labelledby="update_teaweb_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "Connect this TEA Web" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>{% trans "Name" %}:</h4>
+                <p field="name"></p>
+
+                <h4>{% trans "Url" %}:</h4>
+                <p field="url"></p>
+
+                <h4>{% trans "Slug" %}:</h4>
+                <p field="slug"></p>
+
+                <h4>{% trans "Hash Key" %}:</h4>
+                <p field="mask_hash_key"></p>
+
+                <h4>{% trans "Now Use?" %}:</h4>
+                <p>{% trans "Yes" context "now_use" %}</p>
+
+                <h4><span class="text-danger">*</span> {% trans "Pass Key" %}:</h4>
+                <input name="pass_key" class="form-control" type="text"/>
+                <p>{% blocktrans %}
+                    Please get the "Pass Key" from the LCD of ESC/POS Web.
+                    <span class="text-danger">Notice! The pass key is case-sensitive.</span>
+                {% endblocktrans %}</p>
+            </div>
+            <div class="modal-footer">
+                <button id="update_teaweb_button_0" type="button" class="update_teaweb btn btn-secondary">{% trans "Configure" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

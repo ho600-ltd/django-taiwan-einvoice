@@ -1,6 +1,6 @@
 $(function () {
 
-    var TAIWAN_EINVOICE_SITE = function (name, configure) {
+    var ESCPOS_PRINTER_SITE = function (name, configure) {
         if ('https:' == window.location.protocol) {
             this.WS_PROTOCOL = 'wss://' + window.location.host;
         } else {
@@ -37,7 +37,7 @@ $(function () {
 
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.convert_class_number = function ($self) {
+    ESCPOS_PRINTER_SITE.prototype.convert_class_number = function ($self) {
         return function() {
             var $obj = $(this);
             var s = $self.convert_number_str_with_comma($obj.attr('value'));
@@ -45,7 +45,7 @@ $(function () {
         };
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.convert_number_str_with_comma = function (number_str) {
+    ESCPOS_PRINTER_SITE.prototype.convert_number_str_with_comma = function (number_str) {
         number_str = String(number_str).toString().replace(/[^0-9\-\+\.]/g, '').replace(/\.0+$/, '');
         var list = number_str.split('.');
         var i = list[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -62,7 +62,7 @@ $(function () {
         }
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.convert_tastypie_datetime = function (s) {
+    ESCPOS_PRINTER_SITE.prototype.convert_tastypie_datetime = function (s) {
         var $self = this;
         var re = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+).([0-9]+):([0-9]+):([0-9]+)(\.?[0-9]*)$');
         var list = re.exec(s);
@@ -75,7 +75,7 @@ $(function () {
         }
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.convert_time_from_utc_str = function (time_str, second_offset, display_format) {
+    ESCPOS_PRINTER_SITE.prototype.convert_time_from_utc_str = function (time_str, second_offset, display_format) {
         function in_02d (d) {
             if (d >= 0 && d <= 9) {
                 return '0'+String(d);
@@ -108,7 +108,7 @@ $(function () {
                             .replace('D', D).replace('M', M).replace('A', A);
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.get_second_offset_by_timezone_id_value = function ($self) {
+    ESCPOS_PRINTER_SITE.prototype.get_second_offset_by_timezone_id_value = function ($self) {
         var timezone = $('#timezone').attr('value');
         var second_offset = 0;
         if (timezone == 'Asia/Taipei'){
@@ -119,7 +119,7 @@ $(function () {
         return second_offset;
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.convert_class_datetime = function ($self) {
+    ESCPOS_PRINTER_SITE.prototype.convert_class_datetime = function ($self) {
         return function() {
             var $span = $(this);
             var second_offset = $self.get_second_offset_by_timezone_id_value($self);
@@ -144,7 +144,7 @@ $(function () {
         };
     };
 
-    TAIWAN_EINVOICE_SITE.prototype.show_modal = function ($modal, title, body) {
+    ESCPOS_PRINTER_SITE.prototype.show_modal = function ($modal, title, body) {
         $('.modal-title', $modal).html(title);
         body = body.replace(/\n/g, "<br/>");
         $('.modal-body', $modal).html(body);
@@ -152,7 +152,7 @@ $(function () {
     };
 
 
-    TAIWAN_EINVOICE_SITE.prototype.choose_all_check_in_the_same_td = function($self) {
+    ESCPOS_PRINTER_SITE.prototype.choose_all_check_in_the_same_td = function($self) {
         return function () {
             var $i = $(this);
             var $table = $i.parents('table');
@@ -164,7 +164,7 @@ $(function () {
     };
 
 
-    TAIWAN_EINVOICE_SITE.prototype.lock_or_unlock_delete = function ($self) {
+    ESCPOS_PRINTER_SITE.prototype.lock_or_unlock_delete = function ($self) {
         return function () {
             var $i = $(this);
             var $button = $('button.delete_modal', $i.parent());
@@ -181,7 +181,7 @@ $(function () {
     };
 
 
-    TAIWAN_EINVOICE_SITE.prototype.after_document_ready = function () {
+    ESCPOS_PRINTER_SITE.prototype.after_document_ready = function () {
         var $self = this;
         $('.datetime').each($self.convert_class_datetime($self));
         $('.number').each($self.convert_class_number($self));
@@ -214,29 +214,10 @@ $(function () {
         }
 
         var string_kind_params = [
-            'name__icontains',
+            'serail_number__icontains',
             'nickname__icontains',
-            'user__username__icontains',
-            'slug__icontains',
-            'track_no__icontains',
-            'details__description__icontains',
-            'code39__exact',
-            'any_words__icontains',
-            'einvoice__code39__exact',
-            'id',
-            'id_or_hex',
-            'einvoice__track_no__icontains',
-            'new_einvoice__track_no__icontains',
-            'einvoice__any_words__icontains',
-            'einvoice__details__description__icontains',
-            'identifier__icontains',
-            'seller__legal_entity__identifier__icontains',
-            'batch__slug__icontains',
-            'title__icontains',
-            'body__icontains',
-            'no_including',
-            'track__icontains',
-            'buyer_identifier__icontains'
+            'name__icontains',
+            'slug__icontains'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);
@@ -245,37 +226,6 @@ $(function () {
             }
         }
         var select_kind_params = [
-            'creator',
-            'einvoice__creator',
-            'printer',
-            'user',
-            'is_original_copy',
-            'is_active',
-            'is_error',
-            'print_mark',
-            'carrier_type__regex',
-            'npoban__regex',
-            'ei_synced',
-            'turnkey_service',
-            'turnkey_service',
-            'report_type',
-            'target_audience_type',
-            'type',
-            'mig_type__no',
-            'status',
-            'kind',
-            'status__regex',
-            'pass_if_error',
-            'seller__legal_entity__identifier',
-            'turnkey_service__seller__legal_entity__identifier',
-            'turnkey_service__seller__legal_entity__identifier',
-            'batch__turnkey_service__seller__legal_entity__identifier',
-            'seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier',
-            'einvoice__seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier',
-            'seller_invoice_track_no__turnkey_service',
-            'einvoice__seller_invoice_track_no__turnkey_service',
-            'batch__turnkey_service',
-            'cancel_einvoice_type'
         ];
         for (var param of select_kind_params) {
             var select_kind_param = url.searchParams.get(param);
@@ -340,7 +290,7 @@ $(function () {
         });
     }
 
-    TAIWAN_EINVOICE_SITE.prototype.rest_error = function ($self, dialog_id) {
+    ESCPOS_PRINTER_SITE.prototype.rest_error = function ($self, dialog_id) {
         return function (xhr, ajaxOptions, thrownError) {
             dialog_id = dialog_id ? dialog_id : 'error_dialog';
             var $modal = $('#' + dialog_id);
@@ -399,6 +349,6 @@ $(function () {
         };
     };
 
-    window.TAIWAN_EINVOICE_SITE = TAIWAN_EINVOICE_SITE;
+    window.ESCPOS_PRINTER_SITE = ESCPOS_PRINTER_SITE;
 
 });

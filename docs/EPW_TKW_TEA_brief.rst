@@ -69,3 +69,85 @@ TKW 資料設定
     * hash_key: 對應 turnkeyservice 紀錄
     * tea_turnkey_service_endpoint ，如: https://<CEC or TEA url>/taiwan_einvoice/api/v1/turnkeyservice/<turnkeyservice id>/
     * endpoint: 無需填寫， POST 後由 TKW 自動計算
+
+TEA supports ASGI with daphne, supervisor and nginx
+-------------------------------------------------------------------------------
+
+.. code-block:: sh
+
+    $ sudo apt install nginx supervisor
+    $ sudo mkdir /run/daphne/
+    $ sudo chown jenkins:jenkins /run/daphne/ # I use jenkins user to execute app
+    $ cat << 'EOF' > /usr/lib/tmpfiles.d/daphne.conf
+    d /run/daphne 0755 jenkins jenkins
+    EOF
+
+.. code-block:: text
+
+    #/etc/supervisor/conf.d/my-site.com.conf
+    [fcgi-program:my_site]
+    # TCP socket used by Nginx backend upstream
+    socket=tcp://localhost:8001
+
+    # Directory where your site's project files are located
+    directory=/var/www/my-site.com
+
+    # Each process needs to have a separate socket file, so we use process_num
+    # Make sure to update "mysite.asgi" to match your project name
+    command=/var/www/my-site.com-py3-env/bin/daphne -u /run/daphne/daphne%(process_num)d.sock --fd 0 --access-log - --proxy-headers my_site.asgi:application
+
+    # Number of processes to startup, roughly the number of CPUs you have
+    numprocs=4
+
+    # Give each process a unique name so they can be told apart
+    process_name=asgi%(process_num)d
+
+    # Automatically start and recover processes
+    autostart=true
+    autorestart=true
+
+    # Choose where you want your log to go
+    stdout_logfile=/var/www/my-site.com.asgi.log
+    redirect_stderr=true
+
+.. code-block:: sh
+
+    $ sudo supervisorctl reread
+    $ sudo supervisorctl update
+
+.. code-block:: text
+
+    #/etc/nginx/site-enabled/my-site.conf
+    server {
+        server_name     www.my-site.com;
+        access_log      /var/log/nginx/my-site.log;
+        error_log       /var/log/nginx/my-site_error.log;
+
+        listen          443 ssl;       # Listen on port 80 for IPv4 requests
+
+        include         /native-nginx/conf.d/ssl.conf;
+        ssl_certificate /native-nginx/certs/my-site.com/fullchain.pem; # managed by Certbot
+        ssl_certificate_key /native-nginx/certs/my-site.com/privkey.pem; # managed by Certbot
+
+        add_header      Content-Security-Policy "frame-ancestors 'self' hwww.my-site.com hwww.bio-pipe.com";
+
+        location / {
+            proxy_pass http://127.0.0.1:8001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_read_timeout 631;
+            proxy_send_timeout 631;
+            proxy_set_header    Host $host;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $remote_addr;
+            proxy_set_header    REMOTE_ADDR $remote_addr;
+            proxy_set_header    HTTP_HOST $host;
+        }
+    }
+
+.. code-block:: sh
+
+    $ sudo nginx -t
+    $ sudo systemctl restart nginx
+

@@ -5,32 +5,43 @@ import LCD_Config
 
 import RPi.GPIO as GPIO
 
-import time, logging, sys, netifaces, urllib.request, datetime, subprocess
+import django, os, time, logging, sys, netifaces, urllib.request, datetime, subprocess
 from PIL import Image, ImageDraw, ImageFont, ImageColor
-from libs import get_public_ip, get_eths, get_boot_seed, get_hour_minute
+from libs import get_tea_web_name, get_public_ip, get_eths, get_boot_seed, get_hour_minute
+
+
+PWD = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(PWD)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "escpos_web.settings")
+django.setup()
 
 
 def info_block(lg, draw):
-    height = 95
-    draw.text((20, height), "Pass key:", font=MENU_FONT, fill=0)
-    height -= 30
+    height = 110
+    name = get_tea_web_name()
+    draw.text((80 - 10 * len(name), height), name, font=NAME_FONT, fill=0)
+    height -= 20
+    draw.text((20, height), "Pass key:", font=PASS_KEY_FONT, fill=0)
+    height -= 28
     draw.text((5, height), get_boot_seed(), font=SEED_INFO_FONT, fill=0)
 
-    height -= 10
+    height -= 12
     public_ip = get_public_ip()
     lg.info(public_ip)
-    draw.text((80, height), "IP:", font=IP_INFO_FONT, fill=0)
-    height -= 15
+    draw.text((50, height), "Outgoin IP:", font=IP_INFO_FONT, fill=0)
+    height -= 10
     draw.text((5, height), public_ip, font=IP_INFO_FONT, fill=0)
 
-    height -= 15
+    height -= 13
+    draw.text((5, height), "啟動時間:{}".format(get_hour_minute()), font=IP_INFO_FONT, fill=0)
+    height -= 3
+
     eths = get_eths()
     lg.info(eths)
     for e in eths:
-        draw.text((80, height), e[0], font=IP_INFO_FONT, fill=0)
-        draw.text((5, height-10), e[1], font=IP_INFO_FONT, fill=0)
         height -= 10
-    draw.text((5, height-13), "啟動時間:{}".format(get_hour_minute()), font=IP_INFO_FONT, fill=0)
+        draw.text((70, height), e[0], font=IP_INFO_FONT, fill=0)
+        draw.text((5, height), e[1], font=IP_INFO_FONT, fill=0)
 
 
 logging.basicConfig()
@@ -42,11 +53,15 @@ try:
 except:
     TTF_PATH = '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'
 MENU_FONT0 = ImageFont.truetype(TTF_PATH, 18)
-MENU_FONT = ImageFont.TransposedFont(MENU_FONT0, orientation=Image.ROTATE_180)
-IP_INFO_FONT0 = ImageFont.truetype(TTF_PATH, 12)
-IP_INFO_FONT = ImageFont.TransposedFont(IP_INFO_FONT0, orientation=Image.ROTATE_180)
+MENU_FONT = ImageFont.TransposedFont(MENU_FONT0, orientation=Image.Transpose.ROTATE_180)
+NAME_FONT0 = ImageFont.truetype(TTF_PATH, 12)
+NAME_FONT = ImageFont.TransposedFont(NAME_FONT0, orientation=Image.Transpose.ROTATE_180)
+PASS_KEY_FONT0 = ImageFont.truetype(TTF_PATH, 16)
+PASS_KEY_FONT = ImageFont.TransposedFont(PASS_KEY_FONT0, orientation=Image.Transpose.ROTATE_180)
+IP_INFO_FONT0 = ImageFont.truetype(TTF_PATH, 10)
+IP_INFO_FONT = ImageFont.TransposedFont(IP_INFO_FONT0, orientation=Image.Transpose.ROTATE_180)
 SEED_INFO_FONT0 = ImageFont.truetype(TTF_PATH, 32)
-SEED_INFO_FONT = ImageFont.TransposedFont(SEED_INFO_FONT0, orientation=Image.ROTATE_180)
+SEED_INFO_FONT = ImageFont.TransposedFont(SEED_INFO_FONT0, orientation=Image.Transpose.ROTATE_180)
 
 KEY_UP_PIN     = 6 
 KEY_DOWN_PIN   = 19
@@ -138,7 +153,7 @@ while 1:
         KEY_PRESS = None
 
     # with canvas(device) as draw:
-    if GPIO.input(KEY_PRESS_PIN) == 0: # button is released
+    if GPIO.input(KEY_PRESS_PIN) == 0: # pressed
         draw.rectangle(PRESS_PIN_SHAPE, outline=255, fill=0xff00) #center 
         lg.info("center")
         if KEY_PRESS and 'KEY1' == KEY_PRESS:
@@ -154,60 +169,60 @@ while 1:
             subprocess.run(['supervisorctl', 'restart', 'all'])
             break
 
-    else: # button is pressed:
+    else: # released
         draw.rectangle(PRESS_PIN_SHAPE, outline=255, fill=0) #center filled
         
-    if GPIO.input(KEY_LEFT_PIN) == 0: # button is released
+    if GPIO.input(KEY_LEFT_PIN) == 0: # pressed
         draw.polygon(LEFT_PIN_SHAPE, outline=255, fill=0xff00)  #left
         lg.info("left")
-    else: # button is pressed:       
+    else: # released
         draw.polygon(LEFT_PIN_SHAPE, outline=255, fill=0)  #left filled
         
-    if GPIO.input(KEY_UP_PIN) == 0: # button is released       
+    if GPIO.input(KEY_UP_PIN) == 0: # pressed
         draw.polygon(UP_PIN_SHAPE, outline=255, fill=0xff00)  #Up        
         lg.info("Up")
-    else: # button is pressed:
+    else: # released
         draw.polygon(UP_PIN_SHAPE, outline=255, fill=0)  #Up filled
         
-    if GPIO.input(KEY_RIGHT_PIN) == 0: # button is released
+    if GPIO.input(KEY_RIGHT_PIN) == 0: # pressed
         draw.polygon(RIGHT_PIN_SHAPE, outline=255, fill=0xff00) #right
         lg.info("right")
-    else: # button is pressed:
-        draw.polygon(RIGHT_PIN_SHAPE, outline=255, fill=0) #right filled       
+    else: # released
+        draw.polygon(RIGHT_PIN_SHAPE, outline=255, fill=0x00ff) #right filled       
         
-    if GPIO.input(KEY_DOWN_PIN) == 0: # button is released
+    if GPIO.input(KEY_DOWN_PIN) == 0: # pressed
         draw.polygon(DOWN_PIN_SHAPE, outline=255, fill=0xff00) #down
         lg.info("down")
-    else: # button is pressed:
+    else: # released
         draw.polygon(DOWN_PIN_SHAPE, outline=255, fill=0) #down filled
         
-    if GPIO.input(KEY1_PIN) == 0 or ('KEY1' == KEY_PRESS and now - KEY_PRESS_TIME < KEY_PRESS_DURATION): # button is released
+    if GPIO.input(KEY1_PIN) == 0 or ('KEY1' == KEY_PRESS and now - KEY_PRESS_TIME < KEY_PRESS_DURATION): # pressed
         if GPIO.input(KEY1_PIN) == 0:
             KEY_PRESS = 'KEY1'
             KEY_PRESS_TIME = time.time()
         draw.rectangle(KEY1_PIN_SHAPE, outline=255, fill=KEY1_PIN_PRESS_COLOR) #A button
         lg.info("KEY1")
-    else: # button is pressed:
+    else: # released
         draw.rectangle(KEY1_PIN_SHAPE, outline=255, fill=KEY_PIN_COLOR) #A button filled
     draw.text(KEY1_PIN_FONT_POSITION, KEY1_PIN_TEXT, font=MENU_FONT, fill=0)
         
-    if GPIO.input(KEY2_PIN) == 0 or ('KEY2' == KEY_PRESS and now - KEY_PRESS_TIME < KEY_PRESS_DURATION): # button is released
+    if GPIO.input(KEY2_PIN) == 0 or ('KEY2' == KEY_PRESS and now - KEY_PRESS_TIME < KEY_PRESS_DURATION): # pressed
         if GPIO.input(KEY2_PIN) == 0:
             KEY_PRESS = 'KEY2'
             KEY_PRESS_TIME = time.time()
         draw.rectangle(KEY2_PIN_SHAPE, outline=255, fill=KEY2_PIN_PRESS_COLOR) #B button]
         lg.info("KEY2")
-    else: # button is pressed:
+    else: # released
         draw.rectangle(KEY2_PIN_SHAPE, outline=255, fill=KEY_PIN_COLOR) #B button filled
     draw.text(KEY2_PIN_FONT_POSITION, KEY2_PIN_TEXT, font=MENU_FONT, fill=0)
         
-    if GPIO.input(KEY3_PIN) == 0 or ('KEY3' == KEY_PRESS and now - KEY_PRESS_TIME < KEY_PRESS_DURATION): # button is released
+    if GPIO.input(KEY3_PIN) == 0 or ('KEY3' == KEY_PRESS and now - KEY_PRESS_TIME < KEY_PRESS_DURATION): # pressed
         if GPIO.input(KEY3_PIN) == 0:
             KEY_PRESS = 'KEY3'
             KEY_PRESS_TIME = time.time()
         draw.rectangle(KEY3_PIN_SHAPE, outline=255, fill=KEY3_PIN_PRESS_COLOR) #A button
         lg.info("KEY3")
-    else: # button is pressed:
+    else: # released
         draw.rectangle(KEY3_PIN_SHAPE, outline=255, fill=KEY_PIN_COLOR) #A button filled
     draw.text(KEY3_PIN_FONT_POSITION, KEY3_PIN_TEXT, font=MENU_FONT, fill=0)
 

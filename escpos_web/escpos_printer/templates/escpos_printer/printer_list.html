@@ -1,0 +1,67 @@
+{% extends 'escpos_printer/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    <script src="{% static "escpos_printer/printer_list.js" %}"></script>
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="serial_number__icontains">{% trans "Serial Number contains" %}</label>
+                    <div class="input-group" id="serial_number__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="serial_number__icontains" id="id_serial_number__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <div class="form-group">
+                    <label for="nickname__icontains">{% trans "Nickname contains" %}</label>
+                    <div class="input-group" id="nickname__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="nickname__icontains" id="id_nickname__icontains" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}
