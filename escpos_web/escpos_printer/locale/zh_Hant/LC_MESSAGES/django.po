@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-03 10:25+0800\n"
+"POT-Creation-Date: 2022-09-03 18:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,6 +121,9 @@ msgstr "名稱包含"
 msgid "Slug contains"
 msgstr "代號包含"
 
+msgid "Connect this TEA Web"
+msgstr ""
+
 msgid "Name"
 msgstr "名稱"
 
@@ -130,8 +133,47 @@ msgstr "網址"
 msgid "Slug"
 msgstr "代號"
 
+msgid "Hash Key"
+msgstr "金錀"
+
+msgid "Now Use?"
+msgstr "現在使用?"
+
+msgctxt "now_use"
+msgid "Yes"
+msgstr "使用"
+
+msgid "Pass Key"
+msgstr "通行碼(Pass Key)"
+
+msgid ""
+"\n"
+"                    Please get the \"Pass Key\" from the LCD of ESC/POS Web.\n"
+"                    <span class=\"text-danger\">Notice! The pass key is case-sensitive.</span>\n"
+"                "
+msgstr ""
+"\n"
+"                    請從發票機面板上得到\"通行碼(Pass Key)\"。\n"
+"                    <span class=\"text-danger\">注意! 此通行碼會區分大小寫。</span>\n"
+"                "
+
+msgid "Configure"
+msgstr "設定"
+
+msgid "Cancel"
+msgstr "關閉"
+
 msgid "hash key"
 msgstr "金錀"
 
 msgid "Now use?"
 msgstr "現在使用?"
+
+msgid "Button"
+msgstr "按鈕"
+
+msgid "Pass Key Error"
+msgstr "通行碼錯誤"
+
+msgid "Pass Key is not '{}'!"
+msgstr "通行碼不是 '{}'!"
