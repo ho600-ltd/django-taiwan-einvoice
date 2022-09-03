@@ -5,9 +5,15 @@ import LCD_Config
 
 import RPi.GPIO as GPIO
 
-import time, logging, sys, netifaces, urllib.request, datetime, subprocess
+import django, os, time, logging, sys, netifaces, urllib.request, datetime, subprocess
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 from libs import get_tea_web_name, get_public_ip, get_eths, get_boot_seed, get_hour_minute
+
+
+PWD = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(PWD)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "escpos_web.settings")
+django.setup()
 
 
 def info_block(lg, draw):

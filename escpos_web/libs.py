@@ -110,8 +110,12 @@ class UsbZhHant(Usb):
 
 
 def get_tea_web_name():
-    count = int(datetime.datetime.now().strftime('%H')) % 8 + 1
-    return '○' * 8
+    from escpos_printer.models import TEAWeb
+    tea_webs = TEAWeb.objects.filter(now_use=True).order_by('id')
+    if tea_webs:
+        return tea_webs[0].name
+    else:
+        return '無可使用的伺服器'
 
 
 def get_public_ip():
