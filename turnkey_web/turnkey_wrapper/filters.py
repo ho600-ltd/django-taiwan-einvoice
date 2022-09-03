@@ -213,6 +213,7 @@ class EITurnkeyBatchEInvoiceFilter(filters.FilterSet):
             "ei_turnkey_batch": ("exact", ),
             "batch_einvoice_id": ("exact", ),
             "batch_einvoice_track_no": ("exact", "icontains", ),
+            "status": ("exact", ),
             "result_code": ("exact", "icontains", ),
         }
     
