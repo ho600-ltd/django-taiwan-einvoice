@@ -271,7 +271,7 @@ class TEAWeb(models.Model):
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
-    now_use = models.BooleanField(default=False)
+    now_use = models.BooleanField(default=True)
 
 
     def generate_token_auth(self):

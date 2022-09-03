@@ -10,7 +10,9 @@ assets/*/
 docs/_build
 turnkey_web/statics/
 escpos_web/statics/
+escpos_web/django-taiwan-einvoice.crt
 .py3env/
+*.key
 *.log
 *.pyc
 *.mo

@@ -33,7 +33,7 @@ for eth in netifaces.interfaces():
     try: ip = netifaces.ifaddresses(eth)[netifaces.AF_INET][0]['addr']
     except: pass
     else: ips.append(ip)
-ALLOWED_HOSTS = [] + ips
+ALLOWED_HOSTS = ["epw", ] + ips
 
 
 # Application definition
@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -118,18 +119,18 @@ AUTH_PASSWORD_VALIDATORS = [
 
 TIME_ZONE = 'Asia/Taipei'
 
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
 LANGUAGE_CODE = 'zh-hant'
 
 LANGUAGES = (
     ('zh-hant', u'\u6b63\u9ad4\u4e2d\u6587(Taiwan, R.O.C.)'),
     ('en-us', 'English(United States)'),
 )
+
+USE_I18N = True
+
+USE_L10N = False
+
+USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/

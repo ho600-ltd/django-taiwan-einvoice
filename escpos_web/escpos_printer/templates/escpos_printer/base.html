@@ -61,7 +61,7 @@
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
                         <li class="nav-item nav_printer" role="presentation">
-                            <a class="nav-link" href="{% url 'escposwebapi:printer-list' %}?format=html">{% trans "Printer" %}</a>
+                            <a class="nav-link" href="{% url 'escposwebapi:printer-list' %}?format=html">{% trans "ESC/POS Printer" %}</a>
                         </li>
                         <li class="nav-item nav_teaweb" role="presentation">
                             <a class="nav-link" href="{% url 'escposwebapi:teaweb-list' %}?format=html">{% trans "TEA Web" %}</a>
@@ -71,7 +71,7 @@
                                 aria-expanded="false"
                                 class="dropdown-toggle nav-link"
                                 href="#">
-                                    {% if not user.last_name or not user.first_name %}
+                                    {% if not user.last_name and not user.first_name %}
                                         {{ user.email }}
                                     {% else %}
                                         {{ user.last_name }}{{ user.first_name }}
