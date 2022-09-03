@@ -47,15 +47,15 @@ try:
 except:
     TTF_PATH = '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc'
 MENU_FONT0 = ImageFont.truetype(TTF_PATH, 18)
-MENU_FONT = ImageFont.TransposedFont(MENU_FONT0, orientation=Image.ROTATE_180)
+MENU_FONT = ImageFont.TransposedFont(MENU_FONT0, orientation=Image.Transpose.ROTATE_180)
 NAME_FONT0 = ImageFont.truetype(TTF_PATH, 12)
-NAME_FONT = ImageFont.TransposedFont(NAME_FONT0, orientation=Image.ROTATE_180)
+NAME_FONT = ImageFont.TransposedFont(NAME_FONT0, orientation=Image.Transpose.ROTATE_180)
 PASS_KEY_FONT0 = ImageFont.truetype(TTF_PATH, 16)
-PASS_KEY_FONT = ImageFont.TransposedFont(PASS_KEY_FONT0, orientation=Image.ROTATE_180)
+PASS_KEY_FONT = ImageFont.TransposedFont(PASS_KEY_FONT0, orientation=Image.Transpose.ROTATE_180)
 IP_INFO_FONT0 = ImageFont.truetype(TTF_PATH, 10)
-IP_INFO_FONT = ImageFont.TransposedFont(IP_INFO_FONT0, orientation=Image.ROTATE_180)
+IP_INFO_FONT = ImageFont.TransposedFont(IP_INFO_FONT0, orientation=Image.Transpose.ROTATE_180)
 SEED_INFO_FONT0 = ImageFont.truetype(TTF_PATH, 32)
-SEED_INFO_FONT = ImageFont.TransposedFont(SEED_INFO_FONT0, orientation=Image.ROTATE_180)
+SEED_INFO_FONT = ImageFont.TransposedFont(SEED_INFO_FONT0, orientation=Image.Transpose.ROTATE_180)
 
 KEY_UP_PIN     = 6 
 KEY_DOWN_PIN   = 19

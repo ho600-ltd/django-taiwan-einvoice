@@ -64,4 +64,46 @@
 
 {% block modals %}
 
+<div class="modal fade" id="update_teaweb_modal" tabindex="-1" role="dialog"
+    aria-labelledby="update_teaweb_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "Connect this TEA Web" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>{% trans "Name" %}:</h4>
+                <p field="name"></p>
+
+                <h4>{% trans "Url" %}:</h4>
+                <p field="url"></p>
+
+                <h4>{% trans "Slug" %}:</h4>
+                <p field="slug"></p>
+
+                <h4>{% trans "Hash Key" %}:</h4>
+                <p field="mask_hash_key"></p>
+
+                <h4>{% trans "Now Use?" %}:</h4>
+                <p>{% trans "Yes" context "now_use" %}</p>
+
+                <h4><span class="text-danger">*</span> {% trans "Pass Key" %}:</h4>
+                <input name="pass_key" class="form-control" type="text"/>
+                <p>{% blocktrans %}
+                    Please get the "Pass Key" from the LCD of ESC/POS Web.
+                    <span class="text-danger">Notice! The pass key is case-sensitive.</span>
+                {% endblocktrans %}</p>
+            </div>
+            <div class="modal-footer">
+                <button id="update_teaweb_button_0" type="button" class="update_teaweb btn btn-secondary">{% trans "Configure" %}</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

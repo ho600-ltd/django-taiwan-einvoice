@@ -20,9 +20,9 @@ from django.views.static import serve
 from django.conf import settings
 from rest_framework import routers
 from rest_framework.renderers import JSONRenderer
-from rest_framework.schemas import get_schema_view
+from rest_framework.permissions import IsAdminUser
 from escpos_printer.renderers import EPWBrowsableAPIRenderer
-from escpos_printer.permissions import IsSuperUserInIntranet
+from escpos_printer.permissions import IsInIntranet
 
 from escpos_printer import views
 
@@ -33,11 +33,11 @@ class ESCPOSWebAPIRootView(routers.APIRootView):
     """
     version = 'v1'
     renderer_classes = (JSONRenderer, )
-    permission_classes = (IsSuperUserInIntranet, )
+    permission_classes = (IsInIntranet, IsAdminUser, )
 
 
     def initial(self, request, *args, **kwargs):
-        if request.user.is_staff or request.user.is_superuser:
+        if request.user and request.user.is_staff:
             self.renderer_classes = (EPWBrowsableAPIRenderer, JSONRenderer, )
         super().initial(request, *args, **kwargs)
 

@@ -6,9 +6,8 @@ from channels.db import database_sync_to_async
 from libs import get_boot_seed
 
 SSL = False
-dir = os.path.abspath(__file__)
-print(dir)
-sys.path.append(dir)
+PWD = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(PWD)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "escpos_web.settings")
 django.setup()
 from escpos_printer.models import TEAWeb, Printer, Receipt, ReceiptLog
@@ -16,6 +15,8 @@ from escpos_printer.models import TEAWeb, Printer, Receipt, ReceiptLog
 logging.basicConfig()
 lg = logging.getLogger(__name__)
 lg.setLevel('INFO')
+
+lg.debug("PWD: {}".format(PWD))
 
 async def connect_and_print_receipt(tea_web):
     token_auth = tea_web.generate_token_auth()
@@ -137,15 +138,20 @@ def check_printer_status(while_order):
 
 
 if '__main__' == __name__:
-    method = sys.argv[1]
-    args = sys.argv[2:]
-    url = args[0]
-    SSL = True if args[1] == 'ssl=true' else False
+    try:
+        tea_web = TEAWeb.objects.filter(now_use=True).order_by('id')[0]
+    except IndexError:
+        raise Exception("No TEAWeb object!")
+    else:
+        method = sys.argv[1]
+        args = sys.argv[2:]
+        ssl_status = args[0]
+        lg.debug("ssl status: {}".format(ssl_status))
+        SSL = True if ssl_status == 'ssl=true' else False
+        lg.debug("tea_web url: {}".format(tea_web.url))
 
-    if 'print_receipt' == method:
-        tea_web = TEAWeb.objects.get(url=url)
-        asyncio.get_event_loop().run_until_complete(connect_and_print_receipt(tea_web))
-    elif 'check_printer_status' == method:
-        tea_web = TEAWeb.objects.get(url=url)
-        asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(tea_web))
+        if 'print_receipt' == method:
+            asyncio.get_event_loop().run_until_complete(connect_and_print_receipt(tea_web))
+        elif 'check_printer_status' == method:
+            asyncio.get_event_loop().run_until_complete(connect_and_check_print_status(tea_web))
 
