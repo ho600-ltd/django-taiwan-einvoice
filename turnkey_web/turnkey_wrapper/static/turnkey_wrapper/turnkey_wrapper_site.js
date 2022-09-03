@@ -263,7 +263,9 @@ $(function () {
             'MESSAGE_TYPE',
             'FROM_ROUTING_ID',
             'is_parsed',
-            'ei_turnkey_batch__mig'
+            'ei_turnkey_batch__mig',
+            'ei_turnkey__party_id',
+            'ei_turnkey_batch__ei_turnkey__party_id'
         ];
         for (var param of select_kind_params) {
             var select_kind_param = url.searchParams.get(param);

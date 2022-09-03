@@ -183,6 +183,7 @@ class EITurnkeyBatchHtmlRenderer(TKWOriginHTMLRenderer):
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
         res['status_choices'] = EITurnkeyBatch.status_choices
+        res['party_ids'] = EITurnkey.objects.all().values_list('party_id', flat=True)
         return  res
 
 
@@ -197,6 +198,7 @@ class EITurnkeyBatchEInvoiceHtmlRenderer(TKWOriginHTMLRenderer):
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
         res['status_choices'] = EITurnkeyBatchEInvoice.status_choices
+        res['party_ids'] = EITurnkey.objects.all().values_list('party_id', flat=True)
         return  res
 
 

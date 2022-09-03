@@ -17,15 +17,20 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
-                    <label for="ei_turnkey_batch__slug__icontains">{% trans "Batch Slug contains" %}</label>
-                    <div class="input-group" id="ei_turnkey_batch__slug__icontains" data-target-input="nearest">
-                        <input type="text" class="form-control" name="ei_turnkey_batch__slug__icontains" id="id_ei_turnkey_batch__slug__icontains" />
+                    <label for="ei_turnkey_batch__ei_turnkey__party_id">{% trans "Seller Party ID" %}</label>
+                    <div class="input-group" id="ei_turnkey_batch__ei_turnkey__party_id" data-target-input="nearest">
+                        <select class="form-control" data-target="#ei_turnkey_batch__ei_turnkey__party_id" name="ei_turnkey_batch__ei_turnkey__party_id" id="id_ei_turnkey_batch__ei_turnkey__party_id">
+                            <option value=""></option>
+                            {% for pi in party_ids %}
+                                <option value="{{ pi }}">{{ pi }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="ei_turnkey_batch__mig">{% trans "MIG" %}</label>
                     <div class="input-group" id="ei_turnkey_batch__mig" data-target-input="nearest">
@@ -38,7 +43,15 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="ei_turnkey_batch__slug__icontains">{% trans "Batch Slug contains" %}</label>
+                    <div class="input-group" id="ei_turnkey_batch__slug__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="ei_turnkey_batch__slug__icontains" id="id_ei_turnkey_batch__slug__icontains" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
                 <div class="form-group">
                     <label for="batch_einvoice_track_no__icontains">{% trans "Track No." %}</label>
                     <div class="input-group" id="batch_einvoice_track_no__icontains" data-target-input="nearest">
