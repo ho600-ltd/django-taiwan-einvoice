@@ -334,6 +334,7 @@ class EInvoiceFilter(filters.FilterSet):
             'npoban': ('regex', ),
             'reverse_void_order': ('exact', 'gte', 'gt', 'lte', 'lt'),
             'ei_synced': ('exact', ),
+            'buyer_identifier': ('icontains', ),
         }
 
 

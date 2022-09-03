@@ -96,7 +96,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-3">
+                <div class="col-sm-12 col-md-2">
+                    <div class="form-group">
+                        <label for="buyer_identifier__icontains">{% trans "Buyer Identifier contains" %}</label>
+                        <div class="input-group" id="buyer_identifier__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="buyer_identifier__icontains" id="id_buyer_identifier__icontains" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-2">
                     <div class="form-group">
                         <label for="generate_time__gte">{% trans "Generate time later than" %}</label>
                         <div class="input-group date" id="generate_time__gte" data-target-input="nearest">
@@ -108,7 +116,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-3">
+                <div class="col-sm-12 col-md-2">
                     <div class="form-group">
                         <label for="generate_time__lt">{% trans "Generate time earlier than" %}</label>
                         <div class="input-group date" id="generate_time__lt" data-target-input="nearest">

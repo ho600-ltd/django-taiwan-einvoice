@@ -235,7 +235,8 @@ $(function () {
             'title__icontains',
             'body__icontains',
             'no_including',
-            'track__icontains'
+            'track__icontains',
+            'buyer_identifier__icontains'
         ];
         for (var param of string_kind_params) {
             var string_kind_param = url.searchParams.get(param);
