@@ -63,7 +63,7 @@
                         <span class="font-weight-light">{% trans "None" %}</span>
                     {% endif %}{% endif %}
                 </td>
-                <td field="abspath"><a target="xml_{{obj.id}}" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-get-xml-content-detail' pk=obj.id %}">{{ obj.abspath }}</a></td>
+                <td field="abspath"><a target="xml_{{obj.id}}" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-get-xml-content' pk=obj.id %}">{{ obj.abspath }}</a></td>
             </tr>
         {% endfor %}
     </tbody>
