@@ -1,4 +1,10 @@
 import logging, json, zlib, datetime
+
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -98,6 +104,10 @@ from turnkey_wrapper.renderers import (
     EITurnkeyDailySummaryResultHtmlRenderer,
 )
 
+
+@login_required
+def index(request, *args, **kwargs):
+    return HttpResponseRedirect(reverse("turnkeywrapperapi:eiturnkey-list"))
 
 
 class FROM_CONFIGModelViewSet(ModelViewSet):
