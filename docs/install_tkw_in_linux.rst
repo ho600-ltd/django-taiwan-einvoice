@@ -22,6 +22,78 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 .. code-block:: sh
 
     $ sudo yum install cjkuni-uming-fonts.noarch google-noto-sans-traditional-chinese-fonts.noarch java-1.8.0-openjdk
+    $ sudo yum install amazon-cloudwatch-agent collectd # for CloudWatchMonitoringScripts
+    $ sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json # or sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
+    $ cat /opt/aws/amazon-cloudwatch-agent/bin/config.json
+    {
+        "agent": {
+            "metrics_collection_interval": 60,
+            "run_as_user": "root"
+        },
+        "logs": {
+            "logs_collected": {
+                "files": {
+                    "collect_list": [
+                        {
+                            "file_path": "/home/ec2-user/django-taiwan-einvoice/turnkey_web.asgi.log",
+                            "log_group_name": "turnkey_web.asgi.log",
+                            "log_stream_name": "${instance_id}",
+                            "retention_in_days": 7
+                        }
+                    ]
+                }
+            }
+        },
+        "metrics": {
+            "aggregation_dimensions": [
+                [
+                    "InstanceId"
+                ]
+            ],
+            "append_dimensions": {
+                "AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+                "ImageId": "${aws:ImageId}",
+                "InstanceId": "${aws:InstanceId}",
+                "InstanceType": "${aws:InstanceType}"
+            },
+            "metrics_collected": {
+                "collectd": {
+                    "metrics_aggregation_interval": 60
+                },
+                "disk": {
+                    "measurement": [
+                        "used_percent"
+                    ],
+                    "metrics_collection_interval": 60,
+                    "resources": [
+                        "*"
+                    ]
+                },
+                "mem": {
+                    "measurement": [
+                        "mem_used_percent"
+                    ],
+                    "metrics_collection_interval": 60
+                },
+                "statsd": {
+                    "metrics_aggregation_interval": 60,
+                    "metrics_collection_interval": 60,
+                    "service_address": ":8125"
+                }
+            }
+        }
+    }
+    $ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+    $ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+    {
+        "status": "running",
+        "starttime": "2022-09-07T06:08:59+0000",
+        "configstatus": "configured",
+        "cwoc_status": "stopped",
+        "cwoc_starttime": "",
+        "cwoc_configstatus": "not configured",
+        "version": "1.247352.0"
+    }
 
 創建 PostgreSQL 資料庫:
 
