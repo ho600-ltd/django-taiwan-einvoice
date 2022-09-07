@@ -1,7 +1,5 @@
 $(function () {
-    $(".nav_operation").addClass("nav_active");
-    $('.dropdown-menu a').removeClass('active');
-    $(".nav_EITurnkeyBatch").addClass("active");
+    $(".nav_EITurnkeyBatch").addClass("nav_active");
 
 
     turnkey_wrapper_site = new turnkey_wrapper_site('turnkey_wrapper_site', {
