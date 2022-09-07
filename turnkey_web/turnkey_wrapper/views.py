@@ -387,6 +387,13 @@ class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
     http_method_names = ('get', )
 
 
+    @action(detail=True, methods=['get'])
+    def get_xml_content(self, request, pk=None):
+        result = EITurnkeyDailySummaryResultXML.objects.get(id=pk)
+        content = result.content
+        return Response(content)
+
+
 
 class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
