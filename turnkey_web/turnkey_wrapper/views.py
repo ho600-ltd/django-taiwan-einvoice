@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
-
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -84,6 +83,7 @@ from turnkey_wrapper.filters import (
     EITurnkeyDailySummaryResultFilter,
 )
 from turnkey_wrapper.renderers import (
+    XMLFileRenderer,
     TKWBrowsableAPIRenderer,
     FROM_CONFIGHtmlRenderer,
     SCHEDULE_CONFIGHtmlRenderer,
@@ -383,7 +383,7 @@ class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
     queryset = EITurnkeyDailySummaryResultXML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
     serializer_class = EITurnkeyDailySummaryResultXMLSerializer
     filter_class = EITurnkeyDailySummaryResultXMLFilter
-    renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
     http_method_names = ('get', )
 
 

@@ -5,10 +5,11 @@ from datetime import datetime
 from io import BytesIO
 
 from django.template.loader import get_template
+from django.utils.encoding import smart_text
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
-from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
+from rest_framework.renderers import BaseRenderer, BrowsableAPIRenderer, HTMLFormRenderer
 
 
 from turnkey_wrapper.models import EI_STATUSS, MIG_NOS, FROM_CONFIG, EITurnkey, EITurnkeyBatch, EITurnkeyBatchEInvoice
@@ -60,6 +61,16 @@ def _get_template_name(template_name, sub_dir='', show_template_filename=False, 
         lg.info('Use template: "%s"' % t)
 
     return t
+
+
+
+class XMLFileRenderer(BaseRenderer):
+    media_type = 'text/xml'
+    format = 'xml'
+
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return smart_text(data, encoding=self.charset)
 
 
 
