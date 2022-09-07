@@ -83,6 +83,7 @@ from turnkey_wrapper.filters import (
     EITurnkeyDailySummaryResultFilter,
 )
 from turnkey_wrapper.renderers import (
+    PlainFileRenderer,
     XMLFileRenderer,
     TKWBrowsableAPIRenderer,
     FROM_CONFIGHtmlRenderer,
@@ -180,8 +181,20 @@ class TURNKEY_MESSAGE_LOG_DETAILModelViewSet(ModelViewSet):
     queryset = TURNKEY_MESSAGE_LOG_DETAIL.objects.all().order_by('-PROCESS_DTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_MESSAGE_LOG_DETAILSerializer
     filter_class = TURNKEY_MESSAGE_LOG_DETAILFilter
-    renderer_classes = (TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    renderer_classes = (TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, PlainFileRenderer)
     http_method_names = ('get', )
+
+
+    @action(detail=True, methods=['get'])
+    def get_file_content(self, request, pk=None):
+        SEQNO, SUBSEQNO, TASK = pk.split('-')
+        result = TURNKEY_MESSAGE_LOG_DETAIL.objects.get(SEQNO=SEQNO, SUBSEQNO=SUBSEQNO, TASK=TASK)
+        try:
+            content = open(result.FILENAME, 'r').read()
+        except:
+            content = _("File Read Error")
+        return Response(content)
+
 
 
 

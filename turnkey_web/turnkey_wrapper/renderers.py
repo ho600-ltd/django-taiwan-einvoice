@@ -74,6 +74,16 @@ class XMLFileRenderer(BaseRenderer):
 
 
 
+class PlainFileRenderer(BaseRenderer):
+    media_type = 'text/plain'
+    format = 'plain'
+
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return smart_text(data, encoding=self.charset)
+
+
+
 class TKWBrowsableAPIRenderer(BrowsableAPIRenderer):
     template = "turnkey_wrapper/api.html"
 
