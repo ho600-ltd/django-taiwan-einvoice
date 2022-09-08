@@ -6,7 +6,7 @@ from django.db import migrations
 def add_0000000000(apps, schema_editor):
     LegalEntity = apps.get_model('taiwan_einvoice', 'LegalEntity')
     GENERAL_CONSUMER_IDENTIFIER = 10*'0'
-    le = LegalEntity.objects.get_or_create(identifier=GENERAL_CONSUMER_IDENTIFIER, name=GENERAL_CONSUMER_IDENTIFIER)
+    le, created = LegalEntity.objects.get_or_create(identifier=GENERAL_CONSUMER_IDENTIFIER, name=GENERAL_CONSUMER_IDENTIFIER)
     le.customer_number_char = 'General consumer'
     le.save()
 
