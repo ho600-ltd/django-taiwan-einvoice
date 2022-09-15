@@ -1,4 +1,9 @@
 import logging, json, zlib, datetime
+
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -78,6 +83,8 @@ from turnkey_wrapper.filters import (
     EITurnkeyDailySummaryResultFilter,
 )
 from turnkey_wrapper.renderers import (
+    PlainFileRenderer,
+    XMLFileRenderer,
     TKWBrowsableAPIRenderer,
     FROM_CONFIGHtmlRenderer,
     SCHEDULE_CONFIGHtmlRenderer,
@@ -98,6 +105,10 @@ from turnkey_wrapper.renderers import (
     EITurnkeyDailySummaryResultHtmlRenderer,
 )
 
+
+@login_required
+def index(request, *args, **kwargs):
+    return HttpResponseRedirect(reverse("turnkeywrapperapi:eiturnkey-list"))
 
 
 class FROM_CONFIGModelViewSet(ModelViewSet):
@@ -170,8 +181,20 @@ class TURNKEY_MESSAGE_LOG_DETAILModelViewSet(ModelViewSet):
     queryset = TURNKEY_MESSAGE_LOG_DETAIL.objects.all().order_by('-PROCESS_DTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_MESSAGE_LOG_DETAILSerializer
     filter_class = TURNKEY_MESSAGE_LOG_DETAILFilter
-    renderer_classes = (TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    renderer_classes = (TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, PlainFileRenderer)
     http_method_names = ('get', )
+
+
+    @action(detail=True, methods=['get'])
+    def get_file_content(self, request, pk=None):
+        SEQNO, SUBSEQNO, TASK = pk.split('-')
+        result = TURNKEY_MESSAGE_LOG_DETAIL.objects.get(SEQNO=SEQNO, SUBSEQNO=SUBSEQNO, TASK=TASK)
+        try:
+            content = open(result.FILENAME, 'r').read()
+        except:
+            content = _("File Read Error")
+        return Response(content)
+
 
 
 
@@ -373,8 +396,15 @@ class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
     queryset = EITurnkeyDailySummaryResultXML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
     serializer_class = EITurnkeyDailySummaryResultXMLSerializer
     filter_class = EITurnkeyDailySummaryResultXMLFilter
-    renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
     http_method_names = ('get', )
+
+
+    @action(detail=True, methods=['get'])
+    def get_xml_content(self, request, pk=None):
+        result = EITurnkeyDailySummaryResultXML.objects.get(id=pk)
+        content = result.content
+        return Response(content)
 
 
 

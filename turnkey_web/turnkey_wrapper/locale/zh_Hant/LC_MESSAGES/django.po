@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-03 19:07+0800\n"
+"POT-Creation-Date: 2022-09-07 09:31+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -227,23 +227,20 @@ msgstr "切換"
 msgid "RAW Turnkey DB"
 msgstr "原始 Turnkey 資料庫"
 
-msgid "Operation"
-msgstr "作業"
-
 msgid "EI Turnkey"
 msgstr "EI Turnkey"
 
-msgid "EI Turnkey Batch"
-msgstr "EI Turnkey 批次"
+msgid "Batch"
+msgstr "批次"
 
-msgid "EI Turnkey BatchE Invoice"
-msgstr "EI Turnkey 批次發票"
+msgid "Batch E-Invoice"
+msgstr "批次發票"
 
-msgid "EI Turnkey Daily Summary Result XML"
-msgstr "EI Turnkey 日總結 XML"
+msgid "Summary Result XML"
+msgstr "日總結 XML"
 
-msgid "EI Turnkey Daily Summary Result"
-msgstr "EI Turnkey 日總結成果"
+msgid "Summary Result"
+msgstr "日總結成果"
 
 msgid "Timezone"
 msgstr "時區"
@@ -367,9 +364,3 @@ msgstr "檔案路徑"
 
 msgid "None"
 msgstr ""
-
-#~ msgid "Result Date greater than"
-#~ msgstr "報表時間晚於"
-
-#~ msgid "Result Date less than"
-#~ msgstr "報表時間早於"

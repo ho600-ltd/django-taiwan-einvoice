@@ -118,33 +118,20 @@
                                 </a>
                             </div>
                         </li>
-                        <li class="dropdown nav-item nav_operation">
-                            <a data-toggle="dropdown"
-                                aria-expanded="false"
-                                class="dropdown-toggle nav-link"
-                                href="#">{% trans "Operation" %}</a>
-                            <div role="menu" class="dropdown-menu">
-                                <a role="presentation" class="dropdown-item nav_EITurnkey"
-                                    href="{% url 'turnkeywrapperapi:eiturnkey-list' %}">
-                                    {% trans "EI Turnkey" %}
-                                </a>
-                                <a role="presentation" class="dropdown-item nav_EITurnkeyBatch"
-                                    href="{% url 'turnkeywrapperapi:eiturnkeybatch-list' %}">
-                                    {% trans "EI Turnkey Batch" %}
-                                </a>
-                                <a role="presentation" class="dropdown-item nav_EITurnkeyBatchEInvoice"
-                                    href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}">
-                                    {% trans "EI Turnkey BatchE Invoice" %}
-                                </a>
-                                <a role="presentation" class="dropdown-item nav_EITurnkeyDailySummaryResultXML"
-                                    href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-list' %}">
-                                    {% trans "EI Turnkey Daily Summary Result XML" %}
-                                </a>
-                                <a role="presentation" class="dropdown-item nav_EITurnkeyDailySummaryResult"
-                                    href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresult-list' %}">
-                                    {% trans "EI Turnkey Daily Summary Result" %}
-                                </a>
-                            </div>
+                        <li class="nav-item nav_EITurnkey" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkey-list' %}">{% trans "EI Turnkey" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyBatch" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatch-list' %}">{% trans "Batch" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyBatchEInvoice" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}">{% trans "Batch E-Invoice" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyDailySummaryResultXML" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-list' %}">{% trans "Summary Result XML" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyDailySummaryResult" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresult-list' %}">{% trans "Summary Result" %}</a>
                         </li>
                         <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"
@@ -156,7 +143,7 @@
                                 <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
                                     {% trans "Timezone" %}: {% trans "Asia/Taipei" %}
                                 </span>
-                                <a role="presentation" class="dropdown-item" href='{% url "admin:logout" %}'>{% trans "Logout" %}</a>
+                                <a role="presentation" class="dropdown-item" href='{% url "rest_framework:logout" %}'>{% trans "Logout" %}</a>
                             </div>
                         </li>
                         <li class="nav-item nav_change_language" role="presentation">

@@ -307,7 +307,12 @@ class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
     STATUS = models.CharField(db_column='STATUS', max_length=5, blank=True, null=True)
     FILENAME = models.CharField(db_column='FILENAME', max_length=255, blank=True, null=True, db_index=True)
     UUID = models.CharField(db_column='UUID', max_length=40, blank=True, null=True)
-
+    @property
+    def fileformat(self):
+        if self.FILENAME.endswith('.xml') or "Unpack" == self.TASK:
+            return 'xml'
+        else:
+            return 'plain'
     def __str__(self):
         return self.SEQNO_SUBSEQNO_TASK
 

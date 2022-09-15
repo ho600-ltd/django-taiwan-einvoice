@@ -31,7 +31,7 @@
                     value="{{ obj.PROCESS_DTS_datetime }}" format="Y-m-d H:i:s.sss">
                 </td>
                 <td field="STATUS">{{ obj.STATUS }}</td>
-                <td field="FILENAME">{{ obj.FILENAME }}</td>
+                <td field="FILENAME"><a target="tmld_{{ obj.pk }}" href="{% url 'turnkeywrapperapi:turnkeymessagelogdetail-get-file-content' pk=obj.pk %}?format={{ obj.fileformat }}">{{ obj.FILENAME }}</a></td>
                 <td field="UUID">{{ obj.UUID }}</td>
             </tr>
         {% endfor %}

@@ -109,6 +109,8 @@ class TURNKEY_MESSAGE_LOGSerializer(ModelSerializer):
 class TURNKEY_MESSAGE_LOG_DETAILSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:taskconfig-detail")
     PROCESS_DTS_datetime = DateTimeField(read_only=True)
+    pk = CharField(read_only=True)
+    fileformat = CharField(read_only=True)
     
 
 

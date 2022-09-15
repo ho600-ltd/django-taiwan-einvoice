@@ -203,7 +203,7 @@ class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
         seller_ids = turnkey_services.values_list('seller', flat=True)
         res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
         res['type_choices'] = SellerInvoiceTrackNo.type_choices
-        creator_ids = EInvoice.objects.all().values_list("creator", flat=True)
+        creator_ids = EInvoice.objects.filter(seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("creator", flat=True)
         res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
         return  res
 
@@ -220,11 +220,11 @@ class EInvoicePrintLogHtmlRenderer(TEOriginHTMLRenderer):
         res['turnkey_services'] = turnkey_services.order_by('id')
         seller_ids = turnkey_services.values_list('seller', flat=True)
         res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
-        user_ids = EInvoicePrintLog.objects.all().values_list("user", flat=True)
+        user_ids = EInvoicePrintLog.objects.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("user", flat=True)
         res['users'] = User.objects.filter(id__in=user_ids).order_by('first_name')
-        printer_ids = EInvoicePrintLog.objects.all().values_list("printer", flat=True)
+        printer_ids = EInvoicePrintLog.objects.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("printer", flat=True)
         res['printers'] = Printer.objects.filter(id__in=printer_ids).order_by('nickname')
-        creator_ids = EInvoicePrintLog.objects.all().values_list("einvoice__creator", flat=True)
+        creator_ids = EInvoicePrintLog.objects.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("einvoice__creator", flat=True)
         res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
         return  res
 
@@ -237,7 +237,8 @@ class CancelEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        creator_ids = CancelEInvoice.objects.all().values_list("creator", flat=True)
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_canceleinvoice",], any_perm=True)
+        creator_ids = CancelEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("creator", flat=True)
         res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
         return  res
 
@@ -250,7 +251,8 @@ class VoidEInvoiceHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        creator_ids = VoidEInvoice.objects.all().values_list("creator", flat=True)
+        turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_voideinvoice",], any_perm=True)
+        creator_ids = VoidEInvoice.objects.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("creator", flat=True)
         res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
         return  res
 
@@ -263,7 +265,16 @@ class AuditLogHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        turnkey_services = get_objects_for_user(res['request'].user, [
+            "taiwan_einvoice.view_te_sellerinvoicetrackno",
+            "taiwan_einvoice.view_te_einvoice",
+            "taiwan_einvoice.view_te_canceleinvoice",
+            "taiwan_einvoice.view_te_voideinvoice",
+            "taiwan_einvoice.view_te_einvoiceprintlog",
+            "taiwan_einvoice.view_te_summaryreport",
+            "taiwan_einvoice.view_turnkeyservice",
+            ], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
         return  res
 
 
@@ -308,7 +319,10 @@ class SummaryReportHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        turnkey_services = get_objects_for_user(res['request'].user, [
+            "taiwan_einvoice.view_te_summaryreport",
+            ], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
         res['report_type_choices'] = SummaryReport.report_type_choices
         return  res
 
@@ -321,7 +335,11 @@ class TEAlarmHtmlRenderer(TEOriginHTMLRenderer):
 
     def get_context(self, data, accepted_media_type, renderer_context):
         res = super().get_context(data, accepted_media_type, renderer_context)
-        res['turnkey_services'] = TurnkeyService.objects.all().order_by('id')
+        turnkey_services = get_objects_for_user(res['request'].user, [
+            "taiwan_einvoice.view_te_alarm_for_general_user",
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+            ], any_perm=True)
+        res['turnkey_services'] = turnkey_services.order_by('id')
         res['target_audience_type_choices'] = TEAlarm.target_audience_type_choices
         return  res
 

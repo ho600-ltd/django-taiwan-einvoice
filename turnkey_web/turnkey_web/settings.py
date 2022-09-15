@@ -28,6 +28,7 @@ SECRET_KEY = 'django-insecure-fhtyczsp)hmmg)ve1#eewu*5*4e7&km*d9v11nhe2dae55iwx4
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    '127.0.0.1',
     'tkw',
     'ttkw',
 ]
@@ -107,6 +108,8 @@ DATABASES = {
         }
     },
 }
+
+LOGIN_URL = '/api/api-auth/login/'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

@@ -63,13 +63,15 @@ router.register('EITurnkeyDailySummaryResult', views.EITurnkeyDailySummaryResult
 
 app_name = 'turnkey_web'
 urlpatterns = [
-    path('__admin__/', admin.site.urls),
+    re_path('^admin/password_change/$', views.index, name='index'),
+    re_path('^admin/login/$', views.index, name='index'),
+    path('admin/', admin.site.urls),
     re_path(r'^api/api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     re_path(r'^api/{}/'.format(TurnkeyWrapperAPIRootView.version),
         include((router.urls, "turnkeywrapperapi"), namespace="turnkeywrapperapi")),
     path('crontab_monitor/', include('crontab_monitor.urls'), name='crontab_monitor'),
     path('i18n/', include('django.conf.urls.i18n'), name='i18n'),
     path('jsi18n.js', JavaScriptCatalog.as_view(), name='javascript-catalog'),
-    re_path(r'^statics/(.*)', serve,
-        {'document_root': settings.STATIC_ROOT}, name='statics'),
+    re_path(r'^statics/(.*)', serve, {'document_root': settings.STATIC_ROOT}, name='statics'),
+    path('', views.index, name='index'),
 ]

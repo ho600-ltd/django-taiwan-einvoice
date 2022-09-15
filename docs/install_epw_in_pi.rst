@@ -46,13 +46,14 @@ ESC/POS 印表機設定
     $ pip install ipython
     $ cd Django-taiwan-einvoice/escpos_web/
     $ ./manage.py migrate
-    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be getting from TEA service; update "printer object"
-    $ cp -rf Django-taiwan-einvoice/escpos_web/*.conf /etc/supervisor/conf.d/ # then update the wss url
+    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be getting from TEA service; update "Printer object"
+    $ cp -rf Django-taiwan-einvoice/escpos_web/check_printer_status.conf Django-taiwan-einvoice/escpos_web/print_receipt.conf /etc/supervisor/conf.d/ # then update some settings
     $ sudo apt install supervisor
+    $ sudo systemctl enable supervisor
     $ sudo supervisorctl reread
-    $ sudo supervisorctl start all
+    $ sudo supervisorctl update
 
-使用 Waveshare LCD 顯示資訊(非必要)
+使用 Waveshare LCD 顯示 EPW 資訊(非必要)
 ...............................................................................
 
 設定 SPI 介面:
@@ -64,17 +65,17 @@ ESC/POS 印表機設定
     $ sudo raspi-config
     Choose Interfacing Options -> SPI -> Yes  to enable SPI interface
 
-.. figure:: EPW_TKW_TEA_brief/PI_interfaces.png
+.. figure:: install_epw_in_pi/PI_interfaces.png
     :width: 600px
 
     選擇介面選項
 
-.. figure:: EPW_TKW_TEA_brief/SPI.png
+.. figure:: install_epw_in_pi/SPI.png
     :width: 600px
 
     選擇 SPI
 
-.. figure:: EPW_TKW_TEA_brief/Enable_SPI.png
+.. figure:: install_epw_in_pi/Enable_SPI.png
     :width: 600px
 
     啟用 SPI
@@ -100,7 +101,7 @@ ESC/POS 印表機設定
 
     $ sudo cp -rf ~/Django-taiwan-einvoice/escpos_web/lcd_control.conf /etc/supervisor/conf.d/
     $ sudo supervisorctl reread
-    $ sudo supervisorctl restart all
+    $ sudo supervisorctl update
     lcd_control:asgi0: stopped
     print_receipt:asgi0: stopped
     check_printer_status:asgi0: stopped
@@ -110,15 +111,17 @@ ESC/POS 印表機設定
 
 LCD 顯示成果:
 
-.. figure:: EPW_TKW_TEA_brief/Result.jpeg
+.. figure:: install_epw_in_pi/Result.jpeg
     :width: 600px
 
     IP: 4.5.6.7 為出口 IP
 
-讓 EPW WebSocket API 支援驗證
+TEA 以 WebSocket 連線 EPW 時的驗證碼
 -------------------------------------------------------------------------------
 
-先讓 EPW 在每次開機時，產製出驗證碼供 WS API 驗證用:
+在 TEA 上設定預設發票機時，必須填寫驗證碼，此驗證碼是登記在 EPW 的 /var/run/boot_random_seed 檔案。
+
+要讓 EPW 在每次開機時，隨機產製出驗證碼供 TEA 驗證用，可透過 /etc/rc.local:
 
 .. code-block:: sh
 
@@ -134,10 +137,63 @@ LCD 顯示成果:
     $ exit
     $ chmod a+x /etc/rc.local
 
-如未使用 Waveshare LCD 來顯示驗證碼，則建議寫入固定值到 /var/run/boot_random_seed ，如:
+生成 /var/run/boot_random_seed 後，可在 Waveshare LCD 來觀看驗證碼，\
+但若未使用 Waveshare LCD ，則建議寫入固定值到 /var/run/boot_random_seed ，如:
 
 .. code-block:: sh
 
     echo "31a36a1b579fc1f1349183390d5b0a46  -" >  /var/run/boot_random_seed
 
-這樣驗證碼會保持在 31A 。
+這樣驗證碼會保持在 31A ，在 TEA 上就是固定填寫 31A 驗證碼。
+
+設定 EPW Portal(非必要)
+-------------------------------------------------------------------------------
+    
+若發票機上設定的 TEAWeb object 超過 1 個時，就可以使用 Portal 服務來調整現時要連線的是那一個 tea_web 。\
+當然也可以直接連入 pi 中，使用 django shell 手動設定某個 tea_web.now_use = True 。
+
+設定 Portal 步驟:
+
+.. code-block:: sh
+
+    $ virtualenv -p python3 Django-taiwan-einvoice.py3env
+    $ source Django-taiwan-einvoice.py3env/bin/activate
+    $ pip install -r Django-taiwan-einvoice/escpos_web/requirements.txt
+    $ pip install ipython
+    $ cd Django-taiwan-einvoice/escpos_web/
+    $ ./manage.py migrate
+    $ ./manage.py createsuperuser
+    Username (leave blank to use 'XXX'): 
+    Email address: XXX@ho600.com
+    Password: 
+    Password (again): 
+    Superuser created successfully.
+    $ cp -rf Django-taiwan-einvoice/escpos_web/epw.conf /etc/supervisor/conf.d/ # then update some settings
+    $ sudo supervisorctl reread
+    $ sudo supervisorctl update
+
+EPW Portal 預設是使用 8443 port，主要是 pi user 權限無法設定在 443 上，如希望以 https://xxx.yyy.zzz/ 而不是 https://xxx.yyy.zzz:8443/ 來瀏覽 Portal 網站，\
+則再利用 iptables 作轉埠:
+
+.. code-block:: sh
+
+    $ sudo apt-get install iptables-persistent
+    $ sudo iptables -A PREROUTING -t nat -p tcp --dport 443 -j REDIRECT --to-port 8443
+    $ sudo sh -c "iptables-save > /etc/iptables/rules.v4"
+
+假使 EPW 拿到的內部 IP 是 192.168.7.88 ，\
+則使用與 EPW 同一區網的電腦，在其瀏覽器上瀏覽 https://192.168.7.88/ ，輸入 superuser 帳密，再進入「臺灣電子發票管理網站」頁面:
+
+.. figure:: install_epw_in_pi/epw-001.png
+    :width: 600px
+
+    顯示連線網站列表
+
+點擊「設定」按鈕後，跳出視窗:
+
+.. figure:: install_epw_in_pi/epw-002.png
+    :width: 600px
+
+    選擇要更改連線的網站，點擊「設定」按鈕
+
+輸入「驗證碼」後按下「設定」即可更新「所連線的臺灣電子發票管理系統」。

@@ -71,7 +71,11 @@ $(function () {
         } else {
             var re = new RegExp('^([0-9]+)-([0-9]+)-([0-9]+)$');
             var list = re.exec(s);
-            return list[1]+'-'+list[2]+'-'+list[3]+' 00:00:00';
+            if (list) {
+                return list[1]+'-'+list[2]+'-'+list[3]+' 00:00:00';
+            } else {
+                return '';
+            }
         }
     };
 
