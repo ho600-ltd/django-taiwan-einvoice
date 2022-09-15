@@ -209,7 +209,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         "upload_csv_to_multiple_create": (
             "taiwan_einvoice.add_te_sellerinvoicetrackno",
         ),
-        "destory": (
+        "destroy": (
             "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
         "partial_update": (
