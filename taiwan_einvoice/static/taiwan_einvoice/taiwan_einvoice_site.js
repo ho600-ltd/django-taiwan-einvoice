@@ -95,6 +95,9 @@ $(function () {
         }
         time_str = $self.convert_tastypie_datetime(time_str.replace(/Z$/, ''));
         var list = $self.DEFAULT_DATETIME_RE.exec(time_str);
+        if(!list){
+            return '';
+        }
         var D = Date.UTC(Number(list[1]), Number(list[2])-1, Number(list[3]),
                             Number(list[4]), Number(list[5]), Number(list[6]));
         var offseted_d = new Date(D + 1000*Number(second_offset));
