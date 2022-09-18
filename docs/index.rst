@@ -136,6 +136,7 @@
     create_software_certification
     EPW_TKW_TEA_brief
     install_epw_in_pi
+    epw_user_manual
     install_tkw_in_linux
     merchant_create_b2c_invoice
     self_checklist_before_turnkey_online
