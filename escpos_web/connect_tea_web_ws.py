@@ -43,7 +43,7 @@ async def connect_and_print_receipt(tea_web):
                     result = {"meet_to_tw_einvoice_standard":
                                 invoice_data['meet_to_tw_einvoice_standard'],
                               "track_no": invoice_data['track_no'],
-                              "random_number": invoice_data['random_number'],
+                              "random_number": invoice_data.get('random_number', ''),
                               "unixtimestamp": data['unixtimestamp'],
                               "status": False,
                               "status_message": "通行碼(Pass Key {})錯誤".format(pass_key)}
@@ -75,7 +75,7 @@ def print_receipt(tea_web_id, serial_number, unixtimestamp, invoice_json):
         return 'Init'
     result = {"meet_to_tw_einvoice_standard": invoice_data['meet_to_tw_einvoice_standard'],
               "track_no": invoice_data['track_no'],
-              "random_number": invoice_data['random_number'],
+              "random_number": invoice_data.get('random_number', ''),
               "unixtimestamp": unixtimestamp,
              }
     re_print_original_copy = invoice_data.get('re_print_original_copy', False)
