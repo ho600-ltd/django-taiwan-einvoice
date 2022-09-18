@@ -12,13 +12,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 
-from libs import get_boot_seed
+from libs import get_boot_seed, get_public_ip
 
 from escpos_printer.permissions import IsInIntranet
 from escpos_printer.serializers import PrinterSerializer, TEAWebSerializer
-from escpos_printer.renderers import EPWBrowsableAPIRenderer, PrinterHtmlRenderer, TEAWebHtmlRenderer
+from escpos_printer.renderers import EPWBrowsableAPIRenderer, PrinterHtmlRenderer, TEAWebHtmlRenderer, OutgoingIPHtmlRenderer
 from escpos_printer.models import Printer, TEAWeb
 
 from taiwan_einvoice.paginations import (
@@ -70,3 +70,24 @@ class TEAWebModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
+
+
+
+class OutgoingIPViewSet(ViewSet):
+    permission_classes = (IsInIntranet, IsAdminUser, )
+    renderer_classes = (OutgoingIPHtmlRenderer, EPWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+
+    def list(self, request):
+        try:
+            outgoing_ip = get_public_ip()
+        except:
+            outgoing_ip = '?.?.?.?'
+
+        data = {
+            "results": [{
+                "outgoing_ip": outgoing_ip,
+            }],
+        }
+        return Response(data)

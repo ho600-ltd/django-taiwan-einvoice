@@ -56,6 +56,7 @@ class ESCPOSWebRouter(routers.DefaultRouter):
 router = ESCPOSWebRouter()
 router.register('Printer', views.PrinterModelViewSet, basename="printer")
 router.register('TEAWeb', views.TEAWebModelViewSet, basename="teaweb")
+router.register('OutgoingIP', views.OutgoingIPViewSet, basename="outgoingip")
 
 
 # def login(request, *args, **kwargs):
