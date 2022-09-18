@@ -28,7 +28,7 @@ def info_block(lg, draw):
     height -= 12
     public_ip = get_public_ip()
     lg.info(public_ip)
-    draw.text((50, height), "Outgoin IP:", font=IP_INFO_FONT, fill=0)
+    draw.text((50, height), "聯外 IP:", font=IP_INFO_FONT, fill=0)
     height -= 10
     draw.text((5, height), public_ip, font=IP_INFO_FONT, fill=0)
 
@@ -41,7 +41,8 @@ def info_block(lg, draw):
     for e in eths:
         height -= 10
         draw.text((70, height), e[0], font=IP_INFO_FONT, fill=0)
-        draw.text((5, height), e[1], font=IP_INFO_FONT, fill=0)
+        draw.rectangle((1, height, 70, height+10), outline=0, fill=0xffffff) #A button filled
+        draw.text((5, height), e[1], font=IP_INFO_FONT, fill=0x0000ff)
 
 
 logging.basicConfig()
