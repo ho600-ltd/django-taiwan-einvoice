@@ -36,8 +36,8 @@ ESC/POS 印表機設定
 
 .. code-block:: sh
 
-    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
-    $ sudo apt install build-essential libssl-dev libffi-dev python3-dev cargo aptitude python-virtualenv python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate zsh
+    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.9)) 3 # set python3 as default
+    $ sudo apt install vim build-essential libssl-dev libffi-dev python3-dev cargo aptitude python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate zsh
         * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
