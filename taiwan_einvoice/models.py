@@ -1167,6 +1167,9 @@ class EInvoice(models.Model):
         else:
             return True
     @property
+    def cancel_fail_reason(self):
+        pass
+    @property
     def is_voided(self):
         return self.voideinvoice_set.exists()
     @property
