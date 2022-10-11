@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -38,7 +38,7 @@ def index(request, *args, **kwargs):
 
 
 class PrinterModelViewSet(ModelViewSet):
-    permission_classes = (IsInIntranet, IsAdminUser, )
+    permission_classes = (IsInIntranet, IsAuthenticated, )
     pagination_class = TenTo1000PerPagePagination
     queryset = Printer.objects.all().order_by('-id')
     serializer_class = PrinterSerializer
@@ -49,7 +49,7 @@ class PrinterModelViewSet(ModelViewSet):
 
 
 class TEAWebModelViewSet(ModelViewSet):
-    permission_classes = (IsInIntranet, IsAdminUser, )
+    permission_classes = (IsInIntranet, IsAuthenticated, )
     pagination_class = Default30PerPagePagination
     queryset = TEAWeb.objects.all().order_by('-id')
     serializer_class = TEAWebSerializer
@@ -74,7 +74,7 @@ class TEAWebModelViewSet(ModelViewSet):
 
 
 class OutgoingIPViewSet(ViewSet):
-    permission_classes = (IsInIntranet, IsAdminUser, )
+    permission_classes = (IsInIntranet, IsAuthenticated, )
     renderer_classes = (OutgoingIPHtmlRenderer, EPWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
