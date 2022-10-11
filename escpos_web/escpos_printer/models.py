@@ -369,7 +369,22 @@ class ReceiptLog(models.Model):
             )):
             text += '補印'
         printer_device.set(**d)
-        printer_device.textln(text)
+
+        default_encoding = self.printer.get_default_encoding_display().upper()
+        if 'CP950' == default_encoding:
+            map_encoding = 'cp950'
+        elif 'GB18030' == default_encoding:
+            map_encoding = 'gbk'
+        else:
+            map_encoding = 'utf-8'
+        valid_texts = []
+        for _t in text:
+            try:
+                _o = _t.encode(map_encoding)
+            except UnicodeEncodeError:
+                _o = '○'.encode(map_encoding)
+            valid_texts.append(_o.decode(map_encoding))
+        printer_device.textln(''.join(valid_texts))
         printer_device.set()
 
 
