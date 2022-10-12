@@ -1414,6 +1414,14 @@ class EInvoice(models.Model):
         return _d
 
 
+    @property
+    def print_logs(self):
+        return self.einvoiceprintlog_set.all().order_by('id')
+    @property
+    def print_logs_count(self):
+        return self.print_logs.count()
+
+
     def __str__(self):
         return "{}".format(self.track_no)
 

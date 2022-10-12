@@ -744,6 +744,9 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
 
+        if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
+            einvoice.set_print_mark_true()
+
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
         data['mig_type'] = EInvoiceMIG.objects.get(no=CancelEInvoice.MIG_NO_SET[einvoice.get_mig_no()]).id
@@ -881,6 +884,9 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                 "error_message": _('Mobile barcode does not exist.')
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
+            einvoice.set_print_mark_true()
 
         if cancel_before_void:
             cei = CancelEInvoice(creator=request.user,
