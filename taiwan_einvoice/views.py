@@ -742,13 +742,16 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
             elif not re_create_einvoice:
-                message = einvoice.check_before_cancel_einvoice()
-                if message:
-                    er = {
-                        "error_title": _("Cancel Error"),
-                        "error_message": message,
-                    }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                if request.user.is_superuser:
+                    pass
+                else:
+                    message = einvoice.check_before_cancel_einvoice()
+                    if message:
+                        er = {
+                            "error_title": _("Cancel Error"),
+                            "error_message": message,
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
             einvoice.set_print_mark_true()
