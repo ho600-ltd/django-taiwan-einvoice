@@ -638,6 +638,12 @@ class EInvoiceModelViewSet(ModelViewSet):
                 del escpos_print_scripts['details_content']
             if request.GET.get('re_print_original_copy', False) in ['true', '1']:
                 escpos_print_scripts['re_print_original_copy'] = True
+                NOW = now()
+                if (ei.generate_time.astimezone(TAIPEI_TIMEZONE).day != NOW.astimezone(TAIPEI_TIMEZONE).day
+                    and NOW - ei.generate_time >= datetime.timedelta(hours=6)):
+                    return Response({"error_title": _("Re-print E-Invoice Error"),
+                                     "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
+                                    }, status=status.HTTP_403_FORBIDDEN)
             if escpos_print_scripts.get('is_canceled', False):
                 escpos_print_scripts['re_print_original_copy'] = True
             if escpos_print_scripts.get('buyer_is_business_entity', False):
