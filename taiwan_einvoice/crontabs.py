@@ -4,7 +4,7 @@ from django.db.models import Q, Count, Sum
 from django.utils.translation import gettext as _
 from django.utils.timezone import now
 from crontab_monitor.models import SelectOption
-from taiwan_einvoice.models import TurnkeyService, UploadBatch
+from taiwan_einvoice.models import TurnkeyService, UploadBatch, SummaryReport
 
 
 def polling_upload_batch(alert_log, *args, **kw):
@@ -67,6 +67,35 @@ def polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result(al
         lg.debug("{turnkey_service}.get_and_create_ei_turnkey_daily_summary_result end at {now}".format(turnkey_service=turnkey_service, now=now()))
 
     lg.debug("polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result end at {}".format(now()))
+
+    alert_log.title = title
+    alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body
+    alert_log.status = alert_log_status
+    alert_log.executed_end_time = now()
+    alert_log.save()
+    lg.debug("title: {}".format(alert_log.title))
+    lg.debug("status: {}".format(alert_log.status))
+
+
+def auto_generate_summary_report(alert_log, *args, **kw):
+    lg = logging.getLogger('info')
+    lg.debug("alert_log id: {}".format(alert_log.id))
+    lg.debug("*args: {}".format(args))
+    lg.debug("**kw: {}".format(kw))
+    title = _('There is no alarm in auto_generate_summary_report, just logging')
+    mail_body = "Executed from {}\n".format(kw.get('executed_from', '__none__'))
+    mail_body += "args: {}\n".format(args)
+    mail_body += "kw: {}\n".format(kw)
+
+    NOW = now()
+    t0 = time.time()
+
+    alert_log_status = SelectOption.objects.get(swarm='alert-log-status', value='LOG')
+
+    SummaryReport.auto_generate_report(generate_at_time=NOW)
+    title = _('Executed auto_generate_summary_report')
+    lg.debug("SummaryReport.auto_generate_report end at {now}".format(now=now()))
+    lg.debug("auto_generate_summary_report end at {}".format(now()))
 
     alert_log.title = title
     alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body

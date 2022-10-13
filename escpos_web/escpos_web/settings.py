@@ -75,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'escpos_web.context_processors.settings',
             ],
         },
     },
@@ -183,3 +184,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
     'PAGE_SIZE': 10,
 }
+
+BUILD_DATE = '220918'
+BUILD_NUMBER = '1'
+VERSION = 'xxxx'

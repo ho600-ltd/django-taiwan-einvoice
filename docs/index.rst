@@ -103,7 +103,6 @@
     * 營業人
         * 財政部傳輸軟體(Turnkey)
             * 線上申請說明下載
-            * 電子發票Turnkey上線前自行檢測作業
             * 各項手冊與相關文件:
                 * Turnkey-使用手冊_v2.9
                 * 電子發票 PostgreSQL資料庫安裝參考說明
@@ -137,6 +136,7 @@
     create_software_certification
     EPW_TKW_TEA_brief
     install_epw_in_pi
+    epw_user_manual
     install_tkw_in_linux
     merchant_create_b2c_invoice
     self_checklist_before_turnkey_online

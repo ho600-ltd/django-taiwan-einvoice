@@ -171,6 +171,56 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
     選擇「憑證、帳號」，填入統編及大平台開立的繞送代碼
 
+.. note::
+
+    軟體憑證.pfx 相對應的 .cer 檔務必先上傳至大平台。
+
+設定「檔案收送」中的 5 類「目錄」
+-------------------------------------------------------------------------------
+
+來自「財政部電子發票整合服務平台客服中心」的建議，在初始設定 Turnkey 時，\
+就要做好「檔案收送」中的 5 個「目錄設定」，就算你的需求只有 B2C ，\
+也請一併完成 B2B 交換/存證的目錄設定。\
+不然可能會有 `C 狀態拿不到的問題 <https://github.com/ho600-ltd/django-taiwan-einvoice/issues/2>`_ 。
+
+.. figure:: install_tkw_in_linux/S1.png
+
+    依序到「檔案收送」的子選單
+
+5 個設定畫面如下:
+
+.. figure:: install_tkw_in_linux/B2BS.png
+
+    B2B 存證目錄設定
+
+.. figure:: install_tkw_in_linux/B2BE.png
+
+    B2B 交換目錄設定
+
+.. figure:: install_tkw_in_linux/B2CS.png
+
+    B2C 存證目錄設定
+
+.. figure:: install_tkw_in_linux/E.png
+
+    發票配號訊息目錄設定
+
+.. figure:: install_tkw_in_linux/DOWN.png
+
+    下載流程目錄設定
+
+以上 5 個子畫面中，都做到:
+
+1. 確認訊息版本，此版本要與你所生成的 XML MIG 版本相符
+#. 按下「確定」
+#. 按下「離開」
+
+皆完成後，就能在檔案總管中，看到如下的資料夾:
+
+.. figure:: install_tkw_in_linux/RESULT.png
+
+    有設定過「下載流程目錄」後，才會出現 ReceiveFile 資料夾
+
 安裝 TKW 伺服器
 -------------------------------------------------------------------------------
 

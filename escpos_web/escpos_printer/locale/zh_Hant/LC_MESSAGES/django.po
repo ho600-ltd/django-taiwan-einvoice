@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-03 18:19+0800\n"
+"POT-Creation-Date: 2022-09-18 12:23+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,6 +44,9 @@ msgstr "感熱式印表機"
 
 msgid "TEA Web"
 msgstr "臺灣電子發票管理網站"
+
+msgid "Outgoing IP"
+msgstr "聯外 IP"
 
 msgid "Timezone"
 msgstr "時區"

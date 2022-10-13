@@ -1,0 +1,16 @@
+{% load i18n %}
+
+<table class="table search_result">
+    <thead>
+        <tr>
+            <th>{% trans "Outgoing IP" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr>
+                <td field="outgoing_ip">{{ obj.outgoing_ip }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

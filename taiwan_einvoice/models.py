@@ -1167,6 +1167,9 @@ class EInvoice(models.Model):
         else:
             return True
     @property
+    def cancel_fail_reason(self):
+        pass
+    @property
     def is_voided(self):
         return self.voideinvoice_set.exists()
     @property
@@ -1409,6 +1412,14 @@ class EInvoice(models.Model):
                 "details_content": [],
             }
         return _d
+
+
+    @property
+    def print_logs(self):
+        return self.einvoiceprintlog_set.all().order_by('id')
+    @property
+    def print_logs_count(self):
+        return self.print_logs.count()
 
 
     def __str__(self):

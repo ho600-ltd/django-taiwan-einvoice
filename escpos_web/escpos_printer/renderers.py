@@ -99,3 +99,9 @@ class TEAWebHtmlRenderer(EPWOriginHTMLRenderer):
     content_template = _get_template_name('teaweb_list_content', sub_dir='escpos_printer', show_template_filename=True)
 
 
+
+class OutgoingIPHtmlRenderer(EPWOriginHTMLRenderer):
+    template = _get_template_name('outgoingip_list', sub_dir='escpos_printer', show_template_filename=True)
+    content_template = _get_template_name('outgoingip_list_content', sub_dir='escpos_printer', show_template_filename=True)
+
+

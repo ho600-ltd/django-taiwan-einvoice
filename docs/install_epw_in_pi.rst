@@ -36,8 +36,8 @@ ESC/POS 印表機設定
 
 .. code-block:: sh
 
-    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.7)) 3 # set python3 as default
-    $ sudo apt install build-essential libssl-dev libffi-dev python3-dev cargo aptitude python-virtualenv python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate zsh
+    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.9)) 3 # set python3 as default
+    $ sudo apt install vim build-essential libssl-dev libffi-dev python3-dev cargo aptitude python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate zsh
         * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
@@ -53,8 +53,38 @@ ESC/POS 印表機設定
     $ sudo supervisorctl reread
     $ sudo supervisorctl update
 
+TEA 以 WebSocket 連線 EPW 時的驗證碼
+-------------------------------------------------------------------------------
+
+在 TEA 上設定預設發票機時，必須填寫驗證碼，此驗證碼是登記在 EPW 的 /var/run/boot_random_seed 檔案。
+
+要讓 EPW 在每次開機時，隨機產製出驗證碼供 TEA 驗證用，可透過 /etc/rc.local:
+
+.. code-block:: sh
+
+    $ sudo su -
+    $ cat << 'EOF' > /etc/rc.local
+    #!/bin/sh -e
+
+    date "+%Y%m%d%H%M%S.%N Whatever words" | md5sum > /var/run/boot_random_seed
+
+    exit 0
+
+    EOF
+    $ exit
+    $ chmod a+x /etc/rc.local
+
+生成 /var/run/boot_random_seed 後，可在 Waveshare LCD 來觀看驗證碼，\
+但若未使用 Waveshare LCD ，則建議寫入固定值到 /var/run/boot_random_seed ，如:
+
+.. code-block:: sh
+
+    echo "31a36a1b579fc1f1349183390d5b0a46  -" >  /var/run/boot_random_seed
+
+這樣驗證碼會保持在 31A ，在 TEA 上就是固定填寫 31A 驗證碼。
+
 使用 Waveshare LCD 顯示 EPW 資訊(非必要)
-...............................................................................
+-------------------------------------------------------------------------------
 
 設定 SPI 介面:
 
@@ -116,40 +146,10 @@ LCD 顯示成果:
 
     IP: 4.5.6.7 為出口 IP
 
-TEA 以 WebSocket 連線 EPW 時的驗證碼
--------------------------------------------------------------------------------
-
-在 TEA 上設定預設發票機時，必須填寫驗證碼，此驗證碼是登記在 EPW 的 /var/run/boot_random_seed 檔案。
-
-要讓 EPW 在每次開機時，隨機產製出驗證碼供 TEA 驗證用，可透過 /etc/rc.local:
-
-.. code-block:: sh
-
-    $ sudo su -
-    $ cat << 'EOF' > /etc/rc.local
-    #!/bin/sh -e
-
-    date "+%Y%m%d%H%M%S.%N Whatever words" | md5sum > /var/run/boot_random_seed
-
-    exit 0
-
-    EOF
-    $ exit
-    $ chmod a+x /etc/rc.local
-
-生成 /var/run/boot_random_seed 後，可在 Waveshare LCD 來觀看驗證碼，\
-但若未使用 Waveshare LCD ，則建議寫入固定值到 /var/run/boot_random_seed ，如:
-
-.. code-block:: sh
-
-    echo "31a36a1b579fc1f1349183390d5b0a46  -" >  /var/run/boot_random_seed
-
-這樣驗證碼會保持在 31A ，在 TEA 上就是固定填寫 31A 驗證碼。
-
 設定 EPW Portal(非必要)
 -------------------------------------------------------------------------------
     
-若發票機上設定的 TEAWeb object 超過 1 個時，就可以使用 Portal 服務來調整現時要連線的是那一個 tea_web 。\
+若發票機上設定的 TEAWeb 紀錄超過 1 個時，就可以使用 Portal 服務來調整現時要連線的是那一個 tea_web 。\
 當然也可以直接連入 pi 中，使用 django shell 手動設定某個 tea_web.now_use = True 。
 
 設定 Portal 步驟:

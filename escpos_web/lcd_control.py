@@ -28,7 +28,7 @@ def info_block(lg, draw):
     height -= 12
     public_ip = get_public_ip()
     lg.info(public_ip)
-    draw.text((50, height), "Outgoin IP:", font=IP_INFO_FONT, fill=0)
+    draw.text((50, height), "聯外 IP:", font=IP_INFO_FONT, fill=0)
     height -= 10
     draw.text((5, height), public_ip, font=IP_INFO_FONT, fill=0)
 
@@ -41,7 +41,8 @@ def info_block(lg, draw):
     for e in eths:
         height -= 10
         draw.text((70, height), e[0], font=IP_INFO_FONT, fill=0)
-        draw.text((5, height), e[1], font=IP_INFO_FONT, fill=0)
+        draw.rectangle((1, height, 70, height+10), outline=0, fill=0xffffff) #A button filled
+        draw.text((5, height), e[1], font=IP_INFO_FONT, fill=0x0000ff)
 
 
 logging.basicConfig()
@@ -140,6 +141,14 @@ def reset_image(lg, draw, texts):
     disp.LCD_ShowImage(image, 0, 0)
 
 
+def save_image_ppm(lg, draw):
+    draw.im.save_ppm('.menu.ppm')
+    im = Image.open('.menu.ppm')
+    im2 = im.rotate(180)
+    im2.save('.menu.png')
+    lg.info('saved .menu.png')
+
+
 KEY_PRESS = None
 KEY_PRESS_TIME = time.time()
 KEY_PRESS_DURATION = 5 # seconds
@@ -175,6 +184,7 @@ while 1:
     if GPIO.input(KEY_LEFT_PIN) == 0: # pressed
         draw.polygon(LEFT_PIN_SHAPE, outline=255, fill=0xff00)  #left
         lg.info("left")
+        save_image_ppm(lg, draw)
     else: # released
         draw.polygon(LEFT_PIN_SHAPE, outline=255, fill=0)  #left filled
         
@@ -187,6 +197,8 @@ while 1:
     if GPIO.input(KEY_RIGHT_PIN) == 0: # pressed
         draw.polygon(RIGHT_PIN_SHAPE, outline=255, fill=0xff00) #right
         lg.info("right")
+        KEY_PRESS_TIME = 0
+        KEY_PRESS = None
     else: # released
         draw.polygon(RIGHT_PIN_SHAPE, outline=255, fill=0x00ff) #right filled       
         

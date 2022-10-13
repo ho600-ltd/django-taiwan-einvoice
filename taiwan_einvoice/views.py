@@ -638,6 +638,12 @@ class EInvoiceModelViewSet(ModelViewSet):
                 del escpos_print_scripts['details_content']
             if request.GET.get('re_print_original_copy', False) in ['true', '1']:
                 escpos_print_scripts['re_print_original_copy'] = True
+                NOW = now()
+                if (ei.generate_time.astimezone(TAIPEI_TIMEZONE).day != NOW.astimezone(TAIPEI_TIMEZONE).day
+                    and NOW - ei.generate_time >= datetime.timedelta(hours=6)):
+                    return Response({"error_title": _("Re-print E-Invoice Error"),
+                                     "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
+                                    }, status=status.HTTP_403_FORBIDDEN)
             if escpos_print_scripts.get('is_canceled', False):
                 escpos_print_scripts['re_print_original_copy'] = True
             if escpos_print_scripts.get('buyer_is_business_entity', False):
@@ -713,6 +719,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         data = request.data
         einvoice_id = data['einvoice_id']
         re_create_einvoice = data['re_create_einvoice']
+        superuser_cancel_the_einvoice = False
         del data['re_create_einvoice']
         try:
             einvoice = EInvoice.objects.get(id=einvoice_id)
@@ -736,13 +743,19 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
             elif not re_create_einvoice:
-                message = einvoice.check_before_cancel_einvoice()
-                if message:
-                    er = {
-                        "error_title": _("Cancel Error"),
-                        "error_message": message,
-                    }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                if request.user.is_superuser and EInvoice.objects.filter(generate_no=einvoice.generate_no).count() >= 2:
+                    superuser_cancel_the_einvoice = True
+                else:
+                    message = einvoice.check_before_cancel_einvoice()
+                    if message:
+                        er = {
+                            "error_title": _("Cancel Error"),
+                            "error_message": message,
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+        if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
+            einvoice.set_print_mark_true()
 
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
@@ -754,7 +767,11 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        if re_create_einvoice:
+        if superuser_cancel_the_einvoice:
+            old_einvoice = EInvoice.objects.filter(generate_no=einvoice.generate_no).exclude(id=einvoice.id).order_by('id')[0]
+            if hasattr(old_einvoice.content_object, "post_cancel_einvoice"):
+                old_einvoice.content_object.post_cancel_einvoice(old_einvoice)
+        elif re_create_einvoice:
             _d = {f.name: getattr(einvoice, f.name)
                 for f in EInvoice._meta.fields
             }
@@ -839,6 +856,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
 
+        NOW = now()
         einvoice_id = data['einvoice_id']
         try:
             einvoice = EInvoice.objects.get(id=einvoice_id)
@@ -849,6 +867,11 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
+            if (einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).day != NOW.astimezone(TAIPEI_TIMEZONE).day
+                and NOW - einvoice.generate_time >= datetime.timedelta(hours=6)):
+                return Response({"error_title": _("Void Error"),
+                                 "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
+                                }, status=status.HTTP_403_FORBIDDEN)
             if einvoice.is_voided:
                 er = {
                     "error_title": _("Void Error"),
@@ -882,6 +905,9 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
 
+        if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
+            einvoice.set_print_mark_true()
+
         if cancel_before_void:
             cei = CancelEInvoice(creator=request.user,
                                  einvoice=einvoice,
@@ -900,7 +926,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         data['seller_identifier'] = einvoice.seller_identifier
         _post_buyer_identifier = data['buyer_identifier']
         data['buyer_identifier'] = einvoice.buyer_identifier
-        data['generate_time'] = now()
+        data['generate_time'] = NOW
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

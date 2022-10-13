@@ -66,6 +66,9 @@
                         <li class="nav-item nav_teaweb" role="presentation">
                             <a class="nav-link" href="{% url 'escposwebapi:teaweb-list' %}?format=html">{% trans "TEA Web" %}</a>
                         </li>
+                        <li class="nav-item nav_outgoingip" role="presentation">
+                            <a class="nav-link" href="{% url 'escposwebapi:outgoingip-list' %}?format=html">{% trans "Outgoing IP" %}</a>
+                        </li>
                         <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"
                                 aria-expanded="false"
@@ -107,7 +110,7 @@
             </div>
         </nav>
     </div>
-    <div class="container" style="margin-top:112px;">
+    <div class="container" style="margin-top:112px; overflow-x: auto;">
         {% block body %}{% endblock %}
     </div>
 

@@ -421,6 +421,13 @@ function print_einvoice_each_by_each(allow_number, button_id, target_selector_qu
                     }
                 }
                 setTimeout('print_einvoice_each_by_each(' + allow_number + ', "' + button_id + '", "' + target_selector_query + '")', parseInt(interval_seconds_of_printing));
+            },
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
             }
         });
     }

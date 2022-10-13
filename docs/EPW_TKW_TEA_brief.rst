@@ -3,14 +3,17 @@ EPW / TKW / TEA 架構
 
 本專案 Django-Taiwan-EInvoice (DTEI) 是由 3 部份: EPW / TKW / TEA 所組成。
 
-TEA 是一個 Django-based 的 Python app ，可直接以 Web Api Service 方式執行，或是導入至其他 Django-based 的專案中。\
-TEA 支援 WebSocket 協定，當 EPW 系統開機後， EPW 會連線至 TEA Web Api 或 CEC Web Api(import TEA)。
+TEA 是一個 Django-based 的 Python app ，可直接以 Web Api Service 方式執行，\
+或是導入至其他 Django-based 的專案中。 TEA 支援 WebSocket 協定，\
+當 EPW 系統開機後， EPW 會連線至 TEA WebSocket Api 或 CEC WebSocket Api(以導入 TEA)。
 
-當 TEA 有列印發票的需求，可送出其發票資料(JSON)，發票 JSON 透過 WebSocket 傳至 EPW ， EPW 再將發票 JSON 轉譯為 ESC/POS 指令，\
+當 TEA 有列印電子發票證明聯的需求，可送出其發票資料(JSON)，\
+發票 JSON 透過 WebSocket Channel 傳至 EPW ， EPW 再將發票 JSON 轉譯為 ESC/POS 指令，\
 再送至系統 OS 所控管的 Thermal ESC/POS Printer ，由 Printer 印出發票證明聯。
 
 當 TEA 要上傳發票至 EI 大平台時，會使用 HTTP POST 傳送批次編號資料至 TKW 的 Api Endpoint ，\
-TKW 再以 HTTP GET 模式以批次編號為搜尋值抓取所有相關的發票 JSON ，該批次發票抓取完畢後， TKW 會將發票 JSON 轉成 MIG 標準的 xml ，\
+成功後，再以 HTTP POST 傳送批次編號相關所有發票的 JSON ，\
+該批次編號發票傳送完畢後， TKW 會將發票 JSON 轉成 MIG 標準的 xml ，\
 存入本地端的 Turnkey 系統，再由 Turnkey 系統處理與 EI 大平台的發票上傳作業。
 
 TEA 資料設定
@@ -26,9 +29,9 @@ TEA 資料設定
     * party_id: EI 提供
     * routing_id: EI 提供
     * hash_key: 可自動隨機產生
-    * qrcode_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
-    * turnkey_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
-    * download_seed: 可透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
+    * qrcode_seed: 須透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
+    * turnkey_seed: 須透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
+    * download_seed: 須透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
     * epl_base_set: 預設值是 GHIJKLMNOPQRSTUVWXYZ ，用來驗證「電子發票證明聯列印序號」用的字元集合，建議使用「大寫英文、符號」並打亂順序
     * auto_upload_c0401_einvoice: True/False ; if True, then it upload B2C certificate invoices at upload_cronjob_format time 
     * upload_cronjob_format: 5, 10, 15, 20, 30, 60; 5 => "\*/5 \* \* \* \*"(cron format)
@@ -44,7 +47,7 @@ EPW 資料設定
 
     EPW 安裝部份，請見: :doc:`./install_epw_in_pi` 。
 
-1. 套用 TEA 的 escposweb 紀錄來新增 EPW 中的 TEWeb 紀錄，需要資料有:
+1. 套用 TEA 的 escposweb 紀錄來新增 EPW 中的 TEAWeb 紀錄，需要資料有:
     * escpos_web uri ，如: wss://<CEC or TEA url>/ws/taiwan_einvoice/escpos_web/<turnkeyservice id>/
     * slug ，如: BB737
     * hash_key ，如: 5817f0172c9482605d16386a263a7296de8b22f8
@@ -52,6 +55,7 @@ EPW 資料設定
     * nickname: 建議在列表機外殼，標記代號，並將此代號紀錄至本欄位
     * receipt_type: 選項有 0, 5, 6, 8 。意義分別是 0 表不能使用、 5 表 58mm 收據、 6 表 58mm 電子發票、 8 表 80mm 收據
     * default_encoding: 選項有 B, G 。為印表機內置的編碼表設定，其中 B 表 CP950 、 G 表 GB18030 編碼表
+#. 若 TEAWeb 紀錄設定超過 1 個，那建議額外設定 EPW Portal
 
 TKW 資料設定
 -------------------------------------------------------------------------------
@@ -69,6 +73,7 @@ TKW 資料設定
     * hash_key: 對應 turnkeyservice 紀錄
     * tea_turnkey_service_endpoint ，如: https://<CEC or TEA url>/taiwan_einvoice/api/v1/turnkeyservice/<turnkeyservice id>/
     * endpoint: 無需填寫， POST 後由 TKW 自動計算
+    * allow_ips: 若要使用 TKW Portal 功能，才需填寫
 
 TEA supports ASGI with daphne, supervisor and nginx
 -------------------------------------------------------------------------------

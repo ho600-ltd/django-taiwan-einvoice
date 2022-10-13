@@ -16,3 +16,4 @@ escpos_web/django-taiwan-einvoice.crt
 *.log
 *.pyc
 *.mo
+.*

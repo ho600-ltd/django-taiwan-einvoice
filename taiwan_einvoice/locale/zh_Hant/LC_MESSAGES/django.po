@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-03 16:36+0800\n"
+"POT-Creation-Date: 2022-10-13 09:21+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,6 +36,12 @@ msgstr "polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_resul
 
 msgid "Executed polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
 msgstr "已執行 polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
+
+msgid "There is no alarm in auto_generate_summary_report, just logging"
+msgstr "auto_generate_summary_report 並無警示，單純紀錄"
+
+msgid "Executed auto_generate_summary_report"
+msgstr "執行 auto_generate_summary_report"
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -1747,6 +1753,12 @@ msgstr ""
 
 msgid "Delete Error"
 msgstr "刪除失敗"
+
+msgid "Re-print E-Invoice Error"
+msgstr "重印電子發票錯誤"
+
+msgid "Expired time: over next day AM00:00 and 6 hours past the generate time."
+msgstr "逾時: 超過隔日零時且超過開立時間 6 小時。"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"
