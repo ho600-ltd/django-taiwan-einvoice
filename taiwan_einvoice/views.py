@@ -742,7 +742,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
             elif not re_create_einvoice:
-                if request.user.is_superuser:
+                if request.user.is_superuser and EInvoice.objects.filter(generate_no=einvoice.generate_no).count() >= 2:
                     pass
                 else:
                     message = einvoice.check_before_cancel_einvoice()
