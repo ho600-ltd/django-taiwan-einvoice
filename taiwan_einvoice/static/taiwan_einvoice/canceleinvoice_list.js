@@ -1,3 +1,50 @@
+function show_canceleinvoice_modal(taiwan_einvoice_site) {
+    return function () {
+        var $btn = $(this);
+        var $tr = $btn.parents('tr');
+        if (0 < $tr.length) {
+            var canceleinvoice_id = $tr.attr('canceleinvoice_id');
+        } else {
+            var canceleinvoice_id = $btn.attr('canceleinvoice_id');
+        }
+        var track_no_ = $btn.text();
+        var $modal = $('#show_canceleinvoice_modal');
+        var resource_uri = $modal.attr('resource_uri_tmpl').replace('{id}', canceleinvoice_id);
+        var fmts = ngettext('Cancel E-Invoice: %(track_no_)s', 'Cancel E-Invoice: %(track_no_)s', 1);
+        var message = interpolate(fmts, { track_no_: track_no_ }, true);
+        $('#show_canceleinvoice_modal_label', $modal).text(message);
+        $.ajax({
+            url: resource_uri,
+            type: "GET",
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (json) {
+                var $modal_body = $('.modal-body', $modal);
+                $('span[field!=""]', $modal_body).each(function(){
+                    var $span = $(this);
+                    var field = $span.attr('field');
+                    if ($span.hasClass('datetime')) {
+                        var value = $('td[field="'+field+'"]', $tr).attr('value');
+                    } else {
+                        var value = $('td[field="'+field+'"]', $tr).text();
+                    }
+                    if (!value && json[field]) {
+                        value = json[field];
+                    }
+                    if (!value) {
+                        value = '';
+                    }
+                    $span.attr('value', value).text(value);
+                });
+                $('.datetime', $modal_body).each(taiwan_einvoice_site.convert_class_datetime(taiwan_einvoice_site));
+                $modal.data('canceleinvoice_id', canceleinvoice_id);
+                $modal.modal('show');
+            }
+        });
+    };
+};
+
+
 function show_executing_canceleinvoice_modal(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
@@ -271,6 +318,7 @@ $(function () {
         });
     }
 
+    $('button.show_canceleinvoice_modal').click(show_canceleinvoice_modal(taiwan_einvoice_site));
     $('button.show_executing_canceleinvoice_modal').click(show_executing_canceleinvoice_modal(taiwan_einvoice_site));
     $('button.cancel_einvoice').click(cancel_einvoice(taiwan_einvoice_site));
 });
