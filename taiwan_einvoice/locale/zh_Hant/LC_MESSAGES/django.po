@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-14 10:02+0800\n"
+"POT-Creation-Date: 2022-10-14 16:06+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1395,6 +1395,12 @@ msgstr "是否商用?"
 
 msgid "Seller Identifier"
 msgstr "賣方統編"
+
+msgid "Warning Amount"
+msgstr "警示金額"
+
+msgid "Forbidden Amount"
+msgstr "禁用金額"
 
 msgid "Auto Upload C0401?"
 msgstr "自動上傳 C0401?"
