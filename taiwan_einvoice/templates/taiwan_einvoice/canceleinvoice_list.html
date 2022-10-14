@@ -221,14 +221,14 @@
 
 {% if can_add_canceleinvoice_under_turnkeyservices.exists %}
 
-    <div class="modal fade" id="show_canceleinvoice_modal" tabindex="-1" role="dialog"
+    <div class="modal fade" id="show_executing_canceleinvoice_modal" tabindex="-1" role="dialog"
         resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_canceling}"
         resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}"
-        aria-labelledby="show_canceleinvoice_modal_label" aria-hidden="true">
+        aria-labelledby="show_executing_canceleinvoice_modal_label" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="show_canceleinvoice_modal_label">{% trans "Cancel E-Invoice" %}</h4>
+                    <h4 class="modal-title" id="show_executing_canceleinvoice_modal_label">{% trans "Cancel E-Invoice" %}</h4>
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span>
                         <span class="sr-only">Close</span>

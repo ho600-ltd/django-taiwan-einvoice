@@ -1,4 +1,4 @@
-function show_canceleinvoice_modal(taiwan_einvoice_site) {
+function show_executing_canceleinvoice_modal(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $form = $btn.parents('form');
@@ -11,7 +11,7 @@ function show_canceleinvoice_modal(taiwan_einvoice_site) {
                 );
             return false;
         }
-        var $modal = $('#show_canceleinvoice_modal');
+        var $modal = $('#show_executing_canceleinvoice_modal');
         var resource_uri_tmpl = $modal.attr('resource_uri_tmpl');
         var resource_uri = resource_uri_tmpl.replace('{one_dimensional_barcode_for_canceling}', one_dimensional_barcode_for_canceling);
         $.ajax({
@@ -271,6 +271,6 @@ $(function () {
         });
     }
 
-    $('button.show_canceleinvoice_modal').click(show_canceleinvoice_modal(taiwan_einvoice_site));
+    $('button.show_executing_canceleinvoice_modal').click(show_executing_canceleinvoice_modal(taiwan_einvoice_site));
     $('button.cancel_einvoice').click(cancel_einvoice(taiwan_einvoice_site));
 });
