@@ -254,6 +254,8 @@ class TurnkeyServiceSerializer(ModelSerializer):
             'mask_download_seed',
             'mask_epl_base_set',
             'auto_upload_c0401_einvoice',
+            'warning_above_amount',
+            'forbidden_above_amount',
             'upload_cronjob_format__display',
             'tkw_endpoint',
             'qrcode_seed',
