@@ -54,7 +54,7 @@
                         <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}"
                             title="obj id: {{ voideinvoice.id }}; create_time: {{ voideinvoice.create_time }}">{{ forloop.counter }}.</td>
                         <td field="year_month_range">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
-                        <td field="track_no_">{{ voideinvoice.einvoice_dict.track_no_ }}</td>
+                        <td field="track_no_"><button class="btn btn-dark show_voideinvoice_modal">{{ voideinvoice.einvoice_dict.track_no_ }}</button></td>
                         <td field="einvoice_dict.random_number">{{ voideinvoice.einvoice_dict.random_number }}</td>
                         <td field="new_einvoice_dict.random_number">{{ voideinvoice.new_einvoice_dict.random_number }}</td>
                         <td field="type__display">{{ voideinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>

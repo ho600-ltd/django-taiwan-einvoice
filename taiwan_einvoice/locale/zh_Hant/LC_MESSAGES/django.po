@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-14 09:50+0800\n"
+"POT-Creation-Date: 2022-10-14 10:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1547,6 +1547,13 @@ msgctxt "taiwan_einvoice_voideinvoice"
 msgid "Creator"
 msgstr "註銷者"
 
+msgctxt "taiwan_einvoice"
+msgid "Voider"
+msgstr "註銷者"
+
+msgid "Void Time"
+msgstr "註銷時間"
+
 msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
 msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
 
@@ -1616,13 +1623,6 @@ msgstr "已註銷之<br/>隨機碼"
 
 msgid "New Random Number"
 msgstr "新開立之<br/>隨機碼"
-
-msgctxt "taiwan_einvoice"
-msgid "Voider"
-msgstr "註銷者"
-
-msgid "Void Time"
-msgstr "註銷<br/>時間"
 
 msgid "Staff exist"
 msgstr "工作人員已存在"

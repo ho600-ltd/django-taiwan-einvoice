@@ -1,3 +1,50 @@
+function show_voideinvoice_modal(taiwan_einvoice_site) {
+    return function () {
+        var $btn = $(this);
+        var $tr = $btn.parents('tr');
+        if (0 < $tr.length) {
+            var voideinvoice_id = $tr.attr('voideinvoice_id');
+        } else {
+            var voideinvoice_id = $btn.attr('voideinvoice_id');
+        }
+        var track_no_ = $btn.text();
+        var $modal = $('#show_voideinvoice_modal');
+        var resource_uri = $modal.attr('resource_uri_tmpl').replace('{id}', voideinvoice_id);
+        var fmts = ngettext('Void E-Invoice: %(track_no_)s', 'Void E-Invoice: %(track_no_)s', 1);
+        var message = interpolate(fmts, { track_no_: track_no_ }, true);
+        $('#show_voideinvoice_modal_label', $modal).text(message);
+        $.ajax({
+            url: resource_uri,
+            type: "GET",
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (json) {
+                var $modal_body = $('.modal-body', $modal);
+                $('span[field!=""]', $modal_body).each(function(){
+                    var $span = $(this);
+                    var field = $span.attr('field');
+                    if ($span.hasClass('datetime')) {
+                        var value = $('td[field="'+field+'"]', $tr).attr('value');
+                    } else {
+                        var value = $('td[field="'+field+'"]', $tr).text();
+                    }
+                    if (!value && json[field]) {
+                        value = json[field];
+                    }
+                    if (!value) {
+                        value = '';
+                    }
+                    $span.attr('value', value).text(value);
+                });
+                $('.datetime', $modal_body).each(taiwan_einvoice_site.convert_class_datetime(taiwan_einvoice_site));
+                $modal.data('voideinvoice_id', voideinvoice_id);
+                $modal.modal('show');
+            }
+        });
+    };
+};
+
+
 function show_executing_voideinvoice_modal(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
@@ -271,6 +318,7 @@ $(function () {
     adjust_pagination_html();
 
     $('select#reason').change(change_reason(taiwan_einvoice_site));
+    $('button.show_voideinvoice_modal').click(show_voideinvoice_modal(taiwan_einvoice_site));
     $('button.show_executing_voideinvoice_modal').click(show_executing_voideinvoice_modal(taiwan_einvoice_site));
     $('button.void_einvoice').click(void_einvoice(taiwan_einvoice_site));
 });
