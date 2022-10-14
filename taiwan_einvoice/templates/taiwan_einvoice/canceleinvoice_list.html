@@ -146,6 +146,67 @@
 
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.add_te_canceleinvoice" as "can_add_canceleinvoice_under_turnkeyservices" %}
 
+<div class="modal fade" id="show_canceleinvoice_modal" tabindex="-1" role="dialog"
+    resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}{id}/"
+    aria-labelledby="show_canceleinvoice_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="show_einvoice_modal_label">{% trans "Cancel E-Invoice" %}</h4>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Canceler" context "taiwan_einvoice" %}</b><br/>
+                        </div>
+                        <div class="col">
+                            <span field="creator_first_name_id"></span><br/>
+                        </div>
+                        <div class="col">
+                            <b>{% trans "Cancel Time" %}</b>
+                        </div>
+                        <div class="col">
+                            <span class="datetime" field="generate_time" value="" format="Y-m-d A H:i:s"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Reason" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="reason"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Return Tax Document Number" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="return_tax_document_number"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <b>{% trans "Remark" %}</b>
+                        </div>
+                        <div class="col">
+                            <span field="reamrk"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="print_sales_return_receipt_modal" tabindex="-1" role="dialog"
     resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}{id}/get_escpos_print_scripts_for_sales_return_receipt/"
     aria-labelledby="print_einvoice_modal_label" aria-hidden="true">
@@ -221,14 +282,14 @@
 
 {% if can_add_canceleinvoice_under_turnkeyservices.exists %}
 
-    <div class="modal fade" id="show_canceleinvoice_modal" tabindex="-1" role="dialog"
+    <div class="modal fade" id="show_executing_canceleinvoice_modal" tabindex="-1" role="dialog"
         resource_uri_tmpl="{% url 'taiwan_einvoice:taiwaneinvoiceapi:einvoice-list' %}?code39__exact={one_dimensional_barcode_for_canceling}"
         resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:canceleinvoice-list' %}"
-        aria-labelledby="show_canceleinvoice_modal_label" aria-hidden="true">
+        aria-labelledby="show_executing_canceleinvoice_modal_label" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="show_canceleinvoice_modal_label">{% trans "Cancel E-Invoice" %}</h4>
+                    <h4 class="modal-title" id="show_executing_canceleinvoice_modal_label">{% trans "Cancel E-Invoice" %}</h4>
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span>
                         <span class="sr-only">Close</span>

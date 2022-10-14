@@ -12,7 +12,7 @@
                 <input type="text" class="form-control" name="one_dimensional_barcode_for_canceling" id="one_dimensional_barcode_for_canceling" />
             </div>
 
-            <button type="submit" id="show_canceleinvoice_modal_button_0" class="btn btn-success show_canceleinvoice_modal">
+            <button type="submit" id="show_executing_canceleinvoice_modal_button_0" class="btn btn-success show_executing_canceleinvoice_modal">
                 {% blocktrans %}Cancel E-Invoice{% endblocktrans %}
             </button>
 
@@ -89,7 +89,7 @@
                         <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}"
                             title="obj id: {{ canceleinvoice.id }}; create_time: {{ canceleinvoice.create_time }}">{{ forloop.counter }}.</td>
                         <td field="year_month_range">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
-                        <td field="track_no_">{{ canceleinvoice.einvoice_dict.track_no_ }}</td>
+                        <td field="track_no_"><button class="btn btn-success show_canceleinvoice_modal">{{ canceleinvoice.einvoice_dict.track_no_ }}</button></td>
                         <td field="type__display">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>
                         <td field="SalesAmount">{{ canceleinvoice.einvoice_dict.amounts.SalesAmount }}</td>
                         <td field="TaxAmount">{{ canceleinvoice.einvoice_dict.amounts.TaxAmount }}</td>
