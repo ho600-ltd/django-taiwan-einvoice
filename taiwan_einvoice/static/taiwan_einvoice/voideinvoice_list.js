@@ -1,4 +1,4 @@
-function show_voideinvoice_modal(taiwan_einvoice_site) {
+function show_executing_voideinvoice_modal(taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $form = $btn.parents('form');
@@ -11,7 +11,7 @@ function show_voideinvoice_modal(taiwan_einvoice_site) {
                 );
             return false;
         }
-        var $modal = $('#show_voideinvoice_modal');
+        var $modal = $('#show_executing_voideinvoice_modal');
         var resource_uri_tmpl = $modal.attr('resource_uri_tmpl');
         var resource_uri = resource_uri_tmpl.replace('{one_dimensional_barcode_for_voiding}', one_dimensional_barcode_for_voiding);
         $.ajax({
@@ -271,6 +271,6 @@ $(function () {
     adjust_pagination_html();
 
     $('select#reason').change(change_reason(taiwan_einvoice_site));
-    $('button.show_voideinvoice_modal').click(show_voideinvoice_modal(taiwan_einvoice_site));
+    $('button.show_executing_voideinvoice_modal').click(show_executing_voideinvoice_modal(taiwan_einvoice_site));
     $('button.void_einvoice').click(void_einvoice(taiwan_einvoice_site));
 });
