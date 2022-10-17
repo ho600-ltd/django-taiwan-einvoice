@@ -14,7 +14,9 @@
             <th rowspan="2" width="5%">{% trans "Is Production?" %}</th>
             <th rowspan="2" width="10%">
                 {% trans "Seller Identifier" %}<br/>
-                {% trans "Name" %}
+                {% trans "Name" %}<br/>
+                {% trans "Warning Amount" %}<br/>
+                {% trans "Forbidden Amount" %}
             </th>
             <th rowspan="2" width="15%">
                 {% trans "Auto Upload C0401?" %}<br/>
@@ -49,6 +51,8 @@
                 <td>
                     <dv field="identifier">{{ turnkeyservice.seller_dict.legal_entity_dict.identifier }}</div>
                     <div field="name">{{ turnkeyservice.name }}</div>
+                    <div field="warning_above_amount" style="color: red; background: yellow;">{{ turnkeyservice.warning_above_amount }}</div>
+                    <div field="forbidden_above_amount" style="color: white; background: red;">{{ turnkeyservice.forbidden_above_amount }}</div>
                 </td>
                 <td>
                     <dv field="auto_upload_c0401_einvoice">
