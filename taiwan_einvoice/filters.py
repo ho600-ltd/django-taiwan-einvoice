@@ -2,14 +2,15 @@ import re, datetime, logging
 import rest_framework_filters as filters
 
 from django.db.models import Q
-from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User, Group
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 from guardian.shortcuts import get_objects_for_user
 
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
-    StaffProfile,
+    TEAStaffProfile,
     ESCPOSWeb,
     Seller,
     LegalEntity,
@@ -49,18 +50,27 @@ class PrinterFilter(filters.FilterSet):
 def can_view_users_by_some_TODO_groups(request):
     #TODO: Don't let managers can see all users
     lg = logging.getLogger('taiwan_einvoice')
-    users = User.objects.filter(staffprofile__isnull=False)
+    users = User.objects.filter(teastaffprofile__isnull=False)
     lg.debug("#TODO can_view_users_by_some_TODO_groups: {}".format(users)) 
     return users
 
 
-class StaffProfileFilter(filters.FilterSet):
+def can_view_users_by_the_same_groups(request):
+    lg = logging.getLogger('taiwan_einvoice')
+    user_ids = []
+    ct_id = ContentType.objects.get_for_model(TurnkeyService).id
+    for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)):
+        user_ids.extend([d['id'] for d in g.user_set.all().values('id')])
+    return User.objects.filter(id__in=user_ids)
+
+
+class TEAStaffProfileFilter(filters.FilterSet):
     user = filters.RelatedFilter(UserFilter, field_name='user', queryset=can_view_users_by_some_TODO_groups)
 
 
 
     class Meta:
-        model = StaffProfile
+        model = TEAStaffProfile
         fields = {
             'nickname': ('icontains', ),
             'is_active': ('exact', ),
@@ -316,6 +326,7 @@ class EInvoiceFilter(filters.FilterSet):
         'details__8__Description',
         'details__9__Description',
     )
+    creator = filters.RelatedFilter(UserFilter, field_name='creator', queryset=can_view_users_by_some_TODO_groups)
     seller_invoice_track_no = filters.RelatedFilter(SellerInvoiceTrackNoFilter, field_name='seller_invoice_track_no', queryset=sitns_under_can_view_turnkey_services)
     track_no__icontains = filters.CharFilter(method='filter_track_no__icontains')
     details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')

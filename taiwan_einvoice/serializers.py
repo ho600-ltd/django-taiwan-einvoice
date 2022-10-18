@@ -24,7 +24,7 @@ from guardian.shortcuts import get_objects_for_user, assign_perm, get_perms
 from taiwan_einvoice.models import (
     NotEnoughNumberError,
     EInvoiceMIG,
-    StaffProfile,
+    TEAStaffProfile,
     ESCPOSWeb,
     Printer,
     LegalEntity,
@@ -58,9 +58,9 @@ class EInvoiceMIGSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class StaffProfileSerializer(ModelSerializer):
+class TEAStaffProfileSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
-        view_name="taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail", lookup_field='pk')
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:teastaffprofile-detail", lookup_field='pk')
     user_dict = UserSerializer(source='user', read_only=True)
     in_printer_admin_group = BooleanField()
     in_manager_group = BooleanField()
@@ -69,7 +69,7 @@ class StaffProfileSerializer(ModelSerializer):
 
 
     class Meta:
-        model = StaffProfile
+        model = TEAStaffProfile
         fields = '__all__'
 
 
@@ -169,8 +169,8 @@ class ESCPOSWebSerializer(ModelSerializer):
 class ESCPOSWebOperatorSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:escposweboperator-detail", lookup_field='pk')
-    admins = StaffProfileSerializer(read_only=True, many=True)
-    operators = StaffProfileSerializer(read_only=True, many=True)
+    admins = TEAStaffProfileSerializer(read_only=True, many=True)
+    operators = TEAStaffProfileSerializer(read_only=True, many=True)
 
 
 
@@ -296,7 +296,7 @@ class StaffGroupSerializer(ModelSerializer):
     def get_staffs(self, instance):
         request = self.context['request']
         users = instance.user_set.all()
-        return StaffProfileSerializer(StaffProfile.objects.filter(user__in=users).order_by('nickname'),
+        return TEAStaffProfileSerializer(TEAStaffProfile.objects.filter(user__in=users).order_by('nickname'),
                                       many=True,
                                       context={'request': request}).data
 

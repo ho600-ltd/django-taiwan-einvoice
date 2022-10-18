@@ -33,7 +33,7 @@ class TaiwanEInvoiceRouter(routers.DefaultRouter):
 
 
 router = TaiwanEInvoiceRouter()
-router.register('staffprofile', views.StaffProfileModelViewSet, basename="staffprofile")
+router.register('teastaffprofile', views.TEAStaffProfileModelViewSet, basename="teastaffprofile")
 router.register('escposweb', views.ESCPOSWebModelViewSet, basename="escposweb")
 router.register('escposweboperator', views.ESCPOSWebOperatorModelViewSet, basename="escposweboperator")
 router.register('legalentity', views.LegalEntityModelViewSet, basename="legalentity")

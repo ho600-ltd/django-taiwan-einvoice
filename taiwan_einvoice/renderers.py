@@ -101,9 +101,9 @@ class ESCPOSWebOperatorHtmlRenderer(TEOriginHTMLRenderer):
 
 
 
-class StaffProfileHtmlRenderer(TEOriginHTMLRenderer):
-    template = _get_template_name('staffprofile_list', sub_dir='taiwan_einvoice', show_template_filename=True)
-    content_template = _get_template_name('staffprofile_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
+class TEAStaffProfileHtmlRenderer(TEOriginHTMLRenderer):
+    template = _get_template_name('teastaffprofile_list', sub_dir='taiwan_einvoice', show_template_filename=True)
+    content_template = _get_template_name('teastaffprofile_list_content', sub_dir='taiwan_einvoice', show_template_filename=True)
 
 
     def get_content(self, renderer, data, accepted_media_type, renderer_context):

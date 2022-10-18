@@ -6,7 +6,7 @@
 
 {% block js %}
     {% compress js %}
-        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/staffprofile_list.js"></script>
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/teastaffprofile_list.js"></script>
     {% endcompress %}
 {% endblock %}
 
@@ -81,14 +81,14 @@
 
 {% block modals %}
 
-{% if perms.taiwan_einvoice.add_staffprofile %}
-<div class="modal fade" id="add_staffprofile_modal" tabindex="-1" role="dialog"
-    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}"
-    aria-labelledby="add_staffprofile_modal_label" aria-hidden="true">
+{% if perms.taiwan_einvoice.add_teastaffprofile %}
+<div class="modal fade" id="add_teastaffprofile_modal" tabindex="-1" role="dialog"
+    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:teastaffprofile-list' %}"
+    aria-labelledby="add_teastaffprofile_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-xs">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="add_staffprofile_modal_label">
+                <h4 class="modal-title" id="add_teastaffprofile_modal_label">
                     {% trans "Create Staff" %}
                 </h4>
                 <button type="button" class="close" data-dismiss="modal">
@@ -147,20 +147,20 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button id="add_staffprofile_button" type="button" class="add_staffprofile btn btn-secondary">{% trans "Create" %}</button>
+                <button id="add_teastaffprofile_button" type="button" class="add_teastaffprofile btn btn-secondary">{% trans "Create" %}</button>
             </div>
         </div>
     </div>
 </div>
 {% endif %}
 
-{% if perms.taiwan_einvoice.change_staffprofile %}
-<div class="modal fade" id="update_staffprofile_modal" tabindex="-1" role="dialog"
-    aria-labelledby="update_staffprofile_modal_label" aria-hidden="true">
+{% if perms.taiwan_einvoice.change_teastaffprofile %}
+<div class="modal fade" id="update_teastaffprofile_modal" tabindex="-1" role="dialog"
+    aria-labelledby="update_teastaffprofile_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-xs">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="update_staffprofile_modal_label">
+                <h4 class="modal-title" id="update_teastaffprofile_modal_label">
                     {% trans "Staff Profile" %}
                 </h4>
                 <button type="button" class="close" data-dismiss="modal">
@@ -223,7 +223,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
-                <button id="update_staffprofile_button" type="button" class="update_staffprofile btn btn-secondary">{% trans "Update" %}</button>
+                <button id="update_teastaffprofile_button" type="button" class="update_teastaffprofile btn btn-secondary">{% trans "Update" %}</button>
             </div>
         </div>
     </div>
