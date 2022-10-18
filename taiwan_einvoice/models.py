@@ -112,8 +112,16 @@ class TEAStaffProfile(models.Model):
     nickname = models.CharField(max_length=255, default='')
     is_active = models.BooleanField(default=True)
     @property
+    def printer_admin_group(self):
+        if self.in_printer_admin_group:
+            return Group.objects.get(name="TaiwanEInvoicePrinterAdminGroup")
+    @property
     def in_printer_admin_group(self):
         return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoicePrinterAdminGroup").exists()
+    @property
+    def manager_group(self):
+        if self.in_manager_group:
+            return Group.objects.get(name="TaiwanEInvoiceManagerGroup")
     @property
     def in_manager_group(self):
         return self.user.is_superuser or self.user.groups.filter(name="TaiwanEInvoiceManagerGroup").exists()

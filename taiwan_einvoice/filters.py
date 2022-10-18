@@ -2,7 +2,8 @@ import re, datetime, logging
 import rest_framework_filters as filters
 
 from django.db.models import Q
-from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User, Group
 from django.utils.timezone import now, utc
 from django.utils.translation import ugettext as _
 from guardian.shortcuts import get_objects_for_user
@@ -52,6 +53,15 @@ def can_view_users_by_some_TODO_groups(request):
     users = User.objects.filter(teastaffprofile__isnull=False)
     lg.debug("#TODO can_view_users_by_some_TODO_groups: {}".format(users)) 
     return users
+
+
+def can_view_users_by_the_same_groups(request):
+    lg = logging.getLogger('taiwan_einvoice')
+    user_ids = []
+    ct_id = ContentType.objects.get_for_model(TurnkeyService).id
+    for g in Group.objects.filter(name__startswith="ct{ct_id}:".format(ct_id=ct_id)):
+        user_ids.extend([d['id'] for d in g.user_set.all().values('id')])
+    return User.objects.filter(id__in=user_ids)
 
 
 class TEAStaffProfileFilter(filters.FilterSet):
