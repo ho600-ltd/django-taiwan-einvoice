@@ -316,6 +316,7 @@ class EInvoiceFilter(filters.FilterSet):
         'details__8__Description',
         'details__9__Description',
     )
+    creator = filters.RelatedFilter(UserFilter, field_name='creator', queryset=can_view_users_by_some_TODO_groups)
     seller_invoice_track_no = filters.RelatedFilter(SellerInvoiceTrackNoFilter, field_name='seller_invoice_track_no', queryset=sitns_under_can_view_turnkey_services)
     track_no__icontains = filters.CharFilter(method='filter_track_no__icontains')
     details__description__icontains = filters.CharFilter(method='filter_details__description__icontains')
