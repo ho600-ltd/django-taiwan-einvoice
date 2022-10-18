@@ -743,11 +743,9 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
             elif not re_create_einvoice:
-                if (request.user.is_superuser
-                    and (EInvoice.objects.filter(generate_no=einvoice.generate_no).count() >= 2
-                        or "#NO-RETURN" in data['remark'] or "#無退貨" in data['remark'])
-                    ):
-                    superuser_cancel_the_einvoice = True
+                if (("#NO-RETURN" in data['remark'] or "#無退貨" in data['remark'])
+                    and re.search('[a-zA-Z]{2}-?[0-9]{8}', data['remark'])):
+                    force_to_cancel_the_einvoice = True
                 else:
                     message = einvoice.check_before_cancel_einvoice()
                     if message:
@@ -770,14 +768,14 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        if superuser_cancel_the_einvoice:
+        if force_to_cancel_the_einvoice:
             try:
-                old_einvoice = EInvoice.objects.filter(generate_no=einvoice.generate_no).exclude(id=einvoice.id).order_by('id')[0]
+                previous_einvoice = EInvoice.objects.filter(generate_no=einvoice.generate_no).exclude(id=einvoice.id).order_by('-id')[0]
             except IndexError:
                 pass
             else:
-                if hasattr(old_einvoice.content_object, "post_cancel_einvoice"):
-                    old_einvoice.content_object.post_cancel_einvoice(old_einvoice)
+                if hasattr(previous_einvoice.content_object, "post_cancel_einvoice"):
+                    previous_einvoice.content_object.post_cancel_einvoice(previous_einvoice)
         elif re_create_einvoice:
             _d = {f.name: getattr(einvoice, f.name)
                 for f in EInvoice._meta.fields

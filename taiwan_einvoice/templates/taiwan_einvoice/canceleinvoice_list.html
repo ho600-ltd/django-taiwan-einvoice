@@ -301,7 +301,8 @@
                     <h4>{% trans "Cancel Reason Example" %}:</h4>
                     <ol>
                         <li>{% trans "Return the WorkOrder" context "cancel_einvoice" %}</li>
-                        <li>{% trans "Lost original copy" context "cancel_einvoice" %}</li>
+                        <li>{% trans "Lost the original copy(how was missing?)" context "cancel_einvoice" %}</li>
+                        <li>{% trans "The order does not return, but cancel this E-Invoice with another invoice" context "cancel_einvoice" %}</li>
                         <li>{% trans "Got the return tax document number from IRS" context "cancel_einvoice" %}</li>
                     </ol>
                     <div class="form-group row">
@@ -317,7 +318,14 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="remark" class="col-4 col-form-label">{% trans "Remark(Optional)" %}</label>
+                        <label for="remark" class="col-4 col-form-label">{% trans "Remark(Optional)" %}
+                            <span class="form-text text-danger">
+                                {% blocktrans %}
+                                    If the order does not return, please append <b>#NO-RETURN</b> tag in the "remark" field, and insert the track no. of the another invoice, if there is no track no, you can insert NO-00000000.
+                                    And please input the details about this no return order.
+                                {% endblocktrans %}
+                            </span>
+                        </label>
                         <div class="col-8">
                             <textarea class="form-control" name="remark" id="remark" rows="3" placeholder="{% trans 'Limit to 200 words' %}"></textarea>
                         </div>
