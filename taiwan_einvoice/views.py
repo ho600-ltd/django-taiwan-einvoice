@@ -20,8 +20,8 @@ from ho600_lib.permissions import Or
 
 from taiwan_einvoice.permissions import (
     IsSuperUser,
-    CanEditStaffProfile,
-    CanViewSelfStaffProfile,
+    CanEditTEAStaffProfile,
+    CanViewSelfTEAStaffProfile,
     CanOperateESCPOSWebOperator,
     CanEditESCPOSWebOperator,
     CanEditTurnkeyServiceGroup,
@@ -39,7 +39,7 @@ from taiwan_einvoice.permissions import (
 )
 from taiwan_einvoice.renderers import (
     TEBrowsableAPIRenderer,
-    StaffProfileHtmlRenderer,
+    TEAStaffProfileHtmlRenderer,
     ESCPOSWebHtmlRenderer,
     ESCPOSWebOperatorHtmlRenderer,
     TurnkeyServiceHtmlRenderer,
@@ -58,7 +58,7 @@ from taiwan_einvoice.renderers import (
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
-    StaffProfile,
+    TEAStaffProfile,
     ESCPOSWeb,
     LegalEntity,
     Seller,
@@ -77,7 +77,7 @@ from taiwan_einvoice.models import (
     TEAlarm,
 )
 from taiwan_einvoice.serializers import (
-    StaffProfileSerializer,
+    TEAStaffProfileSerializer,
     StaffGroupSerializer,
     ESCPOSWebSerializer,
     ESCPOSWebOperatorSerializer,
@@ -98,7 +98,7 @@ from taiwan_einvoice.serializers import (
     TEAlarmSerializer,
 )
 from taiwan_einvoice.filters import (
-    StaffProfileFilter,
+    TEAStaffProfileFilter,
     ESCPOSWebFilter,
     SellerFilter,
     LegalEntityFilter,
@@ -146,19 +146,19 @@ def escpos_web_demo(request, escpos_web_id):
 
 
 
-class StaffProfileModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanEditStaffProfile, CanViewSelfStaffProfile), )
+class TEAStaffProfileModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEditTEAStaffProfile, CanViewSelfTEAStaffProfile), )
     pagination_class = TenTo1000PerPagePagination
-    queryset = StaffProfile.objects.all().order_by('-id')
-    serializer_class = StaffProfileSerializer
-    filter_class = StaffProfileFilter
-    renderer_classes = (StaffProfileHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
+    queryset = TEAStaffProfile.objects.all().order_by('-id')
+    serializer_class = TEAStaffProfileSerializer
+    filter_class = TEAStaffProfileFilter
+    renderer_classes = (TEAStaffProfileHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        if StaffProfile.objects.filter(user__username=data['user.username']).exists():
+        if TEAStaffProfile.objects.filter(user__username=data['user.username']).exists():
             er = {
                 "error_title": _("Staff exist"),
                 "error_message": _("Staff exist"),
@@ -178,7 +178,7 @@ class StaffProfileModelViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         instance = serializer.instance
-        serializer = StaffProfileSerializer(serializer.instance, context={'request': request})
+        serializer = TEAStaffProfileSerializer(serializer.instance, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -196,7 +196,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super().get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         res = request.user.is_superuser
         if res:
@@ -229,7 +229,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super().get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         res = False
         for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
@@ -252,8 +252,8 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
         escposweb = self.get_object()
         if 'remove' == data['type']:
             try:
-                sp = StaffProfile.objects.get(id=data['staffprofile_id'])
-            except StaffProfile.DoesNotExist:
+                sp = TEAStaffProfile.objects.get(id=data['teastaffprofile_id'])
+            except TEAStaffProfile.DoesNotExist:
                 pass
             else:
                 ct = ContentType.objects.get(app_label='taiwan_einvoice', model='escposweb')
@@ -262,10 +262,10 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
         elif 'add' == data['type']:
             ct = ContentType.objects.get(app_label='taiwan_einvoice', model='escposweb')
             p = Permission.objects.get(content_type=ct, codename='operate_te_escposweb')
-            for staffprofile_id in data['staffprofile_ids']:
+            for teastaffprofile_id in data['teastaffprofile_ids']:
                 try:
-                    sp = StaffProfile.objects.get(id=staffprofile_id)
-                except StaffProfile.DoesNotExist:
+                    sp = TEAStaffProfile.objects.get(id=teastaffprofile_id)
+                except TEAStaffProfile.DoesNotExist:
                     continue
                 else:
                     assign_perm(p, sp.user, escposweb)
@@ -314,7 +314,7 @@ class TurnkeyServiceModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(TurnkeyServiceModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -411,7 +411,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(SellerInvoiceTrackNoModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -619,7 +619,7 @@ class EInvoiceModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(EInvoiceModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -681,7 +681,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(EInvoicePrintLogModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -705,7 +705,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(CancelEInvoiceModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -719,7 +719,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         data = request.data
         einvoice_id = data['einvoice_id']
         re_create_einvoice = data['re_create_einvoice']
-        superuser_cancel_the_einvoice = False
+        force_to_cancel_the_einvoice = False
         del data['re_create_einvoice']
         try:
             einvoice = EInvoice.objects.get(id=einvoice_id)
@@ -828,7 +828,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(VoidEInvoiceModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -1018,7 +1018,7 @@ class UploadBatchModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(UploadBatchModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -1042,7 +1042,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(BatchEInvoiceModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -1136,7 +1136,7 @@ class AuditLogModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(AuditLogModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -1160,7 +1160,7 @@ class SummaryReportModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(SummaryReportModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset
@@ -1184,7 +1184,7 @@ class TEAlarmModelViewSet(ModelViewSet):
     def get_queryset(self):
         request = self.request
         queryset = super(TEAlarmModelViewSet, self).get_queryset()
-        if not request.user.staffprofile or not request.user.staffprofile.is_active:
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         elif request.user.is_superuser:
             return queryset

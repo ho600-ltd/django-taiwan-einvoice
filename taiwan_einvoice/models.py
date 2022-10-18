@@ -107,7 +107,7 @@ class BatchEInvoiceContentTypeError(Exception):
 
 
 
-class StaffProfile(models.Model):
+class TEAStaffProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
     nickname = models.CharField(max_length=255, default='')
     is_active = models.BooleanField(default=True)
@@ -413,9 +413,9 @@ class ESCPOSWeb(models.Model):
         try:
             g = Group.objects.get(name='TaiwanEInvoicePrinterAdminGroup')
         except Group.DoesNotExist:
-            return StaffProfile.objects.none()
+            return TEAStaffProfile.objects.none()
         else:
-            return StaffProfile.objects.filter(user__in=g.user_set.all()).order_by('nickname')
+            return TEAStaffProfile.objects.filter(user__in=g.user_set.all()).order_by('nickname')
 
 
     @property
@@ -427,7 +427,7 @@ class ESCPOSWeb(models.Model):
         else:
             admin_users = g.user_set.all()
         users = get_users_with_perms(self, only_with_perms_in=['operate_te_escposweb'])
-        return StaffProfile.objects.filter(user__is_superuser=False,
+        return TEAStaffProfile.objects.filter(user__is_superuser=False,
                                            user__in=users
                                           ).exclude(user__in=admin_users).order_by('nickname')
 

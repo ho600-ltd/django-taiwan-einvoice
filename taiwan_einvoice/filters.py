@@ -9,7 +9,7 @@ from guardian.shortcuts import get_objects_for_user
 
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
-    StaffProfile,
+    TEAStaffProfile,
     ESCPOSWeb,
     Seller,
     LegalEntity,
@@ -49,18 +49,18 @@ class PrinterFilter(filters.FilterSet):
 def can_view_users_by_some_TODO_groups(request):
     #TODO: Don't let managers can see all users
     lg = logging.getLogger('taiwan_einvoice')
-    users = User.objects.filter(staffprofile__isnull=False)
+    users = User.objects.filter(teastaffprofile__isnull=False)
     lg.debug("#TODO can_view_users_by_some_TODO_groups: {}".format(users)) 
     return users
 
 
-class StaffProfileFilter(filters.FilterSet):
+class TEAStaffProfileFilter(filters.FilterSet):
     user = filters.RelatedFilter(UserFilter, field_name='user', queryset=can_view_users_by_some_TODO_groups)
 
 
 
     class Meta:
-        model = StaffProfile
+        model = TEAStaffProfile
         fields = {
             'nickname': ('icontains', ),
             'is_active': ('exact', ),

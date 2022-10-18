@@ -6,20 +6,20 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
         var name = $('td[field=name]', $tr).text();
         var slug = $('td[field=slug]', $tr).text();
         var $modal = $('#add_operators_to_escposweb_modal');
-        var staffprofile_resource_uri = $('table.modal_table', $modal).attr('resource_uri');
+        var teastaffprofile_resource_uri = $('table.modal_table', $modal).attr('resource_uri');
         if ($tr && $tr.length > 0) {
             var escposweboperator_resource_uri = $tr.attr('resource_uri');
-            var existed_staffprofile_ids = [];
+            var existed_teastaffprofile_ids = [];
             $('.badge', $tr).each(function(){
-                var staffprofile_id = $(this).attr('staffprofile_id');
-                if (staffprofile_id) {
-                    existed_staffprofile_ids.push(staffprofile_id);
+                var teastaffprofile_id = $(this).attr('teastaffprofile_id');
+                if (teastaffprofile_id) {
+                    existed_teastaffprofile_ids.push(teastaffprofile_id);
                 }
             });
             $modal.data("resource_uri", escposweboperator_resource_uri);
             $modal.data("name", name);
             $modal.data("slug", slug);
-            $modal.data("existed_staffprofile_ids", existed_staffprofile_ids);
+            $modal.data("existed_teastaffprofile_ids", existed_teastaffprofile_ids);
         }
         $('[field=name]', $modal).text($modal.data("name"));
         $('[field=slug]', $modal).text($modal.data("slug"));
@@ -39,7 +39,7 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
             params.push(k+'='+data[k]);
         }
         $.ajax({
-            url: staffprofile_resource_uri+'?'+params.join('&'),
+            url: teastaffprofile_resource_uri+'?'+params.join('&'),
             type: "GET",
             dataType: 'json',
             contentType: 'application/json',
@@ -57,7 +57,7 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
                     var result = json['results'][i];
                     if (result['in_printer_admin_group']) {
                         var checkbox = gettext("Admin");
-                    } else if (0 <= $modal.data("existed_staffprofile_ids").indexOf(String(result['id']))) {
+                    } else if (0 <= $modal.data("existed_teastaffprofile_ids").indexOf(String(result['id']))) {
                         var checkbox = gettext("Added");
                     } else {
                         var checkbox = '<input type="checkbox" />';
@@ -71,7 +71,7 @@ function add_operators_to_escposweb_modal (taiwan_einvoice_site) {
                         "in_printer_admin_group": result['in_printer_admin_group'],
                         "in_manager_group": result['in_manager_group']
                     };
-                    var s = '<tr staffprofile_id="'+result['id']+'">';
+                    var s = '<tr teastaffprofile_id="'+result['id']+'">';
                     $('thead tr th', $table).each(function(){
                         var $th = $(this);
                         var k = $th.attr('field');
@@ -105,14 +105,14 @@ function add_operators_to_escposweb(taiwan_einvoice_site) {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var resource_uri = $modal.data("resource_uri");
-        var staffprofile_ids = [];
+        var teastaffprofile_ids = [];
         $('input[type=checkbox]', $modal).each(function(){
             if ($(this).prop('checked')) {
-                staffprofile_ids.push($(this).parents('tr').attr('staffprofile_id'));
+                teastaffprofile_ids.push($(this).parents('tr').attr('teastaffprofile_id'));
             }
         });
         var data = {
-            staffprofile_ids: staffprofile_ids,
+            teastaffprofile_ids: teastaffprofile_ids,
             type: "add"
         };
         $.ajax({
@@ -134,7 +134,7 @@ function add_operators_to_escposweb(taiwan_einvoice_site) {
                 $('[field=operators]', $tr).text('');
                 for (var i=0; i<json['operators'].length; i++) {
                     var op = json['operators'][i];
-                    var operator_str = '<h4 title="'+op['user_dict']['username']+'"><span class="badge badge-pill badge-success" staffprofile_id="'+op['id']+'">'
+                    var operator_str = '<h4 title="'+op['user_dict']['username']+'"><span class="badge badge-pill badge-success" teastaffprofile_id="'+op['id']+'">'
                         + op['nickname']
                         + '<a href="#" class="remove_operator_from_escposweb_modal"><i class="fas fa-user-times" style="color: red;"></i></a></span></h4>';
                     var $operator = $(operator_str);
@@ -165,7 +165,7 @@ function remove_operator_from_escposweb_modal (taiwan_einvoice_site) {
         $('[field=operator]', $modal).text($operator.text());
         $modal.data({
             resource_uri: $tr.attr('resource_uri'),
-            staffprofile_id: $operator.attr('staffprofile_id')
+            teastaffprofile_id: $operator.attr('teastaffprofile_id')
         })
         $modal.modal('show');
     };
@@ -177,9 +177,9 @@ function remove_operator_from_escposweb(taiwan_einvoice_site) {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var resource_uri = $modal.data("resource_uri");
-        var staffprofile_id = $modal.data("staffprofile_id");
+        var teastaffprofile_id = $modal.data("teastaffprofile_id");
         var data = {
-            staffprofile_id: staffprofile_id,
+            teastaffprofile_id: teastaffprofile_id,
             type: "remove"
         };
         $.ajax({
@@ -197,7 +197,7 @@ function remove_operator_from_escposweb(taiwan_einvoice_site) {
             },
             success: function (json) {
                 $modal.modal('hide');
-                $('tr[resource_uri="'+resource_uri+'"] [staffprofile_id='+staffprofile_id+']').remove();
+                $('tr[resource_uri="'+resource_uri+'"] [teastaffprofile_id='+teastaffprofile_id+']').remove();
                 taiwan_einvoice_site.show_modal(
                     taiwan_einvoice_site.$SUCCESS_MODAL,
                     gettext("Success"),

@@ -1,6 +1,6 @@
-function add_staffprofile_modal (taiwan_einvoice_site) {
+function add_teastaffprofile_modal (taiwan_einvoice_site) {
     return function () {
-        var $modal = $('#add_staffprofile_modal');
+        var $modal = $('#add_teastaffprofile_modal');
         $('input[type=text]', $modal).val('');
         $('input[type=checkbox]', $modal).prop('checked', false);
         $modal.modal('show');
@@ -8,7 +8,7 @@ function add_staffprofile_modal (taiwan_einvoice_site) {
 }
 
 
-function add_staffprofile (taiwan_einvoice_site) {
+function add_teastaffprofile (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
@@ -51,7 +51,7 @@ function add_staffprofile (taiwan_einvoice_site) {
                     "groups": ""
                 };
                 var $table = $('table.search_result');
-                var s = '<tr staffprofile_id="'+json['id']+'" resource_uri="'+json['resource_uri']+'">';
+                var s = '<tr teastaffprofile_id="'+json['id']+'" resource_uri="'+json['resource_uri']+'">';
                 $('thead tr th', $table).each(function(){
                     var $th = $(this);
                     var k = $th.attr('field');
@@ -63,14 +63,14 @@ function add_staffprofile (taiwan_einvoice_site) {
                         }
                         s += '<td field="'+k+'">'+value+'</td>';
                     } else if ('user.username' == k) {
-                        s += '<td field="'+k+'" value="'+kv[k]+'"><button class="btn btn-primary update_staffprofile_modal">'+kv[k]+'</button></td>';
+                        s += '<td field="'+k+'" value="'+kv[k]+'"><button class="btn btn-primary update_teastaffprofile_modal">'+kv[k]+'</button></td>';
                     } else {
                         s += '<td field="'+k+'" value="'+kv[k]+'">'+kv[k]+'</td>';
                     }
                 });
                 s += '</tr>';
                 var $s = $(s);
-                $('.update_staffprofile_modal', $s).click(update_staffprofile_modal(taiwan_einvoice_site));
+                $('.update_teastaffprofile_modal', $s).click(update_teastaffprofile_modal(taiwan_einvoice_site));
                 $('tbody', $table).prepend($s);
             }
         });
@@ -78,11 +78,11 @@ function add_staffprofile (taiwan_einvoice_site) {
 }
 
 
-function update_staffprofile_modal (taiwan_einvoice_site) {
+function update_teastaffprofile_modal (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $tr = $btn.parents('tr');
-        var $modal = $('#update_staffprofile_modal');
+        var $modal = $('#update_teastaffprofile_modal');
         var resource_uri = $tr.attr('resource_uri');
         $modal.data('resource_uri', resource_uri);
         $.ajax({
@@ -136,7 +136,7 @@ function update_staffprofile_modal (taiwan_einvoice_site) {
 }
 
 
-function update_staffprofile (taiwan_einvoice_site) {
+function update_teastaffprofile (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
@@ -215,7 +215,7 @@ function update_staffprofile (taiwan_einvoice_site) {
 $(function () {
     var $url = new URL(window.location.href);
     var ps = $url.pathname.split('/');
-    var self_staffprofile = false;
+    var self_teastaffprofile = false;
     for (var i=0; i<ps.length-1; i++) {
         var name = ps[i+1];
         if (name.indexOf('.') >= 0) {
@@ -223,18 +223,18 @@ $(function () {
         } else {
             var id = name;
         }
-        if (ps[i] == 'staffprofile' && parseInt(id) > 0) {
-            self_staffprofile = true;
+        if (ps[i] == 'teastaffprofile' && parseInt(id) > 0) {
+            self_teastaffprofile = true;
             break;
         }
     }
     $('.dropdown-menu a').removeClass('active');
-    if (self_staffprofile) {
+    if (self_teastaffprofile) {
         $(".nav_self").addClass("nav_active");
-        $(".nav_selfstaffprofile").addClass("active");
+        $(".nav_selfteastaffprofile").addClass("active");
     } else {
         $(".nav_permission").addClass("nav_active");
-        $(".nav_staffprofile").addClass("active");
+        $(".nav_teastaffprofile").addClass("active");
     }
 
     taiwan_einvoice_site = new TAIWAN_EINVOICE_SITE('taiwan_einvoice_site', {
@@ -248,10 +248,10 @@ $(function () {
 
     adjust_pagination_html();
 
-    $('button.add_staffprofile_modal').click(add_staffprofile_modal(taiwan_einvoice_site));
-    $('button.add_staffprofile').click(add_staffprofile(taiwan_einvoice_site));
-    $('button.update_staffprofile_modal').click(update_staffprofile_modal(taiwan_einvoice_site));
-    $('button.update_staffprofile').click(update_staffprofile(taiwan_einvoice_site));
+    $('button.add_teastaffprofile_modal').click(add_teastaffprofile_modal(taiwan_einvoice_site));
+    $('button.add_teastaffprofile').click(add_teastaffprofile(taiwan_einvoice_site));
+    $('button.update_teastaffprofile_modal').click(update_teastaffprofile_modal(taiwan_einvoice_site));
+    $('button.update_teastaffprofile').click(update_teastaffprofile(taiwan_einvoice_site));
     var dev_null = [
         pgettext('is_active', 'Yes')
     ]

@@ -4,7 +4,7 @@
 {% load ho600_tags %}
 {% get_current_language as LANGUAGE_CODE %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.edit_te_turnkeyservicegroup" as "can_be_edited_turnkeyservices" %}
-{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_staffprofile" as "can_view_staffprofiles" %}
+{% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_teastaffprofile" as "can_view_teastaffprofiles" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.operate_te_escposweb" as "can_operate_escposwebs" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_sellerinvoicetrackno" as "can_view_sellerinvoicetrackno_under_turnkeyservices" %}
 {% h6_get_objs_by_any_perms request.user for "taiwan_einvoice.view_te_einvoice" as "can_view_einvoice_under_turnkeyservices" %}
@@ -83,7 +83,7 @@
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto" id="nav">
-                        {% if perms.taiwan_einvoice.change_staffprofile or perms.taiwan_einvoice.edit_te_escposweboperator or perms.taiwan_einvoice.edit_te_turnkeyservicegroup %}
+                        {% if perms.taiwan_einvoice.change_teastaffprofile or perms.taiwan_einvoice.edit_te_escposweboperator or perms.taiwan_einvoice.edit_te_turnkeyservicegroup %}
                             <li class="dropdown nav-item nav_permission">
                                 <a data-toggle="dropdown"
                                     aria-expanded="false"
@@ -101,9 +101,9 @@
                                             {% blocktrans with name=turnkeyservice.name %}Staff Group({{ name }}){% endblocktrans %}
                                         </a>
                                     {% endfor %}
-                                    {% if perms.taiwan_einvoice.change_staffprofile %}
-                                        <a role="presentation" class="dropdown-item nav_staffprofile"
-                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-list' %}?format=html&amp;page_size=100">
+                                    {% if perms.taiwan_einvoice.change_teastaffprofile %}
+                                        <a role="presentation" class="dropdown-item nav_teastaffprofile"
+                                            href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:teastaffprofile-list' %}?format=html&amp;page_size=100">
                                             {% trans "Staff" %}
                                         </a>
                                     {% endif %}
@@ -176,9 +176,9 @@
                                 class="dropdown-toggle nav-link"
                                 href="#">{{ user.last_name }}{{ user.first_name }}</a>
                             <div role="menu" class="dropdown-menu">
-                                <a role="presentation" class="dropdown-item nav_selfstaffprofile"
-                                    {% if request.user.staffprofile.id %}    
-                                        href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:staffprofile-detail' pk=request.user.staffprofile.id %}?format=html"
+                                <a role="presentation" class="dropdown-item nav_selfteastaffprofile"
+                                    {% if request.user.teastaffprofile.id %}    
+                                        href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:teastaffprofile-detail' pk=request.user.teastaffprofile.id %}?format=html"
                                     {% else %}
                                         href="#"
                                     {% endif %}
