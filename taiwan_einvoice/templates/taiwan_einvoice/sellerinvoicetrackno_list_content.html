@@ -33,59 +33,61 @@
     {% endif %}
 </div>
 
-<table class="table search_result" init_page_no="{{ data.init_page_no }}">
-    <thead>
-        <tr>
-            <th field="no" width="5%">{% trans "No." %}</th>
-            <th field="turnkey_service" width="10%">{% trans "Turnkey Service" %}</th>
-            <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
-            <th field="year_month_range" width="10%">{% trans "Year Month Range" %}</th>
-            <th field="track" width="10%">{% trans "Track" %}</th>
-            <th field="begin_no" width="10%">{% trans "Begin No." %}</th>
-            <th field="end_no" width="10%">{% trans "End No." %}</th>
-            <th field="next_blank_no" width="10%">{% trans "Blank No." %}</th>
-            <th field="count_blank_no" width="10%">{% trans "Blank No. Count" %}</th>
-            {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
-                <th field="button" width="10%">{% trans "Delete" %}</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for sellerinvoicetrackno in data.results %}
-            <tr sellerinvoicetrackno_id="{{ sellerinvoicetrackno.id }}" resource_uri='{% url "taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail" pk=sellerinvoicetrackno.id %}'>
-                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ sellerinvoicetrackno.id }}">{{ forloop.counter }}.</td>
-                <td field="turnkey_service">
-                    <div field="turnkey_service__name">{{ sellerinvoicetrackno.turnkey_service_dict.name }}</div>
-                    <div field="turnkey_service__party_id">{{ sellerinvoicetrackno.turnkey_service_dict.party_id }}</div>
-                </td>
-                <td field="type__display">{{ sellerinvoicetrackno.type__display }}</td>
-                <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
-                <td field="track">{{ sellerinvoicetrackno.track }}</td>
-                <td field="begin_no">{{ sellerinvoicetrackno.begin_no_str }}</td>
-                <td field="end_no">{{ sellerinvoicetrackno.end_no_str }}</td>
-                <td field="next_blank_no">
-                    {% if sellerinvoicetrackno.next_blank_no %}
-                        {% if sellerinvoicetrackno.next_blank_no == sellerinvoicetrackno.end_no %}
-                            {{ sellerinvoicetrackno.next_blank_no }}
-                        {% else %}
-                            <div>{{ sellerinvoicetrackno.next_blank_no }}</div>
-                             ~
-                            <div>{{ sellerinvoicetrackno.end_no_str }}</div>
-                        {% endif %}
-                    {% else %}
-                        {% trans "None" %}
-                    {% endif %}
-                </td>
-                <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
-                {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
-                    <td field="button">
-                        <button id="delete_iseller_nvoice_track_no_modal_button_0" type="button" class="delete_seller_invoice_track_no_modal btn btn-danger">{% trans "Delete" %}</button>
-                    </td>
+<div class="table-responsive">
+    <table class="table search_result" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th field="no" width="5%">{% trans "No." %}</th>
+                <th field="turnkey_service" width="10%">{% trans "Turnkey Service" %}</th>
+                <th field="type__display" width="10%">{% trans "Tax Type" %}</th>
+                <th field="year_month_range" width="10%">{% trans "Year Month Range" %}</th>
+                <th field="track" width="10%">{% trans "Track" %}</th>
+                <th field="begin_no" width="10%">{% trans "Begin No." %}</th>
+                <th field="end_no" width="10%">{% trans "End No." %}</th>
+                <th field="next_blank_no" width="10%">{% trans "Blank No." %}</th>
+                <th field="count_blank_no" width="10%">{% trans "Blank No. Count" %}</th>
+                {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
+                    <th field="button" width="10%">{% trans "Delete" %}</th>
                 {% endif %}
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for sellerinvoicetrackno in data.results %}
+                <tr sellerinvoicetrackno_id="{{ sellerinvoicetrackno.id }}" resource_uri='{% url "taiwan_einvoice:taiwaneinvoiceapi:sellerinvoicetrackno-detail" pk=sellerinvoicetrackno.id %}'>
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ sellerinvoicetrackno.id }}">{{ forloop.counter }}.</td>
+                    <td field="turnkey_service">
+                        <div field="turnkey_service__name">{{ sellerinvoicetrackno.turnkey_service_dict.name }}</div>
+                        <div field="turnkey_service__party_id">{{ sellerinvoicetrackno.turnkey_service_dict.party_id }}</div>
+                    </td>
+                    <td field="type__display">{{ sellerinvoicetrackno.type__display }}</td>
+                    <td field="year_month_range">{{ sellerinvoicetrackno.year_month_range }}</td>
+                    <td field="track">{{ sellerinvoicetrackno.track }}</td>
+                    <td field="begin_no">{{ sellerinvoicetrackno.begin_no_str }}</td>
+                    <td field="end_no">{{ sellerinvoicetrackno.end_no_str }}</td>
+                    <td field="next_blank_no">
+                        {% if sellerinvoicetrackno.next_blank_no %}
+                            {% if sellerinvoicetrackno.next_blank_no == sellerinvoicetrackno.end_no %}
+                                {{ sellerinvoicetrackno.next_blank_no }}
+                            {% else %}
+                                <div>{{ sellerinvoicetrackno.next_blank_no }}</div>
+                                ~
+                                <div>{{ sellerinvoicetrackno.end_no_str }}</div>
+                            {% endif %}
+                        {% else %}
+                            {% trans "None" %}
+                        {% endif %}
+                    </td>
+                    <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
+                    {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
+                        <td field="button">
+                            <button id="delete_iseller_nvoice_track_no_modal_button_0" type="button" class="delete_seller_invoice_track_no_modal btn btn-danger">{% trans "Delete" %}</button>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% if can_add_sellerinvoicetrackno_under_turnkeyservices.exists %}
 

@@ -43,68 +43,70 @@
         {% endif %}
     </div>
 
-    <table class="table search_result" init_page_no="{{ data.init_page_no }}">
-        <thead>
-            <tr>
-                {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
-                    <th width="5%" field="check" class="print_einvoice">
-                        <input type="checkbox" class="choose_all_check_in_the_same_td" />
-                        {% trans "Choose" %}
-                    </th>
-                {% endif %}
-                <th field="no" width="5%">{% trans "No." %}</th>
-                <th field="year_month_range" width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
-                <th field="track_no_" width="9%">{% trans "Canceled Track No." %}</th>
-                <th field="type__display" width="9%">{% trans "Tax Type" %}</th>
-                <th field="SalesAmount" width="9%">{% trans "Sales Amount" %}</th>
-                <th field="TaxAmount" width="9%">{% trans "Tax Amount" %}</th>
-                <th field="TotalAmount" width="9%">{% trans "Total Amount" %}</th>
-                <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
-                <th field="creator_first_name_id" width="10%">{% trans "Canceler" context "taiwan_einvoice" %}</th>
-                <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Cancel Time" %}</th>
-                <th field="new_einvoice__track_no_" width="5%">{% trans "New E-Invoice Track No." %}</th>
-                <th field="ei_synced" width="5%">{% trans "Synced" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for canceleinvoice in data.results %}
-                {% with canceleinvoice.id as canceleinvoice_id %}
-                    <tr canceleinvoice_id="{{ canceleinvoice_id }}"
-                        einvoice_id="{{ canceleinvoice.einvoice_dict.id }}"
-                        track_no="{{ canceleinvoice.einvoice_dict.track_no }}"
-                        buyer_is_business_entity="{% if canceleinvoice.einvoice_dict.buyer_is_business_entity %}1{% endif %}"
-                        carrier_type="{{ canceleinvoice.einvoice_dict.carrier_type }}"
-                        carrier_type__display="{{ canceleinvoice.einvoice_dict.carrier_type__display }}"
-                        donate_mark__display='{% ifequal "1" canceleinvoice.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
-                        {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
-                            {% if canceleinvoice.new_einvoice_dict.id %}
-                                <td field="check" class="print_einvoice">
-                                </td>
-                            {% else %}
-                                <td field="check" class="print_einvoice">
-                                    <input type="checkbox" name="print_einvoice" />
-                                </td>
+    <div class="table-responsive">
+        <table class="table search_result" init_page_no="{{ data.init_page_no }}">
+            <thead>
+                <tr>
+                    {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
+                        <th width="5%" field="check" class="print_einvoice">
+                            <input type="checkbox" class="choose_all_check_in_the_same_td" />
+                            {% trans "Choose" %}
+                        </th>
+                    {% endif %}
+                    <th field="no" width="5%">{% trans "No." %}</th>
+                    <th field="year_month_range" width="10%">{% trans "Year Month Range" context "taiwan_einvoice" %}</th>
+                    <th field="track_no_" width="9%">{% trans "Canceled Track No." %}</th>
+                    <th field="type__display" width="9%">{% trans "Tax Type" %}</th>
+                    <th field="SalesAmount" width="9%">{% trans "Sales Amount" %}</th>
+                    <th field="TaxAmount" width="9%">{% trans "Tax Amount" %}</th>
+                    <th field="TotalAmount" width="9%">{% trans "Total Amount" %}</th>
+                    <th field="generate_no" width="10%">{% trans "Footprint No." %}</th>
+                    <th field="creator_first_name_id" width="10%">{% trans "Canceler" context "taiwan_einvoice" %}</th>
+                    <th field="generate_time" format="Y-m-d AH:i:s" width="25%">{% trans "Cancel Time" %}</th>
+                    <th field="new_einvoice__track_no_" width="5%">{% trans "New E-Invoice Track No." %}</th>
+                    <th field="ei_synced" width="5%">{% trans "Synced" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for canceleinvoice in data.results %}
+                    {% with canceleinvoice.id as canceleinvoice_id %}
+                        <tr canceleinvoice_id="{{ canceleinvoice_id }}"
+                            einvoice_id="{{ canceleinvoice.einvoice_dict.id }}"
+                            track_no="{{ canceleinvoice.einvoice_dict.track_no }}"
+                            buyer_is_business_entity="{% if canceleinvoice.einvoice_dict.buyer_is_business_entity %}1{% endif %}"
+                            carrier_type="{{ canceleinvoice.einvoice_dict.carrier_type }}"
+                            carrier_type__display="{{ canceleinvoice.einvoice_dict.carrier_type__display }}"
+                            donate_mark__display='{% ifequal "1" canceleinvoice.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
+                            {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
+                                {% if canceleinvoice.new_einvoice_dict.id %}
+                                    <td field="check" class="print_einvoice">
+                                    </td>
+                                {% else %}
+                                    <td field="check" class="print_einvoice">
+                                        <input type="checkbox" name="print_einvoice" />
+                                    </td>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-                        <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}"
-                            title="obj id: {{ canceleinvoice.id }}; create_time: {{ canceleinvoice.create_time }}">{{ forloop.counter }}.</td>
-                        <td field="year_month_range">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
-                        <td field="track_no_"><button class="btn btn-success show_canceleinvoice_modal">{{ canceleinvoice.einvoice_dict.track_no_ }}</button></td>
-                        <td field="type__display">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>
-                        <td field="SalesAmount">{{ canceleinvoice.einvoice_dict.amounts.SalesAmount }}</td>
-                        <td field="TaxAmount">{{ canceleinvoice.einvoice_dict.amounts.TaxAmount }}</td>
-                        <td field="TotalAmount" {% if canceleinvoice.einvoice_dict.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ canceleinvoice.einvoice_dict.amounts.TotalAmount }}</td>
-                        <td field="generate_no">{{ canceleinvoice.einvoice_dict.generate_no }}</td>
-                        <td field="creator_first_name_id">{{ canceleinvoice.creator_dict.first_name }}:{{ canceleinvoice.creator_dict.id }}</td>
-                        <td class="datetime" field="generate_time" value="{{ canceleinvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
-                        <td field="new_einvoice__track_no_">{{ canceleinvoice.new_einvoice_dict.track_no_ }}</td>
-                        <td field="ei_synced">
-                            {% if canceleinvoice.ei_synced %}{% trans "Done" %}{% endif %}
-                        </td>
-                    </tr>
-                {% endwith %}
-            {% endfor %}
-        </tbody>
-    </table>
+                            <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}"
+                                title="obj id: {{ canceleinvoice.id }}; create_time: {{ canceleinvoice.create_time }}">{{ forloop.counter }}.</td>
+                            <td field="year_month_range">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.year_month_range }}</td>
+                            <td field="track_no_"><button class="btn btn-success show_canceleinvoice_modal">{{ canceleinvoice.einvoice_dict.track_no_ }}</button></td>
+                            <td field="type__display">{{ canceleinvoice.einvoice_dict.seller_invoice_track_no_dict.type__display }}</td>
+                            <td field="SalesAmount">{{ canceleinvoice.einvoice_dict.amounts.SalesAmount }}</td>
+                            <td field="TaxAmount">{{ canceleinvoice.einvoice_dict.amounts.TaxAmount }}</td>
+                            <td field="TotalAmount" {% if canceleinvoice.einvoice_dict.amount_is_warning %}style="color: red; background: yellow;"{% endif %}>{{ canceleinvoice.einvoice_dict.amounts.TotalAmount }}</td>
+                            <td field="generate_no">{{ canceleinvoice.einvoice_dict.generate_no }}</td>
+                            <td field="creator_first_name_id">{{ canceleinvoice.creator_dict.first_name }}:{{ canceleinvoice.creator_dict.id }}</td>
+                            <td class="datetime" field="generate_time" value="{{ canceleinvoice.generate_time }}" format="Y-m-d AH:i:s"></td>
+                            <td field="new_einvoice__track_no_">{{ canceleinvoice.new_einvoice_dict.track_no_ }}</td>
+                            <td field="ei_synced">
+                                {% if canceleinvoice.ei_synced %}{% trans "Done" %}{% endif %}
+                            </td>
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
 {% endwith %}

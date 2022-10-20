@@ -13,34 +13,36 @@
     {% endif %}
 </div>
 
-<table class="table search_result" init_page_no="{{ data.groups_count }}">
-    <thead>
-        <tr>
-            <th rowspan="2" width="5%">{% trans "No." %}</th>
-            <th rowspan="2" width="20%">{% trans "Staff Group Name" %}</th>
-            <th rowspan="2" width="75%">{% trans "Staffs" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for group in data.groups %}
-            <tr group_id="{{ group.id }}"
-                permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
-                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
-                <td field="name">
-                    {% if object_can_edit_te_turnkeyservicegroup %}
-                        <button class="btn btn-primary update_turnkeyservicegroup_modal">{{ group.display_name }}</button>
-                    {% else %}
-                        {{ group.display_name }}
-                    {% endif %}
-                </td>
-                <td field="staffs">
-                    {% for teastaffprofile in group.staffs %}
-                        <h4 title="{{ staff.user_dict.username }}"><span class="badge badge-pill badge-info" teastaffprofile_id="{{ teastaffprofile.id }}">
-                            {{ teastaffprofile.nickname }}
-                        </span></h4>
-                    {% endfor %}
-                </td>
+<div class="table-responsive">
+    <table class="table search_result" init_page_no="{{ data.groups_count }}">
+        <thead>
+            <tr>
+                <th rowspan="2" width="5%">{% trans "No." %}</th>
+                <th rowspan="2" width="20%">{% trans "Staff Group Name" %}</th>
+                <th rowspan="2" width="75%">{% trans "Staffs" %}</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for group in data.groups %}
+                <tr group_id="{{ group.id }}"
+                    permissions="{% with permissions=data.groups_permissions|hash:group.id %}{% for p in permissions %}{{ p }},{% endfor %}{% endwith %}">
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                    <td field="name">
+                        {% if object_can_edit_te_turnkeyservicegroup %}
+                            <button class="btn btn-primary update_turnkeyservicegroup_modal">{{ group.display_name }}</button>
+                        {% else %}
+                            {{ group.display_name }}
+                        {% endif %}
+                    </td>
+                    <td field="staffs">
+                        {% for teastaffprofile in group.staffs %}
+                            <h4 title="{{ staff.user_dict.username }}"><span class="badge badge-pill badge-info" teastaffprofile_id="{{ teastaffprofile.id }}">
+                                {{ teastaffprofile.nickname }}
+                            </span></h4>
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -6,46 +6,48 @@
     {% endwith %}
 </div>
 
-<table class="table" init_page_no="{{ data.init_page_no }}">
-    <thead>
-        <tr>
-            <th>{% trans "No." %}</th>
-            <th>{% trans "Create Time" %}</th>
-            <th>{% trans "Turnkey Service" %}</th>
-            <th>{% trans "Target Audience Type" %}</th>
-            {% comment %}
-                <th>{% trans "Content Object" %}</th>
-            {% endcomment %}
-            <th>{% trans "Notified users" %}</th>
-            <th>
-                <div class="font-weight-bold">{% trans "Title" %}</div>
-                <div>{% trans "Body" %}</div>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for obj in data.results %}
-            <tr obj_id="{{ obj.id }}">
-                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
-                <td field="create_time" class="datetime" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
-                <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
-                <td field="target_audience_type">{{ obj.get_target_audience_type_display }}</td>
+<div class="table-responsive">
+    <table class="table" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th>{% trans "No." %}</th>
+                <th>{% trans "Create Time" %}</th>
+                <th>{% trans "Turnkey Service" %}</th>
+                <th>{% trans "Target Audience Type" %}</th>
                 {% comment %}
-                    <td field="content_object_dict">{{ obj.content_object_dict.str_name }}</td>
+                    <th>{% trans "Content Object" %}</th>
                 {% endcomment %}
-                <td field="notified_users">
-                    {% for u in obj.notified_users.all %}
-                        {{ u.first_name }}:{{ u.id }}<br/>
-                    {% empty %}
-                        {% trans "系統管理員" %}
-                    {% endfor %}
-                </td>
-                <td>
-                    <div field="title" class="font-weight-bold">{{ obj.title }}</div>
-                    <div>&nbsp;</div>
-                    <div field="body"><pre>{{ obj.body }}</pre></div>
-                </td>
+                <th>{% trans "Notified users" %}</th>
+                <th>
+                    <div class="font-weight-bold">{% trans "Title" %}</div>
+                    <div>{% trans "Body" %}</div>
+                </th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for obj in data.results %}
+                <tr obj_id="{{ obj.id }}">
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                    <td field="create_time" class="datetime" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
+                    <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
+                    <td field="target_audience_type">{{ obj.get_target_audience_type_display }}</td>
+                    {% comment %}
+                        <td field="content_object_dict">{{ obj.content_object_dict.str_name }}</td>
+                    {% endcomment %}
+                    <td field="notified_users">
+                        {% for u in obj.notified_users.all %}
+                            {{ u.first_name }}:{{ u.id }}<br/>
+                        {% empty %}
+                            {% trans "系統管理員" %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div field="title" class="font-weight-bold">{{ obj.title }}</div>
+                        <div>&nbsp;</div>
+                        <div field="body"><pre>{{ obj.body }}</pre></div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

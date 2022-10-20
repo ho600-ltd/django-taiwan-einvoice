@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-18 09:14+0800\n"
+"POT-Creation-Date: 2022-10-20 08:25+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1284,38 +1284,6 @@ msgstr ""
 msgid "Create and Upload"
 msgstr "新增並上傳"
 
-msgid "Create Staff"
-msgstr "新增工作人員"
-
-msgid "The actived user can entry the Taiwan E-Invoice Management Systemc(this system). Only super user can edit this field."
-msgstr "已啟用的工作人員才能進入「臺灣電子發票管理系統(本系統)」。只有超級管理員可以編輯此欄位。"
-
-msgid "Add to the Printer Admin Group"
-msgstr "加入發票機管理員群組"
-
-msgid "Add to the Manager Group"
-msgstr "加入權限管理者群組"
-
-msgid "Staff Profile"
-msgstr "工作人員資料"
-
-msgid "Add to the Staff Group"
-msgstr "加入工作人員群組"
-
-msgid "Update"
-msgstr "更新"
-
-msgid "Staff Group"
-msgstr "工作人員群組"
-
-msgctxt "in_printer_admin_group"
-msgid "Yes"
-msgstr "是"
-
-msgctxt "in_manager_group"
-msgid "Yes"
-msgstr "是"
-
 msgid "Report Type"
 msgstr "報表類型"
 
@@ -1401,6 +1369,38 @@ msgstr "標題"
 
 msgid "系統管理員"
 msgstr ""
+
+msgid "Create Staff"
+msgstr "新增工作人員"
+
+msgid "The actived user can entry the Taiwan E-Invoice Management Systemc(this system). Only super user can edit this field."
+msgstr "已啟用的工作人員才能進入「臺灣電子發票管理系統(本系統)」。只有超級管理員可以編輯此欄位。"
+
+msgid "Add to the Printer Admin Group"
+msgstr "加入發票機管理員群組"
+
+msgid "Add to the Manager Group"
+msgstr "加入權限管理者群組"
+
+msgid "Staff Profile"
+msgstr "工作人員資料"
+
+msgid "Add to the Staff Group"
+msgstr "加入工作人員群組"
+
+msgid "Update"
+msgstr "更新"
+
+msgid "Staff Group"
+msgstr "工作人員群組"
+
+msgctxt "in_printer_admin_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "in_manager_group"
+msgid "Yes"
+msgstr "是"
 
 msgid "Is on working?"
 msgstr "是否使用中?"
@@ -1864,6 +1864,15 @@ msgstr "上傳批次狀態錯誤"
 
 msgid "Upload Batch Status != \"f\""
 msgstr "上傳批次狀態 != \"f\""
+
+#~ msgid "Certificate Invoice"
+#~ msgstr "B2B存證 開立發票"
+
+#~ msgid "Certificate Cancel Invoice"
+#~ msgstr "B2B存證 作廢發票"
+
+#~ msgid "Certificate Void Invoice"
+#~ msgstr "B2C存證 註銷發票"
 
 #~ msgctxt "cancel_einvoice"
 #~ msgid "Lost original copy"

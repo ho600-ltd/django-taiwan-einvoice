@@ -6,31 +6,33 @@
     {% endwith %}
 </div>
 
-<table class="table" init_page_no="{{ data.init_page_no }}">
-    <thead>
-        <tr>
-            <th width="5%">{% trans "No." %}</th>
-            <th width="15%">{% trans "Name" %}</th>
-            <th width="15%">{% trans "Slug" %}</th>
-            <th width="25%">{% trans "Hash Key" %}</th>
-            <th width="15%">{% trans "Usage" context "taiwan_einvoice:escposweb" %}</th>
-            <th width="10%">{% trans "Button" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for escposweb in data.results %}
-            <tr escposweb_id="{{ escposweb.id }}">
-                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
-                <td field="name">{{ escposweb.name }}</td>
-                <td>{{ escposweb.slug }}</td>
-                <td>{{ escposweb.mask_hash_key }}</td>
-                <td field="usage"></td>
-                <td>
-                    <button class="btn btn-primary set_default_escposweb_modal">
-                        {% trans "Set default" %}
-                    </button>
-                </td>
+<div class="table-responsive">
+    <table class="table" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th width="5%">{% trans "No." %}</th>
+                <th width="15%">{% trans "Name" %}</th>
+                <th width="15%">{% trans "Slug" %}</th>
+                <th width="25%">{% trans "Hash Key" %}</th>
+                <th width="15%">{% trans "Usage" context "taiwan_einvoice:escposweb" %}</th>
+                <th width="10%">{% trans "Button" %}</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for escposweb in data.results %}
+                <tr escposweb_id="{{ escposweb.id }}">
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                    <td field="name">{{ escposweb.name }}</td>
+                    <td>{{ escposweb.slug }}</td>
+                    <td>{{ escposweb.mask_hash_key }}</td>
+                    <td field="usage"></td>
+                    <td>
+                        <button class="btn btn-primary set_default_escposweb_modal">
+                            {% trans "Set default" %}
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
