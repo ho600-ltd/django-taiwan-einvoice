@@ -6,49 +6,51 @@
     {% endwith %}
 </div>
 
-<table class="table" init_page_no="{{ data.init_page_no }}">
-    <thead>
-        <tr>
-            <th>{% trans "No." %}</th>
-            <th width="180px">
-                <div>{% trans "Create Time" %}</div>
-                <div>{% trans "Update Time" %}</div>
-            </th>
-            <th>{% trans "Turnkey Service" %}</th>
-            <th>{% trans "Slug" %}</th>
-            <th>{% trans "MIG Type" %}</th>
-            <th>{% trans "Kind" %}</th>
-            <th>{% trans "Executor" %}</th>
-            <th>{% trans "EI Turnkey Batch ID" %}</th>
-            <th>{% trans "Status" %}</th>
-            <th>{% trans "Batch E-Invoice Count" %}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for obj in data.results %}
-            <tr obj_id="{{ obj.id }}">
-                <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
-                <td>
-                    <div field="create_time" class="datetime" value="{{ obj.create_time }}"></div>
-                    <div field="update_time" class="datetime" value="{{ obj.update_time }}"></div>
-                </td>
-                <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
-                <td field="slug">{{ obj.slug }}</td>
-                <td field="mig_type">{{ obj.mig_type_dict.no }}</td>
-                <td field="kind" title="{{ obj.kind }}">{{ obj.get_kind_display }}</td>
-                <td field="executor">
-                    {% if obj.executor %}
-                        {{ obj.executor_dict.first_name }}:{{ obj.executor_dict.id }}
-                    {% else %}
-                        {% trans "Auto-Executed" %}
-                    {% endif %}
-                </td>
-                <td field="ei_turnkey_batch_id">{{ obj.ei_turnkey_batch_id }}</td>
-                <td field="status" title="{{ obj.status }}">{{ obj.get_status_display }}</td>
-                <td field="batch_einvoice_count">
-                    <a href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html&batch__slug__icontains={{ obj.slug }}">{{ obj.batch_einvoice_count }}</a>
-                </td>
+<div class="table-responsive">
+    <table class="table" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th>{% trans "No." %}</th>
+                <th width="180px">
+                    <div>{% trans "Create Time" %}</div>
+                    <div>{% trans "Update Time" %}</div>
+                </th>
+                <th>{% trans "Turnkey Service" %}</th>
+                <th>{% trans "Slug" %}</th>
+                <th>{% trans "MIG Type" %}</th>
+                <th>{% trans "Kind" %}</th>
+                <th>{% trans "Executor" %}</th>
+                <th>{% trans "EI Turnkey Batch ID" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Batch E-Invoice Count" %}</th>
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for obj in data.results %}
+                <tr obj_id="{{ obj.id }}">
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }} title="obj id: {{ obj.id }}">{{ forloop.counter }}.</td>
+                    <td>
+                        <div field="create_time" class="datetime" value="{{ obj.create_time }}"></div>
+                        <div field="update_time" class="datetime" value="{{ obj.update_time }}"></div>
+                    </td>
+                    <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
+                    <td field="slug">{{ obj.slug }}</td>
+                    <td field="mig_type">{{ obj.mig_type_dict.no }}</td>
+                    <td field="kind" title="{{ obj.kind }}">{{ obj.get_kind_display }}</td>
+                    <td field="executor">
+                        {% if obj.executor %}
+                            {{ obj.executor_dict.first_name }}:{{ obj.executor_dict.id }}
+                        {% else %}
+                            {% trans "Auto-Executed" %}
+                        {% endif %}
+                    </td>
+                    <td field="ei_turnkey_batch_id">{{ obj.ei_turnkey_batch_id }}</td>
+                    <td field="status" title="{{ obj.status }}">{{ obj.get_status_display }}</td>
+                    <td field="batch_einvoice_count">
+                        <a href="{% url 'taiwan_einvoice:taiwaneinvoiceapi:batcheinvoice-list' %}?format=html&batch__slug__icontains={{ obj.slug }}">{{ obj.batch_einvoice_count }}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
