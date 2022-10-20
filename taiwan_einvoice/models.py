@@ -2352,13 +2352,17 @@ class UploadBatch(models.Model):
                     ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                      mig_type=mig_type,
                                      kind=kind,
-                                     status='0')
+                                     status='0',
+                                     executor=executor,
+                                    )
                     ub.save()
             else:
                 ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                  mig_type=mig_type,
                                  kind=kind,
-                                 status='0')
+                                 status='0',
+                                 executor=executor,
+                                )
                 ub.save()
             be = BatchEInvoice(batch=ub,
                                content_object=content_object,
@@ -2383,7 +2387,9 @@ class UploadBatch(models.Model):
                              slug=slug,
                              mig_type=mig_type,
                              kind=kind,
-                             status='0')
+                             status='0',
+                             executor=executor,
+                             )
             ub.save()
             be = BatchEInvoice(batch=ub,
                                content_object=content_object,
