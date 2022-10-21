@@ -757,6 +757,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
             einvoice.set_print_mark_true()
+        dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
         data['creator'] = request.user.id
         data['einvoice'] = einvoice.id
@@ -912,6 +913,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
             einvoice.set_print_mark_true()
+        dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
         if cancel_before_void:
             cei = CancelEInvoice(creator=request.user,

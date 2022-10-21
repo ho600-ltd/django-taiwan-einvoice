@@ -386,6 +386,7 @@ class EInvoiceSimpleSerializer(ModelSerializer):
         view_name="taiwan_einvoice:taiwaneinvoiceapi:einvoice-detail", lookup_field='pk')
     track_no = CharField(read_only=True)
     track_no_ = CharField(read_only=True)
+    has_same_generate_no = BooleanField(read_only=True)
 
 
     class Meta:
@@ -412,6 +413,7 @@ class EInvoiceSerializer(ModelSerializer):
     can_void = BooleanField(read_only=True)
     canceled_time = DateTimeField(read_only=True)
     related_einvoices = EInvoiceSimpleSerializer(read_only=True, many=True)
+    has_same_generate_no = BooleanField(read_only=True)
 
 
 

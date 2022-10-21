@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-20 08:25+0800\n"
+"POT-Creation-Date: 2022-10-20 18:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -997,6 +997,9 @@ msgstr "作<br/>廢<br/>?"
 
 msgid "Voided?"
 msgstr "註<br/>銷<br/>?"
+
+msgid "Duplicated"
+msgstr "重復"
 
 msgctxt "taiwan_einvoice"
 msgid "Print ID or Hex"

@@ -1115,6 +1115,10 @@ class EInvoice(models.Model):
         return self.generate_time.astimezone(TAIPEI_TIMEZONE).strftime('%H:%M:%S')
     generate_no = models.CharField(max_length=40, default='', db_index=True)
     generate_no_sha1 = models.CharField(max_length=10, default='', db_index=True)
+    @property
+    def has_same_generate_no(self):
+        return EInvoice.objects.filter(seller_invoice_track_no__turnkey_service__party_id=self.seller_invoice_track_no.turnkey_service.party_id,
+                                       generate_no=self.generate_no).count() > 1
     batch_id = models.SmallIntegerField(default=0)
 
     content_type = models.ForeignKey(ContentType, null=True, on_delete=models.DO_NOTHING)
@@ -2352,13 +2356,17 @@ class UploadBatch(models.Model):
                     ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                      mig_type=mig_type,
                                      kind=kind,
-                                     status='0')
+                                     status='0',
+                                     executor=executor,
+                                    )
                     ub.save()
             else:
                 ub = UploadBatch(turnkey_service=content_object.seller_invoice_track_no.turnkey_service,
                                  mig_type=mig_type,
                                  kind=kind,
-                                 status='0')
+                                 status='0',
+                                 executor=executor,
+                                )
                 ub.save()
             be = BatchEInvoice(batch=ub,
                                content_object=content_object,
@@ -2383,7 +2391,9 @@ class UploadBatch(models.Model):
                              slug=slug,
                              mig_type=mig_type,
                              kind=kind,
-                             status='0')
+                             status='0',
+                             executor=executor,
+                             )
             ub.save()
             be = BatchEInvoice(batch=ub,
                                content_object=content_object,
