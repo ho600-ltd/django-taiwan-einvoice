@@ -974,11 +974,8 @@ class SellerInvoiceTrackNo(models.Model):
             max_no = int(max_no)
         else:
             lg = logging.getLogger('taiwan_einvoice')
-            time.sleep(3)
-            max_ei = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).order_by('-no').first()
-            lg.info("SellerInvoiceTrackNo.get_new_no max_ei: {}".format(max_ei))
-            if max_ei:
-                max_no = int(max_ei.no)
+            eis = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).order_by('-no')
+            lg.info("SellerInvoiceTrackNo.get_new_no eis: {}".format(eis))
 
         if not max_no:
             new_no = self.begin_no
