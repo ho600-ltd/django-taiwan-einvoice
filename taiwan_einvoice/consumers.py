@@ -43,7 +43,7 @@ def update_print_einvoice_log(data):
     if not meet_to_tw_einvoice_standard:
         return
     track = data['track_no'][:2]
-    no = int(data['track_no'][2:])
+    no = data['track_no'][2:]
     unixtimestamp = data['unixtimestamp']
     status = data['status']
     from taiwan_einvoice.models import EInvoicePrintLog
