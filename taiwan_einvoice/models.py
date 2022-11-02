@@ -968,13 +968,12 @@ class SellerInvoiceTrackNo(models.Model):
     def get_new_no(self):
         if self.is_disabled:
             raise NotEnoughNumberError(_("{} is disabled").format(self))
-
-        max_no = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).aggregate(Max('no'))['no__max']
+        max_no = self.einvoice_set.filter(no__gte=self.begin_no_str, no__lte=self.end_no_str).aggregate(Max('no'))['no__max']
         if max_no:
             max_no = int(max_no)
         else:
             lg = logging.getLogger('taiwan_einvoice')
-            eis = self.einvoice_set.filter(no__gte=self.begin_no, no__lte=self.end_no).order_by('-no')
+            eis = self.einvoice_set.filter(no__gte=self.begin_no_str, no__lte=self.end_no_str).order_by('-no')
             lg.info("SellerInvoiceTrackNo.get_new_no sitn({}) has eis: {}".format(self, eis))
 
         if not max_no:
