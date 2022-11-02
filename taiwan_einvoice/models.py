@@ -891,8 +891,11 @@ class SellerInvoiceTrackNo(models.Model):
         return new_no
     @property
     def can_be_deleted(self):
-        return not self.einvoice_set.exists()
-    
+        if self.einvoice_set.exists() or now() > self.end_time:
+            return False
+        else:
+            return True
+
 
 
     class Meta:
@@ -2427,7 +2430,7 @@ class UploadBatch(models.Model):
                                content_object=content_object,
                                begin_time=content_object.begin_time,
                                end_time=content_object.end_time,
-                               track_no="{}{}".format(content_object.track, content_object.begin_no),
+                               track_no="{}{}".format(content_object.track, content_object.begin_no_str),
                                body="",
                                )
             be.save()
