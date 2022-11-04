@@ -64,6 +64,7 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=15)
 NO_NEED_TO_PRINT_TIME_MARGIN = datetime.timedelta(minutes=10)
 MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
+SELLER_INVOICE_TRACK_NO_ALLOW_CANCEL_MIARGIN = datetime.timedelta(days=15)
 
 
 
@@ -874,6 +875,12 @@ class SellerInvoiceTrackNo(models.Model):
     @property
     def end_no_str(self):
         return "{:08d}".format(self.end_no)
+    allow_cancel = models.BooleanField(default=True)
+    @property
+    def can_cancel(self):
+        if self.allow_cancel and now() < self.end_time + SELLER_INVOICE_TRACK_NO_ALLOW_CANCEL_MIARGIN:
+            return True
+        return False
     @property
     def count_blank_no(self):
         if self.is_disabled:
@@ -1182,11 +1189,20 @@ class EInvoice(models.Model):
             return False
         elif self.is_voided and self.voideinvoice_set.filter(new_einvoice__isnull=False).exists():
             return False
+        elif not self.seller_invoice_track_no.can_cancel:
+            return False
         else:
             return True
     @property
     def cancel_fail_reason(self):
-        pass
+        if self.is_canceled:
+            return _("E-Invoice({}) was already canceled!").format(self.track_no_)
+        elif self.is_voided and self.voideinvoice_set.filter(new_einvoice__isnull=False).exists():
+            return _("E-Invoice({}) was already voieded and has created the new one!").format(self.track_no_)
+        elif not self.seller_invoice_track_no.can_cancel:
+            return _("It can not cancel the e-invoice({}), because of the accounting issue!").format(self.track_no_)
+        else:
+            return ''
     @property
     def is_voided(self):
         return self.voideinvoice_set.exists()

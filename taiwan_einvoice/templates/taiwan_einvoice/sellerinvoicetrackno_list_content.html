@@ -13,7 +13,7 @@
             {% trans "Create Seller Invoice Track No" %}
         </button>
         {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
-            {% if request.GET.turnkey_service__seller__legal_entity__identifier and request.GET.date_in_year_month_range %}
+            {% if request.GET.turnkey_service__seller__legal_entity__identifier and request.GET.date_in_year_month_range and "" == request.GET.turnkey_service and "" == request.GET.type and "" == request.GET.track__icontains and "" == request.GET.no_including %}
                 {% if 0 < data.count %}
                     <button id="create_and_upload_blank_numbers_button_0" 
                         class="btn btn-warning create_and_upload_blank_numbers_modal">
@@ -24,9 +24,13 @@
                         {% trans "No need to upload blank numbers" %}%
                     </span>
                 {% endif %}
+                <button id="ban_to_cancel_button_0" 
+                    class="btn btn-warning ban_to_cancel_modal">
+                    {% trans "Ban to cancel the previous E-Invoices" %}
+                </button>
             {% else %}
                 <span class="text-warning">
-                    {% trans "Search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' button" %}
+                    {% trans "Search and only search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' and 'Ban to cancel the previous E-Invoices' button" %}
                 </span>
             {% endif %}
         {% endif %}
@@ -46,6 +50,9 @@
                 <th field="end_no" width="10%">{% trans "End No." %}</th>
                 <th field="next_blank_no" width="10%">{% trans "Blank No." %}</th>
                 <th field="count_blank_no" width="10%">{% trans "Blank No. Count" %}</th>
+                {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
+                    <th field="allow_cancel" width="10%">{% trans "Allow cancel" %}</th>
+                {% endif %}
                 {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
                     <th field="button" width="10%">{% trans "Delete" %}</th>
                 {% endif %}
@@ -79,6 +86,7 @@
                     </td>
                     <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
                     {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
+                        <td field="allow_cancel">{% if sellerinvoicetrackno.allow_cancel %}{% trans "Yes" context "allow_cancel" %}{% else %}{% trans "Can not be canceld" context "allow_cancel" %}{% endif %}</td>
                         <td field="button">
                             <button id="delete_iseller_nvoice_track_no_modal_button_0" type="button" class="delete_seller_invoice_track_no_modal btn btn-danger">{% trans "Delete" %}</button>
                         </td>
