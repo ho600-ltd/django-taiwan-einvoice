@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-20 18:10+0800\n"
+"POT-Creation-Date: 2022-11-04 17:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -175,6 +175,15 @@ msgstr "手機條碼"
 
 msgid "Natural person barcode"
 msgstr "自然人憑證條碼"
+
+msgid "E-Invoice({}) was already canceled!"
+msgstr "電子發票({})已被作廢!"
+
+msgid "E-Invoice({}) was already voieded and has created the new one!"
+msgstr "電子發票({})已被註銷且另有開立!"
+
+msgid "It can not cancel the e-invoice({}), because of the accounting issue!"
+msgstr "因為會計作帳因素，已無法作廢此發票({})!"
 
 msgctxt "canceleinvoice"
 msgid "Canceled at {} {}"
@@ -1675,6 +1684,12 @@ msgstr "所有欄位皆必填!"
 msgid "There is no any seller-invoice-track-no records!"
 msgstr "無字軌號碼紀錄!"
 
+msgid "End Time Error"
+msgstr "結束期間錯誤"
+
+msgid "The end time of some seller-invoice-track-no records does not over now time!"
+msgstr "部份字軌號碼紀錄的結束時間尚未過期!"
+
 msgid "Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!"
 msgstr "字軌號碼與資料庫紀錄不符，請只搜尋統一編號及期別所含括的時間，其他搜尋欄位須留空!"
 
@@ -1719,9 +1734,6 @@ msgid ""
 msgstr ""
 "{} 有誤: \n"
 "太早匯入。"
-
-msgid "End Time Error"
-msgstr "結束期間錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -1801,12 +1813,6 @@ msgstr "電子發票(id: {})不存在!"
 
 msgid "Cancel Error"
 msgstr "作廢錯誤"
-
-msgid "E-Invoice({}) was already canceled!"
-msgstr "電子發票({})已被作廢!"
-
-msgid "E-Invoice({}) was already voieded and has created the new one!"
-msgstr "電子發票({})已被註銷且另有開立!"
 
 msgid "No Seller Invoice Track No. Error"
 msgstr "無字軌號碼錯誤"

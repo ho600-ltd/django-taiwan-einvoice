@@ -423,41 +423,51 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
     @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
     def create_and_upload_blank_numbers(self, request, pk=None):
+        error_result = {}
         sitn = self.get_object()
         if sitn:
             identifier = request.data.get('turnkey_service__seller__legal_entity__identifier', '')
             date_in_year_month_range = request.data.get('date_in_year_month_range', '')
             seller_invoice_track_no_ids = request.data.get('seller_invoice_track_no_ids', '')
             if "" in [identifier, date_in_year_month_range, seller_invoice_track_no_ids]:
-                result = {"error_title": _("Blank Numbers Error"),
-                          "error_message": _("All fields are required!")}
+                error_result = {"error_title": _("Blank Numbers Error"),
+                                "error_message": _("All fields are required!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
             date_in_year_month_range = datetime.datetime.strptime(date_in_year_month_range, "%Y-%m-%d %H:%M:%S").astimezone(utc)
             seller_invoice_track_no_ids = seller_invoice_track_no_ids.split(',')
             seller_invoice_track_nos = SellerInvoiceTrackNo.objects.filter(turnkey_service__seller__legal_entity__identifier=identifier,
                                                                            begin_time__lte=date_in_year_month_range,
                                                                            end_time__gte=date_in_year_month_range)
             if not seller_invoice_track_nos.exists():
-                result = {"error_title": _("Blank Numbers Error"),
-                          "error_message": _("There is no any seller-invoice-track-no records!")}
+                error_result = {"error_title": _("Blank Numbers Error"),
+                                "error_message": _("There is no any seller-invoice-track-no records!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+            elif seller_invoice_track_nos.filter(end_time__lte=now()).count() != seller_invoice_track_nos.count():
+                error_result = {"error_title": _("End Time Error"),
+                                "error_message": _("The end time of some seller-invoice-track-no records does not over now time!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
             elif (len(seller_invoice_track_no_ids) != seller_invoice_track_nos.count()
                     or seller_invoice_track_nos.count() != seller_invoice_track_nos.filter(id__in=seller_invoice_track_no_ids).count()):
-                result = {"error_title": _("Blank Numbers Error"),
-                          "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
+                error_result = {"error_title": _("Blank Numbers Error"),
+                                "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
             elif sitn not in seller_invoice_track_nos:
-                result = {"error_title": _("Seller Invoice Track No. Error"),
-                          "error_message": _("The first record does not exist!")}
+                error_result = {"error_title": _("Seller Invoice Track No. Error"),
+                                "error_message": _("The first record does not exist!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
             
             try:
                 upload_batchs = SellerInvoiceTrackNo.create_blank_numbers_and_upload_batchs(seller_invoice_track_nos, executor=request.user)
             except Exception as e:
-                result = {"error_title": _("Create Upload Batch Error"),
-                          "error_message": "{}: {}".format(type(e), str(e))}
+                error_result = {"error_title": _("Create Upload Batch Error"),
+                                "error_message": "{}: {}".format(type(e), str(e))}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
             else:
                 return Response({"slugs": [upload_batch.slug for upload_batch in upload_batchs]}, status=status.HTTP_201_CREATED)
         else:
-            result = {"error_title": _("Seller Invoice Track No. Error"),
-                      "error_message": _("{} does not exist").format(pk)}
-        return Response(result, status=status.HTTP_403_FORBIDDEN)
+            error_result = {"error_title": _("Seller Invoice Track No. Error"),
+                            "error_message": _("{} does not exist").format(pk)}
+            return Response(error_result, status=status.HTTP_403_FORBIDDEN)
 
 
     @action(detail=False, methods=['post'], renderer_classes=[JSONRenderer, ])
@@ -730,16 +740,10 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
-            if einvoice.is_canceled:
+            if not einvoice.can_cancel:
                 er = {
                     "error_title": _("Cancel Error"),
-                    "error_message": _("E-Invoice({}) was already canceled!").format(einvoice.track_no_)
-                }
-                return Response(er, status=status.HTTP_403_FORBIDDEN)
-            elif not einvoice.can_cancel:
-                er = {
-                    "error_title": _("Cancel Error"),
-                    "error_message": _("E-Invoice({}) was already voieded and has created the new one!").format(einvoice.track_no_)
+                    "error_message": einvoice.cancel_fail_reason,
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
             elif not re_create_einvoice:
