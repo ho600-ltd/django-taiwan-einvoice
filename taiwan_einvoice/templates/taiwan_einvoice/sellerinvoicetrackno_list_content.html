@@ -19,15 +19,15 @@
                         class="btn btn-warning create_and_upload_blank_numbers_modal">
                         {% trans "Create and Upload Blank Numbers" %}
                     </button>
+                    <button id="ban_to_cancel_button_0" 
+                        class="btn btn-warning ban_to_cancel_modal">
+                        {% trans "Ban to cancel the previous E-Invoices" %}
+                    </button>
                 {% else %}
                     <span class="text-warning">
-                        {% trans "No need to upload blank numbers" %}%
+                        {% trans "No need to upload blank numbers and ban to cancel the previous E-Invoices" %}
                     </span>
                 {% endif %}
-                <button id="ban_to_cancel_button_0" 
-                    class="btn btn-warning ban_to_cancel_modal">
-                    {% trans "Ban to cancel the previous E-Invoices" %}
-                </button>
             {% else %}
                 <span class="text-warning">
                     {% trans "Search and only search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' and 'Ban to cancel the previous E-Invoices' button" %}
@@ -51,9 +51,7 @@
                 <th field="next_blank_no" width="10%">{% trans "Blank No." %}</th>
                 <th field="count_blank_no" width="10%">{% trans "Blank No. Count" %}</th>
                 {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
-                    <th field="allow_cancel" width="10%">{% trans "Allow cancel" %}</th>
-                {% endif %}
-                {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
+                    <th field="can_cancel" width="10%">{% trans "Can cancel" %}</th>
                     <th field="button" width="10%">{% trans "Delete" %}</th>
                 {% endif %}
             </tr>
@@ -85,10 +83,14 @@
                         {% endif %}
                     </td>
                     <td field="count_blank_no">{{ sellerinvoicetrackno.count_blank_no }}</td>
-                    {% if sellerinvoicetrackno.can_be_deleted and can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
-                        <td field="allow_cancel">{% if sellerinvoicetrackno.allow_cancel %}{% trans "Yes" context "allow_cancel" %}{% else %}{% trans "Can not be canceld" context "allow_cancel" %}{% endif %}</td>
+                    {% if can_delete_sellerinvoicetrackno_under_turnkeyservices.exists %}
+                        <td field="can_cancel">
+                            {% if sellerinvoicetrackno.can_cancel %}{% trans "Yes" context "can_cancel" %}{% else %}{% trans "Can not be canceld" context "can_cancel" %}{% endif %}
+                        </td>
                         <td field="button">
-                            <button id="delete_iseller_nvoice_track_no_modal_button_0" type="button" class="delete_seller_invoice_track_no_modal btn btn-danger">{% trans "Delete" %}</button>
+                            {% if sellerinvoicetrackno.can_be_deleted %}
+                                <button id="delete_iseller_nvoice_track_no_modal_button_0" type="button" class="delete_seller_invoice_track_no_modal btn btn-danger">{% trans "Delete" %}</button>
+                            {% endif %}
                         </td>
                     {% endif %}
                 </tr>
@@ -219,7 +221,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="delete_seller_invoice_track_no_modal_label">{% trans "Upload Blank Numbers" %}</h4>
+                    <h4 class="modal-title" id="create_and_upload_blank_numbers_modal_label">{% trans "Upload Blank Numbers" %}</h4>
                     <button type="button" class="close" data-dismiss="modal">
                         <span aria-hidden="true">&times;</span>
                         <span class="sr-only">Close</span>
@@ -233,7 +235,7 @@
                         </tbody>
                     </table>
                     {% blocktrans %}
-                        <p>Do you sure to upload the above record?</p>
+                        <p>Do you sure to create and upload blank numbers on the above records?</p>
                     {% endblocktrans %}
                 </div>
                 <div class="modal-footer">
@@ -245,4 +247,34 @@
         </div>
     </div>
 
+    <div class="modal fade" id="ban_to_cancel_modal" tabindex="-1" role="dialog"
+        aria-labelledby="ban_to_cancel_modal_label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="ban_to_cancel_modal_label">{% trans "Ban to cancel" %}</h4>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table modal_table">
+                        <thead>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    {% blocktrans %}
+                        <p>Do you sure to ban to cancel on the above records?</p>
+                    {% endblocktrans %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button id="ban_to_cancel_button_0" type="button" action="ban_to_cancel"
+                        class="ban_to_cancel btn btn-danger">{% trans "Ban to cancel" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endif %}

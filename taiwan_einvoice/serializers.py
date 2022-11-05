@@ -352,6 +352,7 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
     count_blank_no = IntegerField(read_only=True)
     year_month_range = CharField(read_only=True)
     can_be_deleted = BooleanField(read_only=True)
+    can_cancel = BooleanField(read_only=True)
 
     class Meta:
         model = SellerInvoiceTrackNo

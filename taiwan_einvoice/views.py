@@ -422,6 +422,49 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 
     @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
+    def ban_to_cancel(self, request, pk=None):
+        error_result = {}
+        sitn = self.get_object()
+        if sitn:
+            identifier = request.data.get('turnkey_service__seller__legal_entity__identifier', '')
+            date_in_year_month_range = request.data.get('date_in_year_month_range', '')
+            seller_invoice_track_no_ids = request.data.get('seller_invoice_track_no_ids', '')
+            if "" in [identifier, date_in_year_month_range, seller_invoice_track_no_ids]:
+                error_result = {"error_title": _("Ban to Cancel Error"),
+                                "error_message": _("All fields are required!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+            date_in_year_month_range = datetime.datetime.strptime(date_in_year_month_range, "%Y-%m-%d %H:%M:%S").astimezone(utc)
+            seller_invoice_track_no_ids = seller_invoice_track_no_ids.split(',')
+            seller_invoice_track_nos = SellerInvoiceTrackNo.objects.filter(turnkey_service__seller__legal_entity__identifier=identifier,
+                                                                           begin_time__lte=date_in_year_month_range,
+                                                                           end_time__gte=date_in_year_month_range)
+            if not seller_invoice_track_nos.exists():
+                error_result = {"error_title": _("Ban to Cancel Error"),
+                                "error_message": _("There is no any seller-invoice-track-no records!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+            elif seller_invoice_track_nos.filter(end_time__lte=now()).count() != seller_invoice_track_nos.count():
+                error_result = {"error_title": _("End Time Error"),
+                                "error_message": _("The end time of some seller-invoice-track-no records does not over now time!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+            elif (len(seller_invoice_track_no_ids) != seller_invoice_track_nos.count()
+                    or seller_invoice_track_nos.count() != seller_invoice_track_nos.filter(id__in=seller_invoice_track_no_ids).count()):
+                error_result = {"error_title": _("Ban to Cancel Error"),
+                                "error_message": _("Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+            elif sitn not in seller_invoice_track_nos:
+                error_result = {"error_title": _("Seller Invoice Track No. Error"),
+                                "error_message": _("The first record does not exist!")}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+            
+            seller_invoice_track_nos.update(allow_cancel=False)
+            return Response({"count": seller_invoice_track_nos.count()}, status=status.HTTP_201_CREATED)
+        else:
+            error_result = {"error_title": _("Seller Invoice Track No. Error"),
+                            "error_message": _("{} does not exist").format(pk)}
+            return Response(error_result, status=status.HTTP_403_FORBIDDEN)
+
+
+    @action(detail=True, methods=['post'], renderer_classes=[JSONRenderer, ])
     def create_and_upload_blank_numbers(self, request, pk=None):
         error_result = {}
         sitn = self.get_object()
