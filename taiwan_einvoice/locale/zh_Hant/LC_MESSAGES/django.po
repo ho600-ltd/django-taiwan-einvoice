@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-20 18:10+0800\n"
+"POT-Creation-Date: 2022-11-05 10:48+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -175,6 +175,15 @@ msgstr "手機條碼"
 
 msgid "Natural person barcode"
 msgstr "自然人憑證條碼"
+
+msgid "E-Invoice({}) was already canceled!"
+msgstr "電子發票({})已被作廢!"
+
+msgid "E-Invoice({}) was already voieded and has created the new one!"
+msgstr "電子發票({})已被註銷且另有開立!"
+
+msgid "It can not cancel the e-invoice({}), because of the accounting issue!"
+msgstr "因為會計作帳因素，已無法作廢此發票({})!"
 
 msgctxt "canceleinvoice"
 msgid "Canceled at {} {}"
@@ -1224,11 +1233,14 @@ msgstr "新增字軌號碼檔"
 msgid "Create and Upload Blank Numbers"
 msgstr "新增並上傳空白未使用字軌號碼"
 
-msgid "No need to upload blank numbers"
-msgstr "無須上傳未使用字軌號碼"
+msgid "Ban to cancel the previous E-Invoices"
+msgstr "禁止作廢上期發票"
 
-msgid "Search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' button"
-msgstr "先搜尋'統一編號'及'期別所含括的時間'，方能顯示「新增並上傳空白未使用字軌號碼」按鈕"
+msgid "No need to upload blank numbers and ban to cancel the previous E-Invoices"
+msgstr "無須「上傳未使用字軌號碼」及「禁止作廢上期發票」"
+
+msgid "Search and only search 'identifier' and 'date in year month range', then it will show 'Create and Upload blank numbers' and 'Ban to cancel the previous E-Invoices' button"
+msgstr "先搜尋且只搜尋'統一編號'及'期別所含括的時間'，方能顯示「新增並上傳空白未使用字軌號碼」、「禁止作廢上期發票」按鈕"
 
 msgid "Track"
 msgstr "字軌"
@@ -1245,8 +1257,19 @@ msgstr "空白未使用號碼"
 msgid "Blank No. Count"
 msgstr "空白張數"
 
+msgid "Can cancel"
+msgstr "允許作廢"
+
 msgid "Delete"
 msgstr "刪除"
+
+msgctxt "can_cancel"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "can_cancel"
+msgid "Can not be canceld"
+msgstr "無法作廢"
 
 msgid "Upload .csv to Create Seller Invoice Track No"
 msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
@@ -1277,7 +1300,7 @@ msgstr "新增並上傳空白未使用字軌號碼"
 
 msgid ""
 "\n"
-"                        <p>Do you sure to upload the above record?</p>\n"
+"                        <p>Do you sure to create and upload blank numbers on the above records?</p>\n"
 "                    "
 msgstr ""
 "\n"
@@ -1286,6 +1309,18 @@ msgstr ""
 
 msgid "Create and Upload"
 msgstr "新增並上傳"
+
+msgid "Ban to cancel"
+msgstr "禁止作廢"
+
+msgid ""
+"\n"
+"                        <p>Do you sure to ban to cancel on the above records?</p>\n"
+"                    "
+msgstr ""
+"\n"
+"                        <p>您確定要禁止作廢上述紀錄?</p>\n"
+"                    "
 
 msgid "Report Type"
 msgstr "報表類型"
@@ -1666,14 +1701,20 @@ msgstr "已存在的群組數量已超過限度({})"
 msgid "Group name exists"
 msgstr "工作人員群組名稱已存在"
 
-msgid "Blank Numbers Error"
-msgstr "空白未使用字軌號碼錯誤"
+msgid "Ban to Cancel Error"
+msgstr "禁止作廢錯誤"
 
 msgid "All fields are required!"
 msgstr "所有欄位皆必填!"
 
 msgid "There is no any seller-invoice-track-no records!"
 msgstr "無字軌號碼紀錄!"
+
+msgid "End Time Error"
+msgstr "結束期間錯誤"
+
+msgid "The end time of some seller-invoice-track-no records does not over now time!"
+msgstr "部份字軌號碼紀錄的結束時間尚未過期!"
 
 msgid "Seller-invoice-track-no records do not match the records in the DB, please only set identifier and date in year-month range, and the others keep in empty!"
 msgstr "字軌號碼與資料庫紀錄不符，請只搜尋統一編號及期別所含括的時間，其他搜尋欄位須留空!"
@@ -1684,11 +1725,14 @@ msgstr "字軌號碼錯誤"
 msgid "The first record does not exist!"
 msgstr "第一筆字軌號碼紀錄不存在!"
 
-msgid "Create Upload Batch Error"
-msgstr "新增上傳批次錯誤"
-
 msgid "{} does not exist"
 msgstr "{} 不存在"
+
+msgid "Blank Numbers Error"
+msgstr "空白未使用字軌號碼錯誤"
+
+msgid "Create Upload Batch Error"
+msgstr "新增上傳批次錯誤"
 
 msgid "TurnkeyService Does Not Exist"
 msgstr "Turnkwy 伺服器不存在"
@@ -1719,9 +1763,6 @@ msgid ""
 msgstr ""
 "{} 有誤: \n"
 "太早匯入。"
-
-msgid "End Time Error"
-msgstr "結束期間錯誤"
 
 msgid ""
 "{} has error: \n"
@@ -1802,12 +1843,6 @@ msgstr "電子發票(id: {})不存在!"
 msgid "Cancel Error"
 msgstr "作廢錯誤"
 
-msgid "E-Invoice({}) was already canceled!"
-msgstr "電子發票({})已被作廢!"
-
-msgid "E-Invoice({}) was already voieded and has created the new one!"
-msgstr "電子發票({})已被註銷且另有開立!"
-
 msgid "No Seller Invoice Track No. Error"
 msgstr "無字軌號碼錯誤"
 
@@ -1867,16 +1902,3 @@ msgstr "上傳批次狀態錯誤"
 
 msgid "Upload Batch Status != \"f\""
 msgstr "上傳批次狀態 != \"f\""
-
-#~ msgid "Certificate Invoice"
-#~ msgstr "B2B存證 開立發票"
-
-#~ msgid "Certificate Cancel Invoice"
-#~ msgstr "B2B存證 作廢發票"
-
-#~ msgid "Certificate Void Invoice"
-#~ msgstr "B2C存證 註銷發票"
-
-#~ msgctxt "cancel_einvoice"
-#~ msgid "Lost original copy"
-#~ msgstr "遺失正本"

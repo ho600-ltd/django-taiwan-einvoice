@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-16 15:33+0800\n"
+"POT-Creation-Date: 2022-11-05 10:59+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,6 +29,10 @@ msgstr "已創建新的「上傳批次」： "
 
 msgid "Success"
 msgstr "成功"
+
+msgid "Cancel E-Invoice: %(track_no_)s"
+msgid_plural "Cancel E-Invoice: %(track_no_)s"
+msgstr[0] "作廢電子發票: %(track_no_)s"
 
 msgid "Cancel E-Invoice Error"
 msgstr "作廢電子發票錯誤"
@@ -74,6 +78,27 @@ msgstr "作廢"
 msgid "NEW Record"
 msgstr "新紀錄"
 
+msgid "%(escposweb_name)s - Pass Key: %(pass_key)s"
+msgid_plural "%(escposweb_name)s(Pass Key: %(pass_key)s)"
+msgstr[0] "%(escposweb_name)s(Pass Key: %(pass_key)s)"
+
+msgctxt "taiwan_einvoice"
+msgid "Error"
+msgstr "錯誤"
+
+msgid "It can not connect ESC/POS Printer Server"
+msgstr "無法連線發票機伺服器"
+
+msgctxt "taiwan_einvoice"
+msgid "WARNING"
+msgstr "警示"
+
+msgid "Please choose one record at least"
+msgstr "請至少選擇 1 筆紀錄"
+
+msgid "Set up 'Default ESC/POS Printer first'"
+msgstr "請先設定預設的發票機"
+
 msgctxt "print_mark"
 msgid "Yes"
 msgstr "已印"
@@ -92,10 +117,6 @@ msgstr "WebSocket 連線錯誤"
 
 msgid "<p>Could not connect web server with websocket protocol, now.  It will cause printing job, except searching E-Invoice.</p><p>If you need to print E-Invoice, please wait for the successful connection.</p>"
 msgstr "<p>目前無法使用 WebSocket 協定與伺服器連線。這會導致列印發票作業無法執行，但仍可正常搜尋、瀏覽電子發票紀錄。</p><p>如果您需要列印電子發票，請靜待連線成功。</p>"
-
-msgctxt "taiwan_einvoice"
-msgid "WARNING"
-msgstr "警示"
 
 msgid "Print original copy before close the modal."
 msgstr "在離開列印小視窗前，就重印正本。"
@@ -129,25 +150,8 @@ msgctxt "taiwan_einvoice_donate_mark"
 msgid "Canceled"
 msgstr "已作廢"
 
-msgctxt "taiwan_einvoice"
-msgid "Error"
-msgstr "錯誤"
-
-msgid "It can not connect ESC/POS Printer Server"
-msgstr "無法連線發票機伺服器"
-
 msgid "Reason must has more than 10 words."
 msgstr "理由須超過 10 個字。"
-
-msgid "%(escposweb_name)s - Pass Key: %(pass_key)s"
-msgid_plural "%(escposweb_name)s(Pass Key: %(pass_key)s)"
-msgstr[0] "%(escposweb_name)s(Pass Key: %(pass_key)s)"
-
-msgid "Please choose one record at least"
-msgstr "請至少選擇 1 筆紀錄"
-
-msgid "Set up 'Default ESC/POS Printer first'"
-msgstr "請先設定預設的發票機"
 
 msgid "Default ESC/POS Printer"
 msgstr "預設發票機"
@@ -199,27 +203,19 @@ msgstr[0] "創建 %(count)s 筆"
 msgid "Create the Blank Number Record Successfully"
 msgstr "成功創建空白字軌號碼紀錄"
 
-msgid "Created"
-msgstr "已建立"
+msgid "Ban to cancel only works in the first 15 days of the odd month."
+msgstr "禁止作廢僅於奇數月的前 15 天可作業。"
 
-msgid "Turnkey Service: %(name)s"
-msgid_plural "Turnkey Service: %(name)s"
-msgstr[0] "Turnkey 服務: %(name)s"
+msgctxt "can_cancel"
+msgid "No"
+msgstr "無法作廢"
 
-msgid "Actived"
-msgstr "啟用"
+msgid "Update %(count)s record"
+msgid_plural "Update %(count)s records"
+msgstr[0] "更新 %(count)s 筆"
 
-msgctxt "in_printer_admin_group"
-msgid "Yes"
-msgstr "是"
-
-msgctxt "in_manager_group"
-msgid "Yes"
-msgstr "是"
-
-msgctxt "is_active"
-msgid "Yes"
-msgstr "啟用"
+msgid "Update Successfully"
+msgstr "更新成功"
 
 msgid "Sun"
 msgstr "日"
@@ -295,6 +291,28 @@ msgstr "<p>您的網路似乎有問題，請稍候再試。</p>"
 msgid "Error Code"
 msgstr "錯誤碼"
 
+msgid "Created"
+msgstr "已建立"
+
+msgid "Turnkey Service: %(name)s"
+msgid_plural "Turnkey Service: %(name)s"
+msgstr[0] "Turnkey 服務: %(name)s"
+
+msgid "Actived"
+msgstr "啟用"
+
+msgctxt "in_printer_admin_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "in_manager_group"
+msgid "Yes"
+msgstr "是"
+
+msgctxt "is_active"
+msgid "Yes"
+msgstr "啟用"
+
 msgid "Name Error"
 msgstr "名稱錯誤"
 
@@ -314,6 +332,10 @@ msgstr[0] "您確定要刪除 \"%s\" ?"
 
 msgid "Deleted"
 msgstr "已刪除"
+
+msgid "Void E-Invoice: %(track_no_)s"
+msgid_plural "Void E-Invoice: %(track_no_)s"
+msgstr[0] "註銷電子發票: %(track_no_)s"
 
 msgid "Void E-Invoice Error"
 msgstr "註銷電子發票錯誤"
