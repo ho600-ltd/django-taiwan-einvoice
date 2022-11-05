@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-05 10:48+0800\n"
+"POT-Creation-Date: 2022-11-05 11:27+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1739,6 +1739,12 @@ msgstr "Turnkwy 伺服器不存在"
 
 msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
+
+msgid "Track No. Type Error"
+msgstr "字軌號碼類別錯誤"
+
+msgid "It only support '07' type now."
+msgstr "目前僅支援 07 類別。"
 
 msgid "Year Month Range Error"
 msgstr "期別錯誤"
