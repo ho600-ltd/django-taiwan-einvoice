@@ -533,6 +533,13 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             elif turnkey_service.seller.legal_entity.identifier in line:
                 cols = line.split(',')
 
+                if '07' != '{:02d}'.format(int(cols[1])):
+                    er = {
+                        "error_title": _("Track No. Type Error"),
+                        "error_message": _("It only support '07' type now.")
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
                 try:
                     begin_month_str, end_month_str = cols[3].split(' ~ ')
                     begin_chmk_year, begin_month = begin_month_str.split('/')
