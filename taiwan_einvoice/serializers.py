@@ -392,7 +392,7 @@ class EInvoiceSimpleSerializer(ModelSerializer):
 
     class Meta:
         model = EInvoice
-        fields = ['resource_uri', 'id', 'track_no_', 'track_no', ]
+        fields = ['resource_uri', 'id', 'track_no_', 'track_no', 'has_same_generate_no', ]
 
 
 
