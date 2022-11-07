@@ -218,6 +218,9 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
         "create_and_upload_blank_numbers": (
             "taiwan_einvoice.delete_te_sellerinvoicetrackno",
         ),
+        "ban_to_cancel": (
+            "taiwan_einvoice.delete_te_sellerinvoicetrackno",
+        ),
     }
 
 
