@@ -824,13 +824,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         self.perform_create(serializer)
 
         if force_to_cancel_the_einvoice:
-            try:
-                previous_einvoice = EInvoice.objects.filter(generate_no=einvoice.generate_no).exclude(id=einvoice.id).order_by('-id')[0]
-            except IndexError:
-                pass
-            else:
-                if hasattr(previous_einvoice.content_object, "post_cancel_einvoice"):
-                    previous_einvoice.content_object.post_cancel_einvoice(previous_einvoice)
+            serializer.instance.post_cancel_einvoice()
         elif re_create_einvoice:
             _d = {f.name: getattr(einvoice, f.name)
                 for f in EInvoice._meta.fields
