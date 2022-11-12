@@ -1863,6 +1863,13 @@ class CancelEInvoice(models.Model):
         message = ""
         if self.new_einvoice:
             message = self.einvoice.content_object.post_cancel_einvoice(self.new_einvoice)
+        elif EInvoice.objects.filter(generate_no=self.einvoice.generate_no, canceleinvoice__isnull=True).exists():
+            eis = []
+            for ei in EInvoice.objects.filter(generate_no=self.einvoice.generate_no, canceleinvoice__isnull=True).order_by('id'):
+                if hasattr(ei.content_object, 'post_cancel_einvoice'):
+                    eis.append(ei)
+            if eis:
+                message = self.einvoice.content_object.post_cancel_einvoice(*eis)
         return message
 
 
