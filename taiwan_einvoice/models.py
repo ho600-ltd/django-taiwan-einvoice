@@ -1011,7 +1011,10 @@ class SellerInvoiceTrackNo(models.Model):
         ei = EInvoice(**data)
         try:
             ei.save()
-        except IntegrityError:
+        except IntegrityError as e:
+            lg = logging.getLogger('info')
+            lg.error(vars(e))
+            lg.error(str(e))
             raise GenerateTimeNotFollowNoOrderError("Duplicated no: {}".format(data['no']))
         except EInvoiceDetailsError as e:
             raise e
