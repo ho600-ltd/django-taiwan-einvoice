@@ -264,8 +264,12 @@ class EITurnkeyModelViewSet(ModelViewSet):
     def get_ei_turnkey_summary_results(self, request, pk=None):
         lg = logging.getLogger('turnkey_web')
         eit = EITurnkey.objects.get(id=pk)
+        result_date = request.GET.get('result_date', '')
         result_date__gte = request.GET.get('result_date__gte', '')
-        if result_date__gte:
+        if result_date:
+            result_date = datetime.datetime.strptime(result_date, "%Y-%m-%d").date()
+            eitsrs = eit.eiturnkeydailysummaryresult_set.filter(result_date=result_date).order_by('result_date', 'create_time')[:100]
+        elif result_date__gte:
             result_date = datetime.datetime.strptime(result_date__gte, "%Y-%m-%d").date()
             eitsrs = eit.eiturnkeydailysummaryresult_set.filter(result_date__gte=result_date).order_by('result_date')[:100]
         else:

@@ -751,7 +751,7 @@ class TurnkeyService(models.Model):
         return cbotpr.generate_otps()
     
 
-    def get_and_create_ei_turnkey_daily_summary_result(self):
+    def get_and_create_ei_turnkey_daily_summary_result(self, result_date=''):
         translation.activate(settings.LANGUAGE_CODE)
         audit_type = AuditType.objects.get(name="EI_SUMMARY_RESULT")
         audit_log = AuditLog(
@@ -763,10 +763,20 @@ class TurnkeyService(models.Model):
         )
         url = self.tkw_endpoint + '{action}/'.format(action="get_ei_turnkey_summary_results")
         counter_based_otp_in_row = ','.join(self.generate_counter_based_otp_in_row())
-        last_summary_report = self.summaryreport_set.filter(report_type='E').order_by('begin_time').last()
         payload = {"format": "json"}
-        if last_summary_report:
-            payload["result_date__gte"] = last_summary_report.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d")
+
+        if result_date:
+            try:
+                _dev_null = datetime.datetime.strptime(result_date, "%Y-%m-%d")
+            except:
+                pass
+            else:
+                payload["result_date"] = result_date
+        else:
+            last_summary_report = self.summaryreport_set.filter(report_type='E').order_by('begin_time').last()
+            if last_summary_report:
+                payload["result_date__gte"] = last_summary_report.begin_time.astimezone(TAIPEI_TIMEZONE).strftime("%Y-%m-%d")
+
         try:
             response = requests.get(url,
                                     verify=self.verify_tkw_ssl,
@@ -2969,7 +2979,11 @@ class SummaryReport(models.Model):
 
             last_batch_einvoice = failed_einvoice_ct.content_object.last_batch_einvoice
             if "h" == self.report_type and last_batch_einvoice and "wp" == last_batch_einvoice.batch.kind:
-                target_audience_types.setdefault("g", {})[fe_key] = str(_("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI").format(track_no=track_no))
+                if True == failed_einvoice_ct.content_object.print_mark:
+                    _h_msg = _("Please notice the E-Invoice({track_no}), it does not be synced to EI yet")
+                else:
+                    _h_msg = _("Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI")
+                target_audience_types.setdefault("g", {})[fe_key] = str(_h_msg.format(track_no=track_no))
             elif "a" == self.report_type:
                 target_audience_types.setdefault("p", {})[fe_key] = str(self.EI_SUMMARY_RESULT_RETIRN_FAILED_MESSAGE)
             elif not last_batch_einvoice:
