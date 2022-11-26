@@ -414,6 +414,8 @@ class EITurnkey(models.Model):
     tea_turnkey_service_endpoint = models.CharField(max_length=755)
     allow_ips = models.JSONField(null=True)
     endpoint = models.CharField(max_length=755, null=True)
+
+
     @classmethod
     def parse_summary_result_then_create_objects(cls):
         lg = logging.getLogger("turnkey_web")
