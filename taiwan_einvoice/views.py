@@ -327,6 +327,23 @@ class TurnkeyServiceModelViewSet(ModelViewSet):
             return queryset.filter(id__in=turnkey_service_ids)
 
 
+    @action(detail=True, methods=['get'], renderer_classes=[JSONRenderer, ])
+    def get_and_create_ei_turnkey_daily_summary_result(self, request, pk=None):
+        ts = self.get_object()
+        if ts:
+            result_date = request.GET.get('result_date', '')
+            try:
+                _dev_null = datetime.datetime.strptime(result_date, "%Y-%m-%d")
+            except:
+                pass
+            else:
+                result_json = ts.get_and_create_ei_turnkey_daily_summary_result(result_date)
+                return Response(result_json)
+        return Response({"error_title": _("Turnkey Service Error"),
+                            "error_message": _("{} does not exist").format(pk),
+                        }, status=status.HTTP_403_FORBIDDEN)
+
+
 
 class TurnkeyServiceGroupModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEditTurnkeyServiceGroup), )
