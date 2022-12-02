@@ -14,7 +14,7 @@ TEA 是一個 Django-based 的 Python app ，可直接以 Web Api Service 方式
 當 TEA 要上傳發票至 EI 大平台時，會使用 HTTP POST 傳送批次編號資料至 TKW 的 Api Endpoint ，\
 成功後，再以 HTTP POST 傳送批次編號相關所有發票的 JSON ，\
 該批次編號發票傳送完畢後， TKW 會將發票 JSON 轉成 MIG 標準的 xml ，\
-存入本地端的 Turnkey 系統，再由 Turnkey 系統處理與 EI 大平台的發票上傳作業。
+存入本地端的 Turnkey 系統所控資料夾，再由 Turnkey 系統(Java Application)處理與 EI 大平台的發票上傳作業。
 
 TEA 資料設定
 -------------------------------------------------------------------------------
@@ -29,9 +29,9 @@ TEA 資料設定
     * party_id: EI 提供
     * routing_id: EI 提供
     * hash_key: 可自動隨機產生
-    * qrcode_seed: 須透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
-    * turnkey_seed: 須透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
-    * download_seed: 須透過 turnkey 程式>工具>守門員>QRCode驗證 來產生
+    * qrcode_seed: 須透過 Turnkey 程式>工具>守門員>QRCode驗證 來產生
+    * turnkey_seed: 須透過 Turnkey 程式>工具>守門員>QRCode驗證 來產生
+    * download_seed: 須透過 Turnkey 程式>工具>守門員>QRCode驗證 來產生
     * epl_base_set: 預設值是 GHIJKLMNOPQRSTUVWXYZ ，用來驗證「電子發票證明聯列印序號」用的字元集合，建議使用「大寫英文、符號」並打亂順序
     * auto_upload_c0401_einvoice: True/False ; if True, then it upload B2C certificate invoices at upload_cronjob_format time 
     * upload_cronjob_format: 5, 10, 15, 20, 30, 60; 5 => "\*/5 \* \* \* \*"(cron format)
@@ -45,7 +45,7 @@ EPW 資料設定
 
 .. note::
 
-    EPW 安裝部份，請見: :doc:`./install_epw_in_pi` 。
+    安裝 EPW 的步驟，請見: :doc:`./install_epw_in_pi` 。
 
 1. 套用 TEA 的 escposweb 紀錄來新增 EPW 中的 TEAWeb 紀錄，需要資料有:
     * escpos_web uri ，如: wss://<CEC or TEA url>/ws/taiwan_einvoice/escpos_web/<turnkeyservice id>/
@@ -55,7 +55,7 @@ EPW 資料設定
     * nickname: 建議在列表機外殼，標記代號，並將此代號紀錄至本欄位
     * receipt_type: 選項有 0, 5, 6, 8 。意義分別是 0 表不能使用、 5 表 58mm 收據、 6 表 58mm 電子發票、 8 表 80mm 收據
     * default_encoding: 選項有 B, G 。為印表機內置的編碼表設定，其中 B 表 CP950 、 G 表 GB18030 編碼表
-#. 若 TEAWeb 紀錄設定超過 1 個，那建議額外設定 EPW Portal
+#. 若 TEAWeb 紀錄設定超過 1 個，那建議額外 :ref:`設定 EPW Portal(非必要)` 
 
 TKW 資料設定
 -------------------------------------------------------------------------------

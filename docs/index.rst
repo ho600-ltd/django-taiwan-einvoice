@@ -67,7 +67,7 @@
 -------------------------------------------------------------------------------
 
 * EI: 財政部電子發票整合服務平台，也稱「大平台」
-* EPW: 使用 Django-based escpos_web App 建構的發票列印管理系統
+* EPW: 使用 Django-based escpos_web App 建構的發票列印管理系統。 EPW 系統加上感熱式印表機可簡稱「發票機」
 * TKW: 使用 Django-based turnkey_web 程式來擴充 Turnkey 系統，使其提供 Web Api 功能的電子發票管理系統
 * CEC: 叫用 EPW 及 TKW 系統的自架電子商務銷售系統(Customize E-Commercial system)
 * TEA: 提供 CEC 系統叫用的 Django-based taiwan_einvoice App 。
