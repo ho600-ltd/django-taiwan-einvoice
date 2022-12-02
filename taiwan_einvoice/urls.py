@@ -1,5 +1,11 @@
 # taiwan_einvoice/urls.py
+import os
+
+from django.conf import settings
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, Http404
 from django.urls import include, path, re_path
+from django.utils.translation import ugettext as _
+from django.views.static import serve
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view
 from rest_framework.renderers import JSONRenderer
@@ -7,6 +13,36 @@ from rest_framework.schemas import get_schema_view
 from taiwan_einvoice.renderers import TEBrowsableAPIRenderer
 
 from . import views
+
+
+def check_permissions(my_function):
+    def inner_function(*args, **kw):
+        R = args[0]
+        if R.user and R.user.is_authenticated:
+            if hasattr(settings, "TAIWAN_EINVOICE_MANUAL_ROOT") and os.path.isdir(os.path.join(settings.TAIWAN_EINVOICE_MANUAL_ROOT, 'taiwan_einvoice_manual_html')):
+                kw['document_root'] = os.path.join(settings.TAIWAN_EINVOICE_MANUAL_ROOT, 'taiwan_einvoice_manual_html')
+            elif hasattr(settings, "ROOT") and os.path.isdir(os.path.join(settings.ROOT, 'taiwan_einvoice_manual_html')):
+                kw['document_root'] = os.path.join(settings.ROOT, 'taiwan_einvoice_manual_html')
+            elif os.path.isdir(os.path.join(os.path.dirname(__file__), 'taiwan_einvoice_manual_html')):
+                kw['document_root'] = os.path.join(os.path.dirname(__file__), 'taiwan_einvoice_manual_html')
+            else:
+                kw['document_root'] = 'NOT_EXIST'
+            if not kw.get('path', ''):
+                kw['path'] = 'index.html'
+            http_404_true = False
+            try:
+                response = my_function(*args, **kw)
+            except Http404:
+                http_404_true = True
+            if http_404_true or isinstance(response, HttpResponseNotFound):
+                return HttpResponse(_("No Permission or Page does not ready"))
+            else:
+                return my_function(*args, **kw)
+        else:
+            return HttpResponseRedirect(settings.SOCIAL_AUTH_LOGIN_REDIRECT_URL)
+    return inner_function
+
+
 
 class TaiwanEInvoiceAPIRootView(routers.APIRootView):
     """ Endpoints of Taiwan EInvoice Api
@@ -56,5 +92,6 @@ urlpatterns = [
     path('escpos_web_demo/<int:escpos_web_id>/', views.escpos_web_demo, name='escpos_web_demo'),
     re_path(r'^api/{}/'.format(TaiwanEInvoiceAPIRootView.version),
         include((router.urls, "taiwaneinvoiceapi"), namespace="taiwaneinvoiceapi")),
+    re_path(r'^manual/(?P<path>.*)', check_permissions(serve), name='taiwan_einvoice_manual_html'),
     path('', views.index, name='index'),
 ]
