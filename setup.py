@@ -32,7 +32,7 @@ def package_static_files(directory):
 
 setup(name='taiwan_einvoice',
       install_requires=install_requires,
-      version='0.2.34-1',
+      version='0.3.0-1',
       packages=[
                 'taiwan_einvoice',
                 'taiwan_einvoice.migrations',
