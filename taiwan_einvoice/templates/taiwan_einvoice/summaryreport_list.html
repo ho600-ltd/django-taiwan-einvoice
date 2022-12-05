@@ -127,10 +127,13 @@
 
 <div class="pagination_row">
     <p class="">
+        {% url "taiwan_einvoice:taiwan_einvoice_manual_html" "check_point_and_sop.html" as manual_html_url %}
         {% blocktrans %}
             Notice: "EI Daily Summary Result" counts the E-Invoice by "Upload to EI time", but the others use "Create Time".
 
             This difference causes some E-Invoices to be counted in today's report, but be counted EI daily summary report of the next day, or the day after the next day.
+            <br/><br/>
+            The detail about daily check point and SOP for auditing E-Invoices can be read in <a href="{{ manual_html_url }}#dailyauditsop">Check point and SOP</a>.
         {% endblocktrans %}
     </p>
     <nav>
