@@ -142,6 +142,7 @@
     self_checklist_before_turnkey_online
     self_checklist_before_applying_track_no
     import_django_taiwan_einvoice
+    check_point_and_sop
     agent
     inquire_api
 
