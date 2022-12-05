@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-05 11:27+0800\n"
+"POT-Creation-Date: 2022-12-05 21:05+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -360,6 +360,10 @@ msgstr "每日稽核"
 
 msgid "Daily Summary from EI"
 msgstr "EI 日報表"
+
+#, python-brace-format
+msgid "Please notice the E-Invoice({track_no}), it does not be synced to EI yet"
+msgstr "請注意發票({track_no})，它尚未被同步至 EI 大平台"
 
 #, python-brace-format
 msgid "Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI"
@@ -1337,17 +1341,22 @@ msgstr "結束時間晚於"
 msgid "End time earlier than"
 msgstr "結束時間早於"
 
+#, python-format
 msgid ""
 "\n"
 "            Notice: \"EI Daily Summary Result\" counts the E-Invoice by \"Upload to EI time\", but the others use \"Create Time\".\n"
 "\n"
 "            This difference causes some E-Invoices to be counted in today's report, but be counted EI daily summary report of the next day, or the day after the next day.\n"
+"            <br/><br/>\n"
+"            The detail about daily check point and SOP for auditing E-Invoices can be read in <a href=\"%(manual_html_url)s#dailyauditsop\">Check point and SOP</a>.\n"
 "        "
 msgstr ""
 "\n"
 "注意: 「EI 日報表」使用「上傳至 EI 的時間」來計算筆數，而其他類型報表則是使用「發票創建時間」來計算。\n"
 "\n"
-"這個差異會導致某些發票被歸類在今日的每日報表中，但它們卻可能屬於下一日或下下一日的 EI 日報表。 "
+"這個差異會導致某些發票被歸類在今日的每日報表中，但它們卻可能屬於下一日或下下一日的 EI 日報表。 \n"
+"<br/><br/>\n"
+"每日檢核前一日發票數的檢查點及 SOP 請見「<a href=\"%(manual_html_url)s#dailyauditsop\">每日檢核前一日發票數</a>」。"
 
 msgid "Begin Time"
 msgstr "開始時間"
@@ -1683,6 +1692,9 @@ msgstr "已註銷之<br/>隨機碼"
 msgid "New Random Number"
 msgstr "新開立之<br/>隨機碼"
 
+msgid "No Permission or Page does not ready"
+msgstr "無權限或是頁面尚未完成"
+
 msgid "Staff exist"
 msgstr "工作人員已存在"
 
@@ -1691,6 +1703,12 @@ msgstr "{} 帳號不存在"
 
 msgid "Please check the username, this field is case-sensitive"
 msgstr "請檢查帳號，此欄位有大小寫之分"
+
+msgid "Turnkey Service Error"
+msgstr "Turnkey 服務錯誤"
+
+msgid "{} does not exist"
+msgstr "{} 不存在"
 
 msgid "The count of Existed Groups exceeds the limit"
 msgstr "已存在的群組數量已超過限度"
@@ -1724,9 +1742,6 @@ msgstr "字軌號碼錯誤"
 
 msgid "The first record does not exist!"
 msgstr "第一筆字軌號碼紀錄不存在!"
-
-msgid "{} does not exist"
-msgstr "{} 不存在"
 
 msgid "Blank Numbers Error"
 msgstr "空白未使用字軌號碼錯誤"
