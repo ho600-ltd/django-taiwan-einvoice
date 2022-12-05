@@ -1,0 +1,159 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/summaryreport_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+<div class="form_container" id="id_search_options">
+    <form method="GET" action="./" onsubmit="return false;">
+        <input type='hidden' name='format' value='html' />
+
+        <div class="row">
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="turnkey_service">{% trans "Turnkey Service" %}</label>
+                    <div class="input-group date" id="turnkey_service" data-target-input="nearest">
+                        <select class="form-control" data-target="#turnkey_service"
+                            name="turnkey_service" id="id_turnkey_service">
+                            <option value=""></option>
+                            {% for ts in turnkey_services %}
+                                <option value="{{ ts.id }}">{{ ts.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="report_type">{% trans "Report Type" %}</label>
+                    <div class="input-group date" id="report_type" data-target-input="nearest">
+                        <select class="form-control" data-target="#report_type"
+                            name="report_type" id="id_report_type">
+                            <option value=""></option>
+                            {% for rt in report_type_choices %}
+                                <option value="{{ rt.0 }}">{{ rt.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__gte">{% trans "Create time later than" %}</label>
+                    <div class="input-group date" id="create_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
+                            name="create_time__gte" id="id_create_time__gte" />
+                        <div class="input-group-append" data-target="#create_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="create_time__lt">{% trans "Create time earlier than" %}</label>
+                    <div class="input-group date" id="create_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
+                            name="create_time__lt" id="id_create_time__lt" />
+                        <div class="input-group-append" data-target="#create_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="begin_time__gte">{% trans "Begin time later than" %}</label>
+                    <div class="input-group date" id="begin_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#begin_time__gte"
+                            name="begin_time__gte" id="id_begin_time__gte" />
+                        <div class="input-group-append" data-target="#begin_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="begin_time__lt">{% trans "Begin time earlier than" %}</label>
+                    <div class="input-group date" id="begin_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#begin_time__lt"
+                            name="begin_time__lt" id="id_begin_time__lt" />
+                        <div class="input-group-append" data-target="#begin_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="end_time__gte">{% trans "End time later than" %}</label>
+                    <div class="input-group date" id="end_time__gte" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#end_time__gte"
+                            name="end_time__gte" id="id_end_time__gte" />
+                        <div class="input-group-append" data-target="#end_time__gte" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-3">
+                <div class="form-group">
+                    <label for="end_time__lt">{% trans "End time earlier than" %}</label>
+                    <div class="input-group date" id="end_time__lt" data-target-input="nearest">
+                        <input type="text" class="form-control datetimepicker-input" data-target="#end_time__lt"
+                            name="end_time__lt" id="id_end_time__lt" />
+                        <div class="input-group-append" data-target="#end_time__lt" data-toggle="datetimepicker">
+                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search_button_row">
+            <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+        </div>
+    </form>
+</div>
+
+<div class="pagination_row">
+    <p class="">
+        {% blocktrans %}
+            Notice: "EI Daily Summary Result" counts the E-Invoice by "Upload to EI time", but the others use "Create Time".
+
+            This difference causes some E-Invoices to be counted in today's report, but be counted EI daily summary report of the next day, or the day after the next day.
+        {% endblocktrans %}
+    </p>
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+<div class="pagination_row">
+    <nav>
+        {% if paginator %}
+        {% get_pagination_html paginator %}
+        {% endif %}
+    </nav>
+</div>
+
+
+{% endblock %}
+
+{% block modals %}
+{% endblock %}

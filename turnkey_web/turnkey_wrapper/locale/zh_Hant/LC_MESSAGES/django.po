@@ -1,0 +1,366 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-09-07 09:31+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "There is no alarm in polling_ei_turnkey_batch, just logging"
+msgstr "polling_ei_turnkey_batch 無警示，單純紀錄"
+
+msgid "Executed polling_ei_turnkey_batch"
+msgstr "已執行 polling_ei_turnkey_batch"
+
+#, python-brace-format
+msgid "Title: {title}"
+msgstr "標題: {title}"
+
+msgid "There is no alarm in polling_ei_turnkey, just logging"
+msgstr "polling_ei_turnkey 無警示，單純紀錄"
+
+msgid "Executed polling_ei_turnkey"
+msgstr "已執行 polling_ei_turnkey"
+
+msgid "There is no setting for {}"
+msgstr "{} 無設定"
+
+msgid "B2B Exchange Invoice"
+msgstr "B2B交換 開立發票"
+
+msgid "B2B Exchange Invoice Confirm"
+msgstr "B2B交換 接受確認發票"
+
+msgid "B2B Exchange Allowance"
+msgstr "B2B交換 開立折讓"
+
+msgid "B2B Exchange Allowance Confirm"
+msgstr "B2B交換 接受確認折讓"
+
+msgid "B2B Exchange Cancel Invoice"
+msgstr "B2B交換 作廢發票"
+
+msgid "B2B Exchange Cancel Invoice Confirm"
+msgstr "B2B交換 接受確認作廢"
+
+msgid "B2B Exchange Cancel Allowance"
+msgstr "B2B交換 作廢折讓"
+
+msgid "B2B Exchange Cancel Allowance Confirm"
+msgstr "B2B交換 接受確認作廢折讓"
+
+msgid "B2B Exchange Reject Invoice"
+msgstr "B2B交換 退回發票"
+
+msgid "B2B Exchange Reject Invoice Confirm"
+msgstr "B2B交換 接受確認退回發票"
+
+msgid "B2B Certificate Invoice"
+msgstr "B2B存證 開立發票"
+
+msgid "B2B Certificate Allowance"
+msgstr "B2B存證 開立折讓"
+
+msgid "B2B Certificate Cancel Invoice"
+msgstr "B2B存證 作廢發票"
+
+msgid "B2B Certificate Cancel Allowance"
+msgstr "B2B存證 作廢折讓"
+
+msgid "B2B Certificate Reject Invoice"
+msgstr "B2B存證 退回發票"
+
+msgid "B2C Certificate Invoice"
+msgstr "B2C存證 開立發票"
+
+msgid "B2C Certificate Cancel Invoice"
+msgstr "B2C存證 作廢發票"
+
+msgid "B2C Certificate Void Invoice"
+msgstr "B2C存證 註銷發票"
+
+msgid "B2C Certificate Allowance"
+msgstr "B2C存證 開立折讓"
+
+msgid "B2C Certificate Cancel Allowance"
+msgstr "B2C存證 作廢折讓"
+
+msgid "Branch Track"
+msgstr "分支機構配號檔"
+
+msgid "Branch Track Blank"
+msgstr "空白未使用字軌檔"
+
+msgid "Invoice Assign No"
+msgstr "營業人電子發票配號檔"
+
+msgid "Just created"
+msgstr "初始新增"
+
+msgid "Downloaded from TEA"
+msgstr "已從 TEA 下載"
+
+msgid "Exported to Data/"
+msgstr "輸出至 Data/"
+
+msgid "Finish"
+msgstr "完成"
+
+msgid "ReceiveFile directory does not exist!"
+msgstr "ReceiveFile 資料夾不存在!"
+
+msgid "MIG Type does not match any TASK record"
+msgstr "MIG 類型未符合任何 TASK 紀錄"
+
+msgid "The count of directories for {} {} do not match {}!"
+msgstr "{} {}資料夾數量不符合 {}!"
+
+msgid "Waiting"
+msgstr "等待中"
+
+msgid "Preparing for EI(P)"
+msgstr "準備送至 EI(P)"
+
+msgid "Uploaded to EI or Downloaded from EI(G)"
+msgstr "已上傳至 EI 或從 EI 下載(G)"
+
+msgid "E Error for EI process(E)"
+msgstr "EI 回傳 E 錯誤(E)"
+
+msgid "I Error for EI process(I)"
+msgstr "EI 回傳 I 錯誤(I)"
+
+msgid "Successful EI process(C)"
+msgstr "EI 確認成功(C)"
+
+msgid "TRANSPORT_ID contains"
+msgstr "TRANSPORT_ID 包含"
+
+msgid "PARTY_ID contains"
+msgstr "PARTY_ID 包含"
+
+msgid "Search"
+msgstr "搜尋"
+
+#, python-format
+msgid "%(total_count)s records"
+msgstr "%(total_count)s 筆"
+
+msgid "TASK contains"
+msgstr "TASK 包含"
+
+msgid "ENABLE contains"
+msgstr "ENABLE 包含"
+
+msgid "SIGN_ID contains"
+msgstr "SIGN_ID 包含"
+
+msgid "SIGN_TYPE contains"
+msgstr "SIGN_TYPE 包含"
+
+msgid "CATEGORY_TYPE contains"
+msgstr "CATEGORY_TYPE 包含"
+
+msgid "PROCESS_TYPE contains"
+msgstr "PROCESS_TYPE 包含"
+
+msgid "FROM_PARTY_ID_PARTY_ID contains"
+msgstr "FROM_PARTY_ID_PARTY_ID 包含"
+
+msgid "ROUTING_ID contains"
+msgstr "ROUTING_ID 包含"
+
+msgid "SEQNO contains"
+msgstr "SEQNO 包含"
+
+msgid "SUBSEQNO contains"
+msgstr "SUBSEQNO 包含"
+
+msgid "PROCESS_DTS greater than"
+msgstr "PROCESS_DTS 晚於"
+
+msgid "PROCESS_DTS less than"
+msgstr "PROCESS_DTS 早於"
+
+msgid "STATUS"
+msgstr "狀態"
+
+msgid "MESSAGE_DTS greater than"
+msgstr "MESSAGE_DTS 晚於"
+
+msgid "MESSAGE_DTS less than"
+msgstr "MESSAGE_DTS 早於"
+
+msgid "MESSAGE_TYPE"
+msgstr ""
+
+msgid "FROM_ROUTING_ID"
+msgstr ""
+
+msgid "INVOICE_IDENTIFIER contains"
+msgstr "INVOICE_IDENTIFIER 包含"
+
+msgid "USER_ID contains"
+msgstr "USER_ID 包含"
+
+msgid "Turnkey Wrapper Api"
+msgstr ""
+
+msgid "Turnkey Management"
+msgstr "Turnkey 管理"
+
+msgid "Toggle navigation"
+msgstr "切換"
+
+msgid "RAW Turnkey DB"
+msgstr "原始 Turnkey 資料庫"
+
+msgid "EI Turnkey"
+msgstr "EI Turnkey"
+
+msgid "Batch"
+msgstr "批次"
+
+msgid "Batch E-Invoice"
+msgstr "批次發票"
+
+msgid "Summary Result XML"
+msgstr "日總結 XML"
+
+msgid "Summary Result"
+msgstr "日總結成果"
+
+msgid "Timezone"
+msgstr "時區"
+
+msgid "Asia/Taipei"
+msgstr "亞洲/臺北"
+
+msgid "Logout"
+msgstr "登出"
+
+msgid "change language to your choice"
+msgstr "調整語系"
+
+msgid "Change"
+msgstr "調整"
+
+msgid "Close"
+msgstr "關閉"
+
+#, python-format
+msgid ""
+"\n"
+"            Deploy Date: %(build_date)s\n"
+"            Deploy Number: %(build_number)s\n"
+"            Build Version: %(build_version)s"
+msgstr ""
+"\n"
+"發佈日期: %(build_date)s\n"
+"發佈編號: %(build_number)s\n"
+"發佈版本: %(build_version)s"
+
+msgid "System Build Version"
+msgstr "系統發佈版本"
+
+msgid "transport_id contains"
+msgstr "傳送帳號包含"
+
+msgid "party_id contains"
+msgstr "統一編號包含"
+
+msgid "routing_id contains"
+msgstr "繞送代碼包含"
+
+msgid "slug contains"
+msgstr "代號包含"
+
+msgid "MIG"
+msgstr ""
+
+msgid "Seller Party ID"
+msgstr "賣方統編"
+
+msgid "Turnkey MIG Version"
+msgstr "Turnkey MIG 版本"
+
+msgid "Status"
+msgstr "狀態"
+
+msgid "Create Time greater than"
+msgstr "創建時間晚於"
+
+msgid "Create Time less than"
+msgstr "創建時間早於"
+
+msgid "Update Time greater than"
+msgstr "更新時間晚於"
+
+msgid "Update Time less than"
+msgstr "更新時間早於"
+
+msgid "Batch Slug contains"
+msgstr "批次代號包含"
+
+msgid "Track No."
+msgstr "字軌號碼"
+
+msgid "Result Code contains"
+msgstr "結果碼包含"
+
+msgid "Time in the Year Month Range"
+msgstr "所處期別"
+
+msgid "Batch E-Invoice ID"
+msgstr ""
+
+msgid "Year Month Range"
+msgstr "所處期別"
+
+msgid "Upload to EI Time"
+msgstr "上傳EI大平台時間"
+
+msgid "XML Date greater than"
+msgstr "XML 日期晚於"
+
+msgid "XML Date less than"
+msgstr "XML 日期早於"
+
+msgid "Create Time"
+msgstr "創建時間"
+
+msgid "XML Date"
+msgstr "XML 日期"
+
+msgid "Is Parsed?"
+msgstr "是否解析?"
+
+msgid "Parsed"
+msgstr "已解析"
+
+msgid "Not yet"
+msgstr "未"
+
+msgid "File path contains"
+msgstr "檔案路徑包含"
+
+msgid "Error Note"
+msgstr ""
+
+msgid "File path"
+msgstr "檔案路徑"
+
+msgid "None"
+msgstr ""

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:GEINV:eInvoiceMessage:C0401:3.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:C0401:3.2 C0401.xsd">
+  <Main>
+    <InvoiceNumber>LY42140652</InvoiceNumber>
+    <InvoiceDate>20210830</InvoiceDate>
+    <InvoiceTime>08:58:00</InvoiceTime>
+    <Seller>
+      <Identifier>24634102</Identifier>
+      <Name>何六百有限公司</Name>
+    </Seller>
+    <Buyer>
+      <Identifier>0000000000</Identifier>
+      <Name>0000000000</Name>
+    </Buyer>
+    <InvoiceType>07</InvoiceType>
+    <DonateMark>0</DonateMark>
+    <PrintMark>Y</PrintMark>
+    <RandomNumber>1234</RandomNumber>
+  </Main>
+  <Details>
+    <ProductItem>
+      <Description>鮮奶茶</Description>
+      <Quantity>40</Quantity>
+      <UnitPrice>50</UnitPrice>
+      <Amount>2000</Amount>
+      <SequenceNumber>001</SequenceNumber>
+    </ProductItem>
+  </Details>
+  <Amount>
+    <SalesAmount>2000</SalesAmount>
+    <FreeTaxSalesAmount>20</FreeTaxSalesAmount>
+    <ZeroTaxSalesAmount>40</ZeroTaxSalesAmount>
+    <TaxType>1</TaxType>
+    <TaxRate>0.05</TaxRate>
+    <TaxAmount>60</TaxAmount>
+    <TotalAmount>2000</TotalAmount>
+  </Amount>
+</Invoice>

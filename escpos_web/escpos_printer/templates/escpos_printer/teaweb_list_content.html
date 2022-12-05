@@ -1,0 +1,42 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table search_result" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>{% trans "Name" %}</th>
+            <th>{% trans "Url" %}</th>
+            <th>{% trans "Slug" %}</th>
+            <th>{% trans "hash key" %}</th>
+            <th>{% trans "Now use?" %}</th>
+            <th>{% trans "Button" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}" resource_uri="{% url 'escposwebapi:teaweb-detail' pk=obj.id %}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td field="name">{{ obj.name }}</td>
+                <td field="url">{{ obj.url }}</td>
+                <td field="slug">{{ obj.slug }}</td>
+                <td field="mask_hash_key">{{ obj.mask_hash_key }}</td>
+                <td field="now_use">
+                    {% if obj.now_use %}
+                        <i class="far fa-check-circle"></i>
+                    {% endif %}
+                </td>
+                <td field="update_button">
+                    <button class="btn btn-primary update_teaweb_modal">
+                        {% trans "Configure" %}
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

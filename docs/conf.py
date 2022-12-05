@@ -10,7 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os, sys
+import os, sys, datetime
 sys.path.insert(0, os.path.abspath('.'))
 import sphinx_rtd_theme
 from __version__ import VERSION
@@ -18,8 +18,9 @@ from __version__ import VERSION
 
 # -- Project information -----------------------------------------------------
 
+year = datetime.datetime.now().strftime('%Y')
 project = 'Taiwan E-Invoice'
-copyright = '2019, ho600 Ltd.  All the content on this website is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License unless otherwise specified.'
+copyright = '2019 ~ {}, ho600 Ltd.  All the content on this website is licensed under a Creative Commons Attribution-ShareAlike 3.0 Unported License unless otherwise specified.'.format(year)
 author = 'ho600 Ltd.'
 
 # The full version, including alpha/beta/rc tags
@@ -47,7 +48,7 @@ templates_path = ['_templates']
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'zh_TW'
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

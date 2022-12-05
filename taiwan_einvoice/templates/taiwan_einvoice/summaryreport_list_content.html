@@ -1,0 +1,112 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<div class="table-responsive">
+    <table class="table" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th rowspan="2">{% trans "No." %}</th>
+                <th rowspan="2">{% trans "Create Time" %}</th>
+                <th rowspan="2">{% trans "Turnkey Service" %}</th>
+                <th rowspan="2">{% trans "Begin Time" %}</th>
+                <th rowspan="2">{% trans "End Time" %}</th>
+                <th rowspan="2">{% trans "Report Type" %}</th>
+                <th rowspan="1" colspan="3"><center>
+                    <div>{% trans "Good counts" %}</div>
+                    <div class="text-danger">{% trans "Failed counts" %}</div>
+                    <div class="text-warning">{% trans "Resolved counts" %}</div>
+                </center></th>
+                <th rowspan="2">{% trans "Total counts" %}</th>
+                <th rowspan="2">{% trans "Is resolved?" %}</th>
+                <th rowspan="2">{% trans "Resolved Note" %}</th>
+                <th rowspan="2">{% trans "Resolver" %}</th>
+            </tr>
+            <tr>
+                <th class="text-primary">C0401
+                    <div>{% trans "B2C Certificate Invoice" %}</div>
+                </th>
+                <th class="text-success">C0501
+                    <div>{% trans "B2C Certificate Cancel Invoice" %}</div>
+                </th>
+                <th>C0701
+                    <div>{% trans "B2C Certificate Void Invoice" %}</div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in data.results %}
+                <tr obj_id="{{ obj.id }}">
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                    <td field="create_time" class="datetime" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
+                    <td field="turnkey_service">{{ obj.turnkey_service_dict.name }}</td>
+                    <td field="begin_time" class="datetime" value="{{ obj.begin_time }}" format="Y-m-d H:i:s"></td>
+                    <td field="end_time" class="datetime" value="{{ obj.end_time }}" format="Y-m-d H:i:s"></td>
+                    <td field="report_type">{{ obj.get_report_type_display }}</td>
+                    <td field="C0401_counts" align="right">
+                        <div title='{% trans "Good" %}' class="number text-primary" value="{{ obj.good_counts.C0401 }}"></div>
+                            <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0401 }}"></div>
+                        {% ifnotequal "E" obj.report_type %}
+                            <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_counts.C0401 }}"></div>
+                        {% endifnotequal %}
+                    </td>
+                    <td field="C0501_counts" align="right">
+                        <div title='{% trans "Good" %}' class="number text-success" value="{{ obj.good_counts.C0501  }}"></div>
+                            <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0501  }}"></div>
+                        {% ifnotequal "E" obj.report_type %}
+                            <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_counts.C0501 }}"></div>
+                        {% endifnotequal %}
+                    </td>
+                    <td field="C0701_counts" align="right">
+                        <div title='{% trans "Good" %}' class="number" value="{{ obj.good_counts.C0701  }}"></div>
+                            <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0701  }}"></div>
+                        {% ifnotequal "E" obj.report_type %}
+                            <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_counts.C0701 }}"></div>
+                        {% endifnotequal %}
+                    </td>
+                    <td field="count" align="right">
+                        <div title='{% trans "Good" %}' class="number font-weight-bold" value="{{ obj.good_count }}"></div>
+                            <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_count }}"></div>
+                        {% ifnotequal "E" obj.report_type %}
+                            <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count }}"></div>
+                        {% endifnotequal %}
+                    </td>
+                    {% if "h" == obj.report_type or "a" == obj.report_type %}
+                        <td field="is_resolved">
+                            {% if obj.failed_count > 0 %}
+                                {% if obj.is_resolved %}
+                                    {% trans "Resolved" %}
+                                {% else %}
+                                    <br/><span class="text-danger font-weight-bold">{% trans "Not yet" %}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td field="resolved_note">
+                            {% ifequal "" obj.resolved_note %}
+                                {% for tea in obj.te_alarms %}
+                                    <div style="display: none;">
+                                        <b>{{ tea.title }}</b>
+                                        <pre>{{ tea.body }}</pre>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {{ obj.resolved_note }}
+                            {% endifequal%}
+                        </td>
+                        <td field="resolver">
+                            {% if obj.resolver %}{{ obj.resolver }}{% endif %}
+                        </td>
+                    {% else %}
+                        <td colspan="3" align="center">
+                            {% trans "Only display in the hourly report" %}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

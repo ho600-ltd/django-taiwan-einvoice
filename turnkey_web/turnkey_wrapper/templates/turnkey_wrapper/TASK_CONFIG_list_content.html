@@ -1,0 +1,40 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>CATEGORY_TYPE</th> 
+            <th>PROCESS_TYPE</th> 
+            <th>TASK</th> 
+            <th>SRC_PATH</th> 
+            <th>TARGET_PATH</th> 
+            <th>FILE_FORMAT</th> 
+            <th>VERSION</th> 
+            <th>ENCODING</th> 
+            <th>TRANS_CHINESE_DATE</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</td>
+                <td field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</td>
+                <td field="TASK">{{ obj.TASK }}</td>
+                <td field="SRC_PATH">{{ obj.SRC_PATH }}</td>
+                <td field="TARGET_PATH">{{ obj.TARGET_PATH }}</td>
+                <td field="FILE_FORMAT">{{ obj.FILE_FORMAT }}</td>
+                <td field="VERSION">{{ obj.VERSION }}</td>
+                <td field="ENCODING">{{ obj.ENCODING }}</td>
+                <td field="TRANS_CHINESE_DATE">{{ obj.TRANS_CHINESE_DATE }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

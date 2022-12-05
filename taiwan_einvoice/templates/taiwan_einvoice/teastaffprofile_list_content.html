@@ -1,0 +1,114 @@
+{% load i18n %}{% load ho600_tags %}
+
+<div class="total_count_row">
+    {% if data.id > 0 %}
+    {% else %}
+        {% with data.count as total_count %}
+            {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+        {% endwith %}
+        {% if perms.taiwan_einvoice.add_teastaffprofile %}
+            <button id="add_teastaffprofile_button"
+                class="btn btn-success add_teastaffprofile_modal" data-toggle="modal">
+                {% trans "Create Staff" %}
+            </button>
+        {% endif %}
+    {% endif %}
+</div>
+
+<div class="table-responsive">
+    <table class="table search_result" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th width="5%" field="no">{% trans "No." %}</th>
+                <th width="25%" field="user.username">{% trans "Username" %}</th>
+                <th width="10%" field="nickname">{% trans "Nickname" %}</th>
+                <th width="15%" field="is_active">{% trans "Is Active?" %}
+                    <i class="fa fa-info-circle" data-toggle="tooltip"
+                        data-html="true" data-placement="left"
+                        title='{% trans "The actived user can entry the Taiwan E-Invoice Management Systemc(this system)" %}'></i>
+                </th>
+                <th width="15%" field="in_printer_admin_group">{% trans "Printer Admin" %}
+                    <i class="fa fa-info-circle" data-toggle="tooltip"
+                        data-html="true" data-placement="left"
+                        title='{% trans "The user belongs this group can use ESCPOS Web" %}'></i>
+                </th>
+                <th width="15%" field="in_manager_group">{% trans "Permission Manager" %}
+                    <i class="fa fa-info-circle" data-toggle="tooltip"
+                        data-html="true" data-placement="left"
+                        title='{% trans "The user belongs this group can edit staffs in this page" %}'></i>
+                </th>
+                <th width="15%" field="groups">
+                    {% trans "Staff Group" %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if data.id > 0 %}{% with data as teastaffprofile %}
+                <tr teastaffprofile_id="{{ teastaffprofile.id }}">
+                    <td>1.</td>
+                    <td field="user.username">
+                        {{ teastaffprofile.user_dict.username }}
+                    </td>
+                    <td field="nickname">{{ teastaffprofile.nickname }}</td>
+                    <td field="is_active">{% if teastaffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
+                    <td field="in_printer_admin_group">{% if teastaffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
+                    <td field="in_manager_group">{% if teastaffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
+                    <td>
+                        {% with turnkeyservice_length=teastaffprofile.groups|length %}
+                            {% for turnkeyservice_name, groups in teastaffprofile.groups.items %}
+                                {% if turnkeyservice_name in turnkey_service_names %}
+                                    {% with within_group_length=teastaffprofile.count_within_groups|hash:turnkeyservice_name %}
+                                        {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
+                                        {% for group in groups %}
+                                            {% if group.is_member %}
+                                                <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                                    {{ group.display_name }}
+                                                </span></h5>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </td>
+                </tr>
+            {% endwith %}{% else %}{% for teastaffprofile in data.results %}
+                <tr teastaffprofile_id="{{ teastaffprofile.id }}"
+                    resource_uri="{% url 'taiwan_einvoice:taiwaneinvoiceapi:teastaffprofile-detail' pk=teastaffprofile.id %}">
+                    <td field="no" class="record_order_no" counter0={{ forloop.counter0 }}>{{ forloop.counter }}.</td>
+                    <td field="user.username">
+                        {% if perms.taiwan_einvoice.change_teastaffprofile %}
+                            <button class="btn btn-primary update_teastaffprofile_modal">
+                                {{ teastaffprofile.user_dict.username }}
+                            </button>
+                        {% else %}
+                            {{ teastaffprofile.user_dict.username }}
+                        {% endif %}
+                    </td>
+                    <td field="nickname">{{ teastaffprofile.nickname }}</td>
+                    <td field="is_active">{% if teastaffprofile.is_active %}{% trans "Actived" %}{% endif %}</td>
+                    <td field="in_printer_admin_group">{% if teastaffprofile.in_printer_admin_group %}{% trans "Yes" context "in_printer_admin_group" %}{% endif %}</td>
+                    <td field="in_manager_group">{% if teastaffprofile.in_manager_group %}{% trans "Yes" context "in_manager_group" %}{% endif %}</td>
+                    <td field="groups">
+                        {% with turnkeyservice_length=teastaffprofile.groups|length %}
+                            {% for turnkeyservice_name, groups in teastaffprofile.groups.items %}
+                                {% if turnkeyservice_name in turnkey_service_names %}
+                                    {% with within_group_length=teastaffprofile.count_within_groups|hash:turnkeyservice_name %}
+                                        {% if 1 < turnkeyservice_length and 0 < within_group_length %}{{ turnkeyservice_name }}:{% endif %}
+                                        {% for group in groups %}
+                                            {% if group.is_member %}
+                                                <h5><span class="badge badge-pill badge-info" group_id="{{ group.id }}">
+                                                    {{ group.display_name }}
+                                                </span></h5>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </td>
+                </tr>
+            {% endfor %}{% endif %}
+        </tbody>
+    </table>
+</div>

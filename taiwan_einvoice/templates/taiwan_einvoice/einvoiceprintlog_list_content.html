@@ -1,0 +1,74 @@
+{% load i18n %}{% load tz %}
+
+<div class="total_count_row">
+
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+
+</div>
+
+<div class="table-responsive">
+    <table class="table search_result" init_page_no="{{ data.init_page_no }}">
+        <thead>
+            <tr>
+                <th width="5%">{% trans "Print ID." %}</th>
+                <th width="5%">{% trans "User" context "taiwan_einvoice_einvoiceprintlog" %}</th>
+                <th width="5%">{% trans "Printer" context "taiwan_einvoice_einvoiceprintlog" %}</th>
+                <th width="8%">{% trans "Track No." %}</th>
+                <th width="9%">{% trans "Footprint No." %}</th>
+                <th width="8%">{% trans "Total Amount" %}</th>
+                <th width="10%">{% trans "Print Time" %}</th>
+                <th width="5%">{% trans "Buyer" %}</th>
+                <th width="5%">{% trans "Carrier Type" %}</th>
+                <th width="5%">{% trans "Donate mark" %}</th>
+                <th width="5%">{% trans "Original Copy?" %}</th>
+                <th width="5%">{% trans "Done Status" context "taiwan_einvoice_einvoiceprintlog" %}</th>
+                <th width="5%">{% trans "Creator" context "taiwan_einvoice" %}</th>
+                <th width="10%">{% trans "Reason" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for einvoiceprintlog in data.results %}
+                {% with einvoiceprintlog.id as einvoiceprintlog_id %}
+                    <tr einvoiceprintlog_id="{{ einvoiceprintlog.id }}">
+                        <td>{{ einvoiceprintlog_id }}</td>
+                        <td field="user_first_name_id">{{ einvoiceprintlog.user_dict.first_name }}:{{ einvoiceprintlog.user_dict.id }}</td>
+                        <td><span field="escposweb_name">{{ einvoiceprintlog.printer_dict.escpos_web_dict.name }}</span>-<span field="printer_nickname">{{ einvoiceprintlog.printer_dict.nickname }}</span></td>
+                        <td field="track_no_">{{ einvoiceprintlog.einvoice_dict.track_no_ }}</td>
+                        <td field="generate_no">{{ einvoiceprintlog.einvoice_dict.generate_no }}</td>
+                        <td field="TotalAmount">{{ einvoiceprintlog.einvoice_dict.amounts.TotalAmount }}</td>
+                        <td class="datetime" field="print_time" value="{{ einvoiceprintlog.print_time }}" format="Y-m-d AH:i:s"></td>
+                        <td field="buyer_identifier">
+                            {% if einvoiceprintlog.einvoice_dict.buyer_is_business_entity %}
+                                {{ einvoiceprintlog.einvoice_dict.buyer_identifier }}
+                            {% endif %}
+                        </td>
+                        <td field="carrier_type">{{ einvoiceprintlog.einvoice_dict.carrier_type__display }}</td>
+                        <td field="donate_mark">{% ifequal "1" einvoiceprintlog.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}</td>
+                        <td field="is_original_copy">
+                            {% if einvoiceprintlog.is_original_copy %}
+                                {% if not einvoiceprintlog.einvoice_dict.canceled_time %}
+                                    {% trans "Yes" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}
+                                {% else %}
+                                    {% if einvoiceprintlog.print_time < einvoiceprintlog.einvoice_dict.canceled_time %}
+                                        {% trans "Yes" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}
+                                    {% else %}
+                                        {% trans "Cancel Note" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}
+                                    {% endif %}
+                                {% endif %}
+                            {% else %}
+                                {% trans "No" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}
+                            {% endif %}
+                        </td>
+                        <td field="done_status">{% if einvoiceprintlog.done_status %}
+                            {% trans "Done" context "taiwan_einvoice_einvoiceprintlog_done_status" %}
+                        {% endif %}</td>
+                        <td field="einvoice__creator_first_name_id">{{ einvoiceprintlog.einvoice_dict.creator_dict.first_name }}:{{ einvoiceprintlog.einvoice_dict.creator_dict.id }}</td>
+                        <td field="reason" class="text-danger">{{ einvoiceprintlog.reason }}</td>
+                    </tr>
+                {% endwith %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

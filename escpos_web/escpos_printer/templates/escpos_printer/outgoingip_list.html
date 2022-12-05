@@ -1,0 +1,21 @@
+{% extends 'escpos_printer/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    <script src="{% static "escpos_printer/outgoingip_list.js" %}"></script>
+{% endblock %}
+
+{% block body %}
+
+{% block content %}
+{% if content %}{{ content|safe }}{% endif %}
+{% endblock %}
+
+{% endblock %}
+
+{% block modals %}
+
+{% endblock %}

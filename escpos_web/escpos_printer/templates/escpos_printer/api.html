@@ -1,0 +1,9 @@
+{% extends "rest_framework/base.html" %}
+{% load i18n %}
+
+{% block title %}ESCPOS Web Api{% endblock %}
+{% block branding %}
+    <a class='navbar-brand' rel="nofollow" href='{% url "escposwebapi:api-root" %}'>
+        {% trans "ESCPOS Web Api" %}
+    </a>
+{% endblock %}

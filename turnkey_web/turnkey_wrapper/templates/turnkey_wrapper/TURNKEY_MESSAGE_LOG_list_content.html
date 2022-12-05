@@ -1,0 +1,84 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>SEQNO-SUBSEQNO</th>
+            <th>STATUS</th>
+            <th>MESSAGE_DTS</th>
+            <th>
+                <div>MESSAGE_TYPE</div>
+                <div>CATEGORY_TYPE</div>
+                <div>PROCESS_TYPE</div>
+            </th>
+            <th>
+                <div>FROM_PARTY_ID</div>
+                <div>FROM_ROUTING_ID</div>
+                <div>TO_PARTY_ID</div>
+            </th>
+            <th>
+                <div>INVOICE_IDENTIFIER</div>
+                <div>UUID</div>
+            </th>
+            <th>
+                <div>CHARACTER_COUNT</div>
+                <div>IN_OUT_BOUND</div>
+                <div>TO_ROUTING_ID</div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td>
+                    <span field="SEQNO">{{ obj.SEQNO }}</span>-<span field="SUBSEQNO">{{ obj.SUBSEQNO }}</span>
+                </td>
+                <td field="STATUS" class="font-weight-bold {% ifequal "C" obj.STATUS %}
+                    text-dark
+                {% else %}{% ifequal "G" obj.STATUS %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endifequal %}{% endifequal %}
+                ">{{ obj.STATUS }}</td>
+                <td field="MESSAGE_DTS_datetime" class="datetime"
+                    title="{{ obj.MESSAGE_DTS }}"
+                    value="{{ obj.MESSAGE_DTS_datetime }}" format="Y-m-d H:i:s.sss">
+                </td>
+                <td>
+                    <div field="MESSAGE_TYPE" class="font-weight-bold {% ifequal "C0401" obj.MESSAGE_TYPE %}
+                        text-primary
+                    {% else %}{% ifequal "C0501" obj.MESSAGE_TYPE %}
+                        text-success
+                    {% else %}
+                        text-dark
+                    {% endifequal %}{% endifequal %}">{{ obj.MESSAGE_TYPE }}</div>
+                    <div field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</div>
+                    <div field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</div>
+                </td>
+                <td>
+                    <div field="FROM_PARTY_ID">{{ obj.FROM_PARTY_ID }}</div>
+                    <div field="FROM_ROUTING_ID">{{ obj.FROM_ROUTING_ID }}</div>
+                    <div field="TO_PARTY_ID">{{ obj.TO_PARTY_ID }}</div>
+                </td>
+                <td>
+                    <div field="INVOICE_IDENTIFIER" style="font-weight: bold;">{{ obj.INVOICE_IDENTIFIER }}</div>
+                    <div field="UUID">{{ obj.UUID }}</div>
+                </td>
+                <td>
+                    <div field="CHARACTER_COUNT">{{ obj.CHARACTER_COUNT }}</div>
+                    <div field="IN_OUT_BOUND">{{ obj.IN_OUT_BOUND }}</div>
+                    <div field="TO_ROUTING_ID">{{ obj.TO_ROUTING_ID }}</div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

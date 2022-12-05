@@ -1,0 +1,193 @@
+{% extends 'taiwan_einvoice/base.html' %}
+{% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+    {% compress js %}
+        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/einvoiceprintlog_list.js"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block body %}
+
+    <div class="form_container" id="id_search_options">
+        <form method="GET" action="./" onsubmit="return false;">
+            <input type='hidden' name='format' value='html' />
+
+            <div class="row">
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__code39__exact">{% trans "One-dimensional Barcode" context "taiwan_einvoice" %} <i class="fa fa-barcode" aria-hidden="true"></i></label>
+                        <div class="input-group" id="einvoice__code39__exact" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__code39__exact" id="id_einvoice__code39__exact" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__track_no__icontains">{% trans "Track No. contains" %}</label>
+                        <div class="input-group" id="einvoice__track_no__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__track_no__icontains" id="id_einvoice__track_no__icontains" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="print_id_or_hex">{% trans "Print ID or Hex" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="id_or_hex" data-target-input="nearest">
+                            <input type="text" class="form-control" name="id_or_hex" id="id_id_or_hex" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__any_words__icontains">{% trans "Any Words(Exclude Track No., Product Details) contains" context "taiwan_einvoice" %}</label>
+                        <div class="input-group" id="einvoice__any_words__icontains" data-target-input="nearest">
+                            <input type="text" class="form-control" name="einvoice__any_words__icontains" id="id_einvoice__any_words__icontains" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier">{% trans "Seller Party ID" context "sellerinvoicetrackno" %}</label>
+                        <div class="input-group" id="einvoice__seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier" data-target-input="nearest">
+                            <select class="form-control" data-target="#einvoice__seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier"
+                                name="einvoice__seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier" id="id_einvoice__seller_invoice_track_no__turnkey_service__seller__legal_entity__identifier">
+                                <option value=""></option>
+                                {% for slei in seller__legal_entity__identifiers %}
+                                    <option value="{{ slei }}">{{ slei }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__seller_invoice_track_no__turnkey_service">{% trans "Turnkey Service" %}</label>
+                        <div class="input-group" id="einvoice__seller_invoice_track_no__turnkey_service" data-target-input="nearest">
+                            <select class="form-control" data-target="#einvoice__seller_invoice_track_no__turnkey_service"
+                                name="einvoice__seller_invoice_track_no__turnkey_service" id="id_seller_invoice_track_no__turnkey_service">
+                                <option value=""></option>
+                                {% for ts in turnkey_services %}
+                                    <option value="{{ ts.id }}">{{ ts.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="print_time__gte">{% trans "Print time later than" %}</label>
+                        <div class="input-group date" id="print_time__gte" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#print_time__gte"
+                                name="print_time__gte" id="id_print_time__gte" />
+                            <div class="input-group-append" data-target="#print_time__gte" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="print_time__lt">{% trans "Print time earlier than" %}</label>
+                        <div class="input-group date" id="print_time__lt" data-target-input="nearest">
+                            <input type="text" class="form-control datetimepicker-input" data-target="#print_time__lt"
+                                name="print_time__lt" id="id_print_time__lt" />
+                            <div class="input-group-append" data-target="#print_time__lt" data-toggle="datetimepicker">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="is_original_copy">{% trans "Original Copy?" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group date" id="is_original_copy" data-target-input="nearest">
+                            <select class="form-control" name='is_original_copy'>
+                                <option value=""></option>
+                                <option value="true">{% trans "Yes" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}</option>
+                                <option value="false">{% trans "No" context "taiwan_einvoice_einvoiceprintlog_is_original_copy" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="printer">{% trans "Printer" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group" id="printer" data-target-input="nearest">
+                            <select class="form-control" name="printer">
+                                <option value=""></option>
+                                {% for printer in printers %}
+                                    <option value="{{ printer.id }}">{{ printer.escpos_web.name }}-{{ printer.nickname }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="einvoice__creator">{% trans "Creator" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group" id="einvoice__creator" data-target-input="nearest">
+                            <select class="form-control" name="einvoice__creator">
+                                <option value=""></option>
+                                {% for creator in creators %}
+                                    <option value="{{ creator.id }}">{{ creator.first_name }}:{{ creator.id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="user">{% trans "User" context "taiwan_einvoice_einvoiceprintlog" %}</label>
+                        <div class="input-group" id="user" data-target-input="nearest">
+                            <select class="form-control" name="user">
+                                <option value=""></option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.first_name }}:{{ user.id }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search_button_row">
+                <button class="btn btn-primary search" type="submit">{% trans "Search" %}</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% block content %}
+    {% if content %}{{ content|safe }}{% endif %}
+    {% endblock %}
+
+    <div class="pagination_row">
+        <nav>
+            {% if paginator %}
+            {% get_pagination_html paginator %}
+            {% endif %}
+        </nav>
+    </div>
+
+    {% endblock %}
+
+{% block modals %}
+
+{% endblock %}

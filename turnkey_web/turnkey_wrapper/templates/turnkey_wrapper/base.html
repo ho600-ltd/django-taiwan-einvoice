@@ -1,0 +1,256 @@
+{% load static %}
+{% load i18n %}
+{% load compress %}
+{% get_current_language as LANGUAGE_CODE %}
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>{% trans "Turnkey Management" %}</title>
+    {% if not user.is_authenticated %}
+        <script>
+            window.location.href = "/";
+        </script>
+    {% endif %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css" />
+    {% compress css %}
+        <link rel="stylesheet" href="{% static "turnkey_wrapper/assets/Navigation-Clean.css" %}" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{% static "turnkey_wrapper/assets/bootstrap-multiselect.css" %}" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{% static "turnkey_wrapper/turnkey_wrapper_base.css" %}" type="text/css" charset="utf-8">
+        <link rel="stylesheet" href="{% static "turnkey_wrapper/turnkey_wrapper_form_and_list.css" %}" type="text/css" charset="utf-8">
+    {% endcompress %}
+    {% block css %}
+    {% endblock %}
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    {% compress js %}
+        <script src="{% static "turnkey_wrapper/assets/tempusdominus-bootstrap-4.min.js" %}"></script>
+        <script src="{% static "turnkey_wrapper/assets/jquery.tmpl.min.js" %}"></script>
+        <script src="{% static "turnkey_wrapper/assets/jquery.blockUI.js" %}"></script>
+        <script src="{% static "turnkey_wrapper/assets/js.cookie.js" %}"></script>
+        <script src="{% static "turnkey_wrapper/turnkey_wrapper_base.js" %}"></script>
+        <script src="{% static "turnkey_wrapper/turnkey_wrapper_site.js" %}"></script>
+    {% endcompress %}
+    {% block js %}
+    {% endblock %}
+    <script type="text/javascript">
+        var DEBUG = "{% if settings.DEBUG %}true{% endif %}";
+        var BUGPAGE_URL = "bugpage/";
+        $(function(){
+            $('.language_form input[type=submit]').hide();
+            $('.language_form select[name=language]').change(function() {
+                $.cookie('django_language', $(this).val(), {expires: 365, path: '/'});
+                $(this).parent().find('input[type=submit]').show();
+                $(this).parents('.language_form').submit();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div>
+        <nav class="navbar navbar-light navbar-expand-md fixed-top navigation-clean">
+            <div class="container">
+                <a class="navbar-brand text-success" href="#">
+                    {% trans "Turnkey Management" %}
+                </a>
+                <button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1">
+                    <span class="sr-only">{% trans "Toggle navigation" %}</span><span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navcol-1">
+                    <ul class="nav navbar-nav ml-auto" id="nav">
+                        <li class="dropdown nav-item nav_raw_turnkey_db">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{% trans "RAW Turnkey DB" %}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_FROM_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:fromconfig-list' %}">
+                                    FROM_CONFIG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_SCHEDULE_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:scheduleconfig-list' %}">
+                                    SCHEDULE_CONFIG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_SIGN_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:signconfig-list' %}">
+                                    SIGN_CONFIG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TASK_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:taskconfig-list' %}">
+                                    TASK_CONFIG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TO_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:toconfig-list' %}">
+                                    TO_CONFIG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TURNKEY_MESSAGE_LOG"
+                                    href="{% url 'turnkeywrapperapi:turnkeymessagelog-list' %}">
+                                    TURNKEY_MESSAGE_LOG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TURNKEY_MESSAGE_LOG_DETAIL"
+                                    href="{% url 'turnkeywrapperapi:turnkeymessagelogdetail-list' %}">
+                                    TURNKEY_MESSAGE_LOG_DETAIL
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TURNKEY_SEQUENCE"
+                                    href="{% url 'turnkeywrapperapi:turnkeysequence-list' %}">
+                                    TURNKEY_SEQUENCE
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TURNKEY_SYSEVENT_LOG"
+                                    href="{% url 'turnkeywrapperapi:turnkeysyseventlog-list' %}">
+                                    TURNKEY_SYSEVENT_LOG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TURNKEY_TRANSPORT_CONFIG"
+                                    href="{% url 'turnkeywrapperapi:turnkeytransportconfig-list' %}">
+                                    TURNKEY_TRANSPORT_CONFIG
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_TURNKEY_USER_PROFILE"
+                                    href="{% url 'turnkeywrapperapi:turnkeyuserprofile-list' %}">
+                                    TURNKEY_USER_PROFILE
+                                </a>
+                            </div>
+                        </li>
+                        <li class="nav-item nav_EITurnkey" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkey-list' %}">{% trans "EI Turnkey" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyBatch" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatch-list' %}">{% trans "Batch" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyBatchEInvoice" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}">{% trans "Batch E-Invoice" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyDailySummaryResultXML" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-list' %}">{% trans "Summary Result XML" %}</a>
+                        </li>
+                        <li class="nav-item nav_EITurnkeyDailySummaryResult" role="presentation">
+                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresult-list' %}">{% trans "Summary Result" %}</a>
+                        </li>
+                        <li class="dropdown nav-item nav_self">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{% if user.last_name or user.first_name %}{{ user.last_name }}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_selfstaffprofile" href="#" >{{ user.email }}</a>
+                                <span id="timezone" value="Asia/Taipei" role="presentation" class="dropdown-item">
+                                    {% trans "Timezone" %}: {% trans "Asia/Taipei" %}
+                                </span>
+                                <a role="presentation" class="dropdown-item" href='{% url "rest_framework:logout" %}'>{% trans "Logout" %}</a>
+                            </div>
+                        </li>
+                        <li class="nav-item nav_change_language" role="presentation">
+                            <form class="language_form form-inline" action='{% url "set_language" %}' method="POST">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <input name="next" type="hidden" value="{{ request.META.PATH_INFO }}?{{ request.META.QUERY_STRING }}" />
+                                    <select name="language" class="form-control">
+                                        {% get_available_languages as languages %}
+                                        {% for code, name in languages %}
+                                            <option {% ifequal code LANGUAGE_CODE %}selected{% endifequal %}
+                                                value="{{ code }}">{{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <input class="btn btn-default" type="submit" title="{% trans 'change language to your choice' %}" value='{% trans "Change" %}' />
+                                </div>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <div class="container" style="margin-top:112px;">
+        {% block body %}{% endblock %}
+    </div>
+
+    {% block modals %}
+
+    {% endblock %}
+
+    <div class="modal" id="danger_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-danger"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="success_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-success"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="error_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-danger"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="warning_modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-warning"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div title='{% blocktrans with build_date=settings.BUILD_DATE build_number=settings.BUILD_NUMBER build_version=settings.VERSION %}
+            Deploy Date: {{ build_date }}
+            Deploy Number: {{ build_number }}
+            Build Version: {{ build_version }}{% endblocktrans %}
+            '>
+            {% trans "System Build Version" %}:
+            {{ settings.BUILD_DATE }}-{{ settings.BUILD_NUMBER }}-{{ settings.VERSION }}
+        </div>
+    </div>
+
+</body>
+
+</html>

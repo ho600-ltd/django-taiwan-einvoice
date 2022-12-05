@@ -1,1 +1,13 @@
+# Only for taiwan_einvoice app
 Django>=3.2,<3.3
+Django-filter>=2.4,<2.5
+django-compressor>=2.4,<2.5
+djangorestframework>=3.12,<3.13
+djangorestframework-filters==1.0.0.dev0
+django-simple-history>=3.0,<3.1
+pycryptodome>=3.10,<3.11
+pyotp>=2.6,<2.7
+channels>=3.0,<3.1
+channels-redis>=3.3,<3.4
+https://github.com/ho600-ltd/ho600-ltd-python-libraries/archive/refs/tags/0.0.3.zip
+git+ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/django-ho600_lib2
