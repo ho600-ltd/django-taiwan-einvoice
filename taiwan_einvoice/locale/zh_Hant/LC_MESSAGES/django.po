@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-05 21:05+0800\n"
+"POT-Creation-Date: 2022-12-20 08:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,8 +182,8 @@ msgstr "電子發票({})已被作廢!"
 msgid "E-Invoice({}) was already voieded and has created the new one!"
 msgstr "電子發票({})已被註銷且另有開立!"
 
-msgid "It can not cancel the e-invoice({}), because of the accounting issue!"
-msgstr "因為會計作帳因素，已無法作廢此發票({})!"
+msgid "It can not cancel the e-invoice({}), because of the accounting issue! Please seal the 'Cancel' mark on the original copy then transmit it to the accounter"
+msgstr "因為會計作帳因素，已無法作廢此發票({})! 請在回收的電子發票證明聯正本蓋上作廢章後，交給會計人員"
 
 msgctxt "canceleinvoice"
 msgid "Canceled at {} {}"
@@ -363,7 +363,7 @@ msgstr "EI 日報表"
 
 #, python-brace-format
 msgid "Please notice the E-Invoice({track_no}), it does not be synced to EI yet"
-msgstr "請注意發票({track_no})，它尚未被同步至 EI 大平台"
+msgstr "請注意此電子發票({track_no})，它尚未同步至 EI 大平台"
 
 #, python-brace-format
 msgid "Please print the E-Invoice({track_no}) as soon as possible, so that the system can sync this E-Invoice to EI"
