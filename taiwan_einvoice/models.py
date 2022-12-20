@@ -2912,10 +2912,10 @@ class SummaryReport(models.Model):
             generate_at_time = now()
         timedelta_d = {
             "h": datetime.timedelta(minutes=91),
-            "d": datetime.timedelta(hours=24 + 8),
-            "a": datetime.timedelta(hours=24 + 8),
-            "w": datetime.timedelta(hours=24 * 7 + 9),
-            "m": datetime.timedelta(hours=24 * 31 + 10),
+            "d": datetime.timedelta(hours=24 + 11),
+            "a": datetime.timedelta(hours=24 + 11),
+            "w": datetime.timedelta(hours=24 * 7 + 11),
+            "m": datetime.timedelta(hours=24 * 31 + 11),
             "o": datetime.timedelta(hours=24 * 61 + 11),
             "y": datetime.timedelta(hours=24 * 365 + 12),
         }
