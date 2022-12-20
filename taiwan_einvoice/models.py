@@ -1213,7 +1213,7 @@ class EInvoice(models.Model):
         elif self.is_voided and self.voideinvoice_set.filter(new_einvoice__isnull=False).exists():
             return _("E-Invoice({}) was already voieded and has created the new one!").format(self.track_no_)
         elif not self.seller_invoice_track_no.can_cancel:
-            return _("It can not cancel the e-invoice({}), because of the accounting issue!").format(self.track_no_)
+            return _("It can not cancel the e-invoice({}), because of the accounting issue! Please seal the 'Cancel' mark on the original copy then transmit it to the accounter").format(self.track_no_)
         else:
             return ''
     @property
