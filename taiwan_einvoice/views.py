@@ -58,6 +58,7 @@ from taiwan_einvoice.renderers import (
 )
 from taiwan_einvoice.models import (
     TAIPEI_TIMEZONE,
+    EInvoiceSellerAPI,
     TEAStaffProfile,
     ESCPOSWeb,
     LegalEntity,
@@ -956,6 +957,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
                 }
                 return Response(er, status=status.HTTP_403_FORBIDDEN)
 
+        eisa = EInvoiceSellerAPI.objects.get(AppId=settings.TAIWAN_EINVOICE_APP_ID)
         ir = IdentifierRule()
         if data['buyer_identifier'] and False == ir.verify_identifier(data['buyer_identifier']):
             er = {
