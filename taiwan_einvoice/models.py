@@ -2634,7 +2634,7 @@ Result message: "{result_message}"
         end_time = start_time + datetime.timedelta(days=1)
         _no = UploadBatch.objects.filter(create_time__gte=start_time, create_time__lt=end_time).count() + 1
         no = '{:04d}'.format(_no)
-        return '{}{}{}'.format(no, get_codes(int(_now.strftime('%y%m%d')+no), seed=365724), choice(KEY_CODE_SET))
+        return '{}{}{}'.format(no, get_codes(_no, seed=int(_now.strftime('%y%m%d')+no)), choice(KEY_CODE_SET))
         
 
     def save(self, *args, **kwargs):
