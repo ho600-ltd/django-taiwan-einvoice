@@ -1,4 +1,4 @@
-import pytz, datetime, hmac, requests, logging, zlib, json, re, decimal, time
+import pytz, datetime, hmac, requests, logging, zlib, json, re, decimal, time, math
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -2625,7 +2625,7 @@ Result message: "{result_message}"
         return is_finish
 
 
-    def generate_slug(self):
+    def generate_slug(self, be_called_in_while=0):
         if self.slug:
             return self.slug
         _now = now().astimezone(TAIPEI_TIMEZONE)
@@ -2634,13 +2634,29 @@ Result message: "{result_message}"
         end_time = start_time + datetime.timedelta(days=1)
         _no = UploadBatch.objects.filter(create_time__gte=start_time, create_time__lt=end_time).count() + 1
         no = '{:04d}'.format(_no)
-        return '{}{}{}'.format(no, get_codes(_no, seed=int(_now.strftime('%y%m%d')+no)), choice(KEY_CODE_SET))
+        slug1 = '{}{}'.format(no, get_codes(_no, seed=int(_now.strftime('%y%m%d')+no)))
+        _t = math.ceil(be_called_in_while / len(KEY_CODE_SET))
+        if _t > 1:
+            slug2 = ''
+            for dev_null in range(_t):
+                slug2 += '{}'.format(choice(KEY_CODE_SET))
+        else:
+            slug2 = '{}'.format(choice(KEY_CODE_SET))
+        return "{}{}".format(slug1, slug2)
         
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = self.generate_slug()
-        super().save(*args, **kwargs)
+        _i = 0
+        while True:
+            try:
+                super().save(*args, **kwargs)
+            except IntegrityError:
+                _i += 1
+                self.slug = self.generate_slug(be_called_in_while=_i)
+            else:
+                break
 
 
 
