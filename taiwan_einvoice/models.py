@@ -921,13 +921,13 @@ class SellerInvoiceTrackNo(models.Model):
 
 
     def __str__(self):
-        return "{}{}({}~{}: {}{:08d}-{:08d})".format(self.turnkey_service,
+        return "{}{}({}~{}: {}{}~{})".format(self.turnkey_service,
                                              self.type,
                                              self.begin_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
                                              (self.end_time-datetime.timedelta(seconds=1)).astimezone(TAIPEI_TIMEZONE).strftime('%Y-%m-%d'),
                                              self.track,
-                                             self.begin_no,
-                                             self.end_no)
+                                             self.begin_no_str,
+                                             self.end_no_str)
 
 
     @classmethod
@@ -1041,7 +1041,7 @@ class SellerInvoiceTrackNo(models.Model):
         Details = []
         for sitn in sitns:
             if sitn.next_blank_no:
-                Details.append((sitn.next_blank_no, sitn.end_no))
+                Details.append((sitn.next_blank_no, sitn.end_no_str))
         J = {"E0402": {
             "Main": {
                 "HeadBan": self.turnkey_service.party_id,
