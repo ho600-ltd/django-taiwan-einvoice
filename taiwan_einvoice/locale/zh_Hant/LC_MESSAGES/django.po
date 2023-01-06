@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-12-20 08:00+0800\n"
+"POT-Creation-Date: 2023-01-06 11:52+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -156,6 +156,18 @@ msgstr "新增「空白未使用字軌號碼」所使用的期別，其起始時
 
 msgid "Only use the same end_time to create the record for blank numbers!"
 msgstr "新增「空白未使用字軌號碼」所使用的期別，其結束時間必須相同!"
+
+msgid "{} already have executed UploadBatch, if you want to update the records, please go to EI site to update manually!"
+msgstr "{} 已有執行完畢的上傳批次，如您想要更新紀錄，請至大平台手動調整!"
+
+msgid "{} already has executed UploadBatch, if you want to update the records, please go to EI site to update manually!"
+msgstr "{} 已有執行完畢的上傳批次，如您想要更新紀錄，請至大平台手動調整!"
+
+msgid "{} already have executing UploadBatch, please wait for them completed!"
+msgstr "{} 已有執行中的上傳批次，請等待它們完成!"
+
+msgid "{} already has executing UploadBatch, please wait for them completed!"
+msgstr "{} 已有執行中的上傳批次，請等待它們完成!"
 
 msgid "It could not be deleted, because it had E-Invoice({})"
 msgstr "無法刪除，因為它已開立發票({})"
