@@ -83,6 +83,11 @@ class SellerInvoiceTrackNoDisableError(Exception):
 
 
 
+class ExcutedE0402UploadBatchError(Exception):
+    pass
+
+
+
 class ExistedE0402UploadBatchError(Exception):
     pass
 
@@ -972,6 +977,7 @@ class SellerInvoiceTrackNo(models.Model):
         tracks = [d['track'] for d in seller_invoice_track_nos.values('track').annotate(dev_null=Count('track'))]
         upload_batchs = []
         e0402_existed_upload_batchs = []
+        e0402_excuted_upload_batchs = []
         for party_id in party_ids:
             for tax_type in tax_types:
                 for track in tracks:
@@ -979,11 +985,24 @@ class SellerInvoiceTrackNo(models.Model):
                                                             type=tax_type,
                                                             track=track).order_by('track', 'begin_no')
                     upload_batch = UploadBatch.append_to_the_upload_batch(sitns.first(), executor=executor)
-                    if upload_batch.status in ['0', 'f']:
+                    if upload_batch.status == '0':
                         upload_batchs.append(upload_batch)
+                    elif upload_batch.status == 'f':
+                        e0402_excuted_upload_batchs.append(upload_batch)
                     else:
                         e0402_existed_upload_batchs.append(upload_batch)
-        if e0402_existed_upload_batchs:
+        if e0402_excuted_upload_batchs:
+            details_strs = []
+            for _ub in e0402_excuted_upload_batchs:
+                for bei in _ub.batcheinvoice_set.all():
+                    for detail in bei.content_object.export_json_for_mig()["E0402"]['Details']:
+                        details_strs.append("{} ~ {}".format(*detail))
+            if len(details_strs) > 1:
+                msg = _("{} already have executed UploadBatch, if you want to update the records, please go to EI site to update manually!").format(", ".join(details_strs))
+            else:
+                msg = _("{} already has executed UploadBatch, if you want to update the records, please go to EI site to update manually!").format(", ".join(details_strs))
+            raise ExcutedE0402UploadBatchError(msg)
+        elif e0402_existed_upload_batchs:
             details_strs = []
             for _ub in e0402_existed_upload_batchs:
                 for bei in _ub.batcheinvoice_set.all():
