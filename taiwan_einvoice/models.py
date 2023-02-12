@@ -581,10 +581,13 @@ class IdentifierRule(object):
             return True
         return False
     def verify_identifier(self, identifier):
-        if (self.pass_rule_has_no_7_times_10(identifier)
-            or self.pass_rule_has_7_times_10(identifier)
-            or self.pass_rule_has_no_7_times_5(identifier)
-            or self.pass_rule_has_7_times_5(identifier)):
+        if (re.match('^[0-9]{8}$', identifier)
+            and (self.pass_rule_has_no_7_times_10(identifier)
+                    or self.pass_rule_has_7_times_10(identifier)
+                    or self.pass_rule_has_no_7_times_5(identifier)
+                    or self.pass_rule_has_7_times_5(identifier)
+                )
+           ):
             return True
         return False
     def test(self):
