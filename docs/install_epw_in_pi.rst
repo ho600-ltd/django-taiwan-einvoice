@@ -43,6 +43,7 @@ ESC/POS 印表機設定
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
     $ pip install -r Django-taiwan-einvoice/escpos_web/requirements.txt
+    $ cp -rf Django-taiwan-einvoice/escpos_web/capabilities.json Django-taiwan-einvoice.py3env/lib/python3.9/site-packages/escpos/
     $ pip install ipython
     $ cd Django-taiwan-einvoice/escpos_web/
     $ ./manage.py migrate

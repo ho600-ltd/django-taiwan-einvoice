@@ -16,13 +16,15 @@ class Printer(models.Model):
         ("u", "USB"),
     )
     SUPPORT_PRINTERS = (
-        ("-1", "default"),
+        ("-1", "POS-5890"),
         ("00", "TM-T88IV"),
         ("01", "TM-T88V"),
+        ("02", "POS-5890"),
     )
     PRINTERS_DICT = {
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
+    PRINTERS_DICT["POS58 Printer USB"] = "02"
     RECEIPT_TYPES = (
         ('0', _("DOES NOT WORK")),
         ('5', _('58mm Receipt')),
@@ -60,7 +62,7 @@ class Printer(models.Model):
         for (idVendor, idProduct) in idVendor_idProduct_set:
             for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
                 serial_number = usb.util.get_string(dev, dev.iSerialNumber)
-                product = usb.util.get_string(dev, dev.iProduct)
+                product = usb.util.get_string(dev, dev.iProduct).strip()
                 try:
                     printer = cls.objects.get(serial_number=serial_number)
                 except cls.DoesNotExist:
@@ -72,11 +74,19 @@ class Printer(models.Model):
                 printer.profile = cls.PRINTERS_DICT.get(product, '-1')
                 printer.save()
                 if setup:
+                    x, y = dev[0].interfaces()[0].endpoints()
+                    if re.search('bEndpointAddress .* IN', str(x)):
+                        in_ep = x.bEndpointAddress
+                        out_ep = y.bEndpointAddress
+                    else:
+                        in_ep = y.bEndpointAddress
+                        out_ep = x.bEndpointAddress
                     printer_device = UsbZhHant(printer.vendor_number,
                                                printer.product_number,
+                                               in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
                                                profile=printer.get_profile_display(),
-                                               default_encoding=self.get_default_encoding_display(),
+                                               default_encoding=printer.get_default_encoding_display(),
                                               )
                     cls.PRINTERS[serial_number] = {
                         'nickname': printer.nickname,
