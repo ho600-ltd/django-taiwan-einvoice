@@ -464,11 +464,13 @@ class ReceiptLog(models.Model):
             if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
                 d['center'] = False
             bc_class = barcode.get_barcode_class(line['code'].lower())
-            bc = bc_class(line['barcode'], writer=ImageWriter())
+            bc = bc_class(line['barcode'], writer=ImageWriter(), add_checksum=False)
             fp = BytesIO()
             bc.write(fp)
             image = Image.open(fp)
-            out_image = image.resize((380, 120))
+            x, y = image.size
+            crop_image = image.crop((0, 0, x, y / 4 * 3))
+            out_image = crop_image.resize((380, 120))
             printer_device.image(out_image, **d)
         else:
             printer_device.textln("未支援{}".format(line['code']))
