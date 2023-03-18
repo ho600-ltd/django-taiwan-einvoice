@@ -81,8 +81,7 @@ class Printer(models.Model):
                     else:
                         in_ep = y.bEndpointAddress
                         out_ep = x.bEndpointAddress
-                    printer_device = UsbZhHant(printer.vendor_number,
-                                               printer.product_number,
+                    printer_device = UsbZhHant(printer.vendor_number, printer.product_number,
                                                in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
                                                profile=printer.get_profile_display(),
@@ -111,7 +110,15 @@ class Printer(models.Model):
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if setup:
+                        x, y = dev[0].interfaces()[0].endpoints()
+                        if re.search('bEndpointAddress .* IN', str(x)):
+                            in_ep = x.bEndpointAddress
+                            out_ep = y.bEndpointAddress
+                        else:
+                            in_ep = y.bEndpointAddress
+                            out_ep = x.bEndpointAddress
                         usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                               in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
                                                profile=self.get_profile_display(),
                                                default_encoding=self.get_default_encoding_display(),
@@ -145,7 +152,15 @@ class Printer(models.Model):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if self.serial_number not in Printer.PRINTERS:
                         if setup:
+                            x, y = dev[0].interfaces()[0].endpoints()
+                            if re.search('bEndpointAddress .* IN', str(x)):
+                                in_ep = x.bEndpointAddress
+                                out_ep = y.bEndpointAddress
+                            else:
+                                in_ep = y.bEndpointAddress
+                                out_ep = x.bEndpointAddress
                             usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                                   in_ep=in_ep, out_ep=out_ep,
                                                    usb_args={"address": dev.address, "bus": dev.bus },
                                                    profile=self.get_profile_display(),
                                                    default_encoding=self.get_default_encoding_display(),
