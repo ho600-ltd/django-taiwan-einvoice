@@ -425,6 +425,7 @@ class ReceiptLog(models.Model):
             {height=64, width=3, pos="BELOW", font="A",
              align_ct=True, function_type=None, check=True}
         """
+        from escpos.exceptions import BarcodeTypeError
         if not line.get('barcode', ''):
             printer_device.ln(1)
             return
@@ -435,9 +436,43 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
-            d['align_ct'] = False
-        printer_device.barcode(line['barcode'], line['code'], **d)
+        if ((printer_device.profile.suppurts('barcodeB')
+                and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",
+                                     "CODE93", "CODE128", "GS1-128",
+                                     "GS1 DataBar Omnidirectional",
+                                     "GS1 DataBar Truncated",
+                                     "GS1 DataBar Limited",
+                                     "GS1 DataBar Expanded", ])
+            or
+            (printer_device.profile.suppurts('barcodeA')
+                and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",])
+            ):
+            if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+                d['align_ct'] = False
+            try:
+                printer_device.barcode(line['barcode'], line['code'], **d)
+            except BarcodeTypeError:
+                printer_device.textln("未支援{}".format(line['code']))
+                printer_device.textln(line['barcode'])
+        elif line['code'] in ["CODE39", "CODE128", "PZN", "EAN13", "EAN8",
+            "JAN", "ISBN13", "ISBN10", "ISSN", "UPC", "UPCA", "EAN14", "GS1_128", ]:
+            from PIL import Image
+            import barcode
+            from barcode.writer import ImageWriter
+            from io import BytesIO
+            d = {"center": d.get('align_ct', False)}
+            if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+                d['center'] = False
+            bc_class = barcode.get_barcode_class(line['code'].lower())
+            bc = bc_class(line['barcode'], writer=ImageWriter())
+            fp = BytesIO()
+            bc.write(fp)
+            image = Image.open(fp)
+            out_image = image.resize((380, 120))
+            printer_device.image(out_image, **d)
+        else:
+            printer_device.textln("未支援{}".format(line['code']))
+            printer_device.textln(line['barcode'])
 
     
     def print_qrcode_pair(self, printer_device, line):
