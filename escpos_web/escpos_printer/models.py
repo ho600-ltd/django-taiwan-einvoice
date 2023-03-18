@@ -356,7 +356,12 @@ class ReceiptLog(models.Model):
         }
         for line in self.receipt.content + extra_content:
             type_method[line['type']](pd, line)
-        pd.cut(feed=False)
+
+        if pd.profile.supports('paperFullCut') or pd.profile.supports('paperPartCut'):
+            pd.cut(feed=False)
+        else:
+            pd.ln(4)
+
         self.print_time = now()
         self.save()
     
