@@ -137,6 +137,7 @@ def check_printer_status(while_order):
                                                            (0x0483, 0x5743),
                                                            (0x0483, 0x070b),
                                                            (0x0493, 0x8760),
+                                                           (0x6868, 0x0500),
                                   ), setup=False)
     return result
 
