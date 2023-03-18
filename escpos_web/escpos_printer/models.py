@@ -436,7 +436,7 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if ((printer_device.profile.suppurts('barcodeB')
+        if ((printer_device.profile.supports('barcodeB')
                 and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",
                                      "CODE93", "CODE128", "GS1-128",
                                      "GS1 DataBar Omnidirectional",
@@ -444,7 +444,7 @@ class ReceiptLog(models.Model):
                                      "GS1 DataBar Limited",
                                      "GS1 DataBar Expanded", ])
             or
-            (printer_device.profile.suppurts('barcodeA')
+            (printer_device.profile.supports('barcodeA')
                 and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",])
             ):
             if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
