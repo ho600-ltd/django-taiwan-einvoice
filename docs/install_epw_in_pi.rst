@@ -25,14 +25,10 @@ ESC/POS 印表機設定
         # in /etc/udev/rules.d/50-usb_escpos_printer.rules
         # 04b8, 0202 是 Epson TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
         # 0483, 070b 是 Xprinter Q90EC 的裝置參數，其他型請參照原廠文件
-        # 0483, 5743 是 Xprinter P300 的裝置參數，其他型請參照原廠文件
         # 0493, 8760 是 ZJiang ZJ-5890 的裝置參數，其他型請參照原廠文件
-        # 6868, 0500 是 Gprinter F296 的裝置參數，其他型請參照原廠文件
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="070b", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5743", GROUP="lp", MODE="0666"
-        SUBSYSTEMS=="usb", ATTRS{idVendor}=="0493", ATTRS{idProduct}=="8760", GROUP="lp", MODE="0666"
-        SUBSYSTEMS=="usb", ATTRS{idVendor}=="6868", ATTRS{idProduct}=="0500", GROUP="lp", MODE="0666"
 
 設定 EPW 基本服務
 -------------------------------------------------------------------------------
