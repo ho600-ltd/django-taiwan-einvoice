@@ -966,27 +966,27 @@
                 "0": "black"
             },
             "features": {
-                "barcodeA": true,
-                "barcodeB": true,
-                "bitImageColumn": true,
+                "barcodeA": false,
+                "barcodeB": false,
+                "bitImageColumn": false,
                 "bitImageRaster": true,
-                "graphics": true,
+                "graphics": false,
                 "highDensity": true,
                 "paperFullCut": false,
                 "paperPartCut": false,
-                "pdf417Code": true,
+                "pdf417Code": false,
                 "pulseBel": false,
                 "pulseStandard": true,
-                "qrCode": true,
+                "qrCode": false,
                 "starCommands": false
             },
             "fonts": {
                 "0": {
-                    "columns": 30,
+                    "columns": 32,
                     "name": "Font A"
                 },
                 "1": {
-                    "columns": 40,
+                    "columns": 42,
                     "name": "Font B"
                 }
             },
