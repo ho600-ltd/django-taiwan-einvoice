@@ -357,8 +357,10 @@ class ReceiptLog(models.Model):
         for line in self.receipt.content + extra_content:
             type_method[line['type']](pd, line)
 
-        if pd.profile.supports('paperFullCut') or pd.profile.supports('paperPartCut'):
-            pd.cut(feed=False)
+        if pd.profile.supports('paperPartCut'):
+            pd.cut(mode='PART', feed=False)
+        elif pd.profile.supports('paperFullCut'):
+            pd.cut(mode='FULL', feed=False)
         else:
             pd.ln(4)
 
