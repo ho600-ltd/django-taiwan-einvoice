@@ -20,6 +20,7 @@ class Printer(models.Model):
         ("00", "TM-T88IV"),
         ("01", "TM-T88V"),
         ("02", "POS-5890"),
+        ("03", "XP-Q90EC"),
     )
     PRINTERS_DICT = {
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
