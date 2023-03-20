@@ -26,6 +26,7 @@ class Printer(models.Model):
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
     PRINTERS_DICT["POS58 Printer USB"] = "02"
+    PRINTERS_DICT["USB Printing Support"] = "03"
     RECEIPT_TYPES = (
         ('0', _("DOES NOT WORK")),
         ('5', _('58mm Receipt')),
