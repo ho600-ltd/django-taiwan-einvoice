@@ -890,7 +890,7 @@
             "notes": "POS-5890 thermal printer series, also marketed under various other names.\n",
             "vendor": "Zjiang"
         },
-        "Q90EC": {
+        "XP-Q90EC": {
             "codePages": {
                 "0": "CP437",
                 "1": "CP932",
