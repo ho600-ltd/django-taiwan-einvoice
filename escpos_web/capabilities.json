@@ -966,11 +966,11 @@
                 "0": "black"
             },
             "features": {
-                "barcodeA": true,
-                "barcodeB": true,
-                "bitImageColumn": true,
+                "barcodeA": false,
+                "barcodeB": false,
+                "bitImageColumn": false,
                 "bitImageRaster": true,
-                "graphics": true,
+                "graphics": false,
                 "highDensity": true,
                 "paperFullCut": false,
                 "paperPartCut": true,
