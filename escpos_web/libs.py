@@ -40,7 +40,7 @@ class UsbZhHant(Usb):
                 function_type = 'A'
             else:
                 if bc in BARCODE_TYPES['B']:
-                    if not self.profile.supports(BARCODE_B):
+                    if not self.profile.supports(bc):
                         raise BarcodeTypeError((
                             "Barcode type '{bc} not supported for "
                             "the current printer profile").format(bc=bc))
