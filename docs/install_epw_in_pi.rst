@@ -5,12 +5,16 @@
 
 EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用程式，\
 要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用，\
-目前實機使用過的 Linux Distro: Ubuntu-20.04, Ubuntu-22.04, Raspberry Pi OS(32-bit) Version 10(buster)。\
+目前實機使用過的 Linux Distro:
+
+1. Ubuntu-20.04
+#. Ubuntu-22.04
+#. Raspberry Pi OS(32-bit) Version 10(buster)
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
 而有實機測試過的機型有 TM-T88IV, TM-T88V, XP-Q90EC 及 ZJ-5890 ，\
 只有 TM-T88IV/TM-T88V 可以列印符合規範的電子發票證明聯，\
-而 TM-T88IV 只能設定 80mm 紙寬，透過 EPW 處理後，方可列印電子發票於 57mm 紙捲上但格式會被強制靠左。
+而 TM-T88IV 只能設定 80mm 紙寬，要透過 EPW 處理後，方可列印電子發票證明聯於 57mm 紙捲上，但格式會被強制靠左。
 
 Linux Distro 安裝注意事項
 -------------------------------------------------------------------------------
@@ -58,7 +62,7 @@ ESC/POS 印表機設定
 驗證 ESC/POS 印表機功能
 -------------------------------------------------------------------------------
 
-無須安裝任何原廠的 driver, tool, libary, ...。有完整支援 ESC/POS 指令的印表機，可直接使用 python-escpos (pure python codes)控制。
+無須安裝任何原廠的 driver, tool, libary, ...。有完整支援 ESC/POS 指令集的印表機，就可直接使用 python-escpos (pure python codes)控制。
 
 安裝 python-escpos==3.0a8 :
 
