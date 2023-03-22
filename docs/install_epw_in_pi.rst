@@ -1,15 +1,21 @@
 在 PI 安裝設定 EPW 伺服器
 ===============================================================================
 
-建議使用 Raspberry Pi + Linux OS 為 EPW 的伺服器。\
+考慮長期運作的高可用性，建議使用 Raspberry Pi + Linux OS 為 EPW 的伺服器。
+
 EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用程式，\
-要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用；\
-若要在 Windows 上，則需修改部份硬體控制相關的程式碼。\
-考慮長期運作的高可用性，還是應以 Pi 來執行 EPW 。
+要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用，\
+目前實機使用過的 Linux Distro: Ubuntu-20.04, Ubuntu-22.04, Raspberry Pi OS(32-bit) Version 10(buster)。\
 
-EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，而有實機測試過的機型僅有 TM-T88IV 及 TM-T88V 。
+EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
+而有實機測試過的機型有 TM-T88IV, TM-T88V, XP-Q90EC 及 ZJ-5890 ，\
+只有 TM-T88IV/TM-T88V 可以列印符合規範的電子發票證明聯，\
+而 TM-T88IV 只能設定 80mm 紙寬，透過 EPW 處理後，方可列印電子發票於 57mm 紙捲上但格式會被強制靠左。
 
-安裝 Raspberry OS 時，須將時區設為 Asia/Taipei 。
+Linux Distro 安裝注意事項
+-------------------------------------------------------------------------------
+
+* 時區須設為 Asia/Taipei
 
 ESC/POS 印表機設定
 -------------------------------------------------------------------------------
@@ -19,7 +25,7 @@ ESC/POS 印表機設定
 
         $ sudo adduser <EPW_account> lp
         $ sudo adduser <EPW_account> lpadmin
-#. 自動讓 ESC/POS 印表機在插入 USB 後，權限可分享至 lp 群組
+#. 自動讓 ESC/POS 印表機在插入 USB 後，權限分享至 lp 群組
     * .. code-block:: text
 
         # in /etc/udev/rules.d/50-usb_escpos_printer.rules
@@ -29,6 +35,163 @@ ESC/POS 印表機設定
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="070b", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5743", GROUP="lp", MODE="0666"
+
+安裝基本函式庫
+-------------------------------------------------------------------------------
+
+以 Python 3.X 為預設直譯器，本例使用 python3.9 :
+
+.. code-block:: sh
+
+    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.9)) 3 # set python3 as default
+
+安裝工具程式、編譯程式、相依函式庫:
+
+.. code-block:: sh
+
+    $ sudo apt install vim build-essential libssl-dev libffi-dev python3-dev cargo aptitude python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate
+
+更換比較方便使用的 shell(Optional):
+
+.. code-block:: sh
+
+    $ sudo apt install zsh
+
+安裝 zsh 後，設定請參照 zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
+
+驗證 ESC/POS 印表機功能
+-------------------------------------------------------------------------------
+
+無須安裝任何原廠的 driver, tool, libary, ...。有完整支援 ESC/POS 指令的印表機，可直接使用 python-escpos (pure python codes)控制。
+
+安裝 python-escpos==3.0a8 :
+
+.. code-block:: sh
+
+    $ virtualenv -p python3 TEST.py3env
+    $ source TEST.py3env/bin/activate
+    (TEST.py3env) $ pip install "python-escpos==3.0a8"
+
+將 ESC/POS 印表機的 USB 線接入電腦，再執行 python shell 來測試，本例使用 Epson TM-T88V:
+
+.. code-block:: sh
+
+    (TEST.py3env) $ cat << 'EOF' > libs.py
+    import qrcode
+    from escpos.printer import Usb
+    from PIL import Image
+    class UsbWithBarcodeQRCodePair(Usb):
+        def barcode(self, code, bc, height=64, width=1, pos="OFF", font="A", align_ct=True, function_type='A', check=True):
+            from escpos.escpos import (six, BARCODE_TYPES, NUL,
+                                    BarcodeTypeError, BarcodeCodeError, BarcodeSizeError,
+                                    BARCODE_WIDTH, BARCODE_HEIGHT,
+                                    BARCODE_FONT_A, BARCODE_FONT_B,
+                                    TXT_STYLE,
+                                    BARCODE_TXT_OFF, BARCODE_TXT_BTH, BARCODE_TXT_ABV, BARCODE_TXT_BLW,)
+            
+            bc_types = BARCODE_TYPES[function_type.upper()]
+            # Align Bar Code()
+            if align_ct:
+                self._raw(TXT_STYLE['align']['center'])
+            # Height
+            if 1 <= height <= 255:
+                self._raw(BARCODE_HEIGHT + six.int2byte(height))
+            else:
+                raise BarcodeSizeError("height = {height}".format(height=height))
+            # Width
+            if 1 <= width <= 6:
+                self._raw(BARCODE_WIDTH + six.int2byte(width))
+            else:
+                raise BarcodeSizeError("width = {width}".format(width=width))
+            # Font
+            if font.upper() == "B":
+                self._raw(BARCODE_FONT_B)
+            else:  # DEFAULT FONT: A
+                self._raw(BARCODE_FONT_A)
+            # Position
+            if pos.upper() == "OFF":
+                self._raw(BARCODE_TXT_OFF)
+            elif pos.upper() == "BOTH":
+                self._raw(BARCODE_TXT_BTH)
+            elif pos.upper() == "ABOVE":
+                self._raw(BARCODE_TXT_ABV)
+            else:  # DEFAULT POSITION: BELOW
+                self._raw(BARCODE_TXT_BLW)
+
+            self._raw(bc_types[bc.upper()])
+
+            if function_type.upper() == "B":
+                self._raw(six.int2byte(len(code)))
+
+            # Print Code
+            if code:
+                self._raw(code.encode())
+            else:
+                raise BarcodeCodeError()
+
+            if function_type.upper() == "A":
+                self._raw(NUL)
+
+        def qrcode_pair(self, line):
+            images = []
+            for s in [line['qr1_str'], line['qr2_str']]:
+                qr = qrcode.QRCode(version=1,
+                                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                                box_size=5,
+                                border=0)
+                qr.add_data(s)
+                qr.make(fit=True)
+                img = qr.make_image(fill_color="black", back_color="white")
+                img = img.resize((154, 154))
+                images.append(img)
+            qr_image = Image.new("RGB", (347, 180), color='white')
+            qr_image.paste(images[0], (13, 13))
+            qr_image.paste(images[1], (193, 13))
+            self.image(qr_image)
+
+    EOF
+
+    (TEST.py3env) $ python3
+    Python 3.10.6 (main, Mar 10 2023, 10:55:28) [GCC 11.3.0] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> 
+    from libs import UsbWithBarcodeQRCodePair
+    import re, usb.core, usb.util
+    for dev in usb.core.find(find_all=True):
+        try:
+            iProduct = usb.util.get_string(dev, dev.iProduct)
+        except:
+            continue
+        if "TM-T88V" == iProduct:
+            t88v = dev
+    x, y = t88v[0].interfaces()[0].endpoints()
+    if re.search('bEndpointAddress .* IN', str(x)):
+        in_ep = x.bEndpointAddress
+        out_ep = y.bEndpointAddress
+    else:
+        out_ep = x.bEndpointAddress
+        in_ep = y.bEndpointAddress
+    pd = UsbWithBarcodeQRCodePair(t88v.idVendor, t88v.idProduct, in_ep=in_ep, out_ep=out_ep,
+                           usb_args={"address": t88v.address, "bus": t88v.bus},
+                           profile='default')
+    pd.set(align='left')
+    if "printer supports CP950":
+        #INFO: 印表機使用 Big5 字集
+        pd.charcode(code='CP1252')
+        pd.textln('電子發票證明聯\n測試補印\n年月隨機碼總計\n列印序號\n賣方\n買方\n9876543210\n\n'.encode('cp950').decode('latin1'))
+    elif "printer supports GB18030":
+        #INFO: 印表機使用 GB18030 字集
+        pd.charcode(code='ISO_8859-2')
+        pd.textln('電子發票證明聯\n測試補印\n年月隨機碼總計\n列印序號\n賣方\n買方\n9876543210\n\n'.encode('gb18030').decode('latin2'))
+    pd.barcode('99912HO987654321111', 'CODE39')
+    pd.qrcode_pair({"qr1_str": "FN350996001111031458100000258000002580000000024634102jbdmlVBHXApivmgZzzzzzz==:e378123456:1:1:1:", "qr2_str": "**何六百文件:1:600"})
+    pd.cut()
+
+.. figure:: install_epw_in_pi/python_code_result.jpg
+    :width: 300px
+
+    列印成果
+
 
 設定 EPW 基本服務
 -------------------------------------------------------------------------------
@@ -40,9 +203,6 @@ ESC/POS 印表機設定
 
 .. code-block:: sh
 
-    $ sudo update-alternatives --install /usr/bin/python python $(readlink -f $(which python3.9)) 3 # set python3 as default
-    $ sudo apt install vim build-essential libssl-dev libffi-dev python3-dev cargo aptitude python3-virtualenv sqlite3 ttf-wqy-zenhei mlocate zsh
-        * set up zsh with oh-my-zsh: https://gist.github.com/aaabramov/0f1d963d788bf411c0629a6bcf20114d
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
