@@ -21,12 +21,20 @@ class Printer(models.Model):
         ("01", "TM-T88V"),
         ("02", "POS-5890"),
         ("03", "XP-Q90EC"),
+        ("04", "TP805L"),
     )
     PRINTERS_DICT = {
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
     }
     PRINTERS_DICT["POS58 Printer USB"] = "02"
     PRINTERS_DICT["USB Printing Support"] = "03"
+    PRINTER_PROFILE_MAP = {
+        "POS-5890": "POS-5890",
+        "XP-Q90EC": "XP-Q90EC",
+        "TM-T88IV": "TM-T88IV",
+        "TM-T88V": "TM-T88V",
+        "TP805L": "TM-T88V",
+    }
     RECEIPT_TYPES = (
         ('0', _("DOES NOT WORK")),
         ('5', _('58mm Receipt')),
@@ -86,7 +94,7 @@ class Printer(models.Model):
                     printer_device = UsbZhHant(printer.vendor_number, printer.product_number,
                                                in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
-                                               profile=printer.get_profile_display(),
+                                               profile=printer.PRINTER_PROFILE_MAP[printer.get_profile_display()],
                                                default_encoding=printer.get_default_encoding_display(),
                                               )
                     cls.PRINTERS[serial_number] = {
@@ -122,7 +130,7 @@ class Printer(models.Model):
                         usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
                                                in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
-                                               profile=self.get_profile_display(),
+                                               profile=self.PRINTER_PROFILE_MAP[self.get_profile_display()],
                                                default_encoding=self.get_default_encoding_display(),
                                               )
                         Printer.PRINTERS[self.serial_number] = {
@@ -164,7 +172,7 @@ class Printer(models.Model):
                             usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
                                                    in_ep=in_ep, out_ep=out_ep,
                                                    usb_args={"address": dev.address, "bus": dev.bus },
-                                                   profile=self.get_profile_display(),
+                                                   profile=self.PRINTER_PROFILE_MAP[self.get_profile_display()],
                                                    default_encoding=self.get_default_encoding_display(),
                                                   )
                             Printer.PRINTERS[self.serial_number] = {
