@@ -194,11 +194,11 @@ function set_up_the_escpos_printer(taiwan_einvoice_site, $button, $modal, ws_esc
                 return false;
             }
             const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
-            if ('6,7'.indexOf(data[k]['receipt_type']) > 0) {
+            if ('6,7'.indexOf(data[k]['receipt_type']) >= 0) {
                 var $ei_option = $('<option value="' + k + '">' + v + '</option>');
                 $einvoice_printer.append($ei_option);
             }
-            if ("5,6,8".indexOf(data[k]['receipt_type']) > 0) {
+            if ("5,6,7,8".indexOf(data[k]['receipt_type']) >= 0) {
                 var $option = $('<option value="' + k + '">' + v + '</option>');
                 $details_printer.append($option);
             }
