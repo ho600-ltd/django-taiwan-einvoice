@@ -507,6 +507,7 @@ class Printer(models.Model):
     RECEIPT_TYPES = (
         ('5', _('58mm Receipt')),
         ('6', _('58mm E-Invoice')),
+        ('7', _('58mm E-Invoice in 80mm Machine')),
         ('8', _('80mm Receipt')),
     )
     escpos_web = models.ForeignKey(ESCPOSWeb, on_delete=models.DO_NOTHING)
@@ -581,10 +582,13 @@ class IdentifierRule(object):
             return True
         return False
     def verify_identifier(self, identifier):
-        if (self.pass_rule_has_no_7_times_10(identifier)
-            or self.pass_rule_has_7_times_10(identifier)
-            or self.pass_rule_has_no_7_times_5(identifier)
-            or self.pass_rule_has_7_times_5(identifier)):
+        if (re.match('^[0-9]{8}$', identifier)
+            and (self.pass_rule_has_no_7_times_10(identifier)
+                    or self.pass_rule_has_7_times_10(identifier)
+                    or self.pass_rule_has_no_7_times_5(identifier)
+                    or self.pass_rule_has_7_times_5(identifier)
+                )
+           ):
             return True
         return False
     def test(self):

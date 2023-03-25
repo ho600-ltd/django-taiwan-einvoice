@@ -16,17 +16,30 @@ class Printer(models.Model):
         ("u", "USB"),
     )
     SUPPORT_PRINTERS = (
-        ("-1", "default"),
+        ("-1", "POS-5890"),
         ("00", "TM-T88IV"),
         ("01", "TM-T88V"),
+        ("02", "POS-5890"),
+        ("03", "XP-Q90EC"),
+        ("04", "TP805L"),
     )
     PRINTERS_DICT = {
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
+    }
+    PRINTERS_DICT["POS58 Printer USB"] = "02"
+    PRINTERS_DICT["USB Printing Support"] = "03"
+    PRINTER_PROFILE_MAP = {
+        "POS-5890": "POS-5890",
+        "XP-Q90EC": "XP-Q90EC",
+        "TM-T88IV": "TM-T88IV",
+        "TM-T88V": "TM-T88V",
+        "TP805L": "TM-T88V",
     }
     RECEIPT_TYPES = (
         ('0', _("DOES NOT WORK")),
         ('5', _('58mm Receipt')),
         ('6', _('58mm E-Invoice')),
+        ('7', _('58mm E-Invoice in 80mm Machine')),
         ('8', _('80mm Receipt')),
     )
     ENCODINGS = (
@@ -60,7 +73,7 @@ class Printer(models.Model):
         for (idVendor, idProduct) in idVendor_idProduct_set:
             for dev in usb.core.find(find_all=True, idVendor=idVendor, idProduct=idProduct):
                 serial_number = usb.util.get_string(dev, dev.iSerialNumber)
-                product = usb.util.get_string(dev, dev.iProduct)
+                product = usb.util.get_string(dev, dev.iProduct).strip()
                 try:
                     printer = cls.objects.get(serial_number=serial_number)
                 except cls.DoesNotExist:
@@ -72,11 +85,18 @@ class Printer(models.Model):
                 printer.profile = cls.PRINTERS_DICT.get(product, '-1')
                 printer.save()
                 if setup:
-                    printer_device = UsbZhHant(printer.vendor_number,
-                                               printer.product_number,
+                    x, y = dev[0].interfaces()[0].endpoints()
+                    if re.search('bEndpointAddress .* IN', str(x)):
+                        in_ep = x.bEndpointAddress
+                        out_ep = y.bEndpointAddress
+                    else:
+                        in_ep = y.bEndpointAddress
+                        out_ep = x.bEndpointAddress
+                    printer_device = UsbZhHant(printer.vendor_number, printer.product_number,
+                                               in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
-                                               profile=printer.get_profile_display(),
-                                               default_encoding=self.get_default_encoding_display(),
+                                               profile=printer.PRINTER_PROFILE_MAP[printer.get_profile_display()],
+                                               default_encoding=printer.get_default_encoding_display(),
                                               )
                     cls.PRINTERS[serial_number] = {
                         'nickname': printer.nickname,
@@ -101,9 +121,17 @@ class Printer(models.Model):
             for dev in usb.core.find(find_all=True, idVendor=self.vendor_number, idProduct=self.product_number):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if setup:
+                        x, y = dev[0].interfaces()[0].endpoints()
+                        if re.search('bEndpointAddress .* IN', str(x)):
+                            in_ep = x.bEndpointAddress
+                            out_ep = y.bEndpointAddress
+                        else:
+                            in_ep = y.bEndpointAddress
+                            out_ep = x.bEndpointAddress
                         usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                               in_ep=in_ep, out_ep=out_ep,
                                                usb_args={"address": dev.address, "bus": dev.bus},
-                                               profile=self.get_profile_display(),
+                                               profile=self.PRINTER_PROFILE_MAP[self.get_profile_display()],
                                                default_encoding=self.get_default_encoding_display(),
                                               )
                         Printer.PRINTERS[self.serial_number] = {
@@ -135,9 +163,17 @@ class Printer(models.Model):
                 if self.serial_number == usb.util.get_string(dev, dev.iSerialNumber):
                     if self.serial_number not in Printer.PRINTERS:
                         if setup:
+                            x, y = dev[0].interfaces()[0].endpoints()
+                            if re.search('bEndpointAddress .* IN', str(x)):
+                                in_ep = x.bEndpointAddress
+                                out_ep = y.bEndpointAddress
+                            else:
+                                in_ep = y.bEndpointAddress
+                                out_ep = x.bEndpointAddress
                             usb_zhhant = UsbZhHant(self.vendor_number, self.product_number,
+                                                   in_ep=in_ep, out_ep=out_ep,
                                                    usb_args={"address": dev.address, "bus": dev.bus },
-                                                   profile=self.get_profile_display(),
+                                                   profile=self.PRINTER_PROFILE_MAP[self.get_profile_display()],
                                                    default_encoding=self.get_default_encoding_display(),
                                                   )
                             Printer.PRINTERS[self.serial_number] = {
@@ -331,7 +367,14 @@ class ReceiptLog(models.Model):
         }
         for line in self.receipt.content + extra_content:
             type_method[line['type']](pd, line)
-        pd.cut(feed=False)
+
+        if pd.profile.supports('paperPartCut'):
+            pd.cut(mode='PART', feed=False)
+        elif pd.profile.supports('paperFullCut'):
+            pd.cut(mode='FULL', feed=False)
+        else:
+            pd.ln(4)
+
         self.print_time = now()
         self.save()
     
@@ -353,7 +396,7 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+        if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
             d['align'] = 'left'
         text = line['text']
         if ((self.receipt.meet_to_tw_einvoice_standard
@@ -395,6 +438,7 @@ class ReceiptLog(models.Model):
             {height=64, width=3, pos="BELOW", font="A",
              align_ct=True, function_type=None, check=True}
         """
+        from escpos.exceptions import BarcodeTypeError
         if not line.get('barcode', ''):
             printer_device.ln(1)
             return
@@ -405,9 +449,45 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
-            d['align_ct'] = False
-        printer_device.barcode(line['barcode'], line['code'], **d)
+        if ((printer_device.profile.supports('barcodeB')
+                and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",
+                                     "CODE93", "CODE128", "GS1-128",
+                                     "GS1 DataBar Omnidirectional",
+                                     "GS1 DataBar Truncated",
+                                     "GS1 DataBar Limited",
+                                     "GS1 DataBar Expanded", ])
+            or
+            (printer_device.profile.supports('barcodeA')
+                and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",])
+            ):
+            if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
+                d['align_ct'] = False
+            try:
+                printer_device.barcode(line['barcode'], line['code'], **d)
+            except BarcodeTypeError:
+                printer_device.textln("未支援{}".format(line['code']))
+                printer_device.textln(line['barcode'])
+        elif line['code'] in ["CODE39", "CODE128", "PZN", "EAN13", "EAN8",
+            "JAN", "ISBN13", "ISBN10", "ISSN", "UPC", "UPCA", "EAN14", "GS1_128", ]:
+            from PIL import Image
+            import barcode
+            from barcode.writer import ImageWriter
+            from io import BytesIO
+            d = {"center": d.get('align_ct', False)}
+            if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
+                d['center'] = False
+            bc_class = barcode.get_barcode_class(line['code'].lower())
+            bc = bc_class(line['barcode'], writer=ImageWriter(), add_checksum=False)
+            fp = BytesIO()
+            bc.write(fp)
+            image = Image.open(fp)
+            x, y = image.size
+            crop_image = image.crop((0, 0, x, y / 4 * 3))
+            out_image = crop_image.resize((380, 120))
+            printer_device.image(out_image, **d)
+        else:
+            printer_device.textln("未支援{}".format(line['code']))
+            printer_device.textln(line['barcode'])
 
     
     def print_qrcode_pair(self, printer_device, line):
@@ -421,7 +501,7 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+        if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
             d['center'] = False
         images = []
         for s in [line['qr1_str'], line['qr2_str']]:
