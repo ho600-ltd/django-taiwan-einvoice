@@ -26,6 +26,7 @@ $(function () {
         this.printer_receipt_type_width = {
             "5": "58mm",
             "6": "58mm",
+            "7": "58mm",
             "8": "80mm"
         };
         this.datetimepicker_format = 'YYYY-MM-DD HH:mm:ss';

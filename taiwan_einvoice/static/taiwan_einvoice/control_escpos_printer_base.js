@@ -194,7 +194,7 @@ function set_up_the_escpos_printer(taiwan_einvoice_site, $button, $modal, ws_esc
                 return false;
             }
             const v = data[k]['nickname'] + '(' + data[k]['receipt_type_display'] + ')';
-            if ('6' == data[k]['receipt_type']) {
+            if ('6,7'.indexOf(data[k]['receipt_type']) > 0) {
                 var $ei_option = $('<option value="' + k + '">' + v + '</option>');
                 $einvoice_printer.append($ei_option);
             }

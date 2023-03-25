@@ -39,6 +39,7 @@ class Printer(models.Model):
         ('0', _("DOES NOT WORK")),
         ('5', _('58mm Receipt')),
         ('6', _('58mm E-Invoice')),
+        ('7', _('58mm E-Invoice in 80mm Machine')),
         ('8', _('80mm Receipt')),
     )
     ENCODINGS = (
@@ -395,7 +396,7 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+        if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
             d['align'] = 'left'
         text = line['text']
         if ((self.receipt.meet_to_tw_einvoice_standard
@@ -459,7 +460,7 @@ class ReceiptLog(models.Model):
             (printer_device.profile.supports('barcodeA')
                 and line['code'] in ["UPC-A", "UPC-E", "EAN13", "EAN8", "CODE39", "ITF", "NW7",])
             ):
-            if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+            if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
                 d['align_ct'] = False
             try:
                 printer_device.barcode(line['barcode'], line['code'], **d)
@@ -473,7 +474,7 @@ class ReceiptLog(models.Model):
             from barcode.writer import ImageWriter
             from io import BytesIO
             d = {"center": d.get('align_ct', False)}
-            if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+            if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
                 d['center'] = False
             bc_class = barcode.get_barcode_class(line['code'].lower())
             bc = bc_class(line['barcode'], writer=ImageWriter(), add_checksum=False)
@@ -500,7 +501,7 @@ class ReceiptLog(models.Model):
         for k in default_args:
             if k in line:
                 d[k] = line[k]
-        if '8' == self.printer.receipt_type and '5' == self.receipt.original_width:
+        if self.printer.receipt_type in ['7', '8'] and '5' == self.receipt.original_width:
             d['center'] = False
         images = []
         for s in [line['qr1_str'], line['qr2_str']]:
