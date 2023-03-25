@@ -12,8 +12,8 @@ EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用�
 #. Raspberry Pi OS(32-bit) Version 10(buster)
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
-而有實機測試過的機型有 TM-T88IV, TM-T88V, XP-Q90EC 及 ZJ-5890 ，\
-只有 TM-T88IV/TM-T88V 可以列印符合規範的電子發票證明聯，\
+而有實機測試過的機型有 TM-T88IV, TM-T88V, XP-Q90EC, ZJ-5890 及 TP805L ，\
+只有 TM-T88IV/TM-T88V/TP805L 可以列印符合規範的電子發票證明聯，\
 而 TM-T88IV 只能設定 80mm 紙寬，要透過 EPW 處理後，方可列印電子發票證明聯於 57mm 紙捲上，但格式會被強制靠左。
 
 Linux Distro 安裝注意事項
@@ -33,8 +33,18 @@ ESC/POS 印表機設定
     * .. code-block:: text
 
         # in /etc/udev/rules.d/50-usb_escpos_printer.rules
-        # 04b8, 0202 是 TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
+        # 04b8, 0202 是 Epson TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
+        # 0483, 070b 是 Xprinter Q90EC 的裝置參數，其他型請參照原廠文件
+        # 0493, 8760 是 ZJiang ZJ-5890 的裝置參數，其他型請參照原廠文件
+        # 20d1, 7007 是 HPRT TP805L 的裝置參數，其他型請參照原廠文件
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
+        SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="070b", GROUP="lp", MODE="0666"
+        SUBSYSTEMS=="usb", ATTRS{idVendor}=="0493", ATTRS{idProduct}=="8760", GROUP="lp", MODE="0666"
+        SUBSYSTEMS=="usb", ATTRS{idVendor}=="20d1", ATTRS{idProduct}=="7007", GROUP="lp", MODE="0666"
+#. 重啟 udev 服務，以套用新 50-usb_escpos_printer.rules 設定:
+    * .. code-block:: text
+
+        sudo service udev restart
 
 安裝基本函式庫
 -------------------------------------------------------------------------------
@@ -62,7 +72,7 @@ ESC/POS 印表機設定
 驗證 ESC/POS 印表機功能
 -------------------------------------------------------------------------------
 
-無須安裝任何原廠的 driver, tool, libary, ...。有完整支援 ESC/POS 指令集的印表機，就可直接使用 python-escpos (pure python codes)控制。
+無須安裝任何原廠的 driver, tool, libary, ...，有完整支援 ESC/POS 指令集的印表機，就可直接使用 python-escpos (pure python codes)操作。
 
 安裝 python-escpos==3.0a8 :
 
@@ -162,18 +172,18 @@ ESC/POS 印表機設定
             iProduct = usb.util.get_string(dev, dev.iProduct)
         except:
             continue
-        if "TM-T88V" == iProduct:
-            t88v = dev
-    x, y = t88v[0].interfaces()[0].endpoints()
+        if iProduct and iProduct.strip() in ["TM-T88IV", "TM-T88V", "USB Printing Support", "POS58 Printer USB", "TP805L"]:
+            my_dev = dev
+    x, y = my_dev[0].interfaces()[0].endpoints()
     if re.search('bEndpointAddress .* IN', str(x)):
         in_ep = x.bEndpointAddress
         out_ep = y.bEndpointAddress
     else:
         out_ep = x.bEndpointAddress
         in_ep = y.bEndpointAddress
-    pd = UsbWithBarcodeQRCodePair(t88v.idVendor, t88v.idProduct, in_ep=in_ep, out_ep=out_ep,
-                           usb_args={"address": t88v.address, "bus": t88v.bus},
-                           profile='default')
+    pd = UsbWithBarcodeQRCodePair(my_dev.idVendor, my_dev.idProduct, in_ep=in_ep, out_ep=out_ep,
+                                  usb_args={"address": my_dev.address, "bus": my_dev.bus},
+                                  profile='default')
     pd.set(align='left')
     if "printer supports CP950":
         #INFO: 印表機使用 Big5 字集
@@ -207,6 +217,7 @@ ESC/POS 印表機設定
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
     $ pip install -r Django-taiwan-einvoice/escpos_web/requirements.txt
+    $ cp -rf Django-taiwan-einvoice/escpos_web/capabilities.json Django-taiwan-einvoice.py3env/lib/python3.9/site-packages/escpos/
     $ pip install ipython
     $ cd Django-taiwan-einvoice/escpos_web/
     $ ./manage.py migrate
