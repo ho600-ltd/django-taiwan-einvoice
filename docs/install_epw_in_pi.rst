@@ -1,16 +1,20 @@
-在 PI 安裝設定 EPW 伺服器
+在 Pi 或其他 Linux Distro 安裝設定 EPW 伺服器
 ===============================================================================
 
 考慮長期運作的高可用性，建議使用 Raspberry Pi + Linux OS 為 EPW 的伺服器。
 
 EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用程式，\
 要在其他 x86, x86_64 硬體上執行也是可以運作的。作業系統使用 Linux-based OS 即可直接套用，\
-目前實機使用過的 Linux Distro: Ubuntu-20.04, Ubuntu-22.04, Raspberry Pi OS(32-bit) Version 10(buster)。\
+目前實機使用過的 Linux Distro:
+
+1. Ubuntu-20.04
+#. Ubuntu-22.04
+#. Raspberry Pi OS(32-bit) Version 10(buster)
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
 而有實機測試過的機型有 TM-T88IV, TM-T88V, XP-Q90EC 及 ZJ-5890 ，\
 只有 TM-T88IV/TM-T88V 可以列印符合規範的電子發票證明聯，\
-而 TM-T88IV 只能設定 80mm 紙寬，透過 EPW 處理後，方可列印電子發票於 57mm 紙捲上但格式會被強制靠左。
+而 TM-T88IV 只能設定 80mm 紙寬，要透過 EPW 處理後，方可列印電子發票證明聯於 57mm 紙捲上，但格式會被強制靠左。
 
 Linux Distro 安裝注意事項
 -------------------------------------------------------------------------------
@@ -62,7 +66,7 @@ ESC/POS 印表機設定
 驗證 ESC/POS 印表機功能
 -------------------------------------------------------------------------------
 
-無須安裝任何原廠的 driver, tool, libary, ...。有完整支援 ESC/POS 指令的印表機，可直接使用 python-escpos (pure python codes)控制。
+無須安裝任何原廠的 driver, tool, libary, ...。有完整支援 ESC/POS 指令集的印表機，就可直接使用 python-escpos (pure python codes)控制。
 
 安裝 python-escpos==3.0a8 :
 
@@ -248,7 +252,7 @@ TEA 以 WebSocket 連線 EPW 時的驗證碼
 
 這樣驗證碼會保持在 31A ，在 TEA 上就是固定填寫 31A 驗證碼。
 
-使用 Waveshare LCD 顯示 EPW 資訊(非必要)
+在 Pi 中使用 Waveshare LCD 顯示 EPW 資訊(非必要)
 -------------------------------------------------------------------------------
 
 設定 SPI 介面:
@@ -317,7 +321,7 @@ LCD 顯示成果:
 -------------------------------------------------------------------------------
 
 若發票機上設定的 TEAWeb 紀錄超過 1 個時，就可以使用 Portal 服務來調整現時要連線的是那一個 tea_web 。\
-當然也可以直接連入 pi 中，使用 django shell 手動設定某個 tea_web.now_use = True 。
+當然也可以直接 ssh 連入發票機中，使用 django shell 手動設定某個 tea_web.now_use = True 。
 
 設定 Portal 步驟:
 
