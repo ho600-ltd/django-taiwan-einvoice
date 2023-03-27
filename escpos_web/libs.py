@@ -10,12 +10,14 @@ class UsbZhHant(Usb):
         super(UsbZhHant, self).__init__(*args, **kwargs)
         self.default_encoding = kwargs.get('default_encoding', 'CP950').upper()
         if 'CP950' == self.default_encoding:
-            self.charcode(code='CP1252')
+            charcode = 'CP1252'
         elif 'GB18030' == self.default_encoding:
-            self.charcode(code='ISO_8859-2')
+            charcode = 'ISO_8859-2'
         else:
             self.default_encoding = 'CP950'
-            self.charcode(code='CP1252')
+            charcode = 'CP1252'
+        try: self.charcode(code=charcode)
+        except KeyError: pass
 
 
     def text(self, text, *args, **kwargs):
