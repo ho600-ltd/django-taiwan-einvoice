@@ -12,9 +12,18 @@ EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用�
 #. Raspberry Pi OS(32-bit) Version 10(buster)
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
-而有實機測試過的機型有 TM-T88IV, TM-T88V, XP-Q90EC, ZJ-5890 及 TP805L ，\
-只有 TM-T88IV/TM-T88V/TP805L 可以列印符合規範的電子發票證明聯，\
-而 TM-T88IV 只能設定 80mm 紙寬，要透過 EPW 處理後，方可列印電子發票證明聯於 57mm 紙捲上，但格式會被強制靠左。
+而有實機測試過的機型有:
+
+1. TM-T82III
+#. TM-T88IV
+#. TM-T88V
+#. TP805L
+#. XP-Q90EC
+#. ZJ-5890
+
+只有 TM-T82III 、 TM-T88IV 、 TM-T88V 、 TP805L 可以列印符合規範的電子發票證明聯，\
+而 TM-T88IV 只能設定 80mm 紙寬，要透過 EPW 處理後，方可列印電子發票證明聯於 57mm 紙捲上，\
+但格式會被強制靠左。
 
 Linux Distro 安裝注意事項
 -------------------------------------------------------------------------------
@@ -34,10 +43,12 @@ ESC/POS 印表機設定
 
         # in /etc/udev/rules.d/50-usb_escpos_printer.rules
         # 04b8, 0202 是 Epson TM-T88IV 及 TM-T88V 的裝置參數，其他型請參照原廠文件
+        # 04b8, 0e28 是 Epson TM-T82III 的裝置參數，其他型請參照原廠文件
         # 0483, 070b 是 Xprinter Q90EC 的裝置參數，其他型請參照原廠文件
         # 0493, 8760 是 ZJiang ZJ-5890 的裝置參數，其他型請參照原廠文件
         # 20d1, 7007 是 HPRT TP805L 的裝置參數，其他型請參照原廠文件
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0202", GROUP="lp", MODE="0666"
+        SUBSYSTEMS=="usb", ATTRS{idVendor}=="04b8", ATTRS{idProduct}=="0e28", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="070b", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="0493", ATTRS{idProduct}=="8760", GROUP="lp", MODE="0666"
         SUBSYSTEMS=="usb", ATTRS{idVendor}=="20d1", ATTRS{idProduct}=="7007", GROUP="lp", MODE="0666"
@@ -172,7 +183,13 @@ ESC/POS 印表機設定
             iProduct = usb.util.get_string(dev, dev.iProduct)
         except:
             continue
-        if iProduct and iProduct.strip() in ["TM-T88IV", "TM-T88V", "USB Printing Support", "POS58 Printer USB", "TP805L"]:
+        if iProduct and iProduct.strip() in ["TM-T82III",
+                                             "TM-T88V",
+                                             "TM-T88IV",
+                                             "TP805L",
+                                             "USB Printing Support",
+                                             "POS58 Printer USB",
+                                            ]:
             my_dev = dev
     x, y = my_dev[0].interfaces()[0].endpoints()
     if re.search('bEndpointAddress .* IN', str(x)):
