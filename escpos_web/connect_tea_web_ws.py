@@ -134,6 +134,7 @@ async def connect_and_check_print_status(tea_web):
 def check_printer_status(while_order):
     lg.info("while_order: {}".format(while_order))
     result = Printer.load_printers(idVendor_idProduct_set=((0x04b8, 0x0202),
+                                                           (0x04b8, 0x0e28),
                                                            (0x0483, 0x5743),
                                                            (0x0483, 0x070b),
                                                            (0x0493, 0x8760),
