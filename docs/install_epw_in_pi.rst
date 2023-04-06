@@ -10,6 +10,7 @@ EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用�
 1. Ubuntu-20.04
 #. Ubuntu-22.04
 #. Raspberry Pi OS(32-bit) Version 10(buster)
+#. Raspberry Pi OS(32-bit) Version 11(bullseye)
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
 而有實機測試過的機型有:
