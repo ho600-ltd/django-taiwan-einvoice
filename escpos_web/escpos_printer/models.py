@@ -22,6 +22,7 @@ class Printer(models.Model):
         ("02", "POS-5890"),
         ("03", "XP-Q90EC"),
         ("04", "TP805L"),
+        ("05", "TM-T82III"),
     )
     PRINTERS_DICT = {
         value:key for key, value in dict(SUPPORT_PRINTERS).items()
@@ -33,6 +34,7 @@ class Printer(models.Model):
         "XP-Q90EC": "XP-Q90EC",
         "TM-T88IV": "TM-T88IV",
         "TM-T88V": "TM-T88V",
+        "TM-T82III": "TM-T88V",
         "TP805L": "TM-T88V",
     }
     RECEIPT_TYPES = (
