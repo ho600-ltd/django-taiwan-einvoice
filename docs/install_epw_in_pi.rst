@@ -10,6 +10,7 @@ EPW 是由 Django-based 程式碼及相關 Python3 函式庫所組成的應用�
 1. Ubuntu-20.04
 #. Ubuntu-22.04
 #. Raspberry Pi OS(32-bit) Version 10(buster)
+#. Raspberry Pi OS(32-bit) Version 11(bullseye)
 
 EPW 目前僅支援 USB 介面的 ESC/POS 印表機，詳細請參考 python-escpos 的支援清單，\
 而有實機測試過的機型有:
@@ -93,7 +94,7 @@ ESC/POS 印表機設定
     $ source TEST.py3env/bin/activate
     (TEST.py3env) $ pip install "python-escpos==3.0a8"
 
-將 ESC/POS 印表機的 USB 線接入電腦，再執行 python shell 來測試，本例使用 Epson TM-T88V:
+將 ESC/POS 印表機的 USB 線接入電腦，再執行 python shell 來測試，本例使用 HPRT TP805L:
 
 .. code-block:: sh
 
@@ -178,6 +179,7 @@ ESC/POS 印表機設定
     >>> 
     from libs import UsbWithBarcodeQRCodePair
     import re, usb.core, usb.util
+    devs = {}
     for dev in usb.core.find(find_all=True):
         try:
             iProduct = usb.util.get_string(dev, dev.iProduct)
@@ -190,16 +192,17 @@ ESC/POS 印表機設定
                                              "USB Printing Support",
                                              "POS58 Printer USB",
                                             ]:
-            my_dev = dev
-    x, y = my_dev[0].interfaces()[0].endpoints()
+            devs[iProduct.strip()] = dev
+    product = "TP805L"
+    x, y = devs[product][0].interfaces()[0].endpoints()
     if re.search('bEndpointAddress .* IN', str(x)):
         in_ep = x.bEndpointAddress
         out_ep = y.bEndpointAddress
     else:
         out_ep = x.bEndpointAddress
         in_ep = y.bEndpointAddress
-    pd = UsbWithBarcodeQRCodePair(my_dev.idVendor, my_dev.idProduct, in_ep=in_ep, out_ep=out_ep,
-                                  usb_args={"address": my_dev.address, "bus": my_dev.bus},
+    pd = UsbWithBarcodeQRCodePair(devs[product].idVendor, devs[product].idProduct, in_ep=in_ep, out_ep=out_ep,
+                                  usb_args={"address": devs[product].address, "bus": devs[product].bus},
                                   profile='default')
     pd.set(align='left')
     if "printer supports CP950":
