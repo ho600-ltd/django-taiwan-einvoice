@@ -10,6 +10,6 @@ pycryptodome>=3.10,<3.11
 pyotp>=2.6,<2.7
 channels>=3.0,<3.1
 channels-redis>=3.3,<3.4
-requests>=2.30,<2.31
+requests>=2.25,<2.26
 https://github.com/ho600-ltd/ho600-ltd-python-libraries/archive/refs/tags/0.0.3.zip
 git+ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/django-ho600_lib2
