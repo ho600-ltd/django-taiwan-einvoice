@@ -1,4 +1,5 @@
-/*! from Turnkey-2.0.2/DBSchema/MySQL/MySQL.sql */;
+-- from Turnkey-2.0.2/DBSchema/MySQL/MySQL.sql
+
 CREATE TABLE `FROM_CONFIG` (
   `TRANSPORT_ID` varchar(10) DEFAULT NULL,
   `TRANSPORT_PASSWORD` varchar(45) DEFAULT NULL,
