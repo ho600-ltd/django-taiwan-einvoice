@@ -104,8 +104,8 @@ DATABASES = {
         'HOST': os.getenv("DEFAULT_DB_HOST", "dtei-db.ho600.com"),
         'PORT': '3306',
         'OPTIONS': {
-            'charset': 'utf8',
-        }
+            'charset': 'utf8mb4',
+        },
     },
 }
 

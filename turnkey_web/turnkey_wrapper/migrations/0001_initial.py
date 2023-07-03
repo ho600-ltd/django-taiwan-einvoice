@@ -2,7 +2,9 @@
 
 import os
 from pathlib import Path
-from django.db import migrations, models
+from django.db import connection, migrations, models
+
+DISPLAY_NAME = connection.display_name
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
@@ -11,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent
 class Migration(migrations.Migration):
 
     initial = True
-    initial_sql = open(os.path.join(BASE_DIR, 'initial.sql'), 'r').read()
+    initial_sql = open(os.path.join(BASE_DIR, '{}.sql'.format(DISPLAY_NAME)), 'r').read()
 
     dependencies = [
     ]
@@ -144,7 +146,7 @@ class Migration(migrations.Migration):
                 ('PROCESS_DTS', models.CharField(blank=True, db_column='PROCESS_DTS', max_length=17, null=True)),
                 ('TASK', models.CharField(db_column='TASK', max_length=30)),
                 ('STATUS', models.CharField(blank=True, db_column='STATUS', max_length=5, null=True)),
-                ('FILENAME', models.CharField(blank=True, db_column='FILENAME', db_index=True, max_length=255, null=True)),
+                ('FILENAME', models.CharField(blank=True, db_column='FILENAME', db_index=True, max_length=300, null=True)),
                 ('UUID', models.CharField(blank=True, db_column='UUID', max_length=40, null=True)),
             ],
             options={

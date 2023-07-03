@@ -305,7 +305,7 @@ class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
         return TAIPEI_TIMEZONE.localize(datetime.datetime.strptime("{}000".format(self.PROCESS_DTS), "%Y%m%d%H%M%S%f"))
     TASK = models.CharField(db_column='TASK', max_length=30)
     STATUS = models.CharField(db_column='STATUS', max_length=5, blank=True, null=True)
-    FILENAME = models.CharField(db_column='FILENAME', max_length=255, blank=True, null=True, db_index=True)
+    FILENAME = models.CharField(db_column='FILENAME', max_length=300, blank=True, null=True, db_index=True)
     UUID = models.CharField(db_column='UUID', max_length=40, blank=True, null=True)
     @property
     def fileformat(self):

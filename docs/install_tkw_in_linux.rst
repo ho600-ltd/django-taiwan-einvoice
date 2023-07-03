@@ -95,19 +95,23 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
         "version": "1.247352.0"
     }
 
-創建 PostgreSQL 資料庫:
+.. ::
 
-安裝指令: sudo yum install postgresql
+    <<從 Turnkey-3 起不再使用 PostgreSQL ，因為它們的表格名、欄位名稱大小寫未跟 MariaDB 保持一致>>
 
-.. code-block:: sql 
+    創建 PostgreSQL 資料庫:
 
-    # create database tkw Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
-    # create user tkw with password 'tkw';
-    # alter database tkw owner to tkw;
+    安裝指令: sudo yum install postgresql
 
-.. code-block:: sh 
+    .. code-block:: sql 
 
-    $ psql -h dtei-db.ho600.com -U tkw -W tkw < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
+        # create database tkw Encoding='UTF8' LC_Collate='zh_TW.UTF-8' LC_Ctype='zh_TW.UTF-8' template=template1;
+        # create user tkw with password 'tkw';
+        # alter database tkw owner to tkw;
+
+    .. code-block:: sh 
+
+        $ psql -h dtei-db.ho600.com -U tkw -W tkw < EINVTurnkey2.0.2-linux/DBSchema/PostgreSQL/PostgreSQL.sql
 
 創建 MariaDB 資料庫:
 
