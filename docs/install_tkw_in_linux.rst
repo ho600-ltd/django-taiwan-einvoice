@@ -3,17 +3,18 @@
 
 Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/1536133205094.html
 
-最低需求: 
+TKW 最低需求: 
 
-1. 僅支援 Ubuntu 10.4 以上，Redhat ES 5.4 以上，支援 32、64 位元版本
-#. 需搭配 Xwindow 及中文字集包，以正常顯示中文
-#. 請確認 OpenJDK 版本為 8
+1. 支援 Ubuntu 18.4 以上，Redhat ES 7 以上，可支援 64 位元版本
+#. 建議搭配 XWindow 及中文字集包，以顯示中文
+#. 請確認 OpenJDK 版本為 11
+#. 資料庫 MySQL 5.7 或以上、MariaDB 10.9.3 或以上
 
 安裝建議:
 
 1. EI 平台有限制 Turnkey 系統的來源 IP ，所以建議到雲端平台去建立 TKW 伺服器，本文中範例是運作在 AWS
 #. 安裝 Turnkey 的系統，建議使用 OpenVPN 連線或是部置在 NAT 的後面，讓 Turnkey 可以 OpenVPN Server 或 NAT Server 的 IP 去跟 EI 連線
-#. Turnkey 須搭配 Xwindow ，所以建議使用「Amazon Linux 2 with .Net Core, PowerShell, Mono, and MATE Desktop Environment」AMI，有 LTS 支援
+#. Turnkey 最好搭配 XWindow ，所以建議使用「Amazon Linux 2 with .Net Core, PowerShell, Mono, and MATE Desktop Environment」AMI，有 LTS 支援
 #. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，可多個 Turnkey 系統置於同一 Linux 的不同資料夾中，也可各自裝在獨立的 Linux OS
 #. TKW 是以檔案系統與 Turnkey 系統互動，所以多個 Turnkey 系統置於一 Linux 中，可只安裝一個 TKW ，若裝在不同 Linux ，則每個 Linux 至少都裝一個 TKW
 
@@ -21,7 +22,7 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 
 .. code-block:: sh
 
-    $ sudo yum install cjkuni-uming-fonts.noarch google-noto-sans-traditional-chinese-fonts.noarch java-1.8.0-openjdk
+    $ sudo yum install cjkuni-uming-fonts.noarch google-noto-sans-traditional-chinese-fonts.noarch
     $ sudo yum install amazon-cloudwatch-agent collectd # for CloudWatchMonitoringScripts
     $ sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json # or sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
     $ cat /opt/aws/amazon-cloudwatch-agent/bin/config.json
@@ -126,6 +127,12 @@ Turnkey 下載點: https://www.einvoice.nat.gov.tw/EINSM/ein_upload/html/ENV/153
 .. code-block:: sh 
 
     $ mysql -h dtei-db.ho600.com -u tkw -p tkw < EINVTurnkey2.0.2-linux/DBSchema/MySQL/MySQL.sql
+
+執行 Turnkey 前所需的函式庫:
+
+.. code-block:: sh
+
+    $ wget https://builds.openlogic.com/downloadJDK/openlogic-openjdk/11.0.19+7/openlogic-openjdk-11.0.19+7-linux-x64.tar.gz
 
 設定 Turnkey 所需基本參數:
 
