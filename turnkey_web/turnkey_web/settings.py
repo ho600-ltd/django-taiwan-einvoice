@@ -98,9 +98,9 @@ WSGI_APPLICATION = 'turnkey_web.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.getenv("DEFAULT_DB_ENGINE", 'django.db.backends.mysql'),
-        'NAME': os.getenv("DEFAULT_DB_NAME", 'dev_tkw'),
-        'USER': os.getenv("DEFAULT_DB_USER", 'dev_tkw'),
-        'PASSWORD': os.getenv("DEFAULT_DB_PASSWORD", 'dev_tkw'),
+        'NAME': os.getenv("DEFAULT_DB_NAME", 'ttkw_23'),
+        'USER': os.getenv("DEFAULT_DB_USER", 'ttkw_23'),
+        'PASSWORD': os.getenv("DEFAULT_DB_PASSWORD", 'ttkw_23'),
         'HOST': os.getenv("DEFAULT_DB_HOST", "dtei-db.ho600.com"),
         'PORT': '3306',
         'OPTIONS': {
