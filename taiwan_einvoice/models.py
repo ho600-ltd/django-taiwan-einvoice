@@ -640,6 +640,12 @@ class LegalEntity(models.Model, IdentifierRule):
 
     def __str__(self):
         return "{}({}/{})".format(self.identifier, self.name, self.customer_number)
+    
+
+    def save(self, *args, **kwargs):
+        if self.GENERAL_CONSUMER_IDENTIFIER != self.identifier and False == self.verify_identifier(self.identifier):
+            raise IdentifierDoesNotExist(_('Buyer identifier is not valid.'))
+        super().save(*args, **kwargs)
 
 
 
