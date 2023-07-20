@@ -13,7 +13,7 @@ escpos_web/statics/
 escpos_web/django-taiwan-einvoice.crt
 .py3env/
 *.key
-*.log
+*.log*
 *.pyc
 *.mo
 .*

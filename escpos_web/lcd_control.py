@@ -9,6 +9,9 @@ import django, os, time, logging, sys, netifaces, urllib.request, datetime, subp
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 from libs import get_tea_web_name, get_public_ip, get_eths, get_boot_seed, get_hour_minute
 
+logging.basicConfig(
+)
+logFormatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', '%Y-%m-%d %H:%M:%S')
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(PWD)
@@ -45,9 +48,11 @@ def info_block(lg, draw):
         draw.text((5, height), e[1], font=IP_INFO_FONT, fill=0x0000ff)
 
 
-logging.basicConfig()
 lg = logging.getLogger(__name__)
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
 lg.setLevel('INFO')
+lg.addHandler(consoleHandler)
 
 try:
     TTF_PATH = sys.argv[1]
