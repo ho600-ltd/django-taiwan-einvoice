@@ -18,14 +18,26 @@ TKW 最低需求:
 #. 若需創建多台 Turnkey 系統(如: 不同分店各自擁有 Turnkey 系統)，可多個 Turnkey 系統置於同一 Linux 的不同資料夾中，也可各自裝在獨立的 Linux OS
 #. TKW 是以檔案系統與 Turnkey 系統互動，所以多個 Turnkey 系統置於一 Linux 中，可只安裝一個 TKW ，若裝在不同 Linux ，則每個 Linux 至少都裝一個 TKW
 
-基本函式庫安裝:
+設定台北時區:
 
 .. code-block:: sh
 
     $ sudo timedatectl set-timezone Asia/Taipei
+
+基本函式庫安裝:
+
+.. code-block:: sh
+
+    $ sudo apt update
+    $ sudo apt install aptitude
+    $ sudo aptitude upgrade -y && sudo reboot
     $ sudo apt install unzip net-tools collectd
     $ curl https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -o amazon-cloudwatch-agent.deb
     $ sudo dpkg -i ./amazon-cloudwatch-agent.deb
+    $ sudo adduser eit-user
+    $ sudo cp -rf .ssh/authorized_keys ~eit-user/.ssh/
+    $ sudo chown -R eit-user:eit-user ~eit-user/.ssh
+    $ sudo chmod -R 400 ~eit-user/.ssh/
     $ sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json # or sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
     $ cat /opt/aws/amazon-cloudwatch-agent/bin/config.json
     {
@@ -44,13 +56,13 @@ TKW 最低需求:
                             "retention_in_days": 7
                         },
                         {
-                            "file_path": "/home/eit-user/TK-3.0.2-24634102/linux/log/Turnkey.log",
+                            "file_path": "/home/eit-user/EINVTurnkey3.0.2-24634102/linux/log/Turnkey.log",
                             "log_group_name": "WHAT_NAME_ALL_YOU_WANT",
                             "log_stream_name": "Turnkey.log",
                             "retention_in_days": 7
                         },
                         {
-                            "file_path": "/home/eit-user/TK-3.0.2-24634102/linux/log/Turnkey_mail.log",
+                            "file_path": "/home/eit-user/EINVTurnkey3.0.2-24634102/linux/log/Turnkey_mail.log",
                             "log_group_name": "WHAT_NAME_ALL_YOU_WANT",
                             "log_stream_name": "Turnkey_mail.log",
                             "retention_in_days": 7
@@ -112,10 +124,6 @@ TKW 最低需求:
     }
     $ sudo apt install xfce4 xrdp
     $ sudo apt install language-pack-zh-hant fonts-arphic-ukai fonts-arphic-uming fonts-ipafont-mincho fonts-ipafont-gothic fonts-unfonts-core
-    $ sudo adduser eit-user
-    $ sudo cp -rf .ssh/authorized_keys ~eit-user/.ssh/
-    $ sudo chown -R eit-user:eit-user ~eit-user/.ssh
-    $ sudo chmod -R 400 ~eit-user/.ssh/
 
 .. ::
 
@@ -227,6 +235,18 @@ TKW 最低需求:
 
     設定排程: 最基本的方式就是單純設定發票上傳、發票下載的執行間隔時間
 
+如果要在開機時，就直接啟用 Turnkey 排程程式，請建立 /etc/rc.local 執行檔:
+
+.. code-block:: sh
+
+    $ sudo vi /etc/rc.local
+    $ cat /etc/rc.local
+    #!/bin/bash
+
+    su - eit-user -c "cd /home/eit-user/EINVTurnkey3.0.2-24634102/linux/ && ./run_start.sh &"
+
+    $ sudo chmod a+x /etc/rc.local
+
 安裝 TKW 伺服器
 -------------------------------------------------------------------------------
 
@@ -252,6 +272,7 @@ TKW 最低需求:
 
 .. code-block:: sh
 
+    $ sudo apt install gettext
     $ git clone git@github.com:ho600-ltd/Django-taiwan-einvoice.git
     $ virtualenv -p python3 Django-taiwan-einvoice.py3env
     $ source Django-taiwan-einvoice.py3env/bin/activate
@@ -266,10 +287,22 @@ TKW 最低需求:
     Password: 
     Password (again): 
     Superuser created successfully.
-    $ ./manage.py shell # create "te_web object". The url, slug, hash_key should be set from TEA service
+    $ ./manage.py shell # create "eiturnkey object". The url, slug, hash_key should be set from TEA service
     $ sudo apt install supervisor
     $ cp -rf Django-taiwan-einvoice/turnkey_web/tkw.ini /etc/supervisor/conf.d/ # then update the wss url
     $ sudo systemctl enable supervisor.service
     $ sudo systemctl start supervisor.service
     $ sudo supervisorctl reread
     $ sudo supervisorctl start all
+
+最後再設定 /etc/crontab 即可:
+
+.. code-block:: sh
+
+    */5 *   *  *  * eit-user wget --no-check-certificate "https://localhost:8443/crontab_monitor/single_entry_point_of_view/?me=cron" -O /dev/null
+
+    17  2   *  *  * root su - eit-user -c "cd /home/eit-user/EINVTurnkey3.0.2-24634102/linux/ && ./run_stop.sh" && reboot
+
+執行 /crontab_monitor/single_entry_point_of_view/ 的目的，是將 TEA 所傳入的發票檔轉換成 Turnkey-3 可執行的格式，也同時把 Turnkey-3 執行結果更新至 TEA 可讀取的紀錄。
+
+執行 ./run_stop.sh 則是定時關閉 Turnkey-3 程式並重開機。
