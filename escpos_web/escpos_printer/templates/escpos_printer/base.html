@@ -96,7 +96,7 @@
                                     <select name="language" class="form-control">
                                         {% get_available_languages as languages %}
                                         {% for code, name in languages %}
-                                            <option {% ifequal code LANGUAGE_CODE %}selected{% endifequal %}
+                                            <option {% if code == LANGUAGE_CODE %}selected{% endif %}
                                                 value="{{ code }}">{{ name }}
                                             </option>
                                         {% endfor %}

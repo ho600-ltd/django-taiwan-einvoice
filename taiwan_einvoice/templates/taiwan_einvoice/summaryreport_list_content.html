@@ -50,30 +50,30 @@
                     <td field="C0401_counts" align="right">
                         <div title='{% trans "Good" %}' class="number text-primary" value="{{ obj.good_counts.C0401 }}"></div>
                             <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0401 }}"></div>
-                        {% ifnotequal "E" obj.report_type %}
+                        {% if "E" != obj.report_type %}
                             <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_counts.C0401 }}"></div>
-                        {% endifnotequal %}
+                        {% endif %}
                     </td>
                     <td field="C0501_counts" align="right">
                         <div title='{% trans "Good" %}' class="number text-success" value="{{ obj.good_counts.C0501  }}"></div>
                             <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0501  }}"></div>
-                        {% ifnotequal "E" obj.report_type %}
+                        {% if "E" != obj.report_type %}
                             <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_counts.C0501 }}"></div>
-                        {% endifnotequal %}
+                        {% endif %}
                     </td>
                     <td field="C0701_counts" align="right">
                         <div title='{% trans "Good" %}' class="number" value="{{ obj.good_counts.C0701  }}"></div>
                             <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_counts.C0701  }}"></div>
-                        {% ifnotequal "E" obj.report_type %}
+                        {% if "E" != obj.report_type %}
                             <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_counts.C0701 }}"></div>
-                        {% endifnotequal %}
+                        {% endif %}
                     </td>
                     <td field="count" align="right">
                         <div title='{% trans "Good" %}' class="number font-weight-bold" value="{{ obj.good_count }}"></div>
                             <div title='{% trans "Failed" %}' class="number text-danger" value="{{ obj.failed_count }}"></div>
-                        {% ifnotequal "E" obj.report_type %}
+                        {% if "E" != obj.report_type %}
                             <div title='{% trans "Resolved" %}' class="number text-warning" value="{{ obj.resolved_count }}"></div>
-                        {% endifnotequal %}
+                        {% endif %}
                     </td>
                     {% if "h" == obj.report_type or "a" == obj.report_type %}
                         <td field="is_resolved">
@@ -86,7 +86,7 @@
                             {% endif %}
                         </td>
                         <td field="resolved_note">
-                            {% ifequal "" obj.resolved_note %}
+                            {% if "" == obj.resolved_note %}
                                 {% for tea in obj.te_alarms %}
                                     <div style="display: none;">
                                         <b>{{ tea.title }}</b>
@@ -95,7 +95,7 @@
                                 {% endfor %}
                             {% else %}
                                 {{ obj.resolved_note }}
-                            {% endifequal%}
+                            {% endif%}
                         </td>
                         <td field="resolver">
                             {% if obj.resolver %}{{ obj.resolver }}{% endif %}

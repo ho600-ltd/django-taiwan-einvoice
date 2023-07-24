@@ -76,7 +76,7 @@
                             buyer_is_business_entity="{% if canceleinvoice.einvoice_dict.buyer_is_business_entity %}1{% endif %}"
                             carrier_type="{{ canceleinvoice.einvoice_dict.carrier_type }}"
                             carrier_type__display="{{ canceleinvoice.einvoice_dict.carrier_type__display }}"
-                            donate_mark__display='{% ifequal "1" canceleinvoice.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}'>
+                            donate_mark__display='{% if "1" == canceleinvoice.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endif %}'>
                             {% if perms.taiwan_einvoice.edit_te_escposweboperator or operate_escposwebs_exists %}
                                 {% if canceleinvoice.new_einvoice_dict.id %}
                                     <td field="check" class="print_einvoice">

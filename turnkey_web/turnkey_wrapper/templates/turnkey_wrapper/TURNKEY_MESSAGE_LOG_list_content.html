@@ -41,26 +41,26 @@
                 <td>
                     <span field="SEQNO">{{ obj.SEQNO }}</span>-<span field="SUBSEQNO">{{ obj.SUBSEQNO }}</span>
                 </td>
-                <td field="STATUS" class="font-weight-bold {% ifequal "C" obj.STATUS %}
+                <td field="STATUS" class="font-weight-bold {% if "C" == obj.STATUS %}
                     text-dark
-                {% else %}{% ifequal "G" obj.STATUS %}
+                {% else %}{% if "G" == obj.STATUS %}
                     text-warning
                 {% else %}
                     text-danger
-                {% endifequal %}{% endifequal %}
+                {% endif %}{% endif %}
                 ">{{ obj.STATUS }}</td>
                 <td field="MESSAGE_DTS_datetime" class="datetime"
                     title="{{ obj.MESSAGE_DTS }}"
                     value="{{ obj.MESSAGE_DTS_datetime }}" format="Y-m-d H:i:s.sss">
                 </td>
                 <td>
-                    <div field="MESSAGE_TYPE" class="font-weight-bold {% ifequal "C0401" obj.MESSAGE_TYPE %}
+                    <div field="MESSAGE_TYPE" class="font-weight-bold {% if "C0401" == obj.MESSAGE_TYPE %}
                         text-primary
-                    {% else %}{% ifequal "C0501" obj.MESSAGE_TYPE %}
+                    {% else %}{% if "C0501" == obj.MESSAGE_TYPE %}
                         text-success
                     {% else %}
                         text-dark
-                    {% endifequal %}{% endifequal %}">{{ obj.MESSAGE_TYPE }}</div>
+                    {% endif %}{% endif %}">{{ obj.MESSAGE_TYPE }}</div>
                     <div field="CATEGORY_TYPE">{{ obj.CATEGORY_TYPE }}</div>
                     <div field="PROCESS_TYPE">{{ obj.PROCESS_TYPE }}</div>
                 </td>
