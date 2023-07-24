@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
 from django.utils.timezone import now, utc
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from guardian.shortcuts import get_objects_for_user
 
 from taiwan_einvoice.models import (

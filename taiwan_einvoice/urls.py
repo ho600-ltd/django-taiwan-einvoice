@@ -4,7 +4,7 @@ import os
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, Http404
 from django.urls import include, path, re_path
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.static import serve
 from rest_framework import routers
 from rest_framework.schemas import get_schema_view

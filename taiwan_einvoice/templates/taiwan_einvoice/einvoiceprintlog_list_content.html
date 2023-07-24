@@ -45,7 +45,7 @@
                             {% endif %}
                         </td>
                         <td field="carrier_type">{{ einvoiceprintlog.einvoice_dict.carrier_type__display }}</td>
-                        <td field="donate_mark">{% ifequal "1" einvoiceprintlog.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endifequal %}</td>
+                        <td field="donate_mark">{% if "1" == einvoiceprintlog.einvoice_dict.donate_mark %}{% trans "Donated" context "taiwan_einvoice_donate_mark" %}{% endif %}</td>
                         <td field="is_original_copy">
                             {% if einvoiceprintlog.is_original_copy %}
                                 {% if not einvoiceprintlog.einvoice_dict.canceled_time %}

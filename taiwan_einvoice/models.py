@@ -14,7 +14,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import translation
 from django.utils.timezone import now, utc
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext, pgettext
 from simple_history.models import HistoricalRecords
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms
