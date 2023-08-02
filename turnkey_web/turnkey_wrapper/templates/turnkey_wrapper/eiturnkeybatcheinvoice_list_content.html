@@ -34,13 +34,13 @@
                     <div class="datetime" field="upload_to_ei_time" value="{{ obj.upload_to_ei_time }}" format="Y-m-d H:i:s.sss"></div>
                 </td>
                 <td field="status_and_result_code">
-                    <div field="status" class="font-weight-bold {% ifequal "C" obj.status %}
+                    <div field="status" class="font-weight-bold {% if "C" == obj.status %}
                             text-dark
-                        {% else %}{% ifequal "G" obj.status %}
+                        {% else %}{% if "G" == obj.status %}
                             text-warning
                         {% else %}
                             text-danger
-                        {% endifequal %}{% endifequal %}
+                        {% endif %}{% endif %}
                         ">{{ obj.status }}
                     </div>
                     <div field="result_code">{{ obj.result_code }}</div>

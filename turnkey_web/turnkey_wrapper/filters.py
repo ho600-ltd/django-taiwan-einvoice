@@ -4,7 +4,7 @@ import rest_framework_filters as filters
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.utils.timezone import now, utc
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from turnkey_wrapper.models import (
     TAIPEI_TIMEZONE,

@@ -1,7 +1,7 @@
 # taiwan_einvoice/consumers.py
 import json, logging, datetime
 from asgiref.sync import async_to_sync
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
 
