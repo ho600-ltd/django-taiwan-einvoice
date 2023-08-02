@@ -1112,3 +1112,105 @@ class EITurnkeyDailySummaryResult(models.Model):
 
     class Meta:
         unique_together = (("ei_turnkey", "result_date", ), )
+
+
+
+class EITurnkeyE0501XML(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    abspath = models.CharField(max_length=255, unique=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, null=True, on_delete=models.DO_NOTHING)
+    is_parsed = models.BooleanField(default=False)
+    invoice_assign_nos = models.JSONField(default=[])
+    binary_content = models.BinaryField()
+    error_note = models.TextField(default='')
+    @property
+    def content(self):
+        content = zlib.decompress(self.binary_content)
+        return content
+    @content.setter
+    def content(self, value=''):
+        if bytes != type(value):
+            value = value.encode('utf-8')
+        self.binary_content = zlib.compress(value)
+
+    
+    def parse(self):
+        lg = logging.getLogger('turnkey_web')
+        error_message = ''
+        X = xmltodict.parse(self.content)
+        party_id = X['InvoiceEnvelope']['From']['PartyId']
+        routing_id = X['InvoiceEnvelope']['FromVAC']['RoutingId']
+        if routing_id:
+            self.ei_turnkey = EITurnkey.objects.get(party_id=party_id, routing_id=routing_id)
+        else:
+            self.ei_turnkey = EITurnkey.objects.filter(party_id=party_id).order_by('id')[0]
+        ds = []
+        for ian in X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']:
+            if party_id != ian['Ban']:
+                error_message += "party_id: {} != Ban: {}\n".format(party_id, ian['Ban'])
+                continue
+            d = {
+                'InvoiceType': ian['InvoiceType'],
+                'YearMonth': ian['YearMonth'],
+                'InvoiceTrack': ian['InvoiceTrack'],
+                'InvoiceBeginNo': ian['InvoiceBeginNo'],
+                'InvoiceEndNo': ian['InvoiceEndNo'],
+                'InvoiceBooklet': ian['InvoiceBooklet']
+            }
+            ds.append(d)
+
+        self.error_note = error_message
+        self.is_parsed = True
+        invoice_assign_nos = []
+        for d in ds:
+            eitian, new_creation = EITurnkeyE0501InvoiceAssignNo.objects.get_or_create(
+                ei_turnkey=self.ei_turnkey,
+                invoice_type=d['InvoiceType'],
+                year_month=d['YearMonth'],
+                invoice_track=d['InvoiceTrack'],
+                invoice_begin_no=d['InvoiceBeginNo'],
+                invoice_end_no=d['InvoiceEndNo'],
+                invoice_booklet=d['InvoiceBooklet'],
+            )
+            invoice_assign_nos.append(eitian)
+        return invoice_assign_nos
+
+
+    def save(self, *args, **kwargs):
+        lg = logging.getLogger('turnkey_web')
+        invoice_assign_nos = None
+        if self.binary_content and not self.is_parsed:
+            try:
+                invoice_assign_nos = self.parse()
+            except Exception as e:
+                lg.error("{abspath}: {type} {e}".format(abspath=self.abspath, type=type(e), e=e))
+                self.error_note = "{}: {}".format(type(e), str(e))
+        super().save(*args, **kwargs)
+        if invoice_assign_nos:
+            for ian in invoice_assign_nos:
+                ian.xml_files.add(self)
+
+
+
+class EITurnkeyE0501InvoiceAssignNo(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
+    type_choices = (
+        ('07', _('General')),
+        ('08', _('Special')),
+    )
+    invoice_type = models.CharField(max_length=2,
+                                    default='07',
+                                    choices=type_choices,
+                                    db_index=True)
+    year_month = models.CharField(max_length=5, db_index=True)
+    invoice_track = models.CharField(max_length=2, db_index=True)
+    invoice_begin_no = models.CharField(max_length=8, db_index=True)
+    invoice_end_no = models.CharField(max_length=8, db_index=True)
+    invoice_booklet = models.SmallIntegerField(default=0)
+    xml_files = models.ManyToManyField(EITurnkeyDailySummaryResultXML)
+
+
+    class Meta:
+        unique_together = (("ei_turnkey", "invoice_type", "year_month", "invoice_track"
+                            "invoice_begin_no", "invoice_end_no", "invoice_booklet"), )
