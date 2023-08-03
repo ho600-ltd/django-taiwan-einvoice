@@ -13,7 +13,6 @@
             <th>{% trans "Create Time" %}</th>
             <th>
                 <div class="font-weight-light">{% trans "EI Turnkey" %}</div>
-                <div>{% trans "XML Date" %}</div>
                 <div class="font-weight-light">{% trans "Is Parsed?" %}</div>
             </th>
             <th>{% trans "Invoice Assign No" %}</th>
@@ -28,7 +27,6 @@
                 <td class="datetime" field="create_time" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
                 <td>
                     <div field="ei_turnkey">{{ obj.ei_turnkey_dict.party_id }}({{ obj.ei_turnkey_dict.routing_id }})</div>
-                    <div class="font-weight-bold" field="result_date">{{ obj.result_date }}</div>
                     <div field="is_parsed">
                         {% if obj.is_parsed %}
                             {% trans "Parsed" %}
