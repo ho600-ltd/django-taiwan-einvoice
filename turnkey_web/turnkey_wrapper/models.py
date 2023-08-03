@@ -1198,7 +1198,7 @@ class EITurnkeyE0501XML(models.Model):
                 'InvoiceTrack': ian['InvoiceTrack'],
                 'InvoiceBeginNo': ian['InvoiceBeginNo'],
                 'InvoiceEndNo': ian['InvoiceEndNo'],
-                'InvoiceBooklet': ian['InvoiceBooklet']
+                'InvoiceBooklet': int(ian['InvoiceBooklet']),
             }
             ds.append(d)
 
