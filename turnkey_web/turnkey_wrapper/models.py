@@ -1187,7 +1187,7 @@ class EITurnkeyE0501XML(models.Model):
             self.ei_turnkey = EITurnkey.objects.get(party_id=party_id, routing_id=routing_id)
         else:
             self.ei_turnkey = EITurnkey.objects.filter(party_id=party_id).order_by('id')[0]
-        ds = []
+        invoice_assign_nos = []
         if list == type(X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']):
             ians = X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']
         else:
@@ -1204,11 +1204,12 @@ class EITurnkeyE0501XML(models.Model):
                 'InvoiceEndNo': ian['InvoiceEndNo'],
                 'InvoiceBooklet': int(ian['InvoiceBooklet']),
             }
-            ds.append(d)
+            invoice_assign_nos.append(d)
 
+        self.invoice_assign_nos = invoice_assign_nos
         self.error_note = error_message
         self.is_parsed = True
-        invoice_assign_nos = []
+        ians = []
         for d in ds:
             eitian, new_creation = EITurnkeyE0501InvoiceAssignNo.objects.get_or_create(
                 ei_turnkey=self.ei_turnkey,
@@ -1219,8 +1220,8 @@ class EITurnkeyE0501XML(models.Model):
                 invoice_end_no=d['InvoiceEndNo'],
                 invoice_booklet=d['InvoiceBooklet'],
             )
-            invoice_assign_nos.append(eitian)
-        return invoice_assign_nos
+            ians.append(eitian)
+        return ians
 
 
     def save(self, *args, **kwargs):
