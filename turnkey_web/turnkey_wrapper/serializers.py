@@ -291,7 +291,7 @@ class EITurnkeyE0501XMLSerializer(ModelSerializer):
 
 
 class EITurnkeyE0501InvoiceAssignNoSerializer(ModelSerializer):
-    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeye0501invoiceassignnoxml-detail")
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeye0501invoiceassignno-detail")
     ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
     invoice_type = CharField(read_only=True)
     year_month = CharField(read_only=True)
