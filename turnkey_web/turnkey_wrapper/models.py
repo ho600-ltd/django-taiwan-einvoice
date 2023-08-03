@@ -1255,7 +1255,7 @@ class EITurnkeyE0501InvoiceAssignNo(models.Model):
     invoice_begin_no = models.CharField(max_length=8, db_index=True)
     invoice_end_no = models.CharField(max_length=8, db_index=True)
     invoice_booklet = models.SmallIntegerField(default=0)
-    xml_files = models.ManyToManyField(EITurnkeyDailySummaryResultXML)
+    xml_files = models.ManyToManyField(EITurnkeyE0501XML)
 
 
     class Meta:
