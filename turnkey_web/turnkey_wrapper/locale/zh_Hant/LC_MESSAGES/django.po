@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-07 09:31+0800\n"
+"POT-Creation-Date: 2023-08-03 17:53+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -145,6 +145,12 @@ msgstr "EI 回傳 I 錯誤(I)"
 msgid "Successful EI process(C)"
 msgstr "EI 確認成功(C)"
 
+msgid "General"
+msgstr "一般"
+
+msgid "Special"
+msgstr "特別"
+
 msgid "TRANSPORT_ID contains"
 msgstr "TRANSPORT_ID 包含"
 
@@ -236,11 +242,20 @@ msgstr "批次"
 msgid "Batch E-Invoice"
 msgstr "批次發票"
 
+msgid "Daily Summary"
+msgstr "日總結"
+
 msgid "Summary Result XML"
 msgstr "日總結 XML"
 
 msgid "Summary Result"
 msgstr "日總結成果"
+
+msgid "E0501"
+msgstr ""
+
+msgid "E0501 XML"
+msgstr ""
 
 msgid "Timezone"
 msgstr "時區"
@@ -364,3 +379,30 @@ msgstr "檔案路徑"
 
 msgid "None"
 msgstr ""
+
+msgid "Invoice Typ"
+msgstr ""
+
+msgid "Year-Month"
+msgstr "所處期別"
+
+msgid "Invoice Track"
+msgstr "字軌"
+
+msgid "Begin No."
+msgstr "起始號碼"
+
+msgid "End No."
+msgstr "結束號碼"
+
+msgid "Type"
+msgstr "類別"
+
+msgid "Track"
+msgstr "字軌"
+
+msgid "Boooklet"
+msgstr "本數"
+
+msgid "File Read Error"
+msgstr "檔案讀取錯誤"
