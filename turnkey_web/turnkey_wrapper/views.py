@@ -43,6 +43,8 @@ from turnkey_wrapper.models import (
     EITurnkeyBatchEInvoice,
     EITurnkeyDailySummaryResultXML,
     EITurnkeyDailySummaryResult,
+    EITurnkeyE0501XML,
+    EITurnkeyE0501InvoiceAssignNo,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
@@ -62,6 +64,8 @@ from turnkey_wrapper.serializers import (
     EITurnkeyBatchEInvoiceSerializer,
     EITurnkeyDailySummaryResultXMLSerializer,
     EITurnkeyDailySummaryResultSerializer,
+    EITurnkeyE0501XMLSerializer,
+    EITurnkeyE0501InvoiceAssignNoSerializer,
 )
 from turnkey_wrapper.filters import (
     FROM_CONFIGFilter,
@@ -81,6 +85,8 @@ from turnkey_wrapper.filters import (
     EITurnkeyBatchEInvoiceFilter,
     EITurnkeyDailySummaryResultXMLFilter,
     EITurnkeyDailySummaryResultFilter,
+    EITurnkeyE0501XMLFilter,
+    EITurnkeyE0501InvoiceAssignNoFilter,
 )
 from turnkey_wrapper.renderers import (
     PlainFileRenderer,
@@ -103,6 +109,8 @@ from turnkey_wrapper.renderers import (
     EITurnkeyBatchEInvoiceHtmlRenderer,
     EITurnkeyDailySummaryResultXMLHtmlRenderer,
     EITurnkeyDailySummaryResultHtmlRenderer,
+    EITurnkeyE0501XMLHtmlRenderer,
+    EITurnkeyE0501InvoiceAssignNoHtmlRenderer,
 )
 
 
@@ -419,6 +427,35 @@ class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
     serializer_class = EITurnkeyDailySummaryResultSerializer
     filter_class = EITurnkeyDailySummaryResultFilter
     renderer_classes = (EITurnkeyDailySummaryResultHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+
+
+class EITurnkeyE0501XMLModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyE0501XML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
+    serializer_class = EITurnkeyE0501XMLSerializer
+    filter_class = EITurnkeyE0501XMLFilter
+    renderer_classes = (EITurnkeyE0501XMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
+    http_method_names = ('get', )
+
+
+    @action(detail=True, methods=['get'])
+    def get_xml_content(self, request, pk=None):
+        result = EITurnkeyE0501XML.objects.get(id=pk)
+        content = result.content
+        return Response(content)
+
+
+
+class EITurnkeyE0501InvoiceAssignNoModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyE0501InvoiceAssignNo.objects.all().order_by('-result_date')
+    serializer_class = EITurnkeyE0501InvoiceAssignNoSerializer
+    filter_class = EITurnkeyE0501InvoiceAssignNoFilter
+    renderer_classes = (EITurnkeyE0501InvoiceAssignNoHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
 

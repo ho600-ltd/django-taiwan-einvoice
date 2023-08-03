@@ -1,0 +1,55 @@
+{% load i18n %}
+
+<div class="total_count_row">
+    {% with data.count as total_count %}
+        {% blocktrans with total_count=total_count %}{{ total_count }} records{% endblocktrans %}
+    {% endwith %}
+</div>
+
+<table class="table" init_page_no="{{ data.init_page_no }}">
+    <thead>
+        <tr>
+            <th>No.</th>
+            <th>{% trans "Create Time" %}</th>
+            <th>
+                <div class="font-weight-light">{% trans "EI Turnkey" %}</div>
+                <div>{% trans "XML Date" %}</div>
+                <div class="font-weight-light">{% trans "Is Parsed?" %}</div>
+            </th>
+            <th>{% trans "Invoice Assign No" %}</th>
+            <th>{% trans "Error Note" %}</th>
+            <th>{% trans "File path" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in data.results %}
+            <tr obj_id="{{ obj.id }}">
+                <td field="no" class="record_order_no" counter0="{{ forloop.counter0 }}">{{ forloop.counter }}</td>
+                <td class="datetime" field="create_time" value="{{ obj.create_time }}" format="Y-m-d H:i:s"></td>
+                <td>
+                    <div field="ei_turnkey">{{ obj.ei_turnkey_dict.party_id }}({{ obj.ei_turnkey_dict.routing_id }})</div>
+                    <div class="font-weight-bold" field="result_date">{{ obj.result_date }}</div>
+                    <div field="is_parsed">
+                        {% if obj.is_parsed %}
+                            {% trans "Parsed" %}
+                        {% else %}
+                            <span class="text-danger">{% trans "Not yet" %}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    <pre field="invoice_assign_nos"
+                        style="max-width: 200px; max-height: 100px;">{{ obj.invoice_assign_nos|pprint }}</pre>
+                </td>
+                <td field="error_note">
+                    {% if obj.error_note %}
+                        <span class="text-danger">{{ obj.error_note }}</span>
+                    {% else %}{% if obj.is_parsed %}
+                        <span class="font-weight-light">{% trans "None" %}</span>
+                    {% endif %}{% endif %}
+                </td>
+                <td field="abspath"><a target="xml_{{obj.id}}" href="{% url 'turnkeywrapperapi:eiturnkeye0501xml-get-xml-content' pk=obj.id %}?format=xml">{{ obj.abspath }}</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

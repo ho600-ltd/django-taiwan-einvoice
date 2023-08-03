@@ -26,6 +26,8 @@ from turnkey_wrapper.models import (
     EITurnkeyBatchEInvoice,
     EITurnkeyDailySummaryResultXML,
     EITurnkeyDailySummaryResult,
+    EITurnkeyE0501XML,
+    EITurnkeyE0501InvoiceAssignNo,
 )
 
 
@@ -260,3 +262,27 @@ class EITurnkeyDailySummaryResultFilter(filters.FilterSet):
         }
 
 
+
+class EITurnkeyE0501XMLFilter(filters.FilterSet):
+    class Meta:
+        model = EITurnkeyE0501XML
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt", ),
+            "ei_turnkey": ("exact", ),
+            "abspath": ("exact", "icontains", ),
+            "is_parsed": ("exact", ),
+        }
+
+
+
+class EITurnkeyE0501InvoiceAssignNoFilter(filters.FilterSet):
+    class Meta:
+        model = EITurnkeyE0501InvoiceAssignNo
+        fields = {
+            "create_time": ("gte", "gt", "lte", "lt", ),
+            "invoice_type": ("exact", ),
+            "year_month": ("exact", ),
+            "invoice_track": ("exact", "iexact", ),
+            "invoice_begin_no": ("exact", "contains"),
+            "invoice_end_no": ("exact", "contains"),
+        }

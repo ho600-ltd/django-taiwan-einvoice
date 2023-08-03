@@ -60,6 +60,8 @@ router.register('EITurnkeyBatch', views.EITurnkeyBatchModelViewSet, basename="ei
 router.register('EITurnkeyBatchEInvoice', views.EITurnkeyBatchEInvoiceModelViewSet, basename="eiturnkeybatcheinvoice")
 router.register('EITurnkeyDailySummaryResultXML', views.EITurnkeyDailySummaryResultXMLModelViewSet, basename="eiturnkeydailysummaryresultxml")
 router.register('EITurnkeyDailySummaryResult', views.EITurnkeyDailySummaryResultModelViewSet, basename="eiturnkeydailysummaryresult")
+router.register('EITurnkeyE0501XML', views.EITurnkeyE0501XMLModelViewSet, basename="eiturnkeye0501xml")
+router.register('EITurnkeyE0501InvoiceAssignNo', views.EITurnkeyE0501InvoiceAssignNoModelViewSet, basename="eiturnkeye0501invoiceassignno")
 
 app_name = 'turnkey_web'
 urlpatterns = [
