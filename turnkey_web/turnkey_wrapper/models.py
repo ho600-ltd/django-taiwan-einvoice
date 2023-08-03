@@ -455,9 +455,52 @@ class EITurnkey(models.Model):
         return eitdsrxmls
 
 
+    @classmethod
+    def parse_E0501_then_create_objects(cls):
+        lg = logging.getLogger("turnkey_web")
+        paths = []
+        eitE0501xmls = []
+        for ei_turnkey in cls.objects.all().order_by('routing_id'):
+            if ei_turnkey.E0501UnpackBAK not in paths:
+                paths.append(ei_turnkey.E0501UnpackBAK)
+        _filepaths = []
+        for path in paths:
+            _filepaths.extend(glob.glob(os.path.join(path, "*", "*", "*")))
+        lg.debug("_filepaths: {}".format(_filepaths))
+        exclude_filepaths = EITurnkeyE0501XML.objects.filter(abspath__in=_filepaths, is_parsed=True).values_list('abspath', flat=True)
+        lg.debug("exclude_filepaths: {}".format(exclude_filepaths))
+        filepaths = []
+        for _fp in _filepaths:
+            if _fp not in filepaths and _fp not in exclude_filepaths:
+                filepaths.append(_fp)
+        lg.debug("filepaths: {}".format(filepaths))
+        if filepaths:
+            for filepath in filepaths:
+                if EITurnkeyE0501XML.objects.filter(abspath=filepath, is_parsed=True).exists():
+                    continue
+                content = open(filepath, 'r').read()
+                if 'InvoiceEnvelope xmlns' not in content:
+                    _eitE0501xml = EITurnkeyE0501XML(abspath=filepath, is_parsed=True)
+                    _eitE0501xml.save()
+                    continue
+                lg.debug(filepath)
+                try:
+                    eitE0501xml = EITurnkeyE0501XML.objects.get(abspath=filepath)
+                except EITurnkeyE0501XML.DoesNotExist:
+                    eitE0501xml = EITurnkeyE0501XML(abspath=filepath)
+                eitE0501xml.content = content
+                eitE0501xml.save()
+                eitE0501xmls.append(eitE0501xml)
+        return eitE0501xmls
+
+
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    @property
+    def E0501UnpackBAK(self):
+        task_config_object = self.get_task_config(category_type='B2B', process_type='EXCHANGE', task='Unpack')
+        return os.path.join(task_config_object.SRC_PATH, "BAK", "E0501")
     @property
     def SummaryResultUnpackBAK(self):
         task_config_object = self.get_task_config(category_type='B2B', process_type='EXCHANGE', task='Unpack')
