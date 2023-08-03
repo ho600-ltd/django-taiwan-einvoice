@@ -434,7 +434,7 @@ class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
 class EITurnkeyE0501XMLModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
-    queryset = EITurnkeyE0501XML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
+    queryset = EITurnkeyE0501XML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-abspath', '-id')
     serializer_class = EITurnkeyE0501XMLSerializer
     filter_class = EITurnkeyE0501XMLFilter
     renderer_classes = (EITurnkeyE0501XMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
