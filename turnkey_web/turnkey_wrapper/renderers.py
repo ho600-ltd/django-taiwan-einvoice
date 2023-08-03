@@ -5,7 +5,7 @@ from datetime import datetime
 from io import BytesIO
 
 from django.template.loader import get_template
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
@@ -70,7 +70,7 @@ class XMLFileRenderer(BaseRenderer):
 
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        return smart_text(data, encoding=self.charset)
+        return smart_str(data, encoding=self.charset)
 
 
 
@@ -80,7 +80,7 @@ class PlainFileRenderer(BaseRenderer):
 
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        return smart_text(data, encoding=self.charset)
+        return smart_str(data, encoding=self.charset)
 
 
 
