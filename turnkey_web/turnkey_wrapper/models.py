@@ -1188,7 +1188,11 @@ class EITurnkeyE0501XML(models.Model):
         else:
             self.ei_turnkey = EITurnkey.objects.filter(party_id=party_id).order_by('id')[0]
         ds = []
-        for ian in X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']:
+        if list == type(X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']):
+            ians = X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']
+        else:
+            ians = [X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']]
+        for ian in ians:
             if party_id != ian['Ban']:
                 error_message += "party_id: {} != Ban: {}\n".format(party_id, ian['Ban'])
                 continue
