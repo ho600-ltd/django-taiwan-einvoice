@@ -1209,8 +1209,8 @@ class EITurnkeyE0501XML(models.Model):
         self.invoice_assign_nos = invoice_assign_nos
         self.error_note = error_message
         self.is_parsed = True
-        ians = []
-        for d in ds:
+        eitians = []
+        for d in invoice_assign_nos:
             eitian, new_creation = EITurnkeyE0501InvoiceAssignNo.objects.get_or_create(
                 ei_turnkey=self.ei_turnkey,
                 invoice_type=d['InvoiceType'],
@@ -1220,8 +1220,8 @@ class EITurnkeyE0501XML(models.Model):
                 invoice_end_no=d['InvoiceEndNo'],
                 invoice_booklet=d['InvoiceBooklet'],
             )
-            ians.append(eitian)
-        return ians
+            eitians.append(eitian)
+        return eitians
 
 
     def save(self, *args, **kwargs):
