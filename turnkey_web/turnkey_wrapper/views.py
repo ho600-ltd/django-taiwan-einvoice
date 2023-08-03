@@ -452,7 +452,7 @@ class EITurnkeyE0501XMLModelViewSet(ModelViewSet):
 class EITurnkeyE0501InvoiceAssignNoModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
     pagination_class = TenTo1000PerPagePagination
-    queryset = EITurnkeyE0501InvoiceAssignNo.objects.all().order_by('-result_date')
+    queryset = EITurnkeyE0501InvoiceAssignNo.objects.all().order_by('-year_month')
     serializer_class = EITurnkeyE0501InvoiceAssignNoSerializer
     filter_class = EITurnkeyE0501InvoiceAssignNoFilter
     renderer_classes = (EITurnkeyE0501InvoiceAssignNoHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
