@@ -1212,5 +1212,5 @@ class EITurnkeyE0501InvoiceAssignNo(models.Model):
 
 
     class Meta:
-        unique_together = (("ei_turnkey", "invoice_type", "year_month", "invoice_track"
+        unique_together = (("ei_turnkey", "invoice_type", "year_month", "invoice_track",
                             "invoice_begin_no", "invoice_end_no", "invoice_booklet"), )
