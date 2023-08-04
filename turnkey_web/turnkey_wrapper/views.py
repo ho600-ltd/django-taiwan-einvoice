@@ -284,6 +284,7 @@ class EITurnkeyModelViewSet(ModelViewSet):
         result_datas = [{
             "party_id": e.ei_turnkey.party_id,
             "invoice_type": e.invoice_type,
+            "year_month": e.year_month,
             "invoice_track": e.invoice_track,
             "invoice_begin_no": e.invoice_begin_no,
             "invoice_end_no": e.invoice_end_no,
