@@ -43,6 +43,8 @@ from turnkey_wrapper.models import (
     EITurnkeyBatchEInvoice,
     EITurnkeyDailySummaryResultXML,
     EITurnkeyDailySummaryResult,
+    EITurnkeyE0501XML,
+    EITurnkeyE0501InvoiceAssignNo,
 )
 from turnkey_wrapper.serializers import (
     FROM_CONFIGSerializer,
@@ -62,6 +64,8 @@ from turnkey_wrapper.serializers import (
     EITurnkeyBatchEInvoiceSerializer,
     EITurnkeyDailySummaryResultXMLSerializer,
     EITurnkeyDailySummaryResultSerializer,
+    EITurnkeyE0501XMLSerializer,
+    EITurnkeyE0501InvoiceAssignNoSerializer,
 )
 from turnkey_wrapper.filters import (
     FROM_CONFIGFilter,
@@ -81,6 +85,8 @@ from turnkey_wrapper.filters import (
     EITurnkeyBatchEInvoiceFilter,
     EITurnkeyDailySummaryResultXMLFilter,
     EITurnkeyDailySummaryResultFilter,
+    EITurnkeyE0501XMLFilter,
+    EITurnkeyE0501InvoiceAssignNoFilter,
 )
 from turnkey_wrapper.renderers import (
     PlainFileRenderer,
@@ -103,6 +109,8 @@ from turnkey_wrapper.renderers import (
     EITurnkeyBatchEInvoiceHtmlRenderer,
     EITurnkeyDailySummaryResultXMLHtmlRenderer,
     EITurnkeyDailySummaryResultHtmlRenderer,
+    EITurnkeyE0501XMLHtmlRenderer,
+    EITurnkeyE0501InvoiceAssignNoHtmlRenderer,
 )
 
 
@@ -258,6 +266,36 @@ class EITurnkeyModelViewSet(ModelViewSet):
             self.permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet, CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission), )
         return super(self.__class__, self).get_permissions()
 
+    
+
+    @action(detail=True, methods=['get'])
+    def get_ei_turnkey_e0501_invoice_assign_no(self, request, pk=None):
+        lg = logging.getLogger('turnkey_web')
+        eit = EITurnkey.objects.get(id=pk)
+        year_month = request.GET.get('year_month', '')
+        year_month__gte = request.GET.get('year_month__gte', '')
+        if year_month:
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(ei_turnkey__party_id=eit.party_id, year_month=year_month).order_by('year_month')
+        elif year_month__gte:
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(ei_turnkey__party_id=eit.party_id, year_month__gte=year_month__gte).order_by('year_month')
+        else:
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(ei_turnkey__party_id=eit.party_id).order_by('-year_month')[:1]
+
+        result_datas = [{
+            "party_id": e.ei_turnkey.party_id,
+            "invoice_type": e.invoice_type,
+            "year_month": e.year_month,
+            "invoice_track": e.invoice_track,
+            "invoice_begin_no": e.invoice_begin_no,
+            "invoice_end_no": e.invoice_end_no,
+            } for e in eiteians]
+        twrc = TurnkeyWebReturnCode("0")
+        result = {
+            "return_code": twrc.return_code,
+            "return_code_message": twrc.message,
+            "results": result_datas,
+        }
+        return Response(result)
     
 
     @action(detail=True, methods=['get'])
@@ -419,6 +457,35 @@ class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
     serializer_class = EITurnkeyDailySummaryResultSerializer
     filter_class = EITurnkeyDailySummaryResultFilter
     renderer_classes = (EITurnkeyDailySummaryResultHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
+    http_method_names = ('get', )
+
+
+
+class EITurnkeyE0501XMLModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyE0501XML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-abspath', '-id')
+    serializer_class = EITurnkeyE0501XMLSerializer
+    filter_class = EITurnkeyE0501XMLFilter
+    renderer_classes = (EITurnkeyE0501XMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
+    http_method_names = ('get', )
+
+
+    @action(detail=True, methods=['get'])
+    def get_xml_content(self, request, pk=None):
+        result = EITurnkeyE0501XML.objects.get(id=pk)
+        content = result.content
+        return Response(content)
+
+
+
+class EITurnkeyE0501InvoiceAssignNoModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUserInLocalhost, IsSuperUserInIntranet), )
+    pagination_class = TenTo1000PerPagePagination
+    queryset = EITurnkeyE0501InvoiceAssignNo.objects.all().order_by('-year_month')
+    serializer_class = EITurnkeyE0501InvoiceAssignNoSerializer
+    filter_class = EITurnkeyE0501InvoiceAssignNoFilter
+    renderer_classes = (EITurnkeyE0501InvoiceAssignNoHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
 

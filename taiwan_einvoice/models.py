@@ -23,6 +23,10 @@ from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, intege
 from taiwan_einvoice.libs import CounterBasedOTPinRow
 
 
+def _year_to_chmk_year(year):
+    return year - 1911
+
+
 def _pad(byte_array):
     BLOCK_SIZE = 16
     pad_len = BLOCK_SIZE - len(byte_array) % BLOCK_SIZE
@@ -837,6 +841,67 @@ class TurnkeyService(models.Model):
 
 
 
+    def get_and_create_ei_turnkey_e0501_invoice_assign_no(self, year_month=''):
+        translation.activate(settings.LANGUAGE_CODE)
+        audit_type = AuditType.objects.get(name="E0501_INVOICE_ASSIGN_NO")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self,
+            content_object=self,
+            is_error=False,
+        )
+        url = self.tkw_endpoint + '{action}/'.format(action="get_ei_turnkey_e0501_invoice_assign_no")
+        counter_based_otp_in_row = ','.join(self.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+
+        if year_month and 5 == len(year_month):
+            try:
+                year, month = int(year_month[:3]), int(year_month[3:])
+            except:
+                pass
+            else:
+                payload["year_month"] = year_month
+        else:
+            _date = now().astimezone(TAIPEI_TIMEZONE)
+            year, month = _year_to_chmk_year(_date.year), _date.month
+            payload["year_month__gte"] = '{:03d}{:02d}'.format(year, month)
+
+        try:
+            response = requests.get(url,
+                                    verify=self.verify_tkw_ssl,
+                                    params=payload,
+                                    headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "TurnkeyService.get_and_create_ei_turnkey_e0501_invoice_assign_no",
+                "url": url,
+                "position at": "requests.get(...)",
+                "params": payload,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                for invoice_assign_no in result_json['results']:
+                    eian, new_creation = E0501InvoiceAssignNo.objects.get_or_create(identifier=invoice_assign_no['party_id'],
+                                                                                    type=invoice_assign_no['invoice_type'],
+                                                                                    year_month=invoice_assign_no['year_month'],
+                                                                                    track=invoice_assign_no['invoice_track'].upper(),
+                                                                                    begin_no=invoice_assign_no['invoice_begin_no'],
+                                                                                    end_no=invoice_assign_no['invoice_end_no'],
+                                                                                   )
+                audit_log.is_error = False
+                audit_log.save()
+                return result_json
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
 
 
     class Meta:
@@ -884,7 +949,7 @@ class SellerInvoiceTrackNo(models.Model):
     end_time = models.DateTimeField(db_index=True)
     @property
     def pure_year_month_range(self):
-        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        chmk_year = _year_to_chmk_year(self.begin_time.astimezone(TAIPEI_TIMEZONE).year)
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
         return chmk_year, begin_month, end_month
@@ -1307,7 +1372,7 @@ class EInvoice(models.Model):
                                             object_id=self.id).order_by('id').last()
     @property
     def one_dimension_barcode_str(self):
-        chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        chmk_year = _year_to_chmk_year(self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year)
         begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
         barcode_str = "{:03d}{:02d}{}{}".format(
@@ -1417,7 +1482,7 @@ class EInvoice(models.Model):
         if print_original_copy:
             details = self.details
             amounts = self.amounts
-            chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+            chmk_year = _year_to_chmk_year(self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year)
             begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
             end_month = begin_month + 1
             generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
@@ -2717,7 +2782,7 @@ class BatchEInvoice(models.Model):
     end_time = models.DateTimeField()
     @property
     def year_month_range(self):
-        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        chmk_year = _year_to_chmk_year(self.begin_time.astimezone(TAIPEI_TIMEZONE).year)
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
@@ -2760,6 +2825,7 @@ class AuditType(models.Model):
         ("EI_PROCESSING", "EI Processing"),
         ("EI_PROCESSED", "EI Processed"),
         ("EI_SUMMARY_RESULT", "EI Summary Result"),
+        ("E0501_INVOICE_ASSIGN_NO", "E0501(Invoice Assign No)"),
     )
     name = models.CharField(max_length=32, choices=name_choices, unique=True)
 
@@ -3151,3 +3217,19 @@ class SummaryReport(models.Model):
             sr.is_resolved = True
         sr.save()
         sr.notice()
+        
+
+
+class E0501InvoiceAssignNo(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices, db_index=True)
+    year_month = models.CharField(max_length=5, db_index=True)
+    track = models.CharField(max_length=2, db_index=True)
+    begin_no = models.CharField(max_length=8, db_index=True)
+    end_no = models.CharField(max_length=8, db_index=True)
+
+
+    
+    class Meta:
+        unique_together = (("identifier", "type", "year_month", "track", "begin_no", "end_no", ), )

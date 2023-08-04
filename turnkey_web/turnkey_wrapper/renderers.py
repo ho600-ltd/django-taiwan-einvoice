@@ -249,3 +249,29 @@ class EITurnkeyDailySummaryResultHtmlRenderer(TKWOriginHTMLRenderer):
         return  res
 
 
+
+class EITurnkeyE0501XMLHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('eiturnkeye0501xml_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('eiturnkeye0501xml_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['ei_turnkeys'] = EITurnkey.objects.all().order_by('routing_id')
+        return  res
+
+
+
+class EITurnkeyE0501InvoiceAssignNoHtmlRenderer(TKWOriginHTMLRenderer):
+    template = _get_template_name('eiturnkeye0501invoiceassignno_list', sub_dir='turnkey_wrapper', show_template_filename=True)
+    content_template = _get_template_name('eiturnkeye0501invoiceassignno_list_content', sub_dir='turnkey_wrapper', show_template_filename=True)
+
+
+
+    def get_context(self, data, accepted_media_type, renderer_context):
+        res = super().get_context(data, accepted_media_type, renderer_context)
+        res['ei_turnkeys'] = EITurnkey.objects.all().order_by('routing_id')
+        return  res
+
+
