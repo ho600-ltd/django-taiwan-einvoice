@@ -23,6 +23,10 @@ from ho600_ltd_libraries.utils.formats import customize_hex_from_integer, intege
 from taiwan_einvoice.libs import CounterBasedOTPinRow
 
 
+def _year_to_chmk_year(year):
+    return year - 1911
+
+
 def _pad(byte_array):
     BLOCK_SIZE = 16
     pad_len = BLOCK_SIZE - len(byte_array) % BLOCK_SIZE
@@ -884,7 +888,7 @@ class SellerInvoiceTrackNo(models.Model):
     end_time = models.DateTimeField(db_index=True)
     @property
     def pure_year_month_range(self):
-        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        chmk_year = _year_to_chmk_year(self.begin_time.astimezone(TAIPEI_TIMEZONE).year)
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
         return chmk_year, begin_month, end_month
@@ -1307,7 +1311,7 @@ class EInvoice(models.Model):
                                             object_id=self.id).order_by('id').last()
     @property
     def one_dimension_barcode_str(self):
-        chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        chmk_year = _year_to_chmk_year(self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year)
         begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = begin_month + 1
         barcode_str = "{:03d}{:02d}{}{}".format(
@@ -1417,7 +1421,7 @@ class EInvoice(models.Model):
         if print_original_copy:
             details = self.details
             amounts = self.amounts
-            chmk_year = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+            chmk_year = _year_to_chmk_year(self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).year)
             begin_month = self.seller_invoice_track_no.begin_time.astimezone(TAIPEI_TIMEZONE).month
             end_month = begin_month + 1
             generate_time = self.generate_time.astimezone(TAIPEI_TIMEZONE)
@@ -2717,7 +2721,7 @@ class BatchEInvoice(models.Model):
     end_time = models.DateTimeField()
     @property
     def year_month_range(self):
-        chmk_year = self.begin_time.astimezone(TAIPEI_TIMEZONE).year - 1911
+        chmk_year = _year_to_chmk_year(self.begin_time.astimezone(TAIPEI_TIMEZONE).year)
         begin_month = self.begin_time.astimezone(TAIPEI_TIMEZONE).month
         end_month = (self.end_time.astimezone(TAIPEI_TIMEZONE) - datetime.timedelta(seconds=1)).month
         return "{}年{}-{}月".format(chmk_year, begin_month, end_month)
@@ -2760,6 +2764,7 @@ class AuditType(models.Model):
         ("EI_PROCESSING", "EI Processing"),
         ("EI_PROCESSED", "EI Processed"),
         ("EI_SUMMARY_RESULT", "EI Summary Result"),
+        #("E0501_INVOICE_ASSIGN_NO", "E0501(Invoice Assign No)"),
     )
     name = models.CharField(max_length=32, choices=name_choices, unique=True)
 
@@ -3151,3 +3156,5 @@ class SummaryReport(models.Model):
             sr.is_resolved = True
         sr.save()
         sr.notice()
+        
+
