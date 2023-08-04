@@ -76,6 +76,7 @@ class CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission(BasePermission):
         "create_eiturnkey_batch": (True, ),
         "upload_eiturnkey_batch_einvoice_bodys": (True, ),
         "get_ei_turnkey_summary_results": (True, ),
+        "get_ei_turnkey_e0501_invoice_assign_no": (True, ),
     }
 
 

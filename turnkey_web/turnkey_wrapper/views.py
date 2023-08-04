@@ -269,6 +269,35 @@ class EITurnkeyModelViewSet(ModelViewSet):
     
 
     @action(detail=True, methods=['get'])
+    def get_ei_turnkey_e0501_invoice_assign_no(self, request, pk=None):
+        lg = logging.getLogger('turnkey_web')
+        eit = EITurnkey.objects.get(id=pk)
+        year_month = request.GET.get('year_month', '')
+        year_month__gte = request.GET.get('year_month__gte', '')
+        if year_month:
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(eiturnkey__party_id=self.party_id, year_month=year_month).order_by('year_month')
+        elif year_month__gte:
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(eiturnkey__party_id=self.party_id, year_month__gte=year_month__gte).order_by('year_month')
+        else:
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(eiturnkey__party_id=self.party_id).order_by('-year_month')[:1]
+
+        result_datas = [{
+            "party_id": e.ei_turnkey.party_id,
+            "invoice_type": e.invoice_type,
+            "invoice_track": e.invoice_track,
+            "invoice_begin_no": e.invoice_begin_no,
+            "invoice_end_no": e.invoice_end_no,
+            } for e in eiteians]
+        twrc = TurnkeyWebReturnCode("0")
+        result = {
+            "return_code": twrc.return_code,
+            "return_code_message": twrc.message,
+            "results": result_datas,
+        }
+        return Response(result)
+    
+
+    @action(detail=True, methods=['get'])
     def get_ei_turnkey_summary_results(self, request, pk=None):
         lg = logging.getLogger('turnkey_web')
         eit = EITurnkey.objects.get(id=pk)

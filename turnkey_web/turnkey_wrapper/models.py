@@ -1215,7 +1215,7 @@ class EITurnkeyE0501XML(models.Model):
                 ei_turnkey=self.ei_turnkey,
                 invoice_type=d['InvoiceType'],
                 year_month=d['YearMonth'],
-                invoice_track=d['InvoiceTrack'],
+                invoice_track=d['InvoiceTrack'].upper(),
                 invoice_begin_no=d['InvoiceBeginNo'],
                 invoice_end_no=d['InvoiceEndNo'],
                 invoice_booklet=d['InvoiceBooklet'],
