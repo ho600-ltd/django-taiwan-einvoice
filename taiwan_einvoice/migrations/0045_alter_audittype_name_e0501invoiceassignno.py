@@ -3,6 +3,21 @@
 from django.db import migrations, models
 
 
+def create_audit_type(apps, schema_editor):
+    AuditType = apps.get_model('taiwan_einvoice', 'AuditType')
+
+    audit_type = AuditType(name='E0501_INVOICE_ASSIGN_NO')
+    audit_type.save()
+
+
+def remove_audit_type(apps, schema_editor):
+    AuditType = apps.get_model('taiwan_einvoice', 'AuditType')
+
+    AuditType.objects.filter(name='E0501_INVOICE_ASSIGN_NO').delete()
+
+
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -31,4 +46,5 @@ class Migration(migrations.Migration):
                 'unique_together': {('identifier', 'type', 'year_month', 'track', 'begin_no', 'end_no')},
             },
         ),
+        migrations.RunPython(create_audit_type, remove_audit_type),
     ]
