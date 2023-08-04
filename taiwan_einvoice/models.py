@@ -841,6 +841,67 @@ class TurnkeyService(models.Model):
 
 
 
+    def get_and_create_ei_turnkey_e0501_invoice_assign_no(self, year_month=''):
+        translation.activate(settings.LANGUAGE_CODE)
+        audit_type = AuditType.objects.get(name="E0501_INVOICE_ASSIGN_NO")
+        audit_log = AuditLog(
+            creator=User.objects.get(username="^taiwan_einvoice_sys_user$"),
+            type=audit_type,
+            turnkey_service=self,
+            content_object=self,
+            is_error=False,
+        )
+        url = self.tkw_endpoint + '{action}/'.format(action="get_ei_turnkey_e0501_invoice_assign_no")
+        counter_based_otp_in_row = ','.join(self.generate_counter_based_otp_in_row())
+        payload = {"format": "json"}
+
+        if year_month and 5 == len(year_month):
+            try:
+                year, month = int(year_month[:3]), int(year_month[3:])
+            except:
+                pass
+            else:
+                payload["year_month"] = year_month
+        else:
+            _date = now().astimezone(TAIPEI_TIMEZONE)
+            year, month = _year_to_chmk_year(_date.year), _date.month
+            payload["year_month__gte"] = '{:03d}{:02d}'.format(year, month)
+
+        try:
+            response = requests.get(url,
+                                    verify=self.verify_tkw_ssl,
+                                    params=payload,
+                                    headers={"X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row})
+        except Exception as e:
+            audit_log.is_error = True
+            audit_log.log = {
+                "function": "TurnkeyService.get_and_create_ei_turnkey_e0501_invoice_assign_no",
+                "url": url,
+                "position at": "requests.get(...)",
+                "params": payload,
+                "X-COUNTER-BASED-OTP-IN-ROW": counter_based_otp_in_row,
+                "exception": str(e)
+            }
+            audit_log.save()
+        else:
+            result_json = response.json()
+            audit_log.log = result_json
+            if 200 == response.status_code and "0" == result_json['return_code']:
+                for invoice_assign_no in result_json['results']:
+                    eian, new_creation = E0501InvoiceAssignNo.objects.get_or_create(identifier=invoice_assign_no['party_id'],
+                                                                                    type=invoice_assign_no['invoice_type'],
+                                                                                    year_month=invoice_assign_no['year_month'],
+                                                                                    track=invoice_assign_no['invoice_track'].upper(),
+                                                                                    begin_no=invoice_assign_no['invoice_begin_no'],
+                                                                                    end_no=invoice_assign_no['invoice_end_no'],
+                                                                                   )
+                audit_log.is_error = False
+                audit_log.save()
+                return result_json
+            else:
+                audit_log.is_error = True
+                audit_log.save()
+
 
 
     class Meta:
@@ -2764,7 +2825,7 @@ class AuditType(models.Model):
         ("EI_PROCESSING", "EI Processing"),
         ("EI_PROCESSED", "EI Processed"),
         ("EI_SUMMARY_RESULT", "EI Summary Result"),
-        #("E0501_INVOICE_ASSIGN_NO", "E0501(Invoice Assign No)"),
+        ("E0501_INVOICE_ASSIGN_NO", "E0501(Invoice Assign No)"),
     )
     name = models.CharField(max_length=32, choices=name_choices, unique=True)
 
@@ -3158,3 +3219,17 @@ class SummaryReport(models.Model):
         sr.notice()
         
 
+
+class E0501InvoiceAssignNo(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    identifier = models.CharField(max_length=8, null=False, blank=False, db_index=True)
+    type = models.CharField(max_length=2, default='07', choices=SellerInvoiceTrackNo.type_choices, db_index=True)
+    year_month = models.CharField(max_length=5, db_index=True)
+    track = models.CharField(max_length=2, db_index=True)
+    begin_no = models.CharField(max_length=8, db_index=True)
+    end_no = models.CharField(max_length=8, db_index=True)
+
+
+    
+    class Meta:
+        unique_together = (("identifier", "type", "year_month", "track", "begin_no", "end_no", ), )
