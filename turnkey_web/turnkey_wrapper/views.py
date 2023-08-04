@@ -275,11 +275,11 @@ class EITurnkeyModelViewSet(ModelViewSet):
         year_month = request.GET.get('year_month', '')
         year_month__gte = request.GET.get('year_month__gte', '')
         if year_month:
-            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(eiturnkey__party_id=eit.party_id, year_month=year_month).order_by('year_month')
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(ei_turnkey__party_id=eit.party_id, year_month=year_month).order_by('year_month')
         elif year_month__gte:
-            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(eiturnkey__party_id=eit.party_id, year_month__gte=year_month__gte).order_by('year_month')
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(ei_turnkey__party_id=eit.party_id, year_month__gte=year_month__gte).order_by('year_month')
         else:
-            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(eiturnkey__party_id=eit.party_id).order_by('-year_month')[:1]
+            eiteians = EITurnkeyE0501InvoiceAssignNo.objects.filter(ei_turnkey__party_id=eit.party_id).order_by('-year_month')[:1]
 
         result_datas = [{
             "party_id": e.ei_turnkey.party_id,
