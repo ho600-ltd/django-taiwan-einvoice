@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-25 15:37+0800\n"
+"POT-Creation-Date: 2023-08-05 10:43+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,6 +36,12 @@ msgstr "polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_resul
 
 msgid "Executed polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
 msgstr "已執行 polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result"
+
+msgid "There is no alarm in polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no, just logging"
+msgstr "polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no 並無警示，單純紀錄"
+
+msgid "Executed polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no"
+msgstr "已執行 polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no"
 
 msgid "There is no alarm in auto_generate_summary_report, just logging"
 msgstr "auto_generate_summary_report 並無警示，單純紀錄"
@@ -123,6 +129,9 @@ msgstr "58mm 電子發票(使用 80mm 機器)"
 
 msgid "80mm Receipt"
 msgstr "80mm 收據"
+
+msgid "Buyer identifier is not valid."
+msgstr "買方統編無效。"
 
 msgid "{} does exist!"
 msgstr "{} 已存在!"
@@ -1905,9 +1914,6 @@ msgstr "電子發票({})已被註銷!"
 
 msgid "Buyer Identifier Error"
 msgstr "買方統編錯誤"
-
-msgid "Buyer identifier is not valid."
-msgstr "買方統編無效。"
 
 msgid "NPOBan Error"
 msgstr "捐贈碼錯誤"
