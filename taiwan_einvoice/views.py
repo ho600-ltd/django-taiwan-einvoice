@@ -57,6 +57,7 @@ from taiwan_einvoice.renderers import (
     TEAlarmHtmlRenderer,
 )
 from taiwan_einvoice.models import (
+    _year_to_chmk_year,
     TAIPEI_TIMEZONE,
     EInvoiceSellerAPI,
     TEAStaffProfile,
@@ -65,6 +66,7 @@ from taiwan_einvoice.models import (
     Seller,
     TurnkeyService,
     SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError, ExcutedE0402UploadBatchError, ExistedE0402UploadBatchError,
+    E0501InvoiceAssignNo,
     EInvoiceMIG,
     EInvoice,
     EInvoicePrintLog,
@@ -88,6 +90,7 @@ from taiwan_einvoice.serializers import (
     TurnkeyServiceSerializer,
     TurnkeyServiceGroupSerializer,
     SellerInvoiceTrackNoSerializer,
+    E0501InvoiceAssignNoSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
@@ -106,6 +109,7 @@ from taiwan_einvoice.filters import (
     TurnkeyServiceFilter,
     TurnkeyServiceGroupFilter,
     SellerInvoiceTrackNoFilter,
+    E0501InvoiceAssignNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
     CancelEInvoiceFilter,
@@ -692,6 +696,32 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 
 
+class E0501InvoiceAssignNoModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanEntrySellerInvoiceTrackNo, ), )
+    pagination_class = OneHundredPerPagePagination
+    queryset = E0501InvoiceAssignNo.objects.all().order_by('-year_month', )
+    serializer_class = E0501InvoiceAssignNoSerializer
+    filter_class = E0501InvoiceAssignNoFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(E0501InvoiceAssignNoModelViewSet, self).get_queryset()
+        NOW = now().astimezone(TAIPEI_TIMEZONE)
+        year_month = '{:03d}{:02d}'.format(_year_to_chmk_year(NOW.year), NOW.month)
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
+            return queryset.none()
+        elif request.user.is_superuser:
+            return queryset.filter(year_month__gte=year_month)
+        else:
+            permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(identifier__in=[ts.party_id for ts in turnkey_services], year_month__gte=year_month)
+
+
+
 class EInvoiceModelViewSet(ModelViewSet):
     permission_classes = (Or(IsSuperUser, CanEntryEInvoice), )
     pagination_class = TenTo100PerPagePagination
@@ -1271,3 +1301,5 @@ class TEAlarmModelViewSet(ModelViewSet):
             permissions = list(programmer_permissions) + list(general_user_permissions)
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_service__in=turnkey_services)
+
+
