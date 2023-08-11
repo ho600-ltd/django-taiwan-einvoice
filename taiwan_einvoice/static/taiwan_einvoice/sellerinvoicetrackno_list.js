@@ -1,8 +1,47 @@
 function upload_csv_to_multiple_create_modal (taiwan_einvoice_site) {
     return function () {
         var $btn = $(this);
+        var csrfmiddlewaretoken = $('input[name=csrfmiddlewaretoken]:first').val();
         var $modal = $('#upload_csv_to_multiple_create_modal');
-        $modal.modal('show');
+        $.ajax({
+            type: "GET",
+            url: $modal.attr('e0501invoiceassignno-resource_uri'),
+            cache: false, 
+            contentType: false, 
+            processData: false,
+            async: true,
+            headers: {"X-CSRFToken": csrfmiddlewaretoken},
+            error: function (jqXHR, exception) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$ERROR_MODAL,
+                    jqXHR['responseJSON']['error_title'],
+                    jqXHR['responseJSON']['error_message'],
+                );
+            },
+            success: function(json) {
+                var $table = $('.e0501-table', $modal);
+                for (var i=0; i<json['results'].length; i++) {
+                    if (0 == i) {
+                        $('tbody tr', $table).empty();
+                    }
+                    var o = json['results'][i];
+                    var s = '<tr obj_id="'+o['id']+'">';
+                    s += '<td align="center"><input type="checkbox" /></td>';
+                    s += '<td>'+o['identifier']+'</td>';
+                    s += '<td>'+o['type']+'</td>';
+                    s += '<td>'+o['type__display']+'</td>';
+                    s += '<td>'+o['year_month']+'</td>';
+                    s += '<td>'+o['track']+'</td>';
+                    s += '<td>'+o['begin_no']+'</td>';
+                    s += '<td>'+o['end_no']+'</td>';
+                    s += '<td>'+o['booklet']+'</td>';
+                    s += '</tr>';
+                    var $tr = $(s);
+                    $('tbody', $table).append($tr);
+                }
+                $modal.modal('show');
+            }
+        });
     }
 }
 
@@ -12,20 +51,39 @@ function upload_csv_to_multiple_create(taiwan_einvoice_site) {
         var $btn = $(this);
         var $modal = $btn.parents('.modal');
         var csrfmiddlewaretoken = $('input[name=csrfmiddlewaretoken]:first').val();
+        var from_type = $('#csv_or_e0501 a.active').attr('aria-controls');
         var form_data = '';
         form_data = new FormData();
         form_data.append("turnkey_service", $('select[name=turnkey_service]', $modal).val());
         form_data.append("split_by_numbers", $('select[name=split_by_numbers]', $modal).val());
-        var file = $('input[type=file]', $modal)[0].files[0];
-        if (! file) {
-            taiwan_einvoice_site.show_modal(
-                taiwan_einvoice_site.$WARNING_MODAL,
-                gettext('File Error'),
-                gettext('Please choose .csv')
-            );
-            return false;
+        if ("csv" == from_type) {
+            var file = $('input[type=file]', $modal)[0].files[0];
+            if (! file) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNING_MODAL,
+                    gettext('File Error'),
+                    gettext('Please choose .csv')
+                );
+                return false;
+            }
+            form_data.append("file", file);
+        } else {
+            var e0501invoiceassignno_ids = [];
+            $('#csv_or_e0501_content .e0501-table input:checked').each(function(){
+                e0501invoiceassignno_ids.push(
+                    $(this).parents('tr').attr('obj_id')
+                );
+            });
+            if (0 >= e0501invoiceassignno_ids.length) {
+                taiwan_einvoice_site.show_modal(
+                    taiwan_einvoice_site.$WARNING_MODAL,
+                    gettext('Invoice Assign No Error'),
+                    gettext('Please check records')
+                );
+                return false;
+            }
+            form_data.append("e0501invoiceassignno_ids", e0501invoiceassignno_ids.join(','));
         }
-        form_data.append("file", file);
         $.ajax({
             type: "POST",
             url: $modal.attr('resource_uri'),

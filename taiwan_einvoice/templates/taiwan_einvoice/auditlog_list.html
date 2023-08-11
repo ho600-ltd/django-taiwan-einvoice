@@ -17,7 +17,7 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-2">
                 <div class="form-group">
                     <label for="turnkey_service">{% trans "Turnkey Service" %}</label>
                     <div class="input-group date" id="turnkey_service" data-target-input="nearest">
@@ -31,7 +31,21 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-3">
+            <div class="col-sm-12 col-md-2">
+                <div class="form-group">
+                    <label for="type__name">{% trans "Audit Type" %}</label>
+                    <div class="input-group date" id="type" data-target-input="nearest">
+                        <select class="form-control" data-target="#type__name"
+                            name="type__name" id="id_type__name">
+                            <option value=""></option>
+                            {% for tc in type_choices %}
+                                <option value="{{ tc.0 }}">{{ tc.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-md-2">
                 <div class="form-group">
                     <label for="is_error">{% trans "Is Error?" %}</label>
                     <div class="input-group date" id="is_error" data-target-input="nearest">

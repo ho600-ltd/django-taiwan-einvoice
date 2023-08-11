@@ -24,6 +24,7 @@ from taiwan_einvoice.models import (
     VoidEInvoice,
     UploadBatch,
     BatchEInvoice,
+    AuditType,
     AuditLog,
     SummaryReport,
     TEAlarm,
@@ -695,7 +696,21 @@ class BatchEInvoiceFilter(filters.FilterSet):
 
 
 
+class AuditTypeFilter(filters.FilterSet):
+    class Meta:
+        model = AuditType
+        fields = {
+            "id": ("exact", ),
+            "name": ("exact", ),
+        }
+
+
+
 class AuditLogFilter(filters.FilterSet):
+    type = filters.RelatedFilter(AuditTypeFilter, field_name='type', queryset=AuditType.objects.all())
+
+
+
     class Meta:
         model = AuditLog
         fields = {

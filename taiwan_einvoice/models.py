@@ -3231,6 +3231,9 @@ class E0501InvoiceAssignNo(models.Model):
     begin_no = models.CharField(max_length=8, db_index=True)
     end_no = models.CharField(max_length=8, db_index=True)
     booklet = models.SmallIntegerField(default=0)
+    @property
+    def type__display(self):
+        return self.get_type_display()
 
 
     
