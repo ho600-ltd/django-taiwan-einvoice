@@ -895,6 +895,8 @@ class TurnkeyService(models.Model):
                                                                                     begin_no=invoice_assign_no['invoice_begin_no'],
                                                                                     end_no=invoice_assign_no['invoice_end_no'],
                                                                                    )
+                    eian.booklet = invoice_assign_no['invoice_booklet']
+                    eian.save()
                 audit_log.is_error = False
                 audit_log.save()
                 return result_json
@@ -3228,6 +3230,7 @@ class E0501InvoiceAssignNo(models.Model):
     track = models.CharField(max_length=2, db_index=True)
     begin_no = models.CharField(max_length=8, db_index=True)
     end_no = models.CharField(max_length=8, db_index=True)
+    booklet = models.SmallIntegerField(default=0)
 
 
     

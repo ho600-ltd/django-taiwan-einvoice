@@ -16,6 +16,7 @@ from taiwan_einvoice.models import (
     LegalEntity,
     TurnkeyService,
     SellerInvoiceTrackNo,
+    E0501InvoiceAssignNo,
     EInvoice,
     Printer,
     EInvoicePrintLog,
@@ -282,6 +283,15 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return queryset
         else:
             return queryset.filter(begin_no__lte=value, end_no__gte=value)
+
+
+
+class E0501InvoiceAssignNoFilter(filters.FilterSet):
+    class Meta:
+        model = E0501InvoiceAssignNo
+        fields = {
+            'identifier': ('exact', 'in'),
+        }
 
 
 
