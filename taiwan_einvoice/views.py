@@ -722,7 +722,8 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                                                    end_time=data['end_time'],
                                                    track=data['track']
                                                   ).filter(Q(begin_no__lte=data['begin_no'], end_no__gte=data['begin_no'])
-                                                            |Q(begin_no__lte=data['end_no'], end_no__gte=data['end_no'])).exists():
+                                                            |Q(begin_no__lte=data['end_no'], end_no__gte=data['end_no'])
+                                                            |Q(begin_no__gte=data['begin_no'], end_no__lte=data['end_no'])).exists():
                 
                 error_message = _("{} ~ {} has error: \n\n\nnumber overlapping").format(data['begin_no'], data['end_no'])
                 er = {
