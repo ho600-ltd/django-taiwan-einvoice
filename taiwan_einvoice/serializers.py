@@ -378,6 +378,7 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
 class E0501InvoiceAssignNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:e0501invoiceassignno-detail", lookup_field='pk')
+    type__display = CharField(read_only=True)
 
 
 

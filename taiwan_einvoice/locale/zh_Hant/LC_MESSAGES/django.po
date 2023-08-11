@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-11 13:37+0800\n"
+"POT-Creation-Date: 2023-08-11 17:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1305,11 +1305,14 @@ msgstr "無法作廢"
 msgid "Upload .csv to Create Seller Invoice Track No"
 msgstr "上傳字軌號碼檔以新增字軌號碼紀錄"
 
-msgid "Choose .csv"
-msgstr "選擇 .csv"
-
 msgid "Split by numbers"
 msgstr "每幾組號碼切為 1 筆紀錄"
+
+msgid "Import from .csv"
+msgstr "從 .csv 匯入"
+
+msgid "Import from E0501"
+msgstr "從 E0501(發票配號檔)匯入"
 
 msgid "Create"
 msgstr "新增"
@@ -1947,3 +1950,6 @@ msgstr "上傳批次狀態錯誤"
 
 msgid "Upload Batch Status != \"f\""
 msgstr "上傳批次狀態 != \"f\""
+
+#~ msgid "Choose .csv"
+#~ msgstr "選擇 .csv"
