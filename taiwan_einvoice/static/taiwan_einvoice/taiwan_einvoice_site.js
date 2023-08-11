@@ -269,6 +269,7 @@ $(function () {
             'report_type',
             'target_audience_type',
             'type',
+            'type__name',
             'mig_type__no',
             'status',
             'kind',
