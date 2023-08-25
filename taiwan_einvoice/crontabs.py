@@ -77,6 +77,39 @@ def polling_turnkey_service_to_get_and_create_ei_turnkey_daily_summary_result(al
     lg.debug("status: {}".format(alert_log.status))
 
 
+def polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no(alert_log, *args, **kw):
+    lg = logging.getLogger('info')
+    lg.debug("alert_log id: {}".format(alert_log.id))
+    lg.debug("*args: {}".format(args))
+    lg.debug("**kw: {}".format(kw))
+    title = _('There is no alarm in polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no, just logging')
+    mail_body = "Executed from {}\n".format(kw.get('executed_from', '__none__'))
+    mail_body += "args: {}\n".format(args)
+    mail_body += "kw: {}\n".format(kw)
+
+    NOW = now()
+    t0 = time.time()
+
+    alert_log_status = SelectOption.objects.get(swarm='alert-log-status', value='LOG')
+
+    for turnkey_service in TurnkeyService.objects.exclude(Q(tkw_endpoint='')|Q(tkw_endpoint__isnull=True)).order_by('routing_id'):
+        title = _('Executed polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no')
+        _s = str(turnkey_service.get_and_create_ei_turnkey_e0501_invoice_assign_no())
+        lg.debug(_s)
+        mail_body += _s + "\n"
+        lg.debug("{turnkey_service}.get_and_create_ei_turnkey_e0501_invoice_assign_no end at {now}".format(turnkey_service=turnkey_service, now=now()))
+
+    lg.debug("polling_turnkey_service_to_get_and_create_ei_turnkey_e0501_invoice_assign_no end at {}".format(now()))
+
+    alert_log.title = title
+    alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body
+    alert_log.status = alert_log_status
+    alert_log.executed_end_time = now()
+    alert_log.save()
+    lg.debug("title: {}".format(alert_log.title))
+    lg.debug("status: {}".format(alert_log.status))
+
+
 def auto_generate_summary_report(alert_log, *args, **kw):
     lg = logging.getLogger('info')
     lg.debug("alert_log id: {}".format(alert_log.id))

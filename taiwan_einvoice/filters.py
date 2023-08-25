@@ -16,6 +16,7 @@ from taiwan_einvoice.models import (
     LegalEntity,
     TurnkeyService,
     SellerInvoiceTrackNo,
+    E0501InvoiceAssignNo,
     EInvoice,
     Printer,
     EInvoicePrintLog,
@@ -23,6 +24,7 @@ from taiwan_einvoice.models import (
     VoidEInvoice,
     UploadBatch,
     BatchEInvoice,
+    AuditType,
     AuditLog,
     SummaryReport,
     TEAlarm,
@@ -282,6 +284,15 @@ class SellerInvoiceTrackNoFilter(filters.FilterSet):
             return queryset
         else:
             return queryset.filter(begin_no__lte=value, end_no__gte=value)
+
+
+
+class E0501InvoiceAssignNoFilter(filters.FilterSet):
+    class Meta:
+        model = E0501InvoiceAssignNo
+        fields = {
+            'identifier': ('exact', 'in'),
+        }
 
 
 
@@ -685,7 +696,21 @@ class BatchEInvoiceFilter(filters.FilterSet):
 
 
 
+class AuditTypeFilter(filters.FilterSet):
+    class Meta:
+        model = AuditType
+        fields = {
+            "id": ("exact", ),
+            "name": ("exact", ),
+        }
+
+
+
 class AuditLogFilter(filters.FilterSet):
+    type = filters.RelatedFilter(AuditTypeFilter, field_name='type', queryset=AuditType.objects.all())
+
+
+
     class Meta:
         model = AuditLog
         fields = {

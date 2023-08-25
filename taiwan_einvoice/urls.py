@@ -86,6 +86,7 @@ router.register('batcheinvoice', views.BatchEInvoiceModelViewSet, basename="batc
 router.register('auditlog', views.AuditLogModelViewSet, basename="auditlog")
 router.register('summaryreport', views.SummaryReportModelViewSet, basename="summaryreport")
 router.register('tealarm', views.TEAlarmModelViewSet, basename="tealarm")
+router.register('e0501invoiceassignno', views.E0501InvoiceAssignNoModelViewSet, basename="e0501invoiceassignno")
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [
