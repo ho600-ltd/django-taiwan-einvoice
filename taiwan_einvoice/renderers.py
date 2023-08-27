@@ -11,7 +11,21 @@ from django.utils.translation import pgettext_lazy
 from guardian.shortcuts import get_objects_for_user, get_perms
 from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
-from taiwan_einvoice.models import User, Seller, TurnkeyService, SellerInvoiceTrackNo, EInvoice, CancelEInvoice, VoidEInvoice, Printer, EInvoicePrintLog, UploadBatch, BatchEInvoice, SummaryReport, TEAlarm
+from taiwan_einvoice.models import (User,
+                                    Seller,
+                                    TurnkeyService,
+                                    SellerInvoiceTrackNo,
+                                    EInvoice,
+                                    CancelEInvoice,
+                                    VoidEInvoice,
+                                    Printer,
+                                    EInvoicePrintLog,
+                                    UploadBatch,
+                                    BatchEInvoice,
+                                    SummaryReport,
+                                    TEAlarm,
+                                    AuditType,
+                                    )
 
 
 def _get_template_name(template_name, sub_dir='', show_template_filename=False, lang=''):
@@ -275,6 +289,7 @@ class AuditLogHtmlRenderer(TEOriginHTMLRenderer):
             "taiwan_einvoice.view_turnkeyservice",
             ], any_perm=True)
         res['turnkey_services'] = turnkey_services.order_by('id')
+        res['type_choices'] = AuditType.name_choices
         return  res
 
 

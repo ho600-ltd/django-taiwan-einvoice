@@ -1,4 +1,4 @@
-{% extends 'taiwan_einvoice/base.html' %}
+{% extends 'turnkey_wrapper/base.html' %}
 {% load i18n %}{% load static %}{% load rest_framework %}{% load compress %}
 
 {% block css %}
@@ -6,7 +6,7 @@
 
 {% block js %}
     {% compress js %}
-        <script src="{{ settings.STATIC_URL }}taiwan_einvoice/auditlog_list.js"></script>
+        <script src="{% static "turnkey_wrapper/eiturnkeye0501xml_list.js" %}"></script>
     {% endcompress %}
 {% endblock %}
 
@@ -17,50 +17,42 @@
         <input type='hidden' name='format' value='html' />
 
         <div class="row">
-            <div class="col-sm-12 col-md-2">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="turnkey_service">{% trans "Turnkey Service" %}</label>
-                    <div class="input-group date" id="turnkey_service" data-target-input="nearest">
-                        <select class="form-control" data-target="#turnkey_service"
-                            name="turnkey_service" id="id_turnkey_service">
+                    <label for="ei_turnkey">{% trans "EI Turnkey" %}</label>
+                    <div class="input-group" id="ei_turnkey" data-target-input="nearest">
+                        <select class="form-control" name="ei_turnkey" id="id_ei_turnkey">
                             <option value=""></option>
-                            {% for ts in turnkey_services %}
-                                <option value="{{ ts.id }}">{{ ts.name }}</option>
+                            {% for et in ei_turnkeys %}
+                                <option value="{{ et.id }}">{{ et.party_id }}({{ et.routing_id }})</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-2">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="type__name">{% trans "Audit Type" %}</label>
-                    <div class="input-group date" id="type" data-target-input="nearest">
-                        <select class="form-control" data-target="#type__name"
-                            name="type__name" id="id_type__name">
+                    <label for="is_parsed">{% trans "Is Parsed?" %}</label>
+                    <div class="input-group" id="is_parsed" data-target-input="nearest">
+                        <select class="form-control" name="is_parsed" id="id_is_parsed">
                             <option value=""></option>
-                            {% for tc in type_choices %}
-                                <option value="{{ tc.0 }}">{{ tc.1 }}</option>
-                            {% endfor %}
+                            <option value="1">{% trans "Parsed" %}</option>
+                            <option value="0">{% trans "Not yet" %}</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="col-sm-12 col-md-2">
+            <div class="col-sm-12 col-md-4">
                 <div class="form-group">
-                    <label for="is_error">{% trans "Is Error?" %}</label>
-                    <div class="input-group date" id="is_error" data-target-input="nearest">
-                        <select class="form-control" data-target="#is_error"
-                            name="is_error" id="id_is_error">
-                            <option value=""></option>
-                            <option value="1">{% trans "Error" %}</option>
-                            <option value="0">{% trans "None" %}</option>
-                        </select>
+                    <label for="abspath__icontains">{% trans "File path contains" %}</label>
+                    <div class="input-group" id="abspath__icontains" data-target-input="nearest">
+                        <input type="text" class="form-control" name="abspath__icontains" id="id_abspath__icontains" />
                     </div>
                 </div>
             </div>
             <div class="col-sm-12 col-md-3">
                 <div class="form-group">
-                    <label for="create_time__gte">{% trans "Create time later than" %}</label>
+                    <label for="create_time__gte">{% trans "Create Time greater than" %}</label>
                     <div class="input-group date" id="create_time__gte" data-target-input="nearest">
                         <input type="text" class="form-control datetimepicker-input" data-target="#create_time__gte"
                             name="create_time__gte" id="id_create_time__gte" />
@@ -72,7 +64,7 @@
             </div>
             <div class="col-sm-12 col-md-3">
                 <div class="form-group">
-                    <label for="create_time__lt">{% trans "Create time earlier than" %}</label>
+                    <label for="create_time__lt">{% trans "Create Time less than" %}</label>
                     <div class="input-group date" id="create_time__lt" data-target-input="nearest">
                         <input type="text" class="form-control datetimepicker-input" data-target="#create_time__lt"
                             name="create_time__lt" id="id_create_time__lt" />
@@ -114,4 +106,5 @@
 {% endblock %}
 
 {% block modals %}
+
 {% endblock %}

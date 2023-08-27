@@ -1,7 +1,7 @@
 $(function () {
-    $(".nav_daily_summary").addClass("nav_active");
+    $(".nav_E0501").addClass("nav_active");
     $('.dropdown-menu a').removeClass('active');
-    $(".nav_EITurnkeyDailySummaryResult").addClass("active");
+    $(".nav_EITurnkeyE0501XML").addClass("active");
 
     turnkey_wrapper_site = new turnkey_wrapper_site('turnkey_wrapper_site', {
         $SUCCESS_MODAL: $('#success_modal'),

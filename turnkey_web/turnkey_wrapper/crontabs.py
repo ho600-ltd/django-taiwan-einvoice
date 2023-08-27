@@ -60,6 +60,8 @@ def polling_ei_turnkey(alert_log, *args, **kw):
     alert_log_status = SelectOption.objects.get(swarm='alert-log-status', value='LOG')
 
     title = _('Executed polling_ei_turnkey')
+
+    lg.debug("EITurnkey.parse_summary_result_then_create_objects() start at {}".format(now()))
     for summary_result_xml in EITurnkey.parse_summary_result_then_create_objects():
         if summary_result_xml:
             _s = "Parsed {abspath}: total count: {total_count}, good count: {good_count}, failed count: {failed_count} at {now}".format(
@@ -74,6 +76,27 @@ def polling_ei_turnkey(alert_log, *args, **kw):
         lg.debug(_s)
         mail_body += _s + "\n"
     lg.debug("EITurnkey.parse_summary_result_then_create_objects() end at {}".format(now()))
+
+    lg.debug("EITurnkey.parse_E0501_then_create_objects() start at {}".format(now()))
+    for E0501 in EITurnkey.parse_E0501_then_create_objects():
+        if E0501:
+            _s = ""
+            for ian in E0501.invoice_assign_nos:
+                _s += "Parsed {abspath}: type: {invoice_type}, Y_M: {year_month},  track_no: {invoice_track}{invoice_begin_no}~{invoice_end_no}({invoice_booklet}) at {now}\n".format(
+                    abspath=E0501.abspath,
+                    invoice_type=ian["InvoiceType"],
+                    year_month=ian["YearMonth"],
+                    invoice_track=ian["InvoiceTrack"],
+                    invoice_begin_no=ian["InvoiceBeginNo"],
+                    invoice_end_no=ian["InvoiceEndNo"],
+                    invoice_booklet=ian["InvoiceBooklet"],
+                    now=now(),
+                )
+        else:
+            _s = "__None__"
+        lg.debug(_s)
+        mail_body += _s + "\n"
+    lg.debug("EITurnkey.parse_E0501_then_create_objects() end at {}".format(now()))
 
     alert_log.title = title
     alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body

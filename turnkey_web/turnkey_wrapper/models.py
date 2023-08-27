@@ -305,7 +305,7 @@ class TURNKEY_MESSAGE_LOG_DETAIL(models.Model):
         return TAIPEI_TIMEZONE.localize(datetime.datetime.strptime("{}000".format(self.PROCESS_DTS), "%Y%m%d%H%M%S%f"))
     TASK = models.CharField(db_column='TASK', max_length=30)
     STATUS = models.CharField(db_column='STATUS', max_length=5, blank=True, null=True)
-    FILENAME = models.CharField(db_column='FILENAME', max_length=255, blank=True, null=True, db_index=True)
+    FILENAME = models.CharField(db_column='FILENAME', max_length=300, blank=True, null=True, db_index=True)
     UUID = models.CharField(db_column='UUID', max_length=40, blank=True, null=True)
     @property
     def fileformat(self):
@@ -455,9 +455,52 @@ class EITurnkey(models.Model):
         return eitdsrxmls
 
 
+    @classmethod
+    def parse_E0501_then_create_objects(cls):
+        lg = logging.getLogger("turnkey_web")
+        paths = []
+        eitE0501xmls = []
+        for ei_turnkey in cls.objects.all().order_by('routing_id'):
+            if ei_turnkey.E0501UnpackBAK not in paths:
+                paths.append(ei_turnkey.E0501UnpackBAK)
+        _filepaths = []
+        for path in paths:
+            _filepaths.extend(glob.glob(os.path.join(path, "*", "*", "*")))
+        lg.debug("_filepaths: {}".format(_filepaths))
+        exclude_filepaths = EITurnkeyE0501XML.objects.filter(abspath__in=_filepaths, is_parsed=True).values_list('abspath', flat=True)
+        lg.debug("exclude_filepaths: {}".format(exclude_filepaths))
+        filepaths = []
+        for _fp in _filepaths:
+            if _fp not in filepaths and _fp not in exclude_filepaths:
+                filepaths.append(_fp)
+        lg.debug("filepaths: {}".format(filepaths))
+        if filepaths:
+            for filepath in filepaths:
+                if EITurnkeyE0501XML.objects.filter(abspath=filepath, is_parsed=True).exists():
+                    continue
+                content = open(filepath, 'r').read()
+                if 'InvoiceEnvelope xmlns' not in content:
+                    _eitE0501xml = EITurnkeyE0501XML(abspath=filepath, is_parsed=True)
+                    _eitE0501xml.save()
+                    continue
+                lg.debug(filepath)
+                try:
+                    eitE0501xml = EITurnkeyE0501XML.objects.get(abspath=filepath)
+                except EITurnkeyE0501XML.DoesNotExist:
+                    eitE0501xml = EITurnkeyE0501XML(abspath=filepath)
+                eitE0501xml.content = content
+                eitE0501xml.save()
+                eitE0501xmls.append(eitE0501xml)
+        return eitE0501xmls
+
+
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    @property
+    def E0501UnpackBAK(self):
+        task_config_object = self.get_task_config(category_type='B2B', process_type='EXCHANGE', task='Unpack')
+        return os.path.join(task_config_object.SRC_PATH, "BAK", "E0501")
     @property
     def SummaryResultUnpackBAK(self):
         task_config_object = self.get_task_config(category_type='B2B', process_type='EXCHANGE', task='Unpack')
@@ -1112,3 +1155,110 @@ class EITurnkeyDailySummaryResult(models.Model):
 
     class Meta:
         unique_together = (("ei_turnkey", "result_date", ), )
+
+
+
+class EITurnkeyE0501XML(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    abspath = models.CharField(max_length=255, unique=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, null=True, on_delete=models.DO_NOTHING)
+    is_parsed = models.BooleanField(default=False)
+    invoice_assign_nos = models.JSONField(default=[])
+    binary_content = models.BinaryField()
+    error_note = models.TextField(default='')
+    @property
+    def content(self):
+        content = zlib.decompress(self.binary_content)
+        return content
+    @content.setter
+    def content(self, value=''):
+        if bytes != type(value):
+            value = value.encode('utf-8')
+        self.binary_content = zlib.compress(value)
+
+    
+    def parse(self):
+        lg = logging.getLogger('turnkey_web')
+        error_message = ''
+        X = xmltodict.parse(self.content)
+        party_id = X['InvoiceEnvelope']['From']['PartyId']
+        routing_id = X['InvoiceEnvelope']['FromVAC']['RoutingId']
+        if routing_id:
+            self.ei_turnkey = EITurnkey.objects.get(party_id=party_id, routing_id=routing_id)
+        else:
+            self.ei_turnkey = EITurnkey.objects.filter(party_id=party_id).order_by('id')[0]
+        invoice_assign_nos = []
+        if list == type(X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']):
+            ians = X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']
+        else:
+            ians = [X['InvoiceEnvelope']['InvoicePack']['InvoiceAssignNo']]
+        for ian in ians:
+            if party_id != ian['Ban']:
+                error_message += "party_id: {} != Ban: {}\n".format(party_id, ian['Ban'])
+                continue
+            d = {
+                'InvoiceType': ian['InvoiceType'],
+                'YearMonth': ian['YearMonth'],
+                'InvoiceTrack': ian['InvoiceTrack'],
+                'InvoiceBeginNo': ian['InvoiceBeginNo'],
+                'InvoiceEndNo': ian['InvoiceEndNo'],
+                'InvoiceBooklet': int(ian['InvoiceBooklet']),
+            }
+            invoice_assign_nos.append(d)
+
+        self.invoice_assign_nos = invoice_assign_nos
+        self.error_note = error_message
+        self.is_parsed = True
+        eitians = []
+        for d in invoice_assign_nos:
+            eitian, new_creation = EITurnkeyE0501InvoiceAssignNo.objects.get_or_create(
+                ei_turnkey=self.ei_turnkey,
+                invoice_type=d['InvoiceType'],
+                year_month=d['YearMonth'],
+                invoice_track=d['InvoiceTrack'].upper(),
+                invoice_begin_no=d['InvoiceBeginNo'],
+                invoice_end_no=d['InvoiceEndNo'],
+                invoice_booklet=d['InvoiceBooklet'],
+            )
+            eitians.append(eitian)
+        return eitians
+
+
+    def save(self, *args, **kwargs):
+        lg = logging.getLogger('turnkey_web')
+        invoice_assign_nos = None
+        if self.binary_content and not self.is_parsed:
+            try:
+                invoice_assign_nos = self.parse()
+            except Exception as e:
+                lg.error("{abspath}: {type} {e}".format(abspath=self.abspath, type=type(e), e=e))
+                self.error_note = "{}: {}".format(type(e), str(e))
+        super().save(*args, **kwargs)
+        if invoice_assign_nos:
+            for ian in invoice_assign_nos:
+                ian.xml_files.add(self)
+
+
+
+class EITurnkeyE0501InvoiceAssignNo(models.Model):
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
+    ei_turnkey = models.ForeignKey(EITurnkey, on_delete=models.DO_NOTHING)
+    type_choices = (
+        ('07', _('General')),
+        ('08', _('Special')),
+    )
+    invoice_type = models.CharField(max_length=2,
+                                    default='07',
+                                    choices=type_choices,
+                                    db_index=True)
+    year_month = models.CharField(max_length=5, db_index=True)
+    invoice_track = models.CharField(max_length=2, db_index=True)
+    invoice_begin_no = models.CharField(max_length=8, db_index=True)
+    invoice_end_no = models.CharField(max_length=8, db_index=True)
+    invoice_booklet = models.SmallIntegerField(default=0)
+    xml_files = models.ManyToManyField(EITurnkeyE0501XML)
+
+
+    class Meta:
+        unique_together = (("ei_turnkey", "invoice_type", "year_month", "invoice_track",
+                            "invoice_begin_no", "invoice_end_no", "invoice_booklet"), )

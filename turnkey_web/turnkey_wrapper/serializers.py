@@ -38,6 +38,8 @@ from turnkey_wrapper.models import (
     EITurnkeyBatchEInvoice,
     EITurnkeyDailySummaryResultXML,
     EITurnkeyDailySummaryResult,
+    EITurnkeyE0501XML,
+    EITurnkeyE0501InvoiceAssignNo,
 )
 
 
@@ -263,4 +265,43 @@ class EITurnkeyDailySummaryResultSerializer(ModelSerializer):
 
     class Meta:
         model = EITurnkeyDailySummaryResult
+        fields = '__all__'
+
+
+class EITurnkeyE0501XMLSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeye0501xml-detail")
+    ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
+    
+
+
+    class Meta:
+        model = EITurnkeyE0501XML
+        fields = [
+            "id",
+            "resource_uri",
+            "create_time",
+            "ei_turnkey",
+            "ei_turnkey_dict",
+            "abspath",
+            "is_parsed",
+            "invoice_assign_nos",
+            "error_note",
+        ]
+
+
+
+class EITurnkeyE0501InvoiceAssignNoSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(view_name="turnkeywrapperapi:eiturnkeye0501invoiceassignno-detail")
+    ei_turnkey_dict = EITurnkeySerializer(read_only=True, source="ei_turnkey")
+    invoice_type = CharField(read_only=True)
+    year_month = CharField(read_only=True)
+    invoice_track = CharField(read_only=True)
+    invoice_begin_no = CharField(read_only=True)
+    invoice_end_no = CharField(read_only=True)
+    invoice_booklet = IntegerField(read_only=True)
+    
+
+
+    class Meta:
+        model = EITurnkeyE0501InvoiceAssignNo
         fields = '__all__'

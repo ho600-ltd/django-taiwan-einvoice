@@ -31,6 +31,7 @@ from taiwan_einvoice.models import (
     Seller,
     TurnkeyService,
     SellerInvoiceTrackNo,
+    E0501InvoiceAssignNo,
     EInvoice,
     EInvoicePrintLog,
     CancelEInvoice,
@@ -371,6 +372,20 @@ class SellerInvoiceTrackNoSerializer(ModelSerializer):
             else:
                 del validated_data[key]
         return super().update(instance, validated_data)
+
+
+
+class E0501InvoiceAssignNoSerializer(ModelSerializer):
+    resource_uri = HyperlinkedIdentityField(
+        view_name="taiwan_einvoice:taiwaneinvoiceapi:e0501invoiceassignno-detail", lookup_field='pk')
+    type__display = CharField(read_only=True)
+
+
+
+    class Meta:
+        model = E0501InvoiceAssignNo
+        fields = '__all__'
+
 
 
 class DetailsContentField(ReadOnlyField):

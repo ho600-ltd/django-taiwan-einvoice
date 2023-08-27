@@ -127,11 +127,37 @@
                         <li class="nav-item nav_EITurnkeyBatchEInvoice" role="presentation">
                             <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeybatcheinvoice-list' %}">{% trans "Batch E-Invoice" %}</a>
                         </li>
-                        <li class="nav-item nav_EITurnkeyDailySummaryResultXML" role="presentation">
-                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-list' %}">{% trans "Summary Result XML" %}</a>
+                        <li class="dropdown nav-item nav_daily_summary">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{% trans "Daily Summary" %}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_EITurnkeyDailySummaryResultXML"
+                                    href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresultxml-list' %}">
+                                    {% trans "Summary Result XML" %}
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_EITurnkeyDailySummaryResult"
+                                    href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresult-list' %}">
+                                    {% trans "Summary Result" %}
+                                </a>
+                            </div>
                         </li>
-                        <li class="nav-item nav_EITurnkeyDailySummaryResult" role="presentation">
-                            <a class="nav-link" href="{% url 'turnkeywrapperapi:eiturnkeydailysummaryresult-list' %}">{% trans "Summary Result" %}</a>
+                        <li class="dropdown nav-item nav_E0501">
+                            <a data-toggle="dropdown"
+                                aria-expanded="false"
+                                class="dropdown-toggle nav-link"
+                                href="#">{% trans "E0501" %}</a>
+                            <div role="menu" class="dropdown-menu">
+                                <a role="presentation" class="dropdown-item nav_EITurnkeyE0501XML"
+                                    href="{% url 'turnkeywrapperapi:eiturnkeye0501xml-list' %}">
+                                    {% trans "E0501 XML" %}
+                                </a>
+                                <a role="presentation" class="dropdown-item nav_EITurnkeyE0501InvoiceAssignNo"
+                                    href="{% url 'turnkeywrapperapi:eiturnkeye0501invoiceassignno-list' %}">
+                                    {% trans "Invoice Assign No" %}
+                                </a>
+                            </div>
                         </li>
                         <li class="dropdown nav-item nav_self">
                             <a data-toggle="dropdown"

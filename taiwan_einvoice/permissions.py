@@ -3,7 +3,7 @@ import logging
 from rest_framework.permissions import BasePermission, IsAdminUser
 from guardian.shortcuts import get_objects_for_user, get_perms
 
-from taiwan_einvoice.models import ESCPOSWeb, TEAlarm
+from taiwan_einvoice.models import ESCPOSWeb, TEAlarm, TurnkeyService
 
 
 
@@ -591,4 +591,44 @@ class CanViewSummaryReport(BasePermission):
         lg.debug("CanViewSummaryReport.has_object_permission with {}: {}".format(request.method, res))
         return res
 
+
+
+class CanViewE0501InvoiceAssignNo(BasePermission):
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_turnkeyservice",
+        ),
+        "retrieve": (
+            "taiwan_einvoice.view_turnkeyservice",
+        ),
+    }
+
+
+
+
+    def has_permission(self, request, view):
+        lg = logging.getLogger('taiwan_einvoice')
+        res = False
+        if request.user.is_authenticated and request.user.teastaffprofile and request.user.teastaffprofile.is_active:
+            permissions = CanViewE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            if permissions:
+                res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
+        lg.debug("CanViewE0501InvoiceAssignNo.has_permission with {}: {}".format(request.method, res))
+        return res
+        
+
+    def has_object_permission(self, request, view, obj):
+        lg = logging.getLogger('taiwan_einvoice')
+        res = False
+        if request.user.is_authenticated and request.user.teastaffprofile and request.user.teastaffprofile.is_active:
+            permissions = CanViewE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            ts = TurnkeyService.objects.filter(seller__legalentity__identifier=obj.identifier)
+            for p in permissions:
+                app, codename = p.split('.')
+                for t_obj in ts:
+                    if codename in get_perms(request.user, t_obj):
+                        res = True
+                        break
+        lg.debug("CanViewE0501InvoiceAssignNo.has_object_permission with {}: {}".format(request.method, res))
+        return res
 

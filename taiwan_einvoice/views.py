@@ -26,6 +26,7 @@ from taiwan_einvoice.permissions import (
     CanEditESCPOSWebOperator,
     CanEditTurnkeyServiceGroup,
     CanEntrySellerInvoiceTrackNo,
+    CanViewE0501InvoiceAssignNo,
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
@@ -57,6 +58,7 @@ from taiwan_einvoice.renderers import (
     TEAlarmHtmlRenderer,
 )
 from taiwan_einvoice.models import (
+    _year_to_chmk_year,
     TAIPEI_TIMEZONE,
     EInvoiceSellerAPI,
     TEAStaffProfile,
@@ -65,6 +67,7 @@ from taiwan_einvoice.models import (
     Seller,
     TurnkeyService,
     SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError, ExcutedE0402UploadBatchError, ExistedE0402UploadBatchError,
+    E0501InvoiceAssignNo,
     EInvoiceMIG,
     EInvoice,
     EInvoicePrintLog,
@@ -88,6 +91,7 @@ from taiwan_einvoice.serializers import (
     TurnkeyServiceSerializer,
     TurnkeyServiceGroupSerializer,
     SellerInvoiceTrackNoSerializer,
+    E0501InvoiceAssignNoSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
@@ -106,6 +110,7 @@ from taiwan_einvoice.filters import (
     TurnkeyServiceFilter,
     TurnkeyServiceGroupFilter,
     SellerInvoiceTrackNoFilter,
+    E0501InvoiceAssignNoFilter,
     EInvoiceFilter,
     EInvoicePrintLogFilter,
     CancelEInvoiceFilter,
@@ -550,106 +555,160 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                 "error_message": _("TurnkeyService(id: {}) does not exist").format(turnkey_service),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
-        csv_file = request.FILES['file']
+    
+        raw_datas = []
         datas = []
-        while True:
-            line = csv_file.readline().decode('cp950').rstrip("\r\n")
-            if not line:
-                break
-            elif turnkey_service.seller.legal_entity.identifier in line:
-                cols = line.split(',')
-
-                if '07' != '{:02d}'.format(int(cols[1])):
-                    er = {
-                        "error_title": _("Track No. Type Error"),
-                        "error_message": _("It only support '07' type now.")
-                    }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
-
+        if request.POST.get("e0501invoiceassignno_ids", ""):
+            for id in request.POST['e0501invoiceassignno_ids'].split(','):
                 try:
-                    begin_month_str, end_month_str = cols[3].split(' ~ ')
-                    begin_chmk_year, begin_month = begin_month_str.split('/')
-                    begin_year = int(begin_chmk_year) + 1911
-                    begin_month = int(begin_month)
-                    end_chmk_year, end_month = begin_month_str.split('/')
-                    end_year = int(end_chmk_year) + 1911
-                    end_month = int(end_month)
-                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(begin_year, begin_month, 1, 0, 0, 0))
-                    end_time_0 = TAIPEI_TIMEZONE.localize(datetime.datetime(end_year, end_month, 1, 0, 0, 0)) + datetime.timedelta(days=70)
-                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
-                except Exception as e:
+                    eian = E0501InvoiceAssignNo.objects.get(id=id)
+                except E0501InvoiceAssignNo.DoesNotExist:
                     er = {
-                        "error_title": _("Year Month Range Error"),
-                        "error_message": _("{} has error: \n\n\n{}").format(line, e)
+                        "error_title": _("E0501InvoiceAssignNo Does Not Exist"),
+                        "error_message": _("E0501InvoiceAssignNo(id: {}) does not exist").format(id),
                     }
                     return Response(er, status=status.HTTP_403_FORBIDDEN)
                 else:
-                    if NOW < begin_time - datetime.timedelta(days=15):
+                    type = '{:02d}'.format(int(eian.type))
+                    if '07' != type:
                         er = {
-                            "error_title": _("Begin Time Error"),
-                            "error_message": _("{} has error: \nToo early to import.").format(line)
+                            "error_title": _("Track No. Type Error"),
+                            "error_message": _("It only support '07' type now.")
                         }
                         return Response(er, status=status.HTTP_403_FORBIDDEN)
-                    elif NOW > end_time:
-                        er = {
-                            "error_title": _("End Time Error"),
-                            "error_message": _("{} has error: \nToo late to import.").format(line)
-                        }
-                        return Response(er, status=status.HTTP_403_FORBIDDEN)
-                
-                begin_no = cols[5]
-                end_no = cols[6]
-                if begin_no[-2:] not in ('00', '50'):
-                    er = {
-                        "error_title": _("Begin No. Error"),
-                        "error_message": _("{} has error: \n\n\nThe suffix of begin_no should be 00 or 50.").format(line)
-                    }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
-                if end_no[-2:] not in ('49', '99'):
-                    er = {
-                        "error_title": _("End No. Error"),
-                        "error_message": _("{} has error: \n\n\nThe suffix of end_no should be 49 or 99.").format(line)
-                    }
-                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    elif eian.identifier != turnkey_service.seller.legal_entity.identifier:
+                        continue
 
-                begin_no = int(begin_no)
-                end_no = int(end_no)
-                split_by_numbers = int(request.POST.get('split_by_numbers', '100'))
-                _begin_no_in_split = begin_no
-                _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
-                if _end_no_in_split > end_no: _end_no_in_split = end_no
-                while _begin_no_in_split < _end_no_in_split:
-                    data = {
+                    end_chmk_year, end_month = eian.year_month[:3], eian.year_month[3:]
+                    end_year = int(end_chmk_year) + 1911
+                    end_month = int(end_month)
+                    end_time_0 = TAIPEI_TIMEZONE.localize(datetime.datetime(end_year, end_month, 1, 0, 0, 0)) + datetime.timedelta(days=40)
+                    end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
+                    begin_time_0 = end_time - datetime.timedelta(days=45)
+                    begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(begin_time_0.year, begin_time_0.month, 1, 0, 0, 0))
+                    raw_data = {
+                        "turnkey_service": turnkey_service.id,
+                        "type": type,
+                        "begin_time": begin_time,
+                        "end_time": end_time,
+                        "track": eian.track,
+                        "begin_no": eian.begin_no,
+                        "end_no": eian.end_no,
+                    }
+                raw_datas.append(raw_data)
+        else:
+            csv_file = request.FILES['file']
+            while True:
+                line = csv_file.readline().decode('cp950').rstrip("\r\n")
+                if not line:
+                    break
+                elif turnkey_service.seller.legal_entity.identifier in line:
+                    cols = line.split(',')
+
+                    if '07' != '{:02d}'.format(int(cols[1])):
+                        er = {
+                            "error_title": _("Track No. Type Error"),
+                            "error_message": _("It only support '07' type now.")
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                    try:
+                        begin_month_str, end_month_str = cols[3].split(' ~ ')
+                        begin_chmk_year, begin_month = begin_month_str.split('/')
+                        begin_year = int(begin_chmk_year) + 1911
+                        begin_month = int(begin_month)
+                        end_chmk_year, end_month = end_month_str.split('/')
+                        end_year = int(end_chmk_year) + 1911
+                        end_month = int(end_month)
+                        begin_time = TAIPEI_TIMEZONE.localize(datetime.datetime(begin_year, begin_month, 1, 0, 0, 0))
+                        end_time_0 = TAIPEI_TIMEZONE.localize(datetime.datetime(end_year, end_month, 1, 0, 0, 0)) + datetime.timedelta(days=40)
+                        end_time = TAIPEI_TIMEZONE.localize(datetime.datetime(end_time_0.year, end_time_0.month, 1, 0, 0, 0))
+                    except Exception as e:
+                        er = {
+                            "error_title": _("Year Month Range Error"),
+                            "error_message": _("{} has error: \n\n\n{}").format(line, e)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    else:
+                        if NOW < begin_time - datetime.timedelta(days=15):
+                            er = {
+                                "error_title": _("Begin Time Error"),
+                                "error_message": _("{} has error: \nToo early to import.").format(line)
+                            }
+                            return Response(er, status=status.HTTP_403_FORBIDDEN)
+                        elif NOW > end_time:
+                            er = {
+                                "error_title": _("End Time Error"),
+                                "error_message": _("{} has error: \nToo late to import.").format(line)
+                            }
+                            return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    
+                    begin_no = cols[5]
+                    end_no = cols[6]
+                    if begin_no[-2:] not in ('00', '50'):
+                        er = {
+                            "error_title": _("Begin No. Error"),
+                            "error_message": _("{} has error: \n\n\nThe suffix of begin_no should be 00 or 50.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    if end_no[-2:] not in ('49', '99'):
+                        er = {
+                            "error_title": _("End No. Error"),
+                            "error_message": _("{} has error: \n\n\nThe suffix of end_no should be 49 or 99.").format(line)
+                        }
+                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                    raw_data = {
                         "turnkey_service": turnkey_service.id,
                         "type": '{:02d}'.format(int(cols[1])),
                         "begin_time": begin_time,
                         "end_time": end_time,
                         "track": cols[4],
-                        "begin_no": _begin_no_in_split,
-                        "end_no": _end_no_in_split,
+                        "begin_no": begin_no,
+                        "end_no": end_no,
                     }
-                    sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
-                    if sitns.is_valid():
-                        datas.append(data)
-                    elif 'unique' in str(sitns.errors) and (_begin_no_in_split != begin_no or _end_no_in_split != end_no):
-                        pass
-                    else:
-                        if 'unique' in str(sitns.errors):
-                            error_message = _("{} exists").format(line)
-                        else:
-                            error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
-                        er = {
-                            "error_title": _("Data Error"),
-                            "error_message": error_message,
-                        }
-                        return Response(er, status=status.HTTP_403_FORBIDDEN)
+                    raw_datas.append(raw_data)
 
-                    _begin_no_in_split = _end_no_in_split + 1
-                    if _begin_no_in_split > end_no:
-                        break
-                    _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
-                    if _end_no_in_split > end_no:
-                        _end_no_in_split = end_no
+        split_by_numbers = int(request.POST.get('split_by_numbers', '100'))
+        for rd in raw_datas:
+            begin_no = int(rd['begin_no'])
+            end_no = int(rd['end_no'])
+            _begin_no_in_split = begin_no
+            _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
+            if _end_no_in_split > end_no:
+                _end_no_in_split = end_no
+            while _begin_no_in_split < _end_no_in_split:
+                data = {
+                    "turnkey_service": rd['turnkey_service'],
+                    "type": rd['type'],
+                    "begin_time": rd['begin_time'],
+                    "end_time": rd['end_time'],
+                    "track": rd['track'],
+                    "begin_no": _begin_no_in_split,
+                    "end_no": _end_no_in_split,
+                }
+                sitns = SellerInvoiceTrackNoSerializer(data=data, context={'request': request})
+                if sitns.is_valid():
+                    datas.append(data)
+                elif 'unique' in str(sitns.errors) and (_begin_no_in_split != begin_no or _end_no_in_split != end_no):
+                    pass
+                else:
+                    if 'unique' in str(sitns.errors):
+                        error_message = _("{} exists").format(line)
+                    else:
+                        error_message = _("{} has error: \n\n\n{}").format(line, sitns.errors)
+                    er = {
+                        "error_title": _("Data Error"),
+                        "error_message": error_message,
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                _begin_no_in_split = _end_no_in_split + 1
+                if _begin_no_in_split > end_no:
+                    break
+                _end_no_in_split = _begin_no_in_split + split_by_numbers - 1
+                if _end_no_in_split > end_no:
+                    _end_no_in_split = end_no
         output_datas = []
         if not datas:
             er = {
@@ -663,7 +722,8 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                                                    end_time=data['end_time'],
                                                    track=data['track']
                                                   ).filter(Q(begin_no__lte=data['begin_no'], end_no__gte=data['begin_no'])
-                                                            |Q(begin_no__lte=data['end_no'], end_no__gte=data['end_no'])).exists():
+                                                            |Q(begin_no__lte=data['end_no'], end_no__gte=data['end_no'])
+                                                            |Q(begin_no__gte=data['begin_no'], end_no__lte=data['end_no'])).exists():
                 
                 error_message = _("{} ~ {} has error: \n\n\nnumber overlapping").format(data['begin_no'], data['end_no'])
                 er = {
@@ -689,6 +749,32 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
                             }, status=status.HTTP_403_FORBIDDEN)
         else:
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class E0501InvoiceAssignNoModelViewSet(ModelViewSet):
+    permission_classes = (Or(IsSuperUser, CanViewE0501InvoiceAssignNo, ), )
+    pagination_class = OneHundredPerPagePagination
+    queryset = E0501InvoiceAssignNo.objects.all().order_by('-year_month', )
+    serializer_class = E0501InvoiceAssignNoSerializer
+    filter_class = E0501InvoiceAssignNoFilter
+    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
+    http_method_names = ('get', )
+
+
+    def get_queryset(self):
+        request = self.request
+        queryset = super(E0501InvoiceAssignNoModelViewSet, self).get_queryset()
+        NOW = now().astimezone(TAIPEI_TIMEZONE)
+        year_month = '{:03d}{:02d}'.format(_year_to_chmk_year(NOW.year), NOW.month)
+        if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
+            return queryset.none()
+        elif request.user.is_superuser:
+            return queryset.filter(year_month__gte=year_month)
+        else:
+            permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
+            turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
+            return queryset.filter(identifier__in=[ts.party_id for ts in turnkey_services], year_month__gte=year_month)
 
 
 
@@ -1271,3 +1357,5 @@ class TEAlarmModelViewSet(ModelViewSet):
             permissions = list(programmer_permissions) + list(general_user_permissions)
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_service__in=turnkey_services)
+
+

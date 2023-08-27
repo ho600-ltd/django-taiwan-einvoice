@@ -52,7 +52,12 @@ class IsSuperUserInIntranet(IsAdminUser):
                 allow_ips = obj.allow_ips
             elif "EITurnkeyBatchEInvoice".lower() == model_name:
                 allow_ips = obj.ei_turnkey_batch.ei_turnkey.allow_ips
-            elif model_name in ["EITurnkeyBatch".lower(), "EITurnkeyDailySummaryResultXML".lower(), "EITurnkeyDailySummaryResult".lower(), ]:
+            elif model_name in ["EITurnkeyBatch".lower(),
+                                "EITurnkeyDailySummaryResultXML".lower(),
+                                "EITurnkeyDailySummaryResult".lower(),
+                                "EITurnkeyE0501XML".lower(),
+                                "EITurnkeyE0501InvoiceAssignNo".lower(),
+                                ]:
                 allow_ips = obj.ei_turnkey.allow_ips
             else:
                 allow_ips = []
@@ -71,6 +76,7 @@ class CounterBasedOTPinRowAndIpCheckForEITurnkeyPermission(BasePermission):
         "create_eiturnkey_batch": (True, ),
         "upload_eiturnkey_batch_einvoice_bodys": (True, ),
         "get_ei_turnkey_summary_results": (True, ),
+        "get_ei_turnkey_e0501_invoice_assign_no": (True, ),
     }
 
 
