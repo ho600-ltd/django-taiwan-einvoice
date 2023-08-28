@@ -288,6 +288,7 @@ class EITurnkeyModelViewSet(ModelViewSet):
             "invoice_track": e.invoice_track,
             "invoice_begin_no": e.invoice_begin_no,
             "invoice_end_no": e.invoice_end_no,
+            "invoice_booklet": e.invoice_booklet,
             } for e in eiteians]
         twrc = TurnkeyWebReturnCode("0")
         result = {
