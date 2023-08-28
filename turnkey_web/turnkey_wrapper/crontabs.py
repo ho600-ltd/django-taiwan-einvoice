@@ -80,15 +80,18 @@ def polling_ei_turnkey(alert_log, *args, **kw):
     lg.debug("EITurnkey.parse_E0501_then_create_objects() start at {}".format(now()))
     for E0501 in EITurnkey.parse_E0501_then_create_objects():
         if E0501:
-            _s = "Parsed {abspath}: type: {invoice_type}, Y_M: {year_month},  track_no: {invoice_track}{invoice_begin_no}~{invoice_end_no}({invoice_booklet}) at {now}".format(
-                invoice_type=E0501.invoice_type,
-                year_month=E0501.year_month,
-                invoice_track=E0501.invoice_track,
-                invoice_begin_no=E0501.invoice_begin_no,
-                invoice_end_no=E0501.invoice_end_no,
-                invoice_booklet=E0501.invoice_booklet,
-                now=now(),
-            )
+            _s = ""
+            for ian in E0501.invoice_assign_nos:
+                _s += "Parsed {abspath}: type: {invoice_type}, Y_M: {year_month},  track_no: {invoice_track}{invoice_begin_no}~{invoice_end_no}({invoice_booklet}) at {now}\n".format(
+                    abspath=E0501.abspath,
+                    invoice_type=ian["InvoiceType"],
+                    year_month=ian["YearMonth"],
+                    invoice_track=ian["InvoiceTrack"],
+                    invoice_begin_no=ian["InvoiceBeginNo"],
+                    invoice_end_no=ian["InvoiceEndNo"],
+                    invoice_booklet=ian["InvoiceBooklet"],
+                    now=now(),
+                )
         else:
             _s = "__None__"
         lg.debug(_s)
