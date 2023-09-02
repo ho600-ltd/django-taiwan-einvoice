@@ -714,10 +714,10 @@ class EITurnkeyBatch(models.Model):
         else:
             NEXT_STATUS_IN_GOOD = 'F'
         
-        for eitbei in self.eiturnkeybatcheinvoice_set.filter(status__in=["", "P", "G"]):
+        for eitbei in self.eiturnkeybatcheinvoice_set.filter(status__in=["", "P", "G", "I", "E"]):
             eitbei.check_status_from_ei()
         
-        if not self.eiturnkeybatcheinvoice_set.exclude(status__in=["I", "E", "C"]).exists():
+        if not self.eiturnkeybatcheinvoice_set.exclude(status__in=[".", "C"]).exists():
             self.update_to_new_status(NEXT_STATUS_IN_GOOD)
 
 
@@ -933,6 +933,7 @@ class EITurnkeyBatchEInvoice(models.Model):
         ("E", _("E Error for EI process(E)")),
         ("I", _("I Error for EI process(I)")),
         ("C", _("Successful EI process(C)")),
+        (".", _("Failed but pass(.)")),
     )
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     save_body_time = models.DateTimeField()
