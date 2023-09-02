@@ -986,9 +986,13 @@ class EITurnkeyBatchEInvoice(models.Model):
         lg = logging.getLogger("turnkey_web")
         SAVE_BODY_TIME_DTS = self.save_body_time.astimezone(TAIPEI_TIMEZONE).strftime('%Y%m%d%H%M%S000')
         lg.debug("SAVE_BODY_TIME_DTS: {}".format(SAVE_BODY_TIME_DTS))
+        if 'E0402' in self.body:
+            query_d = {"INVOICE_IDENTIFIER__regex": "-?".join(self.invoice_identifier.split('-'))}
+        else:
+            query_d = {"INVOICE_IDENTIFIER": self.invoice_identifier}
         try:
-            nearest_TURNKEY_MESSAGE_LOG = TURNKEY_MESSAGE_LOG.objects.filter(INVOICE_IDENTIFIER=self.invoice_identifier,
-                                                                             MESSAGE_DTS__gte=SAVE_BODY_TIME_DTS
+            nearest_TURNKEY_MESSAGE_LOG = TURNKEY_MESSAGE_LOG.objects.filter(MESSAGE_DTS__gte=SAVE_BODY_TIME_DTS,
+                                                                             **query_d
                                                                             ).order_by('MESSAGE_DTS')[0]
         except IndexError:
             return
