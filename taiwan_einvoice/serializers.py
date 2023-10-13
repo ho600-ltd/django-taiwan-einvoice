@@ -228,6 +228,7 @@ class TurnkeyServiceSerializer(ModelSerializer):
     count_now_use_07_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
     count_now_use_08_sellerinvoicetrackno_blank_no = IntegerField(read_only=True)
     mask_hash_key = CharField(read_only=True)
+    mask_member_vehicle_key = CharField(read_only=True)
     mask_qrcode_seed = CharField(read_only=True)
     mask_turnkey_seed = CharField(read_only=True)
     mask_download_seed = CharField(read_only=True)
@@ -250,6 +251,8 @@ class TurnkeyServiceSerializer(ModelSerializer):
             'transport_id',
             'party_id',
             'routing_id',
+            'member_vehicle_id',
+            'mask_member_vehicle_key',
             'mask_qrcode_seed',
             'mask_turnkey_seed',
             'mask_download_seed',

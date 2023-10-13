@@ -691,6 +691,8 @@ class TurnkeyService(models.Model):
     transport_id = models.CharField(max_length=10)
     party_id = models.CharField(max_length=10)
     routing_id = models.CharField(max_length=39)
+    member_vehicle_id = models.CharField(max_length=8, default='00000000')
+    member_vehicle_key = models.CharField(max_length=32, default='********************************')
     qrcode_seed = models.CharField(max_length=40)
     turnkey_seed = models.CharField(max_length=40)
     download_seed = models.CharField(max_length=40)
@@ -740,6 +742,9 @@ class TurnkeyService(models.Model):
     @property
     def mask_hash_key(self):
         return self.hash_key[:4] + '********************************' + self.hash_key[-4:]
+    @property
+    def mask_member_vehicle_key(self):
+        return self.member_vehicle_key[:4] + '************************' + self.member_vehicle_key[-4:]
     @property
     def mask_qrcode_seed(self):
         return self.qrcode_seed[:4] + '************************' + self.qrcode_seed[-4:]
