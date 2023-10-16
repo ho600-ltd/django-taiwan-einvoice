@@ -1599,9 +1599,9 @@ class EInvoice(models.Model):
     def in_cp_np_or_wp(self):
         if '3J0002' == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
             kind = 'cp'
-        elif "" != self.carrier_type:
-            kind = 'np'
         elif "1" == self.donate_mark:
+            kind = 'np'
+        elif self.carrier_type not in ("", "00000000"):
             kind = 'np'
         else:
             kind = 'wp'
