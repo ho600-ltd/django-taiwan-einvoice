@@ -1239,7 +1239,10 @@ class EInvoice(models.Model):
     carrier_type = models.CharField(max_length=6, default='', choices=carrier_type_choices, db_index=True)
     @property
     def carrier_type__display(self):
-        return self.get_carrier_type_display()
+        if self.seller_invoice_track_no.turnkey_service.member_vehicle_id == self.carrier_type:
+            return "{}:{}".format(_("Member Vehicle"), self.carrier_type)
+        else:
+            return self.get_carrier_type_display()
 
     carrier_id1 = models.CharField(max_length=64, default='', db_index=True)
     carrier_id2 = models.CharField(max_length=64, default='', db_index=True)
