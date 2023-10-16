@@ -26,7 +26,8 @@
                 <th rowspan="2" width="10%">
                     {% trans "Transport ID" %}<br/>
                     {% trans "Party ID" %}<br/>
-                    {% trans "Routing ID" %}
+                    {% trans "Routing ID" %}<br/>
+                    {% trans "Member Vehicle" %}
                 </th>
                 <th rowspan="2" width="30%">
                     {% trans "Hash Key" %}<br/>
@@ -75,6 +76,7 @@
                         <div field="transport_id">{{ turnkeyservice.transport_id }}</div>
                         <div field="party_id">{{ turnkeyservice.party_id }}</div>
                         <div field="routing_id">{{ turnkeyservice.routing_id }}</div>
+                        <div field="member_vehicle_id">{{ turnkeyservice.member_vehicle_id }}</div>
                     </td>
                     <td>
                         <div field="hash_key">{{ turnkeyservice.mask_hash_key }}</div>

@@ -141,6 +141,9 @@
                                 <option value="^$">{% trans "None setting" %}</option>
                                 <option value="^3J0002$">{% trans "Mobile barcode" %}</option>
                                 <option value="^CQ0001$">{% trans "Natural person barcode" %}</option>
+                                {% for mvi in member_vehicle_ids %}
+                                    <option value="^{{ mvi }}$">{{ mvi }}({% trans "Member Vehicle" %})</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
