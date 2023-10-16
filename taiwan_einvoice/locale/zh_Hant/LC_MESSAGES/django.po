@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-11 17:02+0800\n"
+"POT-Creation-Date: 2023-10-16 15:22+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -865,6 +865,9 @@ msgstr "載具類別"
 
 msgid "None setting"
 msgstr "無設定"
+
+msgid "Member Vehicle"
+msgstr "會員載具"
 
 msgid "Is Donated?"
 msgstr "是否捐贈?"
@@ -1784,6 +1787,12 @@ msgstr "Turnkwy 伺服器不存在"
 
 msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
+
+msgid "E0501InvoiceAssignNo Does Not Exist"
+msgstr "營業人電子發票配號檔不存在"
+
+msgid "E0501InvoiceAssignNo(id: {}) does not exist"
+msgstr "營業人電子發票配號檔(id: {})不存在"
 
 msgid "Track No. Type Error"
 msgstr "字軌號碼類別錯誤"

@@ -214,6 +214,7 @@ class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
         res = super().get_context(data, accepted_media_type, renderer_context)
         turnkey_services = get_objects_for_user(res['request'].user, ["taiwan_einvoice.view_te_einvoice",], any_perm=True)
         res['turnkey_services'] = turnkey_services.order_by('id')
+        res['member_vehicle_ids'] = [_mvi[0] for _mvi in turnkey_services.exclude(member_vehicle_id__in=('', '00000000')).values_list("member_vehicle_id")]
         seller_ids = turnkey_services.values_list('seller', flat=True)
         res['seller__legal_entity__identifiers'] = Seller.objects.filter(id__in=seller_ids).order_by('legal_entity__identifier').values_list('legal_entity__identifier', flat=True)
         res['type_choices'] = SellerInvoiceTrackNo.type_choices
