@@ -1450,12 +1450,18 @@ class EInvoice(models.Model):
                 carrier_type=self.get_carrier_type_display(),
                 carrier_id1=carrier_id1, carrier_id2=carrier_id2,
             )
+            if '' == self.npoban:
+                _track_no = "{}-{}".format(self.track, self.no)
+                one_dimension_barcode_str = self.one_dimension_barcode_str
+            else:
+                _track_no = "{}-{}".format(self.track, self.no[:-3] + '***')
+                one_dimension_barcode_str = self.one_dimension_barcode_str[:-7] + '---' + self.one_dimension_barcode_str[-4:]
             _result = [
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
-                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "{}-{}".format(self.track, self.no)},
+                {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": _track_no},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
-                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": self.one_dimension_barcode_str},
+                {"type": "barcode", "align_ct": True, "width": 1, "height": 64, "pos": "OFF", "code": "CODE39", "barcode": one_dimension_barcode_str},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": ""},
                 {"type": "text", "custom_size": True, "width": 1, "height": 1, "align": "left", "text": message},
             ]
@@ -1470,7 +1476,7 @@ class EInvoice(models.Model):
                 npoban=self.npoban,
             )
             no_with_npoban = self.no[:-3] + '***'
-            one_dimension_barcode_str = self.one_dimension_barcode_str[:-7] + '***' + self.one_dimension_barcode_str[-4:]
+            one_dimension_barcode_str = self.one_dimension_barcode_str[:-7] + '---' + self.one_dimension_barcode_str[-4:]
             return [
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": "列  印  說  明"},
                 {"type": "text", "custom_size": True, "width": 2, "height": 2, "align": "center", "text": self.seller_invoice_track_no.year_month_range},
