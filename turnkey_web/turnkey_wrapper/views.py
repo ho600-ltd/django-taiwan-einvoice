@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import MethodNotAllowed, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -433,13 +433,19 @@ class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
     http_method_names = ('get', 'patch', )
 
 
+    def update(self, *args, **kwargs):
+        raise MethodNotAllowed(method="update")
+
+
     @action(detail=True, methods=['get', 'patch',], renderer_classes=[JSONRenderer, TKWBrowsableAPIRenderer, ])
     def pass_the_fail(self, request, pk=None):
         invoice_identifier = request.data.get('invoice_identifier', '')
         batch_einvoice_id = request.data.get('batch_einvoice_id', '')
         eitbei = EITurnkeyBatchEInvoice.objects.get(id=pk)
         if 'PATCH' == request.method.upper():
-            if (invoice_identifier != eitbei.invoice_identifier
+            if '.' == eitbei.status:
+                return Response({"detail": "status is already '.'"})
+            elif (invoice_identifier != eitbei.invoice_identifier
                 or batch_einvoice_id != eitbei.batch_einvoice_id
                 or eitbei.status not in ['E', 'I']
                 ):
