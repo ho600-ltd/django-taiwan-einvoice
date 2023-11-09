@@ -286,8 +286,15 @@ class TURNKEY_MESSAGE_LOG(models.Model):
                                                           |Q(SEQNO=self.SEQNO, SUBSEQNO=self.SUBSEQNO)
                                                          ).order_by('EVENTDTS').first()
         if tsl:
-            code = tsl.MESSAGE6.split(' ;')[0]
-            message = tsl.MESSAGE1 + tsl.MESSAGE2 + tsl.MESSAGE3 + tsl.MESSAGE4 + tsl.MESSAGE5 + tsl.MESSAGE6 
+            message = tsl.MESSAGE
+            code = tsl.ERRORCODE
+            code_re = re.search('(E[0-9]{4})\\b', message)
+            if code_re:
+                code = code_re.groups()[0]
+            elif '-007' == tsl.ERRORCODE:
+                code_re = re.search('\\b([579][0-9]{3}|6[0-9]{4})\\b', message)
+                if code_re:
+                    code = code_re.groups()[0]
         else:
             code = ''
             message = ''
@@ -355,6 +362,16 @@ class TURNKEY_SYSEVENT_LOG(models.Model):
     MESSAGE4 = models.CharField(db_column='MESSAGE4', max_length=100, blank=True, null=True)
     MESSAGE5 = models.CharField(db_column='MESSAGE5', max_length=100, blank=True, null=True)
     MESSAGE6 = models.CharField(db_column='MESSAGE6', max_length=100, blank=True, null=True)
+    @property
+    def MESSAGE(self):
+        return "{}{}{}{}{}{}".format(
+            self.MESSAGE1,
+            self.MESSAGE2,
+            self.MESSAGE3,
+            self.MESSAGE4,
+            self.MESSAGE5,
+            self.MESSAGE6,
+        )
 
     def __str__(self):
         return "{}-{}".format(self.SEQNO, self.SUBSEQNO)
