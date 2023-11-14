@@ -618,7 +618,7 @@ class IdentifierRule(object):
 class LegalEntity(models.Model, IdentifierRule):
     GENERAL_CONSUMER_IDENTIFIER = 10 * '0'
     identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    name = models.CharField(max_length=60, default='', db_index=True)
+    name = models.CharField(max_length=60, null=False, blank=False, db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
     person_in_charge = models.CharField(max_length=30, default='', db_index=True)
     telephone_number = models.CharField(max_length=26, default='', db_index=True)
