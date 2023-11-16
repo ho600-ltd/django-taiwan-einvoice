@@ -618,7 +618,7 @@ class IdentifierRule(object):
 class LegalEntity(models.Model, IdentifierRule):
     GENERAL_CONSUMER_IDENTIFIER = 10 * '0'
     identifier = models.CharField(max_length=10, null=False, blank=False, db_index=True)
-    name = models.CharField(max_length=60, default='', db_index=True)
+    name = models.CharField(max_length=60, null=False, blank=False, db_index=True)
     address = models.CharField(max_length=100, default='', db_index=True)
     person_in_charge = models.CharField(max_length=30, default='', db_index=True)
     telephone_number = models.CharField(max_length=26, default='', db_index=True)
@@ -2677,9 +2677,9 @@ class UploadBatch(models.Model):
             else:
                 beis.update(result_message=rc)
         
-        ids_in_c = []
+        ids_in_c_and_dot = []
         status['__else__'] = status['__else__'].lower()
-        finish_status = ['i', 'e', 'c']
+        finish_status = ['i', 'e', 'c', '.']
         is_finish = True
         exclude_ids = []
         lg.debug("status: {}".format(status))
@@ -2694,8 +2694,8 @@ class UploadBatch(models.Model):
                 raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match batch_einvoice_ids({})".format(self, ids))
             else:
                 beis.update(status=s)
-                if 'c' == s and not ids_in_c:
-                    ids_in_c = ids
+                if s in ('c', '.', ) and not ids_in_c_and_dot:
+                    ids_in_c_and_dot = ids
 
             exclude_ids.extend(ids)
             if s not in finish_status:
@@ -2705,14 +2705,14 @@ class UploadBatch(models.Model):
             raise BatchEInvoiceIDsError("BatchEInvoice objects of {} do not match excluding batch_einvoice_ids({})".format(self, ids))
         else:
             beis.update(status=status['__else__'])
-            if 'c' == status['__else__']:
-                ids_in_c = beis.values_list('id', named=False, flat=True)
+            if status['__else__'] in ('c', '.'):
+                ids_in_c_and_dot = beis.values_list('id', named=False, flat=True)
 
-        if ids_in_c:
-            bei = self.batcheinvoice_set.get(id=ids_in_c[0])
+        if ids_in_c_and_dot:
+            bei = self.batcheinvoice_set.get(id=ids_in_c_and_dot[0])
             content_model = bei.content_type.model_class()
             if content_model in [EInvoice, CancelEInvoice, VoidEInvoice]:
-                content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c
+                content_ids = BatchEInvoice.objects.filter(id__in=ids_in_c_and_dot
                                                           ).values_list('object_id',
                                                                         named=False,
                                                                         flat=True)
@@ -2813,6 +2813,7 @@ class BatchEInvoice(models.Model):
         ("e", _("E Error for EI process(E)")),
         ("i", _("I Error for EI process(I)")),
         ("c", _("Successful EI process(C)")),
+        (".", _("Failed but pass(.)")),
     )
     status = models.CharField(max_length=1, default="", choices=status_choices, db_index=True)
     result_code = models.CharField(max_length=5, default='', db_index=True)
