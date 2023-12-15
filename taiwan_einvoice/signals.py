@@ -4,11 +4,11 @@ from django.dispatch import receiver
 from django.utils.translation import gettext as _
 from channels.layers import get_channel_layer
 from taiwan_einvoice.models import UserConnectESCPOSWebLog
-
+from taiwan_einvoice.consumers import set_name_with_system_hash_key
 
 
 def discard_group_after_send_message(channel_layer, ucel):
-    group_name = "escpos_web_status_{}".format(ucel.escpos_web.id)
+    group_name = set_name_with_system_hash_key("escpos_web_status_{}".format(ucel.escpos_web.id))
     error_message_dict = {
             'type': 'show_error_message',
             'error_message': {"error_message": {"value": _("Already Logout")}},
