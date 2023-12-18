@@ -74,6 +74,7 @@ def update_print_einvoice_log(data):
 
 class ESCPOSWebConsumer(WebsocketConsumer):
     def connect(self):
+        lg = logging.getLogger('django')
         self.user = self.scope["user"]
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
         if self.user.is_superuser:
@@ -87,6 +88,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
+                    lg.info("ESCPOSWeb.DoesNotExist: {}".format(self.escpos_web_id))
                     return False
                 if 'operate_te_escposweb' in get_perms(self.user, escpos_web):
                     pass
@@ -95,8 +97,10 @@ class ESCPOSWebConsumer(WebsocketConsumer):
                     try:
                         escpos_web = ESCPOSWeb.objects.get(slug=slug)
                     except ESCPOSWeb.DoesNotExist:
+                        lg.info("ESCPOSWeb.DoesNotExist: {}".format(slug))
                         return False
                     if not escpos_web.verify_token_auth(seed, verify_value):
+                        lg.info("Wrong verify_token_auth: {} {} {}".format(slug, seed, verify_value))
                         return False
         self.escpos_web_group_name = set_name_with_system_hash_key('escpos_web_{}'.format(self.escpos_web_id))
         async_to_sync(self.channel_layer.group_add)(
@@ -121,7 +125,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         if not self.user.is_authenticated:
             lg.warning("is not authenticated: {}".format(self.user))
             return 
-        lg.debug("is authenticated: {}".format(self.user))
+        lg.info("is authenticated: {}".format(self.user))
         data = json.loads(text_data)
         einvoice_id = int(data.get('einvoice_id', 0))
         pass_key = data.get('pass_key', '')
@@ -172,7 +176,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             })
             invoice_json = json.dumps(invoice_data)
 
-        lg.debug(invoice_json)
+        lg.info(invoice_json)
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
@@ -202,6 +206,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
 
 class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
     def connect(self):
+        lg = logging.getLogger('django')
         self.user = self.scope["user"]
         escpos_web = None
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
@@ -216,6 +221,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
+                    lg.info("ESCPOSWeb.DoesNotExist: {}".format(self.escpos_web_id))
                     return False
                 if 'operate_te_escposweb' in get_perms(self.user, escpos_web):
                     pass
@@ -224,8 +230,10 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
                     try:
                         escpos_web = ESCPOSWeb.objects.get(slug=slug)
                     except ESCPOSWeb.DoesNotExist:
+                        lg.info("ESCPOSWeb.DoesNotExist: {}".format(slug))
                         return False
                     if not escpos_web.verify_token_auth(seed, verify_value):
+                        lg.info("Wrong verify_token_auth: {} {} {}".format(slug, seed, verify_value))
                         return False
         if self.user.is_authenticated:
             from taiwan_einvoice.models import ESCPOSWeb, UserConnectESCPOSWebLog
@@ -233,6 +241,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
+                    lg.info("ESCPOSWeb.DoesNotExist: {}".format(self.escpos_web_id))
                     return False
             ucel = UserConnectESCPOSWebLog.objects.get_or_create(escpos_web=escpos_web,
                                                                  user=self.user,
@@ -329,6 +338,7 @@ def save_printer_status_and_parse_receipt_type(escpos_web_id, data):
 
 class ESCPOSWebStatusConsumer(WebsocketConsumer):
     def connect(self):
+        lg = logging.getLogger('django')
         self.user = self.scope["user"]
         escpos_web = None
         self.escpos_web_id = self.scope['url_route']['kwargs']['escpos_web_id']
@@ -343,6 +353,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
+                    lg.info("ESCPOSWeb.DoesNotExist: {}".format(self.escpos_web_id))
                     return False
                 if 'operate_te_escposweb' in get_perms(self.user, escpos_web):
                     pass
@@ -351,8 +362,10 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
                     try:
                         escpos_web = ESCPOSWeb.objects.get(slug=slug)
                     except ESCPOSWeb.DoesNotExist:
+                        lg.info("ESCPOSWeb.DoesNotExist: {}".format(slug))
                         return False
                     if not escpos_web.verify_token_auth(seed, verify_value):
+                        lg.info("Wrong verify_token_auth: {} {} {}".format(slug, seed, verify_value))
                         return False
         if self.user.is_authenticated:
             from taiwan_einvoice.models import ESCPOSWeb, UserConnectESCPOSWebLog
@@ -360,6 +373,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
                 try:
                     escpos_web = ESCPOSWeb.objects.get(id=self.escpos_web_id)
                 except ESCPOSWeb.DoesNotExist:
+                    lg.info("ESCPOSWeb.DoesNotExist: {}".format(self.escpos_web_id))
                     return False
             ucel = UserConnectESCPOSWebLog.objects.get_or_create(escpos_web=escpos_web,
                                                                  user=self.user,
