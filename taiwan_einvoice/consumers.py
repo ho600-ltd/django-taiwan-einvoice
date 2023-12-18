@@ -125,7 +125,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
         if not self.user.is_authenticated:
             lg.warning("is not authenticated: {}".format(self.user))
             return 
-        lg.info("is authenticated: {}".format(self.user))
+        lg.debug("is authenticated: {}".format(self.user))
         data = json.loads(text_data)
         einvoice_id = int(data.get('einvoice_id', 0))
         pass_key = data.get('pass_key', '')
@@ -176,7 +176,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
             })
             invoice_json = json.dumps(invoice_data)
 
-        lg.info(invoice_json)
+        lg.debug(invoice_json)
         async_to_sync(self.channel_layer.group_send)(
             self.escpos_web_group_name,
             {
