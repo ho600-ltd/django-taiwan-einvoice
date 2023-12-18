@@ -1,9 +1,20 @@
 # taiwan_einvoice/consumers.py
+import hashlib
 import json, logging, datetime
 from asgiref.sync import async_to_sync
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from channels.generic.websocket import WebsocketConsumer
 from channels.db import database_sync_to_async
+
+
+
+def set_name_with_system_hash_key(name):
+    sk = settings.SECRET_KEY
+    if bytes != type(sk):
+        sk = sk.encode('utf-8')
+    h = hashlib.md5(b'django-taiwan-einvoice-'+sk).hexdigest()
+    return "{}_{}".format(name, h)
 
 
 
@@ -87,7 +98,7 @@ class ESCPOSWebConsumer(WebsocketConsumer):
                         return False
                     if not escpos_web.verify_token_auth(seed, verify_value):
                         return False
-        self.escpos_web_group_name = 'escpos_web_%s' % self.escpos_web_id
+        self.escpos_web_group_name = set_name_with_system_hash_key('escpos_web_{}'.format(self.escpos_web_id))
         async_to_sync(self.channel_layer.group_add)(
             self.escpos_web_group_name,
             self.channel_name
@@ -228,7 +239,7 @@ class ESCPOSWebPrintResultConsumer(WebsocketConsumer):
                                                                  channel_name=self.channel_name,
                                                                  is_connected=True,
             )
-        self.escpos_web_group_name = 'escpos_web_print_result_%s' % self.escpos_web_id
+        self.escpos_web_group_name = set_name_with_system_hash_key('escpos_web_print_result_{}'.format(self.escpos_web_id))
         async_to_sync(self.channel_layer.group_add)(
             self.escpos_web_group_name,
             self.channel_name
@@ -355,7 +366,7 @@ class ESCPOSWebStatusConsumer(WebsocketConsumer):
                                                                  channel_name=self.channel_name,
                                                                  is_connected=True,
             )
-        self.escpos_web_group_name = 'escpos_web_status_%s' % self.escpos_web_id
+        self.escpos_web_group_name = set_name_with_system_hash_key('escpos_web_status_{}'.format(self.escpos_web_id))
         async_to_sync(self.channel_layer.group_add)(
             self.escpos_web_group_name,
             self.channel_name
