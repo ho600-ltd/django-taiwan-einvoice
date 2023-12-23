@@ -72,6 +72,11 @@ SELLER_INVOICE_TRACK_NO_ALLOW_CANCEL_MIARGIN = datetime.timedelta(days=15)
 
 
 
+class EInvoiceSellerAPIError(Exception):
+    pass
+
+
+
 class IdentifierError(Exception):
     pass
 
@@ -222,7 +227,12 @@ class EInvoiceSellerAPI(models.Model):
             except:
                 pass
             else:
-                return result.json()
+                try:
+                    result_json = result.json()
+                except json.JSONDecodeError:
+                    raise EInvoiceSellerAPIError("EInvoiceSellerAPI return status code: {}".format(result.status_code))
+                else:
+                    return result_json
         return {"code": "?"}
 
 
