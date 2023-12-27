@@ -1686,6 +1686,11 @@ class EInvoice(models.Model):
                 v = getattr(self, "{}_{}".format(er, k))
                 if v:
                     er_j[er][json_k] = v
+        only_7_decimal_places = lambda x: str(round(float(x), 7))
+        _details = []
+        for _d in self.details:
+            _d['UnitPrice'] = only_7_decimal_places(_d['UnitPrice'])
+            _details.append(_d)
         J = {self.get_mig_no(): {
                 "Main": {
                     "InvoiceNumber": self.track_no,
@@ -1698,7 +1703,7 @@ class EInvoice(models.Model):
                     "PrintMark": 'Y' if self.print_mark else 'N',
                     "RandomNumber": self.random_number,
                 },
-                "Details": self.details,
+                "Details": _details,
                 "Amount": self.amounts,
             }
         }
