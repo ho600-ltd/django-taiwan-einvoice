@@ -1086,7 +1086,9 @@ class EITurnkeyDailySummaryResultXML(models.Model):
             self.result_date = datetime.datetime.strptime(report_date, "%Y%m%d").date()
             mig_no = message['Info']['MessageType']
             for key in counts.keys():
-                if '0' == message['ResultType'][key]['ResultDetailType']['Count']:
+                if mig_no in ('E0402', ):
+                    continue
+                elif '0' == message['ResultType'][key]['ResultDetailType']['Count']:
                     continue
                 if list == type(message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']):
                     invoices = message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']

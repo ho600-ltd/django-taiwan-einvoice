@@ -1694,10 +1694,11 @@ class EInvoice(models.Model):
                 v = getattr(self, "{}_{}".format(er, k))
                 if v:
                     er_j[er][json_k] = v
-        only_7_decimal_places = lambda x: str(round(float(x), 7))
+        only_7_decimal_places = lambda x: round(float(x), 7)
+        convert_to_int_if_the_same = lambda x: int(x) if int(x) == x else x
         _details = []
         for _d in self.details:
-            _d['UnitPrice'] = only_7_decimal_places(_d['UnitPrice'])
+            _d['UnitPrice'] = str(convert_to_int_if_the_same(only_7_decimal_places(_d['UnitPrice'])))
             _details.append(_d)
         J = {self.get_mig_no(): {
                 "Main": {
