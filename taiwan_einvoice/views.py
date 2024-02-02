@@ -599,7 +599,12 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
         else:
             csv_file = request.FILES['file']
             while True:
-                line = csv_file.readline().decode('cp950').rstrip("\r\n")
+                line = csv_file.readline()
+                try:
+                    line = line.decode('cp950').rstrip("\r\n")
+                except UnicodeDecodeError:
+                    line = line.decode('utf-8').rstrip("\r\n")
+
                 if not line:
                     break
                 elif turnkey_service.seller.legal_entity.identifier in line:
