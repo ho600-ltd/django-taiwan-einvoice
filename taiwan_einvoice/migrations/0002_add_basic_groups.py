@@ -7,13 +7,13 @@ NAMES = [
         "permissions": [
             "taiwan_einvoice.view_escposweb",
             "taiwan_einvoice.edit_te_escposweboperator",
-            "taiwan_einvoice.view_staffprofile",
+            "taiwan_einvoice.view_teastaffprofile",
         ]},
     {"group_name": 'TaiwanEInvoiceManagerGroup',
         "permissions": [
-            "taiwan_einvoice.view_staffprofile",
-            "taiwan_einvoice.add_staffprofile",
-            "taiwan_einvoice.change_staffprofile",
+            "taiwan_einvoice.view_teastaffprofile",
+            "taiwan_einvoice.add_teastaffprofile",
+            "taiwan_einvoice.change_teastaffprofile",
             "taiwan_einvoice.edit_te_turnkeywebgroup",
         ]},
 ]
