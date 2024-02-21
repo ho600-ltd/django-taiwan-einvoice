@@ -1095,7 +1095,10 @@ class EITurnkeyDailySummaryResultXML(models.Model):
                 else:
                     invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
                 for invoice in invoices:
-                    invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
+                    if "C0501" == mig_no:
+                        invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], report_date)
+                    else:
+                        invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
                     try:
                         tml = TURNKEY_MESSAGE_LOG.objects.get(UUID=uuid, INVOICE_IDENTIFIER=invoice_identifier)
                     except TURNKEY_MESSAGE_LOG.DoesNotExist:
