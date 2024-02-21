@@ -28,10 +28,14 @@ def rename_codename(apps, schema_editor):
         pcodes = [p for p in group_permissions['permissions'] if '_staffprofile' in p]
         for pcode in pcodes:
             app, code = pcode.split('.')
-            p = Permission.objects.get(codename=code)
-            group.permissions.remove(p)
-            np = Permission.objects.get(codename=code.replace('_staffprofile', '_teastaffprofile'))
-            group.permissions.add(np)
+            try:
+                p = Permission.objects.get(codename=code)
+            except Permission.DoesNotExist:
+                continue
+            else:
+                group.permissions.remove(p)
+                np = Permission.objects.get(codename=code.replace('_staffprofile', '_teastaffprofile'))
+                group.permissions.add(np)
 
 
 
