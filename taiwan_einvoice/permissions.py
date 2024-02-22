@@ -61,13 +61,16 @@ class CanEditTEAStaffProfile(BasePermission):
 
 class CanViewSelfTEAStaffProfile(BasePermission):
     ACTION_PERMISSION_MAPPING = {
+        "list": "",
+        "retrieve": "",
+        "partial_update": "",
     }
 
 
     def has_permission(self, request, view):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
-        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
+        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active and view.action in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
             res = True
         lg.debug("CanViewSelfTEAStaffProfile.has_permission with {}: {}".format(view.action, res))
         return res
@@ -76,7 +79,7 @@ class CanViewSelfTEAStaffProfile(BasePermission):
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
-        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active and request.user == obj.user:
+        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active and view.action in self.ACTION_PERMISSION_MAPPING.get(view.action, []) and request.user == obj.user:
             res = True
         lg.debug("CanViewSelfTEAStaffProfile.has_object_permission with {}: {}".format(view.action, res))
         return res
