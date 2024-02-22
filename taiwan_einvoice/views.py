@@ -348,6 +348,14 @@ class TurnkeyServiceModelViewSet(ModelViewSet):
         return Response({"error_title": _("Turnkey Service Error"),
                             "error_message": _("{} does not exist").format(pk),
                         }, status=status.HTTP_403_FORBIDDEN)
+    
+
+    def create(self, request, *args, **kwargs):
+        res = super().create(request, *args, **kwargs)
+        ct = ContentType.objects.get(app_label='taiwan_einvoice', model='turnkeyservice')
+        p = Permission.objects.get(content_type=ct, codename='edit_te_turnkeyservicegroup')
+        assign_perm(p, request.user, TurnkeyService.objects.get(id=res.data['id']))
+        return res
 
 
 
