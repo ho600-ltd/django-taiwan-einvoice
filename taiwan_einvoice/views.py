@@ -92,6 +92,7 @@ from taiwan_einvoice.serializers import (
     TurnkeyServiceGroupSerializer,
     SellerInvoiceTrackNoSerializer,
     E0501InvoiceAssignNoSerializer,
+    E0501InvoiceAssignNoCSVSerializer,
     EInvoiceSerializer,
     EInvoicePrintLogSerializer,
     CancelEInvoiceSerializer,
@@ -149,6 +150,14 @@ def escpos_web_demo(request, escpos_web_id):
     return render(request,
                   'taiwan_einvoice/escpos_web_demo.html',
                   {"escpos_web": escpos_web})
+
+
+
+class TEBaseModelViewset(ModelViewSet):
+    def initial(self, request, *args, **kwargs):
+        if request.user.is_staff or request.user.is_superuser:
+            self.renderer_classes += [TEBrowsableAPIRenderer, ]
+        super().initial(request, *args, **kwargs)
 
 
 
@@ -757,14 +766,14 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 
 
-class E0501InvoiceAssignNoModelViewSet(ModelViewSet):
+class E0501InvoiceAssignNoModelViewSet(TEBaseModelViewset):
     permission_classes = (Or(IsSuperUser, CanViewE0501InvoiceAssignNo, ), )
     pagination_class = OneHundredPerPagePagination
     queryset = E0501InvoiceAssignNo.objects.all().order_by('-year_month', )
     serializer_class = E0501InvoiceAssignNoSerializer
     filter_class = E0501InvoiceAssignNoFilter
-    renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
-    http_method_names = ('get', )
+    renderer_classes = [JSONRenderer, ]
+    http_method_names = ('get', 'post', )
 
 
     def get_queryset(self):
@@ -780,6 +789,88 @@ class E0501InvoiceAssignNoModelViewSet(ModelViewSet):
             permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(self.action, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(identifier__in=[ts.party_id for ts in turnkey_services], year_month__gte=year_month)
+
+
+    @action(detail=False,
+            methods=['get', 'post'],
+            serializer_class=E0501InvoiceAssignNoCSVSerializer)
+    def upload_csv_to_multiple_create(self, request, *args, **kwargs):
+        if 'csv_file' not in request.FILES:
+            serializer = self.get_serializer_class()([], many=True, context={"request": request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        identifiers = []
+        for ts in TurnkeyService.objects.all():
+            if ts.seller.legal_entity.identifier not in identifiers:
+                identifiers.append(ts.seller.legal_entity.identifier)
+
+        eians = []
+        csv_file = request.FILES['csv_file']
+        while True:
+            line = csv_file.readline()
+            try:
+                line = line.decode('cp950').rstrip("\r\n")
+            except UnicodeDecodeError:
+                line = line.decode('utf-8').rstrip("\r\n")
+            else:
+                if not line:
+                    break
+
+            for identifier in identifiers:
+                if identifier not in line:
+                    continue
+
+                cols = line.split(',')
+
+                if '07' != '{:02d}'.format(int(cols[1])):
+                    er = {
+                        "error_title": _("Track No. Type Error"),
+                        "error_message": _("It only support '07' type now.")
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                try:
+                    begin_month_str, end_month_str = cols[3].split(' ~ ')
+                    end_chmk_year, end_month = end_month_str.split('/')
+                    end_year = int(end_chmk_year)
+                    end_month = int(end_month)
+                    year_month = "{:03d}{:02d}".format(end_year, end_month)
+                except Exception as e:
+                    er = {
+                        "error_title": _("Year Month Range Error"),
+                        "error_message": _("{} has error: \n\n\n{}").format(line, e)
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+
+                identifier = cols[0]
+                track = cols[4]
+                begin_no = cols[5]
+                end_no = cols[6]
+                if begin_no[-2:] not in ('00', '50'):
+                    er = {
+                        "error_title": _("Begin No. Error"),
+                        "error_message": _("{} has error: \n\n\nThe suffix of begin_no should be 00 or 50.").format(line)
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                if end_no[-2:] not in ('49', '99'):
+                    er = {
+                        "error_title": _("End No. Error"),
+                        "error_message": _("{} has error: \n\n\nThe suffix of end_no should be 49 or 99.").format(line)
+                    }
+                    return Response(er, status=status.HTTP_403_FORBIDDEN)
+                booklet = (int(end_no) - int(begin_no) + 1) / 50.
+                eian, created = E0501InvoiceAssignNo.objects.get_or_create(
+                    identifier=identifier,
+                    type='{:02d}'.format(int(cols[1])),
+                    year_month=year_month,
+                    track=track,
+                    begin_no=begin_no,
+                    end_no=end_no,
+                    booklet=booklet,
+                )
+                eians.append(eian)
+        serializer = E0501InvoiceAssignNoCSVSerializer(eians, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 
