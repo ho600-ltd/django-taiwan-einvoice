@@ -3267,6 +3267,11 @@ class E0501InvoiceAssignNo(models.Model):
     @property
     def type__display(self):
         return self.get_type_display()
+    @property
+    def csv_file(self,
+                 csv_file_property_is_just_for_E0501InvoiceAssignNoModelViewSet_upload_csv_to_multiple_create_ACTION='/dev/null',
+                 csv_file_property_is_just_for_E0501InvoiceAssignNoCSVSerializer_csv_file_FIELD='/dev/null'):
+        return None
 
 
     

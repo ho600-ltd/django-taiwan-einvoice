@@ -14,6 +14,7 @@ from rest_framework.serializers import (
     HyperlinkedIdentityField,
     ModelSerializer,
     Serializer,
+    FileField,
     ReadOnlyField,
     ChoiceField,
     RelatedField,
@@ -382,6 +383,27 @@ class E0501InvoiceAssignNoSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:e0501invoiceassignno-detail", lookup_field='pk')
     type__display = CharField(read_only=True)
+
+
+
+    class Meta:
+        model = E0501InvoiceAssignNo
+        fields = '__all__'
+
+
+
+class E0501InvoiceAssignNoCSVSerializer(ModelSerializer):
+    id = ReadOnlyField()
+    create_time = ReadOnlyField()
+    identifier = ReadOnlyField()
+    type = ReadOnlyField()
+    type__display = CharField(read_only=True)
+    year_month = ReadOnlyField()
+    track = ReadOnlyField()
+    begin_no = ReadOnlyField()
+    end_no = ReadOnlyField()
+    booklet = ReadOnlyField()
+    csv_file = FileField()
 
 
 
