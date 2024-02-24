@@ -18,14 +18,17 @@ class IsSuperUser(IsAdminUser):
 
 
 class CanEditTEAStaffProfile(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.view_teastaffprofile",
         ),
-        'PATCH': (
+        "retrieve": (
+            "taiwan_einvoice.view_teastaffprofile",
+        ),
+        "partial_update": (
             "taiwan_einvoice.change_teastaffprofile",
         ),
-        'POST': (
+        "create": (
             "taiwan_einvoice.add_teastaffprofile",
         )
     }
@@ -35,11 +38,11 @@ class CanEditTEAStaffProfile(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanEditTEAStaffProfile.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditTEAStaffProfile.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -47,56 +50,51 @@ class CanEditTEAStaffProfile(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanEditTEAStaffProfile.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditTEAStaffProfile.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanViewSelfTEAStaffProfile(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
-            "taiwan_einvoice.view_teastaffprofile",
-        ),
+    ACTION_PERMISSION_MAPPING = {
+        "list": "",
+        "retrieve": "",
+        "partial_update": "",
     }
 
 
     def has_permission(self, request, view):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
-        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
-                app, codename = app_codename.split('.')
-                if codename in get_perms(request.user, request.user.teastaffprofile):
-                    res = True
-                    break
-        lg.debug("CanViewSelfTEAStaffProfile.has_permission with {}: {}".format(request.method, res))
+        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active and view.action in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
+            res = True
+        lg.debug("CanViewSelfTEAStaffProfile.has_permission with {}: {}".format(view.action, res))
         return res
         
 
     def has_object_permission(self, request, view, obj):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
-        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for app_codename in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
-                app, codename = app_codename.split('.')
-                if codename in get_perms(request.user, request.user.teastaffprofile):
-                    res = True
-                    break
-        lg.debug("CanViewSelfTEAStaffProfile.has_object_permission with {}: {}".format(request.method, res))
+        if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active and view.action in self.ACTION_PERMISSION_MAPPING.get(view.action, []) and request.user == obj.user:
+            res = True
+        lg.debug("CanViewSelfTEAStaffProfile.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanEditESCPOSWebOperator(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.edit_te_escposweboperator",
         ),
-        "PATCH": (
+        "retrieve": (
+            "taiwan_einvoice.edit_te_escposweboperator",
+        ),
+        "partial_update": (
             "taiwan_einvoice.edit_te_escposweboperator",
         ),
     }
@@ -106,11 +104,11 @@ class CanEditESCPOSWebOperator(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanEditESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditESCPOSWebOperator.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -118,18 +116,21 @@ class CanEditESCPOSWebOperator(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanEditESCPOSWebOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditESCPOSWebOperator.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanOperateESCPOSWebOperator(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.operate_te_escposweb",
+        ),
+        "retrieve": (
             "taiwan_einvoice.operate_te_escposweb",
         ),
     }
@@ -139,10 +140,10 @@ class CanOperateESCPOSWebOperator(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanOperateESCPOSWebOperator.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanOperateESCPOSWebOperator.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanOperateESCPOSWebOperator.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -150,12 +151,12 @@ class CanOperateESCPOSWebOperator(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanOperateESCPOSWebOperator.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj):
                     res = True
                     break
-        lg.debug("CanOperateESCPOSWebOperator.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanOperateESCPOSWebOperator.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
@@ -181,7 +182,7 @@ class CanEditTurnkeyServiceGroup(BasePermission):
             permissions = self.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEditTurnkeyServiceGroup.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditTurnkeyServiceGroup.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -194,7 +195,7 @@ class CanEditTurnkeyServiceGroup(BasePermission):
                 if codename in get_perms(request.user, obj):
                     res = True
                     break
-        lg.debug("CanEditTurnkeyServiceGroup.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEditTurnkeyServiceGroup.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
@@ -231,7 +232,7 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
             permissions = CanEntrySellerInvoiceTrackNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntrySellerInvoiceTrackNo.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntrySellerInvoiceTrackNo.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -244,14 +245,17 @@ class CanEntrySellerInvoiceTrackNo(BasePermission):
                 if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
-        lg.debug("CanEntrySellerInvoiceTrackNo.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntrySellerInvoiceTrackNo.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanEntryEInvoice(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_te_einvoice",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_te_einvoice",
         ),
     }
@@ -261,10 +265,10 @@ class CanEntryEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntryEInvoice.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoice.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -272,19 +276,22 @@ class CanEntryEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanEntryEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
-        lg.debug("CanEntryEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoice.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanEntryEInvoicePrintLog(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_te_einvoiceprintlog",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_te_einvoiceprintlog",
         ),
     }
@@ -294,10 +301,10 @@ class CanEntryEInvoicePrintLog(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryEInvoicePrintLog.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntryEInvoicePrintLog.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoicePrintLog.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -305,22 +312,25 @@ class CanEntryEInvoicePrintLog(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanEntryEInvoicePrintLog.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
-        lg.debug("CanEntryEInvoicePrintLog.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryEInvoicePrintLog.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanEntryCancelEInvoice(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.view_te_canceleinvoice",
         ),
-        "POST": (
+        "retrieve": (
+            "taiwan_einvoice.view_te_canceleinvoice",
+        ),
+        "create": (
             "taiwan_einvoice.add_te_canceleinvoice",
         ),
     }
@@ -330,10 +340,10 @@ class CanEntryCancelEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryCancelEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntryCancelEInvoice.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryCancelEInvoice.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -341,22 +351,25 @@ class CanEntryCancelEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanEntryCancelEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
-        lg.debug("CanEntryCancelEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryCancelEInvoice.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanEntryVoidEInvoice(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
             "taiwan_einvoice.view_te_voideinvoice",
         ),
-        "POST": (
+        "retrieve": (
+            "taiwan_einvoice.view_te_voideinvoice",
+        ),
+        "create": (
             "taiwan_einvoice.add_te_voideinvoice",
         ),
     }
@@ -366,10 +379,10 @@ class CanEntryVoidEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryVoidEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanEntryVoidEInvoice.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryVoidEInvoice.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -377,19 +390,22 @@ class CanEntryVoidEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanEntryVoidEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.einvoice.seller_invoice_track_no.turnkey_service):
                     res = True
                     break
-        lg.debug("CanEntryVoidEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanEntryVoidEInvoice.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanViewLegalEntity(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_legalentity",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_legalentity",
         ),
     }
@@ -399,11 +415,11 @@ class CanViewLegalEntity(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanViewLegalEntity.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewLegalEntity.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -411,11 +427,11 @@ class CanViewLegalEntity(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for _p in self.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in self.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
-        lg.debug("CanViewLegalEntity.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewLegalEntity.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
@@ -440,7 +456,7 @@ class CanViewTurnkeyService(BasePermission):
             permissions = CanViewTurnkeyService.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewTurnkeyService.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTurnkeyService.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -454,13 +470,16 @@ class CanViewTurnkeyService(BasePermission):
                 if codename in get_perms(request.user, obj):
                     res = True
                     break
-        lg.debug("CanViewTurnkeyService.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTurnkeyService.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 class CanViewBatchEInvoice(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_te_alarm_for_programmer",
         ),
     }
@@ -470,10 +489,10 @@ class CanViewBatchEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewBatchEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewBatchEInvoice.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewBatchEInvoice.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -481,18 +500,21 @@ class CanViewBatchEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewBatchEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.batch.turnkey_service):
                     res = True
                     break
-        lg.debug("CanViewBatchEInvoice.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewBatchEInvoice.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 class CanViewTEAlarmForProgrammer(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_te_alarm_for_programmer",
         ),
     }
@@ -502,11 +524,11 @@ class CanViewTEAlarmForProgrammer(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
                 return turnkey_services.exists()
-        lg.debug("CanViewTEAlarmForProgrammer.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTEAlarmForProgrammer.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -514,19 +536,22 @@ class CanViewTEAlarmForProgrammer(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewTEAlarmForProgrammer.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
-        lg.debug("CanViewTEAlarmForProgrammer.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTEAlarmForProgrammer.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanViewTEAlarmForGeneralUser(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_te_alarm_for_general_user",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_te_alarm_for_general_user",
         ),
     }
@@ -536,11 +561,11 @@ class CanViewTEAlarmForGeneralUser(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForGeneralUser.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
                 return TEAlarm.objects.filter(turnkey_service__in=turnkey_services, target_audience_type="g").exists()
-        lg.debug("CanViewTEAlarmForGeneralUser.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTEAlarmForGeneralUser.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -548,21 +573,24 @@ class CanViewTEAlarmForGeneralUser(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewTEAlarmForGeneralUser.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
         if res and hasattr(self, 'target_audience_type') and "g" != self.target_audience_type:
             res = False
-        lg.debug("CanViewTEAlarmForGeneralUser.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewTEAlarmForGeneralUser.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
 
 class CanViewSummaryReport(BasePermission):
-    METHOD_PERMISSION_MAPPING = {
-        "GET": (
+    ACTION_PERMISSION_MAPPING = {
+        "list": (
+            "taiwan_einvoice.view_te_summaryreport",
+        ),
+        "retrieve": (
             "taiwan_einvoice.view_te_summaryreport",
         ),
     }
@@ -572,10 +600,10 @@ class CanViewSummaryReport(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewSummaryReport.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewSummaryReport.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewSummaryReport.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -583,12 +611,12 @@ class CanViewSummaryReport(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for p in CanViewSummaryReport.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.turnkey_service):
                     res = True
                     break
-        lg.debug("CanViewSummaryReport.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewSummaryReport.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 
@@ -614,7 +642,7 @@ class CanViewE0501InvoiceAssignNo(BasePermission):
             permissions = CanViewE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewE0501InvoiceAssignNo.has_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewE0501InvoiceAssignNo.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -630,6 +658,6 @@ class CanViewE0501InvoiceAssignNo(BasePermission):
                     if codename in get_perms(request.user, t_obj, with_superuser=self.with_superuser):
                         res = True
                         break
-        lg.debug("CanViewE0501InvoiceAssignNo.has_object_permission with {}: {}".format(request.method, res))
+        lg.debug("CanViewE0501InvoiceAssignNo.has_object_permission with {}: {}".format(view.action, res))
         return res
 
