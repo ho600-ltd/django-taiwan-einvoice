@@ -208,7 +208,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
         if res:
             return queryset
         else:
-            for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+            for _p in CanEditESCPOSWebOperator.ACTION_PERMISSION_MAPPING.get(request.method, []):
                 res = request.user.has_perm(_p)
                 if res:
                     break
@@ -216,7 +216,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
                 return queryset
             else:
                 objs = get_objects_for_user(request.user,
-                                            CanOperateESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                            CanOperateESCPOSWebOperator.ACTION_PERMISSION_MAPPING.get(request.method, []),
                                             any_perm=True)
                 return objs
 
@@ -238,7 +238,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
         if not request.user.teastaffprofile or not request.user.teastaffprofile.is_active:
             return queryset.none()
         res = False
-        for _p in CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []):
+        for _p in CanEditESCPOSWebOperator.ACTION_PERMISSION_MAPPING.get(request.method, []):
             res = request.user.has_perm(_p)
             if res:
                 break
@@ -246,7 +246,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
             return queryset
         else:
             objs = get_objects_for_user(request.user,
-                                        CanEditESCPOSWebOperator.METHOD_PERMISSION_MAPPING.get(request.method, []),
+                                        CanEditESCPOSWebOperator.ACTION_PERMISSION_MAPPING.get(request.method, []),
                                         any_perm=True)
             return objs
     
@@ -809,7 +809,7 @@ class EInvoiceModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryEInvoice.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(seller_invoice_track_no__turnkey_service__in=turnkey_services)
 
@@ -869,7 +869,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryEInvoicePrintLog.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryEInvoicePrintLog.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services)
 
@@ -893,7 +893,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryCancelEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryCancelEInvoice.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services)
     
@@ -1005,7 +1005,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanEntryVoidEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanEntryVoidEInvoice.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(einvoice__seller_invoice_track_no__turnkey_service__in=turnkey_services)
     
@@ -1197,7 +1197,7 @@ class UploadBatchModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_service__in=turnkey_services)
 
@@ -1221,7 +1221,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewBatchEInvoice.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewBatchEInvoice.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(batch__turnkey_service__in=turnkey_services)
 
@@ -1315,7 +1315,7 @@ class AuditLogModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewTEAlarmForProgrammer.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_service__in=turnkey_services)
 
@@ -1339,7 +1339,7 @@ class SummaryReportModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewSummaryReport.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            permissions = CanViewSummaryReport.ACTION_PERMISSION_MAPPING.get(request.method, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_service__in=turnkey_services)
 
@@ -1363,8 +1363,8 @@ class TEAlarmModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            programmer_permissions = CanViewTEAlarmForGeneralUser.METHOD_PERMISSION_MAPPING.get(request.method, [])
-            general_user_permissions = CanViewTEAlarmForProgrammer.METHOD_PERMISSION_MAPPING.get(request.method, [])
+            programmer_permissions = CanViewTEAlarmForGeneralUser.ACTION_PERMISSION_MAPPING.get(request.method, [])
+            general_user_permissions = CanViewTEAlarmForProgrammer.ACTION_PERMISSION_MAPPING.get(request.method, [])
             permissions = list(programmer_permissions) + list(general_user_permissions)
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(turnkey_service__in=turnkey_services)
