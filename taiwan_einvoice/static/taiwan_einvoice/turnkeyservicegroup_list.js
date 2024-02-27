@@ -187,7 +187,7 @@ function delete_turnkeyservicegroup(taiwan_einvoice_site) {
                     gettext("Success"),
                     gettext("Deleted")
                 );
-                var no = 1;
+                var no = 0;
                 $('table.search_result tbody tr').each(function(){
                     $('[field=no]', $(this)).text(no);
                     no += 1;
