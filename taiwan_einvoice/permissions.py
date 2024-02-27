@@ -258,6 +258,12 @@ class CanEntryEInvoice(BasePermission):
         "retrieve": (
             "taiwan_einvoice.view_te_einvoice",
         ),
+        "get_escpos_print_scripts": (
+            "taiwan_einvoice.view_te_einvoice",
+        ),
+        "get_escpos_print_scripts_for_sales_return_receipt": (
+            "taiwan_einvoice.view_te_einvoice",
+        ),
     }
 
 
@@ -444,6 +450,9 @@ class CanViewTurnkeyService(BasePermission):
         "retrieve": (
             "taiwan_einvoice.view_turnkeyservice",
         ),
+        "get_and_create_ei_turnkey_daily_summary_result": (
+            "taiwan_einvoice.view_turnkeyservice",
+        ),
     }
 
 
@@ -482,6 +491,9 @@ class CanDealWithBatchEInvoice(BasePermission):
         "retrieve": (
             "taiwan_einvoice.view_te_alarm_for_programmer",
         ),
+        "re_create_another_upload_batch": (
+            "taiwan_einvoice.view_te_alarm_for_programmer",
+        )
     }
 
 
