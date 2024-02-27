@@ -622,6 +622,7 @@ class CanViewSummaryReport(BasePermission):
 
 
 class CanViewE0501InvoiceAssignNo(BasePermission):
+    with_superuser = True
     ACTION_PERMISSION_MAPPING = {
         "list": (
             "taiwan_einvoice.view_turnkeyservice",
@@ -654,7 +655,7 @@ class CanViewE0501InvoiceAssignNo(BasePermission):
             for p in permissions:
                 app, codename = p.split('.')
                 for t_obj in ts:
-                    if codename in get_perms(request.user, t_obj):
+                    if codename in get_perms(request.user, t_obj, with_superuser=self.with_superuser):
                         res = True
                         break
         lg.debug("CanViewE0501InvoiceAssignNo.has_object_permission with {}: {}".format(view.action, res))
