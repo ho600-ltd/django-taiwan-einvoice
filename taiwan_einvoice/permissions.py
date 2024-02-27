@@ -639,7 +639,7 @@ class CanDealWithE0501InvoiceAssignNo(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            permissions = CanDealWithE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
         lg.debug("CanDealWithE0501InvoiceAssignNo.has_permission with {}: {}".format(view.action, res))
@@ -650,7 +650,7 @@ class CanDealWithE0501InvoiceAssignNo(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            permissions = CanDealWithE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             ts = TurnkeyService.objects.filter(seller__legalentity__identifier=obj.identifier)
             for p in permissions:
                 app, codename = p.split('.')
