@@ -621,7 +621,7 @@ class CanViewSummaryReport(BasePermission):
 
 
 
-class CanViewE0501InvoiceAssignNo(BasePermission):
+class CanDealWithE0501InvoiceAssignNo(BasePermission):
     with_superuser = True
     ACTION_PERMISSION_MAPPING = {
         "list": (
@@ -642,7 +642,7 @@ class CanViewE0501InvoiceAssignNo(BasePermission):
             permissions = CanViewE0501InvoiceAssignNo.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewE0501InvoiceAssignNo.has_permission with {}: {}".format(view.action, res))
+        lg.debug("CanDealWithE0501InvoiceAssignNo.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -658,6 +658,6 @@ class CanViewE0501InvoiceAssignNo(BasePermission):
                     if codename in get_perms(request.user, t_obj, with_superuser=self.with_superuser):
                         res = True
                         break
-        lg.debug("CanViewE0501InvoiceAssignNo.has_object_permission with {}: {}".format(view.action, res))
+        lg.debug("CanDealWithE0501InvoiceAssignNo.has_object_permission with {}: {}".format(view.action, res))
         return res
 
