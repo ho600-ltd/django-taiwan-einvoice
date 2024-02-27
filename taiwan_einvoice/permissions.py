@@ -474,7 +474,7 @@ class CanViewTurnkeyService(BasePermission):
         return res
 
 
-class CanViewBatchEInvoice(BasePermission):
+class CanDealWithBatchEInvoice(BasePermission):
     ACTION_PERMISSION_MAPPING = {
         "list": (
             "taiwan_einvoice.view_te_alarm_for_programmer",
@@ -489,10 +489,10 @@ class CanViewBatchEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            permissions = CanViewBatchEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, [])
+            permissions = CanDealWithBatchEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, [])
             if permissions:
                 res = get_objects_for_user(request.user, permissions, any_perm=True).exists()
-        lg.debug("CanViewBatchEInvoice.has_permission with {}: {}".format(view.action, res))
+        lg.debug("CanDealWithBatchEInvoice.has_permission with {}: {}".format(view.action, res))
         return res
         
 
@@ -500,12 +500,12 @@ class CanViewBatchEInvoice(BasePermission):
         lg = logging.getLogger('taiwan_einvoice')
         res = False
         if request.user.is_authenticated and hasattr(request.user, 'teastaffprofile') and request.user.teastaffprofile.is_active:
-            for p in CanViewBatchEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, []):
+            for p in CanDealWithBatchEInvoice.ACTION_PERMISSION_MAPPING.get(view.action, []):
                 app, codename = p.split('.')
                 if codename in get_perms(request.user, obj.batch.turnkey_service):
                     res = True
                     break
-        lg.debug("CanViewBatchEInvoice.has_object_permission with {}: {}".format(view.action, res))
+        lg.debug("CanDealWithBatchEInvoice.has_object_permission with {}: {}".format(view.action, res))
         return res
 
 

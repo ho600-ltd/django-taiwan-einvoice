@@ -33,7 +33,7 @@ from taiwan_einvoice.permissions import (
     CanEntryVoidEInvoice,
     CanViewLegalEntity,
     CanViewTurnkeyService,
-    CanViewBatchEInvoice,
+    CanDealWithBatchEInvoice,
     CanViewSummaryReport,
     CanViewTEAlarmForProgrammer,
     CanViewTEAlarmForGeneralUser,
@@ -1204,7 +1204,7 @@ class UploadBatchModelViewSet(ModelViewSet):
 
 
 class BatchEInvoiceModelViewSet(ModelViewSet):
-    permission_classes = (Or(IsSuperUser, CanViewBatchEInvoice), )
+    permission_classes = (Or(IsSuperUser, CanDealWithBatchEInvoice), )
     pagination_class = TenTo100PerPagePagination
     queryset = BatchEInvoice.objects.all().order_by('-id')
     serializer_class = BatchEInvoiceSerializer
@@ -1221,7 +1221,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
         elif request.user.is_superuser:
             return queryset
         else:
-            permissions = CanViewBatchEInvoice.ACTION_PERMISSION_MAPPING.get(self.action, [])
+            permissions = CanDealWithBatchEInvoice.ACTION_PERMISSION_MAPPING.get(self.action, [])
             turnkey_services = get_objects_for_user(request.user, permissions, any_perm=True)
             return queryset.filter(batch__turnkey_service__in=turnkey_services)
 
