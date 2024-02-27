@@ -26,7 +26,7 @@ from taiwan_einvoice.permissions import (
     CanEditESCPOSWebOperator,
     CanEditTurnkeyServiceGroup,
     CanEntrySellerInvoiceTrackNo,
-    CanViewE0501InvoiceAssignNo,
+    CanDealWithE0501InvoiceAssignNo,
     CanEntryEInvoice,
     CanEntryEInvoicePrintLog,
     CanEntryCancelEInvoice,
@@ -775,13 +775,13 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
 
 
 class E0501InvoiceAssignNoModelViewSet(TEBaseModelViewset):
-    permission_classes = (Or(IsSuperUser, CanViewE0501InvoiceAssignNo, ), )
+    permission_classes = (Or(IsSuperUser, CanDealWithE0501InvoiceAssignNo, ), )
     pagination_class = OneHundredPerPagePagination
     queryset = E0501InvoiceAssignNo.objects.all().order_by('-year_month', )
     serializer_class = E0501InvoiceAssignNoSerializer
     filter_class = E0501InvoiceAssignNoFilter
     renderer_classes = [JSONRenderer, ]
-    http_method_names = ('get', 'post', )
+    http_method_names = ('get', 'post', 'delete')
 
 
     def get_queryset(self):
