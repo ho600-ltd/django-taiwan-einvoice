@@ -59,9 +59,20 @@ class EInvoiceMIGSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class UserToSuperuserRelatedField(PrimaryKeyRelatedField):
+    def get_queryset(self):
+        request = self.context.get('request', None)
+        if request and request.user.is_superuser:
+            return User.objects.all().order_by('id')
+        else:
+            return User.objects.none()
+
+
+
 class TEAStaffProfileSerializer(ModelSerializer):
     resource_uri = HyperlinkedIdentityField(
         view_name="taiwan_einvoice:taiwaneinvoiceapi:teastaffprofile-detail", lookup_field='pk')
+    user = UserToSuperuserRelatedField(required=True, allow_null=False)
     user_dict = UserSerializer(source='user', read_only=True)
     in_printer_admin_group = BooleanField()
     in_manager_group = BooleanField()
