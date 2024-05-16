@@ -191,6 +191,11 @@
             {% trans "System Build Version" %}:
             {{ settings.BUILD_DATE }}-{{ settings.BUILD_NUMBER }}-{{ settings.VERSION }}
         </div>
+        {% if settings.CONTAINER_HOSTNAME %}
+            <div style="display: none">{{ settings.CONTAINER_HOSTNAME }}</div>
+        {% else %}{% if request.META.NODE_HOSTNAME %}
+            <div style="display: none">{{ request.META.NODE_HOSTNAME }}</div>
+        {% endif %}{% endif %}
     </div>
 
 </body>
