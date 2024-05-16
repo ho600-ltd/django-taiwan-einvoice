@@ -1,6 +1,6 @@
 # Only for taiwan_einvoice app
 Django>=4.2,<4.3
-Django-filter>=23.3,<2.4
+Django-filter>=23.3,<24
 django-compressor>=4.4,<4.5
 django-guardian>=2.4,<2.5
 djangorestframework>=3.14,<3.15
