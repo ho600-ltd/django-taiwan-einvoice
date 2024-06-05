@@ -90,6 +90,7 @@ router.register('e0501invoiceassignno', views.E0501InvoiceAssignNoModelViewSet, 
 
 app_name = 'taiwan_einvoice'
 urlpatterns = [
+    path('channel_layer_monitor/', views.channel_layer_monitor, name='channel_layer_monitor'),
     path('escpos_web_demo/<int:escpos_web_id>/', views.escpos_web_demo, name='escpos_web_demo'),
     re_path(r'^api/{}/'.format(TaiwanEInvoiceAPIRootView.version),
         include((router.urls, "taiwaneinvoiceapi"), namespace="taiwaneinvoiceapi")),
