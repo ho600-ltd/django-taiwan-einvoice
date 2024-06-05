@@ -1,6 +1,7 @@
 import json, datetime, logging, re
+from random import randint
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.models import Permission, User, Group
@@ -150,6 +151,22 @@ def escpos_web_demo(request, escpos_web_id):
     return render(request,
                   'taiwan_einvoice/escpos_web_demo.html',
                   {"escpos_web": escpos_web})
+
+
+def channel_layer_monitor(request):
+    from time import sleep
+    import channels.layers
+    channel_layer = channels.layers.get_channel_layer()
+    from asgiref.sync import async_to_sync
+    i = randint(0, 10000)
+    message = 'hello {} at {}'.format(i, now())
+    async_to_sync(channel_layer.send)('test_channel', {'type': message})
+    sleep(3+1/i)
+    result = async_to_sync(channel_layer.receive)('test_channel')
+    if message != result['type']:
+        return HttpResponseForbidden('{}\n!=\n{}'.format(message, result['type']), content_type='text/plain')
+    else:
+        return HttpResponse('Ok', content_type='text/plain')
 
 
 
