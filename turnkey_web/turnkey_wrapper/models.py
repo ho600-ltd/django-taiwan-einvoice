@@ -799,9 +799,15 @@ class EITurnkeyBatch(models.Model):
             f.close()
         for f in glob.glob(os.path.join(tmp_data_path, "*")):
             if self.mig.startswith("E"):
-                shutil.move(f, self.ei_turnkey.B2PMessageUpCastSRC.format(mig=self.mig))
+                _path = self.ei_turnkey.B2PMessageUpCastSRC.format(mig=self.mig)
             elif self.mig.startswith("C"):
-                shutil.move(f, self.ei_turnkey.B2CStorageUpCastSRC.format(mig=self.mig))
+                _path = self.ei_turnkey.B2CStorageUpCastSRC.format(mig=self.mig)
+            else:
+                _path = ''
+
+            if _path:
+                pathlib.Path(_path).mkdir(parents=True, exist_ok=True)
+                shutil.move(f, _path)
         
         self.update_to_new_status(NEXT_STATUS_IN_GOOD)
         return True
