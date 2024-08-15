@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-16 15:22+0800\n"
+"POT-Creation-Date: 2024-08-15 17:39+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -348,6 +348,9 @@ msgstr "EI 回傳 I 錯誤(I)"
 
 msgid "Successful EI process(C)"
 msgstr "成功完成 EI 程序(C)"
+
+msgid "Failed but pass(.)"
+msgstr "失敗但略過(.)"
 
 msgid "BatchEInvoice does exist"
 msgstr "批次上傳電子發票(id: {})不存在!"
@@ -803,8 +806,8 @@ msgstr ""
 msgid "Limit to 200 words"
 msgstr "上限200個字"
 
-msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator and random_number.)"
-msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼不同外，其餘資訊皆同原作廢發票)"
+msgid "Re-Create E-Invoice as the same time(The new E-Invoice will be the same as the canceled E-Invoice, except track no, generate_time, creator, random_number, sales amount, tax amount, total amount and details.)"
+msgstr "同時開立新的電子發票(新發票除字軌號碼、開立時間、開立者、隨機碼、銷售額、稅額、總金額及明細不同外，其餘資訊皆同原作廢發票)"
 
 msgid "Please input the one-dimensional barcode for canceling: "
 msgstr "請輸入欲作廢之發票的一維條碼"
@@ -1789,10 +1792,10 @@ msgid "TurnkeyService(id: {}) does not exist"
 msgstr "Turnkwy 伺服器(id: {})不存在"
 
 msgid "E0501InvoiceAssignNo Does Not Exist"
-msgstr "營業人電子發票配號檔不存在"
+msgstr "E0501營業人電子發票配號檔不存在"
 
 msgid "E0501InvoiceAssignNo(id: {}) does not exist"
-msgstr "營業人電子發票配號檔(id: {})不存在"
+msgstr "E0501營業人電子發票配號檔(id: {})不存在"
 
 msgid "Track No. Type Error"
 msgstr "字軌號碼類別錯誤"

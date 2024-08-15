@@ -145,6 +145,8 @@
     epw_user_manual
     install_tkw_in_linux
     merchant_create_b2c_invoice
+    turnkey_download_E0501
+    turnkey_download_E0504
     self_checklist_before_turnkey_online
     self_checklist_before_applying_track_no
     import_django_taiwan_einvoice
