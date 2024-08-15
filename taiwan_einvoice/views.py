@@ -1060,6 +1060,8 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d = {f.name: getattr(einvoice, f.name)
                 for f in EInvoice._meta.fields
             }
+            _d['details'] = einvoice.content_object.get_einvoice_details()
+            _d['amounts'] = einvoice.content_object.get_einvoice_amounts(data['buyer_identifier'] == LegalEntity.GENERAL_CONSUMER_IDENTIFIER)
             seller_invoice_track_no = None
             for seller_invoice_track_no in SellerInvoiceTrackNo.filter_now_use_sitns(
                                                     turnkey_service=einvoice.seller_invoice_track_no.turnkey_service,
