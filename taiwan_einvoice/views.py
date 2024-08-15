@@ -1,6 +1,7 @@
 import json, datetime, logging, re
+from random import randint
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.models import Permission, User, Group
@@ -152,6 +153,22 @@ def escpos_web_demo(request, escpos_web_id):
                   {"escpos_web": escpos_web})
 
 
+def channel_layer_monitor(request):
+    from time import sleep
+    import channels.layers
+    channel_layer = channels.layers.get_channel_layer()
+    from asgiref.sync import async_to_sync
+    i = randint(0, 10000)
+    message = 'hello {} at {}'.format(i, now())
+    async_to_sync(channel_layer.send)('test_channel', {'type': message})
+    sleep(3+1/i)
+    result = async_to_sync(channel_layer.receive)('test_channel')
+    if message != result['type']:
+        return HttpResponseForbidden('{}\n!=\n{}'.format(message, result['type']), content_type='text/plain')
+    else:
+        return HttpResponse('Ok', content_type='text/plain')
+
+
 
 class TEBaseModelViewset(ModelViewSet):
     def initial(self, request, *args, **kwargs):
@@ -166,7 +183,7 @@ class TEAStaffProfileModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TEAStaffProfile.objects.all().order_by('-id')
     serializer_class = TEAStaffProfileSerializer
-    filter_class = TEAStaffProfileFilter
+    filterset_class = TEAStaffProfileFilter
     renderer_classes = (TEAStaffProfileHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
@@ -203,7 +220,7 @@ class ESCPOSWebModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebSerializer
-    filter_class = ESCPOSWebFilter
+    filterset_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('post', 'get', )
 
@@ -236,7 +253,7 @@ class ESCPOSWebOperatorModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = ESCPOSWeb.objects.all().order_by('-id')
     serializer_class = ESCPOSWebOperatorSerializer
-    filter_class = ESCPOSWebFilter
+    filterset_class = ESCPOSWebFilter
     renderer_classes = (ESCPOSWebOperatorHtmlRenderer, TEBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', 'patch', )
 
@@ -294,7 +311,7 @@ class LegalEntityModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = LegalEntity.objects.all().order_by('-id')
     serializer_class = None
-    filter_class = LegalEntityFilter
+    filterset_class = LegalEntityFilter
     renderer_classes = (LegalEntityHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
@@ -310,7 +327,7 @@ class SellerModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = Seller.objects.all().order_by('-id')
     serializer_class = SellerSerializer
-    filter_class = SellerFilter
+    filterset_class = SellerFilter
     renderer_classes = (JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
@@ -321,7 +338,7 @@ class TurnkeyServiceModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = TurnkeyService.objects.all().order_by('-id')
     serializer_class = TurnkeyServiceSerializer
-    filter_class = TurnkeyServiceFilter
+    filterset_class = TurnkeyServiceFilter
     renderer_classes = (TurnkeyServiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'patch')
 
@@ -373,7 +390,7 @@ class TurnkeyServiceGroupModelViewSet(ModelViewSet):
     pagination_class = Default30PerPagePagination
     queryset = TurnkeyService.objects.all().order_by('-id')
     serializer_class = TurnkeyServiceGroupSerializer
-    filter_class = TurnkeyServiceGroupFilter
+    filterset_class = TurnkeyServiceGroupFilter
     renderer_classes = (TurnkeyServiceGroupHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', 'patch')
 
@@ -443,7 +460,7 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
     pagination_class = OneHundredPerPagePagination
     queryset = SellerInvoiceTrackNo.objects.all().order_by('-type', '-begin_time', '-track', '-begin_no')
     serializer_class = SellerInvoiceTrackNoSerializer
-    filter_class = SellerInvoiceTrackNoFilter
+    filterset_class = SellerInvoiceTrackNoFilter
     renderer_classes = (SellerInvoiceTrackNoHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', 'delete', 'patch')
 
@@ -779,7 +796,7 @@ class E0501InvoiceAssignNoModelViewSet(TEBaseModelViewset):
     pagination_class = OneHundredPerPagePagination
     queryset = E0501InvoiceAssignNo.objects.all().order_by('-year_month', )
     serializer_class = E0501InvoiceAssignNoSerializer
-    filter_class = E0501InvoiceAssignNoFilter
+    filterset_class = E0501InvoiceAssignNoFilter
     renderer_classes = [JSONRenderer, ]
     http_method_names = ('get', 'post', 'delete')
 
@@ -887,7 +904,7 @@ class EInvoiceModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = EInvoice.objects.all().order_by('-id')
     serializer_class = EInvoiceSerializer
-    filter_class = EInvoiceFilter
+    filterset_class = EInvoiceFilter
     renderer_classes = (EInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
@@ -947,7 +964,7 @@ class EInvoicePrintLogModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = EInvoicePrintLog.objects.all().order_by('-id')
     serializer_class = EInvoicePrintLogSerializer
-    filter_class = EInvoicePrintLogFilter
+    filterset_class = EInvoicePrintLogFilter
     renderer_classes = (EInvoicePrintLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
@@ -971,7 +988,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = CancelEInvoice.objects.all().order_by('-id')
     serializer_class = CancelEInvoiceSerializer
-    filter_class = CancelEInvoiceFilter
+    filterset_class = CancelEInvoiceFilter
     renderer_classes = (CancelEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )
 
@@ -1083,7 +1100,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = VoidEInvoice.objects.all().order_by('-id')
     serializer_class = VoidEInvoiceSerializer
-    filter_class = VoidEInvoiceFilter
+    filterset_class = VoidEInvoiceFilter
     renderer_classes = (VoidEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('post', 'get', )
 
@@ -1275,7 +1292,7 @@ class UploadBatchModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = UploadBatch.objects.all().order_by('-id')
     serializer_class = UploadBatchSerializer
-    filter_class = UploadBatchFilter
+    filterset_class = UploadBatchFilter
     renderer_classes = (UploadBatchHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
 
@@ -1299,7 +1316,7 @@ class BatchEInvoiceModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = BatchEInvoice.objects.all().order_by('-id')
     serializer_class = BatchEInvoiceSerializer
-    filter_class = BatchEInvoiceFilter
+    filterset_class = BatchEInvoiceFilter
     renderer_classes = (BatchEInvoiceHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', 'post')
 
@@ -1393,7 +1410,7 @@ class AuditLogModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = AuditLog.objects.all().order_by('-id')
     serializer_class = AuditLogSerializer
-    filter_class = AuditLogFilter
+    filterset_class = AuditLogFilter
     renderer_classes = (AuditLogHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
     
@@ -1417,7 +1434,7 @@ class SummaryReportModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = SummaryReport.objects.all().order_by('-id')
     serializer_class = SummaryReportSerializer
-    filter_class = SummaryReportFilter
+    filterset_class = SummaryReportFilter
     renderer_classes = (SummaryReportHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
     
@@ -1441,7 +1458,7 @@ class TEAlarmModelViewSet(ModelViewSet):
     pagination_class = TenTo100PerPagePagination
     queryset = TEAlarm.objects.all().order_by('-id')
     serializer_class = TEAlarmSerializer
-    filter_class = TEAlarmFilter
+    filterset_class = TEAlarmFilter
     renderer_classes = (TEAlarmHtmlRenderer, JSONRenderer, TEBrowsableAPIRenderer, )
     http_method_names = ('get', )
     

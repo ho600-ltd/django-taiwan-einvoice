@@ -125,7 +125,7 @@ class FROM_CONFIGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = FROM_CONFIG.objects.all()
     serializer_class = FROM_CONFIGSerializer
-    filter_class = FROM_CONFIGFilter
+    filterset_class = FROM_CONFIGFilter
     renderer_classes = (FROM_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -135,7 +135,7 @@ class SCHEDULE_CONFIGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = SCHEDULE_CONFIG.objects.all()
     serializer_class = SCHEDULE_CONFIGSerializer
-    filter_class = SCHEDULE_CONFIGFilter
+    filterset_class = SCHEDULE_CONFIGFilter
     renderer_classes = (SCHEDULE_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -145,7 +145,7 @@ class SIGN_CONFIGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = SIGN_CONFIG.objects.all()
     serializer_class = SIGN_CONFIGSerializer
-    filter_class = SIGN_CONFIGFilter
+    filterset_class = SIGN_CONFIGFilter
     renderer_classes = (SIGN_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -156,7 +156,7 @@ class TASK_CONFIGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TASK_CONFIG.objects.all()
     serializer_class = TASK_CONFIGSerializer
-    filter_class = TASK_CONFIGFilter
+    filterset_class = TASK_CONFIGFilter
     renderer_classes = (TASK_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -167,7 +167,7 @@ class TO_CONFIGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TO_CONFIG.objects.all()
     serializer_class = TO_CONFIGSerializer
-    filter_class = TO_CONFIGFilter
+    filterset_class = TO_CONFIGFilter
     renderer_classes = (TO_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -178,7 +178,7 @@ class TURNKEY_MESSAGE_LOGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_MESSAGE_LOG.objects.all().order_by('-MESSAGE_DTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_MESSAGE_LOGSerializer
-    filter_class = TURNKEY_MESSAGE_LOGFilter
+    filterset_class = TURNKEY_MESSAGE_LOGFilter
     renderer_classes = (TURNKEY_MESSAGE_LOGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -189,7 +189,7 @@ class TURNKEY_MESSAGE_LOG_DETAILModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_MESSAGE_LOG_DETAIL.objects.all().order_by('-PROCESS_DTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_MESSAGE_LOG_DETAILSerializer
-    filter_class = TURNKEY_MESSAGE_LOG_DETAILFilter
+    filterset_class = TURNKEY_MESSAGE_LOG_DETAILFilter
     renderer_classes = (TURNKEY_MESSAGE_LOG_DETAILHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, PlainFileRenderer)
     http_method_names = ('get', )
 
@@ -212,7 +212,7 @@ class TURNKEY_SEQUENCEModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_SEQUENCE.objects.all()
     serializer_class = TURNKEY_SEQUENCESerializer
-    filter_class = TURNKEY_SEQUENCEFilter
+    filterset_class = TURNKEY_SEQUENCEFilter
     renderer_classes = (TURNKEY_SEQUENCEHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -223,7 +223,7 @@ class TURNKEY_SYSEVENT_LOGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_SYSEVENT_LOG.objects.all().order_by('-EVENTDTS', '-SEQNO', '-SUBSEQNO')
     serializer_class = TURNKEY_SYSEVENT_LOGSerializer
-    filter_class = TURNKEY_SYSEVENT_LOGFilter
+    filterset_class = TURNKEY_SYSEVENT_LOGFilter
     renderer_classes = (TURNKEY_SYSEVENT_LOGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -234,7 +234,7 @@ class TURNKEY_TRANSPORT_CONFIGModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_TRANSPORT_CONFIG.objects.all()
     serializer_class = TURNKEY_TRANSPORT_CONFIGSerializer
-    filter_class = TURNKEY_TRANSPORT_CONFIGFilter
+    filterset_class = TURNKEY_TRANSPORT_CONFIGFilter
     renderer_classes = (TURNKEY_TRANSPORT_CONFIGHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -245,7 +245,7 @@ class TURNKEY_USER_PROFILEModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = TURNKEY_USER_PROFILE.objects.all()
     serializer_class = TURNKEY_USER_PROFILESerializer
-    filter_class = TURNKEY_USER_PROFILEFilter
+    filterset_class = TURNKEY_USER_PROFILEFilter
     renderer_classes = (TURNKEY_USER_PROFILEHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -256,7 +256,7 @@ class EITurnkeyModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkey.objects.all()
     serializer_class = EITurnkeySerializer
-    filter_class = EITurnkeyFilter
+    filterset_class = EITurnkeyFilter
     renderer_classes = (EITurnkeyHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', 'post')
 
@@ -403,7 +403,7 @@ class EITurnkeyBatchModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyBatch.objects.all().order_by('-id')
     serializer_class = EITurnkeyBatchSerializer
-    filter_class = EITurnkeyBatchFilter
+    filterset_class = EITurnkeyBatchFilter
     renderer_classes = (EITurnkeyBatchHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -428,7 +428,7 @@ class EITurnkeyBatchEInvoiceModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyBatchEInvoice.objects.all().order_by('-id')
     serializer_class = EITurnkeyBatchEInvoiceSerializer
-    filter_class = EITurnkeyBatchEInvoiceFilter
+    filterset_class = EITurnkeyBatchEInvoiceFilter
     renderer_classes = (EITurnkeyBatchEInvoiceHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', 'patch', )
 
@@ -466,7 +466,7 @@ class EITurnkeyDailySummaryResultXMLModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyDailySummaryResultXML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-result_date', '-id')
     serializer_class = EITurnkeyDailySummaryResultXMLSerializer
-    filter_class = EITurnkeyDailySummaryResultXMLFilter
+    filterset_class = EITurnkeyDailySummaryResultXMLFilter
     renderer_classes = (EITurnkeyDailySummaryResultXMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
     http_method_names = ('get', )
 
@@ -484,7 +484,7 @@ class EITurnkeyDailySummaryResultModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyDailySummaryResult.objects.all().order_by('-result_date')
     serializer_class = EITurnkeyDailySummaryResultSerializer
-    filter_class = EITurnkeyDailySummaryResultFilter
+    filterset_class = EITurnkeyDailySummaryResultFilter
     renderer_classes = (EITurnkeyDailySummaryResultHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -495,7 +495,7 @@ class EITurnkeyE0501XMLModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyE0501XML.objects.exclude(is_parsed=True, binary_content=b"").order_by('-abspath', '-id')
     serializer_class = EITurnkeyE0501XMLSerializer
-    filter_class = EITurnkeyE0501XMLFilter
+    filterset_class = EITurnkeyE0501XMLFilter
     renderer_classes = (EITurnkeyE0501XMLHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, XMLFileRenderer, )
     http_method_names = ('get', )
 
@@ -513,7 +513,7 @@ class EITurnkeyE0501InvoiceAssignNoModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = EITurnkeyE0501InvoiceAssignNo.objects.all().order_by('-year_month')
     serializer_class = EITurnkeyE0501InvoiceAssignNoSerializer
-    filter_class = EITurnkeyE0501InvoiceAssignNoFilter
+    filterset_class = EITurnkeyE0501InvoiceAssignNoFilter
     renderer_classes = (EITurnkeyE0501InvoiceAssignNoHtmlRenderer, TKWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 

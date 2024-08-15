@@ -42,7 +42,7 @@ class PrinterModelViewSet(ModelViewSet):
     pagination_class = TenTo1000PerPagePagination
     queryset = Printer.objects.all().order_by('-id')
     serializer_class = PrinterSerializer
-    filter_class = PrinterFilter
+    filterset_class = PrinterFilter
     renderer_classes = (PrinterHtmlRenderer, EPWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', )
 
@@ -53,7 +53,7 @@ class TEAWebModelViewSet(ModelViewSet):
     pagination_class = Default30PerPagePagination
     queryset = TEAWeb.objects.all().order_by('-id')
     serializer_class = TEAWebSerializer
-    filter_class = TEAWebFilter
+    filterset_class = TEAWebFilter
     renderer_classes = (TEAWebHtmlRenderer, EPWBrowsableAPIRenderer, JSONRenderer, )
     http_method_names = ('get', 'patch', )
 
