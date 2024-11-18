@@ -21,7 +21,7 @@ def set_name_with_system_hash_key(name):
 def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
     if not invoice_data['meet_to_tw_einvoice_standard']:
         return
-    from taiwan_einvoice.models import Printer, User, EInvoice, EInvoicePrintLog
+    from taiwan_einvoice.models import LegalEntity, Printer, User, EInvoice, EInvoicePrintLog
     try:
         einvoice = EInvoice.objects.get(id=invoice_data['id'])
     except EInvoice.DoesNotExist:
@@ -31,10 +31,12 @@ def save_print_einvoice_log(escpos_web_id, user, data, invoice_data):
                                       serial_number=data['serial_number'])
     except Printer.DoesNotExist:
         return
-    if "" != einvoice.carrier_type or "" != einvoice.npoban:
-        is_original_copy = False
-    else:
+    if (("3J0002" == einvoice.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != einvoice.buyer_identifier)
+        or ("" == einvoice.carrier_type and "" == einvoice.npoban)
+       ):
         is_original_copy = not einvoice.einvoiceprintlog_set.exists()
+    else:
+        is_original_copy = False
     epl = EInvoicePrintLog(user=user,
         printer=printer,
         einvoice=einvoice,
