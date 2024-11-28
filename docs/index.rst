@@ -94,6 +94,13 @@
 #. 電子發票字軌號碼申請書(含電子發票開立系統自行檢測表) - 位於 EI 大平台/營業人文件下載頁面
 #. 使用電子發票承諾書 - 此文件與「電子發票字軌號碼申請書(含電子發票開立系統自行檢測表)」是放在同一個壓縮檔中
 
+Turnkey-3 新版期程說明
+-------------------------------------------------------------------------------
+
+新版說明頁面( https://www.einvoice.nat.gov.tw/static/ptl/ein_upload/html/ENV/Turnkey-01.html ):
+* 新版Turnkey v3.0(含安裝手冊)自2023年5月1日起提供加值服務中心、營業人及境外電商下載使用，請儘早安裝新版，俾順利銜接整合服務平台再造上線作業。
+* Turnkey v2.0.4(含以前版本)將於整合服務平台再造上線(預計2023年底)後停止服務。
+
 自建 Turnkey-3+ 來開立 B2C 電子發票的事前準備說明
 -------------------------------------------------------------------------------
 
@@ -137,6 +144,7 @@
 
     consumer_operations
     merchant_create_b2b_invoice
+    EI-V2024/merchant_create_b2b_invoice
     merchant_operations
     b2c_invoice_brief
     create_software_certification
