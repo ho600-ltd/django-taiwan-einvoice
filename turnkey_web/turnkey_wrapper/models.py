@@ -14,7 +14,7 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS = ["G", "C"]
 EI_WELL_STATUSS = ["P", "G", "C"]
 EI_STATUSS = ["C", "G", "P", "E", "I"]
-MIG_NOS = ["C0401", "C0501", "C0701"]
+MIG_NOS = ["C0401", "C0501", "C0701", "F0401", "F0501", "F0701"]
 XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
 WILL_REMOVE_DFAJDLFZX_RE = re.compile('</?will_remove_dfajdlfzx>', re.I)
 
@@ -106,13 +106,13 @@ class C0701JSON2MIGXMl(C0501JSON2MIGXMl):
 
 
 class E0402JSON2MIGXMl(object):
-    versions = ["3.2"]
+    versions = ["4.0"]
     base_xml = """<BranchTrackBlank xmlns="urn:GEINV:eInvoiceMessage:E0402:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:E0402:{version} E0402.xsd">
     {xml_body}
 </BranchTrackBlank>"""
 
 
-    def __init__(self, json_data, version="3.2"):
+    def __init__(self, json_data, version="4.0"):
         if version not in self.versions:
             raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
         self.version = version
@@ -606,12 +606,17 @@ class EITurnkeyBatch(models.Model):
         ('E0401', _('Branch Track')),
         ('E0402', _('Branch Track Blank')),
         ('E0501', _('Invoice Assign No')),
+
+        ('F0401', _('B2B/B2C Certificate Invoice')),
+        ('F0501', _('B2B/B2C Certificate Cancel Invoice')),
+        ('F0701', _('B2B/B2C Certificate Void Invoice')),
     )
-    mig = models.CharField(max_length=5, choices=mig_choices, default='C0401')
+    mig = models.CharField(max_length=5, choices=mig_choices, default='F0401')
     version_choices = (
         ('3.2', 'v32'),
+        ('4.0', 'v40'),
     )
-    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='3.2')
+    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='4.0') # MIG version at turnkey
     status_choices = (
         ("7", _("Just created")),
         ("8", _("Downloaded from TEA")),
@@ -665,6 +670,9 @@ class EITurnkeyBatch(models.Model):
             'C0701',
             'D0401',
             'D0501',
+            'F0401',
+            'F0501',
+            'F0701',
             ]:
             category_type = "B2C"
             process_type = "STORAGE"
@@ -786,6 +794,13 @@ class EITurnkeyBatch(models.Model):
                 same_eitbeis = _same_eitbeis.filter(**{"body__{}__isnull".format(mig_no): False})
                 if not same_eitbeis.exists():
                     error_005 = False
+                elif mig_no in ["F0401", "F0701"]:
+                    same_eitbeis_47 = _same_eitbeis.order_by('-id')[0]
+                    k, v = same_eitbeis_47.body.popitem()
+                    if "F0401" == mig_no and "C" == same_eitbeis_47.status and "F0701" == k and v:
+                        error_005 = False
+                    elif "F0701" == mig_no and "C" == same_eitbeis_47.status and "F0401" == k and v:
+                        error_005 = False
                 elif mig_no in ["C0401", "C0701"]:
                     same_eitbeis_47 = _same_eitbeis.order_by('-id')[0]
                     k, v = same_eitbeis_47.body.popitem()
@@ -969,7 +984,13 @@ class EITurnkeyBatchEInvoice(models.Model):
     @property
     def mig_xml(self):
         for k, v in self.body.items():
-            if 'C0401' == k:
+            if 'F0401' == k:
+                j2mx = F0401JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            elif 'F0501' == k:
+                j2mx = F0501JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            elif 'F0701' == k:
+                j2mx = F0701JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
+            elif 'C0401' == k:
                 j2mx = C0401JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
             elif 'C0501' == k:
                 j2mx = C0501JSON2MIGXMl(v, version=self.ei_turnkey_batch.turnkey_version)
@@ -983,12 +1004,12 @@ class EITurnkeyBatchEInvoice(models.Model):
     def save(self, *args, **kwargs):
         if not self.invoice_identifier:
             mig = self.ei_turnkey_batch.mig
-            if mig in ["C0401", "C0501", "C0701"]:
-                if "C0401" == mig:
+            if mig in ["F0401", "F0501", "F0701", "C0401", "C0501", "C0701"]:
+                if mig in ["F0401", "C0401"]:
                     invoice_date = self.body[self.ei_turnkey_batch.mig]["Main"]["InvoiceDate"]
-                elif "C0501" == mig:
+                elif mig in ["F0501", "C0501"]:
                     invoice_date = self.body[self.ei_turnkey_batch.mig]["CancelDate"]
-                elif "C0701" == mig:
+                elif mig in ["F0701", "C0701"]:
                     invoice_date = self.body[self.ei_turnkey_batch.mig]["VoidDate"]
                 self.invoice_identifier = "{mig}{batch_einvoice_track_no}{InvoiceDate}".format(
                     mig=mig,
@@ -1101,7 +1122,7 @@ class EITurnkeyDailySummaryResultXML(models.Model):
                 else:
                     invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
                 for invoice in invoices:
-                    if "C0501" == mig_no:
+                    if mig_no in ["F0501", "C0501"]:
                         invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], report_date)
                     else:
                         invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
@@ -1295,3 +1316,80 @@ class EITurnkeyE0501InvoiceAssignNo(models.Model):
     class Meta:
         unique_together = (("ei_turnkey", "invoice_type", "year_month", "invoice_track",
                             "invoice_begin_no", "invoice_end_no", "invoice_booklet"), )
+
+
+
+class F0401JSON2MIGXMl(object):
+    versions = ["4.0"]
+    base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:F0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0401:{version} F0401.xsd">
+    {xml_body}
+</Invoice>"""
+
+
+    def __init__(self, json_data, version="4.0"):
+        if version not in self.versions:
+            raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
+        self.version = version
+        self.json_data = self.regulate_json_data(json_data)
+    
+
+    def export_xml(self):
+        return self.base_xml.format(version=self.version, xml_body=self.get_xml_body())
+
+    
+    def regulate_json_data(self, json_data):
+        def _append_sequence_number(index0, d):
+            d["SequenceNumber"] = "{:03d}".format(index0+1)
+            return d
+        json_data["Details"] = [{"ProductItem": _append_sequence_number(_i, _pi)}
+            for _i, _pi in enumerate(json_data["Details"])
+        ]
+
+        if "FreeTaxSalesAmount" not in json_data["Amount"]:
+            json_data["Amount"]["FreeTaxSalesAmount"] = '0'
+        if "ZeroTaxSalesAmount" not in json_data["Amount"]:
+            json_data["Amount"]["ZeroTaxSalesAmount"] = '0'
+        return json_data
+    
+
+    def get_xml_body(self):
+        xml_body = ''
+        for elm in ["Main", "Details", "Amount"]:
+            xml = json2xml.Json2xml(self.json_data[elm], wrapper=elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+            xml_body += XML_VERSION_RE.sub("", xml.decode('utf-8'))
+        return xml_body
+
+
+
+class F0501JSON2MIGXMl(F0401JSON2MIGXMl):
+    base_xml = """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:F0501:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0501:{version} F0501.xsd">
+    {xml_body}
+</CancelInvoice>"""
+
+
+    def __init__(self, json_data, version="4.0"):
+        super().__init__(json_data, version=version)
+
+
+    def export_xml(self):
+        return super().export_xml()
+
+
+    def regulate_json_data(self, json_data):
+        return json_data
+
+
+    def get_xml_body(self):
+        remove_elm = "will_remove_dfajdlfzx"
+        _xml_body = json2xml.Json2xml(self.json_data, wrapper=remove_elm, pretty=False, item_wrap=False, attr_type=False).to_xml()
+        _xml_body = XML_VERSION_RE.sub("", _xml_body.decode('utf-8'))
+        xml_body = WILL_REMOVE_DFAJDLFZX_RE.sub("", _xml_body)
+        return xml_body
+
+
+
+class F0701JSON2MIGXMl(F0501JSON2MIGXMl):
+    base_xml = """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:F0701:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0701:{version} F0701.xsd">
+    {xml_body}
+</VoidInvoice>"""
+
