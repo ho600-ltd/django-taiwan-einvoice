@@ -2523,7 +2523,7 @@ class UploadBatch(models.Model):
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
 
         if 'einvoice' == content_object._meta.model_name:
-            mig_type = EInvoiceMIG.objects.get(no='C0401')
+            mig_type = EInvoiceMIG.objects.get(no='F0401')
             _now = now().astimezone(TAIPEI_TIMEZONE)
             _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
             start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
@@ -2573,10 +2573,10 @@ class UploadBatch(models.Model):
             return ub
         elif content_object._meta.model_name in ['canceleinvoice', 'voideinvoice']:
             if 'canceleinvoice' == content_object._meta.model_name:
-                mig_type = EInvoiceMIG.objects.get(no='C0501')
+                mig_type = EInvoiceMIG.objects.get(no='F0501')
                 kind = 'w4'
             elif 'voideinvoice' == content_object._meta.model_name:
-                mig_type = EInvoiceMIG.objects.get(no='C0701')
+                mig_type = EInvoiceMIG.objects.get(no='F0701')
                 kind = '54'
             slug_prefix = '{}{}'.format(mig_type.no[2], content_object.einvoice.track_no)
             index = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)
