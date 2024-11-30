@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-03 17:53+0800\n"
+"POT-Creation-Date: 2024-11-30 13:47+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -106,6 +106,15 @@ msgstr "空白未使用字軌檔"
 msgid "Invoice Assign No"
 msgstr "營業人電子發票配號檔"
 
+msgid "B2B/B2C Certificate Invoice"
+msgstr "B2B/B2C存證 開立發票"
+
+msgid "B2B/B2C Certificate Cancel Invoice"
+msgstr "B2B/B2C存證 作廢發票"
+
+msgid "B2B/B2C Certificate Void Invoice"
+msgstr "B2B/B2C存證 註銷發票"
+
 msgid "Just created"
 msgstr "初始新增"
 
@@ -144,6 +153,9 @@ msgstr "EI 回傳 I 錯誤(I)"
 
 msgid "Successful EI process(C)"
 msgstr "EI 確認成功(C)"
+
+msgid "Failed but pass(.)"
+msgstr "失敗但略過(.)"
 
 msgid "General"
 msgstr "一般"

@@ -20,7 +20,7 @@
                     {% trans "Forbidden Amount" %}
                 </th>
                 <th rowspan="2" width="15%">
-                    {% trans "Auto Upload C0401?" %}<br/>
+                    {% trans "Auto Upload F0401/C0401?" %}<br/>
                     {% trans "Cron(execute once per ? minutes" %}
                 </th>
                 <th rowspan="2" width="10%">
@@ -59,7 +59,7 @@
                     <td>
                         <dv field="auto_upload_c0401_einvoice">
                             {% if turnkeyservice.auto_upload_c0401_einvoice %}
-                                {% trans "Yes to C0401" context "auto_upload_c0401_einvoice" %}
+                                {% trans "Yes to F0401/C0401" context "auto_upload_c0401_einvoice" %}
                             {% else %}
                                 {% trans "Manually" context "auto_upload_c0401_einvoice" %}
                             {% endif %}
