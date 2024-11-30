@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-15 17:39+0800\n"
+"POT-Creation-Date: 2024-11-30 13:47+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -118,6 +118,15 @@ msgstr "空白未使用字軌檔"
 msgid "Invoice Assign No"
 msgstr "營業人電子發票配號檔"
 
+msgid "B2B/B2C Certificate Invoice"
+msgstr "B2B/B2C存證 開立發票"
+
+msgid "B2B/B2C Certificate Cancel Invoice"
+msgstr "B2B/B2C存證 作廢發票"
+
+msgid "B2B/B2C Certificate Void Invoice"
+msgstr "B2B/B2C存證 註銷發票"
+
 msgid "58mm Receipt"
 msgstr "58mm 收據"
 
@@ -135,6 +144,9 @@ msgstr "買方統編無效。"
 
 msgid "{} does exist!"
 msgstr "{} 已存在!"
+
+msgid "Address is mandatory!"
+msgstr "地址是必填的!"
 
 msgid "once per 5 minutes"
 msgstr "每 5 分鐘 1 次"
@@ -257,8 +269,8 @@ msgstr "內容物件: {} 無「check_before_cancel_einvoice」方法"
 msgid "Content Object: {} has no 'post_cancel_einvoice' method"
 msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
-msgid "Max records in details is 999"
-msgstr "明細最多只能有 999 筆紀錄"
+msgid "Max records in details is 9999"
+msgstr "明細最多只能有 9999 筆紀錄"
 
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
@@ -273,14 +285,14 @@ msgstr "可能需要列印"
 msgid "No need to print"
 msgstr "無需列印紙本"
 
-msgid "Wait for C0501 or C0701"
-msgstr "等待C0501或C0701"
+msgid "Wait for F0501 or F0701"
+msgstr "等待F0501或F0701"
 
-msgid "Wait for C0401"
-msgstr "等待C0401"
+msgid "Wait for F0401"
+msgstr "等待F0401"
 
-msgid "Wait for C0501 or C0401"
-msgstr "等待C0501或C0401"
+msgid "Wait for F0501 or F0401"
+msgstr "等待F0501或F0401"
 
 msgid "Re-Created by error status"
 msgstr "依錯誤狀態重新創建"
