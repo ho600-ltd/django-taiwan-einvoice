@@ -531,6 +531,10 @@ class EITurnkey(models.Model):
         task_config_object = self.get_task_config(category_type='B2B', process_type='STORAGE', task='UpCast')
         return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
     @property
+    def B2SStorageUpCastSRC(self):
+        task_config_object = self.get_task_config(category_type='B2S', process_type='STORAGE', task='UpCast')
+        return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
+    @property
     def B2CStorageUpCastSRC(self):
         task_config_object = self.get_task_config(category_type='B2C', process_type='STORAGE', task='UpCast')
         return os.path.join(task_config_object.SRC_PATH, "{mig}", "SRC")
@@ -880,6 +884,8 @@ class EITurnkeyBatch(models.Model):
         for f in glob.glob(os.path.join(tmp_data_path, "*")):
             if self.mig.startswith("E"):
                 _path = self.ei_turnkey.B2PMessageUpCastSRC.format(mig=self.mig)
+            elif self.mig.startswith("F"):
+                _path = self.ei_turnkey.B2SStorageUpCastSRC.format(mig=self.mig)
             elif self.mig.startswith("C"):
                 _path = self.ei_turnkey.B2CStorageUpCastSRC.format(mig=self.mig)
             else:
