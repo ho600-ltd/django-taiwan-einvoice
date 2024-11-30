@@ -658,6 +658,7 @@ class EITurnkeyBatch(models.Model):
             raise EITurnkeyConfigurationError(_("ReceiveFile directory does not exist!"))
 
         TASK_D = {
+            ("B2S", "STORAGE"): ("UpCast", "SendFile", "Pack", ),
             ("B2C", "STORAGE"): ("UpCast", "SendFile", "Pack", ),
             ("B2B", "EXCHANGE"): ("UpCast", "Unpack", "SendFile", "ReceiveFile", "Pack", "DownCast", ),
             ("B2B", "STORAGE"): ("UpCast", "SendFile", "Pack", ),
