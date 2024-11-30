@@ -665,14 +665,18 @@ class EITurnkeyBatch(models.Model):
         }
 
         if self.mig in [
+            'F0401',
+            'F0501',
+            'F0701',
+            ]:
+            category_type = "B2S"
+            process_type = "STORAGE"
+        elif self.mig in [
             'C0401',
             'C0501',
             'C0701',
             'D0401',
             'D0501',
-            'F0401',
-            'F0501',
-            'F0701',
             ]:
             category_type = "B2C"
             process_type = "STORAGE"
