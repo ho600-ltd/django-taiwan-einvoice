@@ -1089,7 +1089,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
             _d['ei_synced'] = False
             _d['print_mark'] = False
             new_einvoice = EInvoice(**_d)
-            new_einvoice.save()
+            new_einvoice.save(upload_batch_kind='57')
             serializer.instance.set_new_einvoice(new_einvoice)
             serializer.instance.post_cancel_einvoice()
         serializer = CancelEInvoiceSerializer(serializer.instance, context={'request': request})
