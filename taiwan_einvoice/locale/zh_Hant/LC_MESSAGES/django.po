@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-30 14:01+0800\n"
+"POT-Creation-Date: 2024-12-02 10:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -317,6 +317,9 @@ msgstr "已上傳到 TKW"
 
 msgid "Finish"
 msgstr "完成"
+
+msgid "Failed but ignore"
+msgstr "失敗但略過"
 
 msgid "{} not in [EInvoice, CancelEInvoice, VoidEInvoice]"
 msgstr "{} 非發票、作廢發票、註銷發票"
