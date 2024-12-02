@@ -87,6 +87,11 @@ class IdentifierDuplicateError(Exception):
 
 
 
+class SellerAddressError(Exception):
+    pass
+
+
+
 class SellerInvoiceTrackNoDisableError(Exception):
     pass
 
@@ -678,6 +683,8 @@ class Seller(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk and Seller.objects.filter(legal_entity__identifier=self.legal_entity.identifier).exists():
             raise IdentifierDuplicateError(_("{} does exist!").format(self.legal_entity.identifier))
+        elif not self.legal_entity.address:
+            raise SellerAddressError(_("Address is mandatory!"))
         super().save(*args, **kwargs)
 
 
@@ -1209,6 +1216,10 @@ class EInvoiceMIG(models.Model):
         ('E0401', _('Branch Track')),
         ('E0402', _('Branch Track Blank')),
         ('E0501', _('Invoice Assign No')),
+
+        ('F0401', _('B2B/B2C Certificate Invoice')),
+        ('F0501', _('B2B/B2C Certificate Cancel Invoice')),
+        ('F0701', _('B2B/B2C Certificate Void Invoice')),
     )
     no = models.CharField(max_length=5, choices=no_choices, unique=True)
 
@@ -1818,8 +1829,8 @@ class EInvoice(models.Model):
             raise ContentObjectError(_("Content Object: {} has no 'check_before_cancel_einvoice' method").format(self.content_object))
         elif not hasattr(self.content_object, 'post_cancel_einvoice'):
             raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
-        elif 999 <= len(self.details):
-            raise EInvoiceDetailsError(_("Max records in details is 999"))
+        elif 9999 < len(self.details):
+            raise EInvoiceDetailsError(_("Max records in details is 9999"))
         elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
@@ -2038,6 +2049,7 @@ class CancelEInvoice(models.Model):
 
     MIG_NO_SET = {
         "C0401": "C0501",
+        "F0401": "F0501",
     }
     def get_mig_no(self):
         no = self.einvoice.get_mig_no()
@@ -2136,6 +2148,7 @@ class VoidEInvoice(models.Model):
     
     MIG_NO_SET = {
         "C0401": "C0701",
+        "F0401": "F0701",
     }
     def get_mig_no(self):
         no = self.einvoice.get_mig_no()
@@ -2174,10 +2187,10 @@ class UploadBatch(models.Model):
         ("wp", _("Wait for printed")),          # to EInvoice
         ("cp", _("Could print")),               # to EInvoice
         ("np", _("No need to print")),          # to EInvoice
-        ("57", _("Wait for C0501 or C0701")),   # to EInvoice
+        ("57", _("Wait for F0501 or F0701")),   # to EInvoice
 
-        ("w4", _("Wait for C0401")),            # to CancelEInvoice or VoidEInvoice
-        ("54", _("Wait for C0501 or C0401")),   # to VoidEInvoice
+        ("w4", _("Wait for F0401")),            # to CancelEInvoice or VoidEInvoice
+        ("54", _("Wait for F0501 or F0401")),   # to VoidEInvoice
 
         ("E",  "E0401 ~ E0501"),
         ("R",  _("Re-Created by error status")),
@@ -2192,6 +2205,7 @@ class UploadBatch(models.Model):
         ("3", _("Exporting E-Invoice JSON")),
         ("4", _("Uploaded to TKW")),
         ("f", _("Finish")),
+        ("-", _("Failed but ignore")),
     )
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
     ei_turnkey_batch_id = models.PositiveBigIntegerField(default=0)
@@ -2211,18 +2225,18 @@ class UploadBatch(models.Model):
 
     @classmethod
     def status_check(cls, statuss=[]):
-        ubs = []
-        for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
+        ubs_pair = []
+        for ub in cls.objects.exclude(status__in=['-',]).filter(status__in=statuss).order_by('id'):
             while True:
                 function_name = 'check_in_{}_status_then_update_to_the_next'.format(ub.status)
                 pair = [ub, function_name, ub.status]
                 if hasattr(ub, function_name):
                     getattr(*pair[:2])()
                     pair.append(ub.status)
-                    ubs.append(pair)
+                    ubs_pair.append(pair)
                 if 3 == len(pair) or pair[2] == pair[3]:
                     break
-        return ubs
+        return ubs_pair
 
 
     def update_to_new_status(self, new_status):
@@ -2438,15 +2452,15 @@ class UploadBatch(models.Model):
     def check_in_0_status_then_update_to_the_next(self, NEXT_STATUS='1'):
         if '0' != self.status: return
 
-        if self.kind in ['wp', 'cp', 'np']:
+        if self.kind not in ['wp', 'cp', 'np']:
+            eis = []
+            content_object = self.batcheinvoice_set.get().content_object
+        else:
             object_ids = self.batcheinvoice_set.all().values('object_id')
             ids = [_i['object_id'] for _i in object_ids]
             eis = EInvoice.objects.filter(id__in=ids)
             if len(object_ids) != eis.count():
                 raise Exception('Some E-Invoices disappear')
-        else:
-            eis = []
-            content_object = self.batcheinvoice_set.get().content_object
 
         if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
             self.update_to_new_status(NEXT_STATUS)
@@ -2458,17 +2472,17 @@ class UploadBatch(models.Model):
               and not eis.filter(generate_time__gte=now() - NO_NEED_TO_PRINT_TIME_MARGIN).exists()):
             self.update_to_new_status(NEXT_STATUS)
         elif '57' == self.kind:
-            check_C0501 = False
-            check_C0701 = False
+            check_F0501 = False
+            check_F0701 = False
             if (not content_object.new_einvoice_on_cancel_einvoice_set.exists()
                 or content_object.new_einvoice_on_cancel_einvoice_set.get().ei_synced):
-                check_C0501 = True
+                check_F0501 = True
 
             if (not content_object.new_einvoice_on_void_einvoice_set.exists()
                 or content_object.new_einvoice_on_void_einvoice_set.get().ei_synced):
-                check_C0701 = True
+                check_F0701 = True
             
-            if check_C0501 and check_C0701:
+            if check_F0501 and check_F0701:
                 kind = content_object.in_cp_np_or_wp()
                 if content_object.print_mark or "np" == kind or content_object.is_voided or content_object.is_canceled:
                     self.update_to_new_status(NEXT_STATUS)
@@ -2477,16 +2491,16 @@ class UploadBatch(models.Model):
         elif 'w4' == self.kind and content_object.einvoice.ei_synced:
             self.update_to_new_status(NEXT_STATUS)
         elif '54' == self.kind:
-            check_C0401 = False
-            check_C0501 = False
+            check_F0401 = False
+            check_F0501 = False
             if content_object.einvoice.ei_synced:
-                check_C0401 = True
+                check_F0401 = True
             
             if (not content_object.einvoice.canceleinvoice_set.exists()
                 or content_object.einvoice.canceleinvoice_set.get().ei_synced):
-                check_C0501 = True
+                check_F0501 = True
             
-            if check_C0401 and check_C0501:
+            if check_F0401 and check_F0501:
                 self.update_to_new_status(NEXT_STATUS)
         elif self.kind in ['E', 'R', 'RN']:
             self.update_to_new_status(NEXT_STATUS)
@@ -2510,7 +2524,7 @@ class UploadBatch(models.Model):
             return BatchEInvoice.objects.get(content_type=ct, object_id=content_object.id, result_code='').batch
 
         if 'einvoice' == content_object._meta.model_name:
-            mig_type = EInvoiceMIG.objects.get(no='C0401')
+            mig_type = EInvoiceMIG.objects.get(no='F0401')
             _now = now().astimezone(TAIPEI_TIMEZONE)
             _s = _now.strftime('%Y-%m-%d 00:00:00+08:00')
             start_time = datetime.datetime.strptime(_s, '%Y-%m-%d %H:%M:%S%z')
@@ -2560,10 +2574,10 @@ class UploadBatch(models.Model):
             return ub
         elif content_object._meta.model_name in ['canceleinvoice', 'voideinvoice']:
             if 'canceleinvoice' == content_object._meta.model_name:
-                mig_type = EInvoiceMIG.objects.get(no='C0501')
+                mig_type = EInvoiceMIG.objects.get(no='F0501')
                 kind = 'w4'
             elif 'voideinvoice' == content_object._meta.model_name:
-                mig_type = EInvoiceMIG.objects.get(no='C0701')
+                mig_type = EInvoiceMIG.objects.get(no='F0701')
                 kind = '54'
             slug_prefix = '{}{}'.format(mig_type.no[2], content_object.einvoice.track_no)
             index = '{:03d}'.format(UploadBatch.objects.filter(slug__startswith=slug_prefix).count() + 1)

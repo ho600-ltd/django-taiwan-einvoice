@@ -222,6 +222,8 @@ $(function () {
         }
 
         var string_kind_params = [
+            'CATEGORY_TYPE__icontains',
+            'PROCESS_TYPE__icontains',
             'TASK__icontains',
             'ENABLE__icontains',
             'SIGN_ID__icontains',

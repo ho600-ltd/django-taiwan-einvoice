@@ -54,9 +54,9 @@
                     value="{{ obj.MESSAGE_DTS_datetime }}" format="Y-m-d H:i:s.sss">
                 </td>
                 <td>
-                    <div field="MESSAGE_TYPE" class="font-weight-bold {% if "C0401" == obj.MESSAGE_TYPE %}
+                    <div field="MESSAGE_TYPE" class="font-weight-bold {% if "F0401" == obj.MESSAGE_TYPE or "C0401" == obj.MESSAGE_TYPE %}
                         text-primary
-                    {% else %}{% if "C0501" == obj.MESSAGE_TYPE %}
+                    {% else %}{% if "F0501" == obj.MESSAGE_TYPE or "C0501" == obj.MESSAGE_TYPE %}
                         text-success
                     {% else %}
                         text-dark
