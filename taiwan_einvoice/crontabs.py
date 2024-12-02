@@ -23,7 +23,7 @@ def polling_upload_batch(alert_log, *args, **kw):
     alert_log_status = SelectOption.objects.get(swarm='alert-log-status', value='LOG')
 
     for status in UploadBatch.status_choices:
-        if status[0] in ['c', 'm']:
+        if status[0] in ['-', ]:
             continue
         ubs_pair = UploadBatch.status_check(statuss=[status[0]])
         for up in ubs_pair:

@@ -2205,6 +2205,7 @@ class UploadBatch(models.Model):
         ("3", _("Exporting E-Invoice JSON")),
         ("4", _("Uploaded to TKW")),
         ("f", _("Finish")),
+        ("-", _("Failed but ignore")),
     )
     status = models.CharField(max_length=1, default='0', choices=status_choices, db_index=True)
     ei_turnkey_batch_id = models.PositiveBigIntegerField(default=0)
@@ -2224,18 +2225,18 @@ class UploadBatch(models.Model):
 
     @classmethod
     def status_check(cls, statuss=[]):
-        ubs = []
-        for ub in cls.objects.exclude(status__in=['c', 'm']).filter(status__in=statuss).order_by('id'):
+        ubs_pair = []
+        for ub in cls.objects.exclude(status__in=['-',]).filter(status__in=statuss).order_by('id'):
             while True:
                 function_name = 'check_in_{}_status_then_update_to_the_next'.format(ub.status)
                 pair = [ub, function_name, ub.status]
                 if hasattr(ub, function_name):
                     getattr(*pair[:2])()
                     pair.append(ub.status)
-                    ubs.append(pair)
+                    ubs_pair.append(pair)
                 if 3 == len(pair) or pair[2] == pair[3]:
                     break
-        return ubs
+        return ubs_pair
 
 
     def update_to_new_status(self, new_status):
@@ -2451,15 +2452,15 @@ class UploadBatch(models.Model):
     def check_in_0_status_then_update_to_the_next(self, NEXT_STATUS='1'):
         if '0' != self.status: return
 
-        if self.kind in ['wp', 'cp', 'np']:
+        if self.kind not in ['wp', 'cp', 'np']:
+            eis = []
+            content_object = self.batcheinvoice_set.get().content_object
+        else:
             object_ids = self.batcheinvoice_set.all().values('object_id')
             ids = [_i['object_id'] for _i in object_ids]
             eis = EInvoice.objects.filter(id__in=ids)
             if len(object_ids) != eis.count():
                 raise Exception('Some E-Invoices disappear')
-        else:
-            eis = []
-            content_object = self.batcheinvoice_set.get().content_object
 
         if 'wp' == self.kind and not eis.filter(print_mark=False).exists():
             self.update_to_new_status(NEXT_STATUS)
