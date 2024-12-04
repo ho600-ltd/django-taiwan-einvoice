@@ -2056,7 +2056,7 @@ class CancelEInvoice(models.Model):
 
 
     MIG_NO_SET = {
-        "C0401": "C0501",
+        "C0401": "F0501",
         "F0401": "F0501",
     }
     def get_mig_no(self):
@@ -2155,7 +2155,7 @@ class VoidEInvoice(models.Model):
     
     
     MIG_NO_SET = {
-        "C0401": "C0701",
+        "C0401": "F0701",
         "F0401": "F0701",
     }
     def get_mig_no(self):
