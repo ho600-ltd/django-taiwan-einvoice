@@ -97,6 +97,11 @@ class SellerInvoiceTrackNoDisableError(Exception):
 
 
 
+class E0402HasZeroBlankNoError(Exception):
+    pass
+
+
+
 class ExcutedE0402UploadBatchError(Exception):
     pass
 
@@ -1075,6 +1080,7 @@ class SellerInvoiceTrackNo(models.Model):
         tax_types = [d['type'] for d in seller_invoice_track_nos.values('type').annotate(dev_null=Count('type'))]
         tracks = [d['track'] for d in seller_invoice_track_nos.values('track').annotate(dev_null=Count('track'))]
         upload_batchs = []
+        sitns_have_zero_blank_no = []
         e0402_existed_upload_batchs = []
         e0402_excuted_upload_batchs = []
         for party_id in party_ids:
@@ -1083,14 +1089,31 @@ class SellerInvoiceTrackNo(models.Model):
                     sitns = seller_invoice_track_nos.filter(turnkey_service__party_id=party_id,
                                                             type=tax_type,
                                                             track=track).order_by('track', 'begin_no')
-                    upload_batch = UploadBatch.append_to_the_upload_batch(sitns.first(), executor=executor)
-                    if upload_batch.status == '0':
-                        upload_batchs.append(upload_batch)
-                    elif upload_batch.status == 'f':
-                        e0402_excuted_upload_batchs.append(upload_batch)
+                    sitns_count_blank_no = 0
+                    for _sitn in sitns:
+                        sitns_count_blank_no += _sitn.count_blank_no
+                    if 0 == sitns_count_blank_no:
+                        sitns_have_zero_blank_no.append(sitns.first())
                     else:
-                        e0402_existed_upload_batchs.append(upload_batch)
-        if e0402_excuted_upload_batchs:
+                        upload_batch = UploadBatch.append_to_the_upload_batch(sitns.first(), executor=executor)
+                        if upload_batch.status == '0':
+                            upload_batchs.append(upload_batch)
+                        elif upload_batch.status == 'f':
+                            e0402_excuted_upload_batchs.append(upload_batch)
+                        else:
+                            e0402_existed_upload_batchs.append(upload_batch)
+        if sitns_have_zero_blank_no and not e0402_excuted_upload_batchs and not e0402_existed_upload_batchs and not upload_batchs:
+            msg = ";\n".join([_("{} {} Track No.{}").format(
+                shzbn.turnkey_service.party_id,
+                shzbn.get_type_display(),
+                shzbn.track,
+            ) for shzbn in sitns_have_zero_blank_no])
+            if 1 >= len(sitns_have_zero_blank_no):
+                msg += _(' has no blank number. It does not need to upload.')
+            else:
+                msg += _(' have no blank number. It does not need to upload.')
+            raise E0402HasZeroBlankNoError(msg)
+        elif e0402_excuted_upload_batchs:
             details_strs = []
             for _ub in e0402_excuted_upload_batchs:
                 for bei in _ub.batcheinvoice_set.all():
