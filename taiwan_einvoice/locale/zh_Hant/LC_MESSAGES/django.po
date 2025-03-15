@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-02 10:17+0800\n"
+"POT-Creation-Date: 2025-03-08 16:30+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,6 +180,15 @@ msgstr "新增「空白未使用字軌號碼」所使用的期別，其起始時
 
 msgid "Only use the same end_time to create the record for blank numbers!"
 msgstr "新增「空白未使用字軌號碼」所使用的期別，其結束時間必須相同!"
+
+msgid "{} {} Track No.{}"
+msgstr "{} {} 字軌{}"
+
+msgid " has no blank number. It does not need to upload."
+msgstr " 無空白未使用號碼。無須上傳。"
+
+msgid " have no blank number. It does not need to upload."
+msgstr " 無空白未使用號碼。無須上傳。"
 
 msgid "{} already have executed UploadBatch, if you want to update the records, please go to EI site to update manually!"
 msgstr "{} 已有執行完畢的上傳批次，如您想要更新紀錄，請至大平台手動調整!"

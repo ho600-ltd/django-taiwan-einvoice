@@ -67,7 +67,7 @@ from taiwan_einvoice.models import (
     LegalEntity,
     Seller,
     TurnkeyService,
-    SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError, ExcutedE0402UploadBatchError, ExistedE0402UploadBatchError,
+    SellerInvoiceTrackNo, NotEnoughNumberError, UsedSellerInvoiceTrackNoError, E0402HasZeroBlankNoError, ExcutedE0402UploadBatchError, ExistedE0402UploadBatchError,
     E0501InvoiceAssignNo,
     EInvoiceMIG,
     EInvoice,
@@ -558,6 +558,10 @@ class SellerInvoiceTrackNoModelViewSet(ModelViewSet):
             
             try:
                 upload_batchs = SellerInvoiceTrackNo.create_blank_numbers_and_upload_batchs(seller_invoice_track_nos, executor=request.user)
+            except E0402HasZeroBlankNoError as e:
+                error_result = {"error_title": _("Create Upload Batch Error"),
+                                "error_message": str(e)}
+                return Response(error_result, status=status.HTTP_403_FORBIDDEN)
             except ExcutedE0402UploadBatchError as e:
                 error_result = {"error_title": _("Create Upload Batch Error"),
                                 "error_message": str(e)}
