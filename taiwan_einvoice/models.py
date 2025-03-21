@@ -65,7 +65,7 @@ def get_codes(verify_id, seed=0):
 
 
 TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
-COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=15)
+COULD_PRINT_TIME_MARGIN = datetime.timedelta(minutes=120)
 NO_NEED_TO_PRINT_TIME_MARGIN = datetime.timedelta(minutes=10)
 MARGIN_TIME_BETWEEN_END_TIME_AND_NOW = datetime.timedelta(minutes=31)
 SELLER_INVOICE_TRACK_NO_ALLOW_CANCEL_MIARGIN = datetime.timedelta(days=15)
