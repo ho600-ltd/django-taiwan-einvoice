@@ -1,4 +1,5 @@
 import pytz, datetime, hmac, requests, logging, zlib, json, re, decimal, time, math
+import boto3
 from hashlib import sha256
 from base64 import b64encode, b64decode
 from binascii import unhexlify 
@@ -1025,7 +1026,7 @@ class SellerInvoiceTrackNo(models.Model):
         else:
             return True
     @classmethod
-    def get_managers_from_the_blank_track_number_is_below_the_threshold(cls, threshold):
+    def warn_managers_from_the_blank_track_number_is_below_the_threshold(cls, threshold):
         NOW = now()
         SD = {}
         for sitn in cls.objects.filter(begin_time__lte=NOW,
@@ -1047,15 +1048,80 @@ class SellerInvoiceTrackNo(models.Model):
                         if u.email not in managers_email:
                             managers_email.append(u.email)
                 notifications[k] = {
+                    "threshold": threshold,
                     "count_blank_no": v["count_blank_no"],
                     "count_all_no": v["count_all_no"],
                     "managers": managers_email,
                 }
-        
+        cls.send_warn_mail_about_blank_track_number(notifications)
         return notifications
+    
 
-        
+    @classmethod
+    def send_warn_mail_about_blank_track_number(cls, notifications, language_code=settings.LANGUAGE_CODE):
+        try:
+            from ses_notification.models import PermanentBounceEmail, PermanentBounceEmailError
+        except:
+            PermanentBounceEmail = None
 
+        translation.activate(language_code)
+        NOW = now()
+
+        for identifier, v in notifications.items():
+            title = gettext("""[E-Invoice Notice for {identifier}] Blank numbers are under than threshold({threshold})""").format(
+                identifier=identifier,
+                threshold=v['threshold'],
+            )
+            
+            text_body = gettext('''Dear manager,
+
+        The blank numbers of {identifier} lefts {count_blank_no}(all are {count_all_no}).
+        Please consider applying for the additional blank number.
+
+        Sent time: {now}
+    ''').format(identifier=identifier,
+                count_blank_no=v['count_blank_no'],
+                count_all_no=v['count_all_no'],
+                now=NOW.strftime("%Y-%m-%d %H:%M:%S%z")
+    )
+
+            for email in v['managers']:
+                if PermanentBounceEmail and PermanentBounceEmail.doesexists(email):
+                    raise PermanentBounceEmailError()
+                elif not PermanentBounceEmail or (PermanentBounceEmail
+                                                  and not PermanentBounceEmail.doesexists(email)):
+                    sender = settings.EMAIL_SENDER
+                    if '<' in sender:
+                        sender_name, sender_email = sender.split('<')
+                        sender_email = "<{}".format(sender_email)
+                        sender_name = sender_name.strip()
+                    else:
+                        sender_name = sender.split('@')[0]
+                        sender_email = "<{}>".format(sender)
+
+                    sender = "=?utf-8?B?{}?= {}".format(b64encode(sender_name.encode()).decode(), sender_email)
+                    client = boto3.client(service_name='ses', region_name=settings.AWS_SES_REGION,
+                                          aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                                          aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+
+                    response = client.send_email(
+                        Source=sender,
+                        Destination={
+                            'ToAddresses': [email],
+                        },
+                        Message={
+                            'Subject': {
+                                'Data': title,
+                                'Charset': 'utf-8'
+                            },
+                            'Body': {
+                                'Text': {
+                                    'Data': text_body,
+                                    'Charset': 'utf-8'
+                                }
+                            }
+                        }
+                    )
 
 
 
