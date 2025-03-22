@@ -16,7 +16,8 @@ def forward(apps, schema_editor):
         cron_format='#45 17 * * *',
         name="warn_managers_from_the_blank_track_number_is_below_the_threshold",
         function_option=cf_so,
-        function_note="Warn managers from the blank track number is below the threshold"
+        function_note="Warn managers from the blank track number is below the threshold",
+        kwargs="threshold=0.2",
     )
     insp.save()
 

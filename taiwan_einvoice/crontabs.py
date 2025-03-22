@@ -160,7 +160,7 @@ def warn_managers_from_the_blank_track_number_is_below_the_threshold(alert_log, 
     lg.debug("remind_managers_that_the_blank_track_number_is_below_the_threshold end at {}".format(now()))
 
     alert_log.title = title
-    alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body + "\n\nNotifications: " + Notifications
+    alert_log.mail_body = _("Title: {title}".format(title=title)) + "\n\n" + mail_body + "\n\nNotifications: " + str(Notifications)
     alert_log.status = alert_log_status
     alert_log.executed_end_time = now()
     alert_log.save()
