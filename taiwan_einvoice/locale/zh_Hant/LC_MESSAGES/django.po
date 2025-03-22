@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-08 16:30+0800\n"
+"POT-Creation-Date: 2025-03-22 14:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -48,6 +48,12 @@ msgstr "auto_generate_summary_report 並無警示，單純紀錄"
 
 msgid "Executed auto_generate_summary_report"
 msgstr "執行 auto_generate_summary_report"
+
+msgid "There is no alarm in remind_managers_that_the_blank_track_number_is_below_the_threshold, just logging"
+msgstr "remind_managers_that_the_blank_track_number_is_below_the_threshold 並無警示，單純紀錄"
+
+msgid "Executed remind_managers_that_the_blank_track_number_is_below_the_threshold"
+msgstr "執行完成 remind_managers_that_the_blank_track_number_is_below_the_threshold"
 
 msgid "B2B Exchange Invoice"
 msgstr "B2B交換 開立發票"
@@ -171,6 +177,28 @@ msgstr "一般稅額"
 
 msgid "Special"
 msgstr "特種稅額"
+
+#, python-brace-format
+msgid "[E-Invoice Notice for {identifier}] Blank numbers are under than threshold({threshold})"
+msgstr "[給 {identifier} 電子發票通知] 空白號碼已低於門檻({threshold})"
+
+#, python-brace-format
+msgid ""
+"Dear manager,\n"
+"\n"
+"        The blank numbers of {identifier} lefts {count_blank_no}(all are {count_all_no}).\n"
+"        Please consider applying for the additional blank number.\n"
+"\n"
+"        Sent time: {now}\n"
+"    "
+msgstr ""
+"親愛的管理者,\n"
+"\n"
+"        {identifier} 的空白號碼還剩 {count_blank_no} 張(全部有 {count_all_no} 張)。\n"
+"        請考慮申請新的空白號碼。\n"
+"\n"
+"        寄信時間: {now}\n"
+"    "
 
 msgid "Only use the same identifier to create the record for blank numbers!"
 msgstr "新增「空白未使用字軌號碼」須使用同一個統一編號!"
