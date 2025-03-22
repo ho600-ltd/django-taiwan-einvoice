@@ -1007,6 +1007,9 @@ class SellerInvoiceTrackNo(models.Model):
         else:
             return self.end_no - self.begin_no + 1 - self.einvoice_set.filter(reverse_void_order=0).count()
     @property
+    def count_all_no(self):
+        return self.end_no - self.begin_no + 1
+    @property
     def next_blank_no(self):
         try:
             new_no = self.get_new_no()
@@ -1021,6 +1024,38 @@ class SellerInvoiceTrackNo(models.Model):
             return False
         else:
             return True
+    @classmethod
+    def get_managers_from_the_blank_track_number_is_below_the_threshold(cls, threshold):
+        NOW = now()
+        SD = {}
+        for sitn in cls.objects.filter(begin_time__lte=NOW,
+                                                        end_time__gt=NOW):
+            identifier = sitn.turnkey_service.seller.legal_entity.identifier
+            if identifier not in SD:
+                SD[identifier] = {"count_all_no": sitn.count_all_no, "count_blank_no": sitn.count_blank_no}
+            else:
+                SD[identifier]["count_all_no"] += sitn.count_all_no
+                SD[identifier]["count_blank_no"] += sitn.count_blank_no
+        
+        threshold = float(threshold)
+        notifications = {}
+        for k, v in SD.items():
+            if v['count_blank_no'] / v['count_all_no'] < threshold:
+                managers_email = []
+                for ts in TurnkeyService.objects.filter(seller__legal_entity__identifier='89858673'):
+                    for u in get_users_with_perms(ts, only_with_perms_in=['add_te_sellerinvoicetrackno'], with_superusers=True):
+                        if u.email not in managers_email:
+                            managers_email.append(u.email)
+                notifications[k] = {
+                    "count_blank_no": v["count_blank_no"],
+                    "count_all_no": v["count_all_no"],
+                    "managers": managers_email,
+                }
+        
+        return notifications
+
+        
+
 
 
 
