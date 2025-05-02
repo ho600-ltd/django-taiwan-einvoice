@@ -106,13 +106,13 @@ class C0701JSON2MIGXMl(C0501JSON2MIGXMl):
 
 
 class E0402JSON2MIGXMl(object):
-    versions = ["4.0"]
+    versions = ["4.1"]
     base_xml = """<BranchTrackBlank xmlns="urn:GEINV:eInvoiceMessage:E0402:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:E0402:{version} E0402.xsd">
     {xml_body}
 </BranchTrackBlank>"""
 
 
-    def __init__(self, json_data, version="4.0"):
+    def __init__(self, json_data, version="4.1"):
         if version not in self.versions:
             raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
         self.version = version
@@ -619,8 +619,9 @@ class EITurnkeyBatch(models.Model):
     version_choices = (
         ('3.2', 'v32'),
         ('4.0', 'v40'),
+        ('4.1', 'v41'),
     )
-    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='4.0') # MIG version at turnkey
+    turnkey_version = models.CharField(max_length=8, choices=version_choices, default='4.1') # MIG version at turnkey
     status_choices = (
         ("7", _("Just created")),
         ("8", _("Downloaded from TEA")),
@@ -1331,13 +1332,15 @@ class EITurnkeyE0501InvoiceAssignNo(models.Model):
 
 
 class F0401JSON2MIGXMl(object):
-    versions = ["4.0"]
-    base_xml = """<Invoice xmlns="urn:GEINV:eInvoiceMessage:F0401:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0401:{version} F0401.xsd">
-    {xml_body}
-</Invoice>"""
+    versions = ["4.1"]
+    base_xml = """<?xml version="1.0" encoding="UTF-8"?>
+                  <Invoice xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0401:{version} F0401.xsd"
+                        xmlns="urn:GEINV:eInvoiceMessage:F0401:{version}"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">{xml_body}
+                  </Invoice>"""
 
 
-    def __init__(self, json_data, version="4.0"):
+    def __init__(self, json_data, version="4.1"):
         if version not in self.versions:
             raise Exception("Only accept version number: {}".format(", ".join(self.versions)))
         self.version = version
@@ -1373,12 +1376,14 @@ class F0401JSON2MIGXMl(object):
 
 
 class F0501JSON2MIGXMl(F0401JSON2MIGXMl):
-    base_xml = """<CancelInvoice xmlns="urn:GEINV:eInvoiceMessage:F0501:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0501:{version} F0501.xsd">
-    {xml_body}
-</CancelInvoice>"""
+    base_xml = """<?xml version="1.0" encoding="UTF-8"?>
+                  <CancelInvoice xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0501:{version} F0501.xsd"
+                    xmlns="urn:GEINV:eInvoiceMessage:F0501:{version}"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">{xml_body}
+                  </CancelInvoice>"""
 
 
-    def __init__(self, json_data, version="4.0"):
+    def __init__(self, json_data, version="4.1"):
         super().__init__(json_data, version=version)
 
 
@@ -1400,7 +1405,9 @@ class F0501JSON2MIGXMl(F0401JSON2MIGXMl):
 
 
 class F0701JSON2MIGXMl(F0501JSON2MIGXMl):
-    base_xml = """<VoidInvoice xmlns="urn:GEINV:eInvoiceMessage:F0701:{version}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0701:{version} F0701.xsd">
-    {xml_body}
-</VoidInvoice>"""
+    base_xml = """<?xml version="1.0" encoding="UTF-8"?>
+                    <VoidInvoice xsi:schemaLocation="urn:GEINV:eInvoiceMessage:F0701:{version} F0701.xsd"
+                        xmlns="urn:GEINV:eInvoiceMessage:F0701:{version}"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">{xml_body}
+                    </VoidInvoice>"""
 
