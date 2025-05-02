@@ -1350,7 +1350,7 @@ class F0401JSON2MIGXMl(object):
     
     def regulate_json_data(self, json_data):
         def _append_sequence_number(index0, d):
-            d["SequenceNumber"] = "{:03d}".format(index0+1)
+            d["SequenceNumber"] = "{:04d}".format(index0+1)
             return d
         json_data["Details"] = [{"ProductItem": _append_sequence_number(_i, _pi)}
             for _i, _pi in enumerate(json_data["Details"])
