@@ -1381,9 +1381,9 @@ class EInvoice(models.Model):
     def carrier_type__display(self):
         return self.get_carrier_type_display()
 
-    carrier_id1 = models.CharField(max_length=64, default='', db_index=True)
-    carrier_id2 = models.CharField(max_length=64, default='', db_index=True)
-    npoban = models.CharField(max_length=7, default='', db_index=True)
+    carrier_id1 = models.CharField(max_length=400, default='', db_index=True)
+    carrier_id2 = models.CharField(max_length=400, default='', db_index=True)
+    npoban = models.CharField(max_length=10, default='', db_index=True)
     @property
     def donate_mark(self):
         if self.npoban:
@@ -1947,6 +1947,9 @@ class EInvoice(models.Model):
             del kwargs['upload_batch_kind']
         else:
             upload_batch_kind = ''
+
+        over_500_descriptions = [d['Description'] for d in self.details if 500 < len(d['Description'])]
+
         if not self.content_object:
             raise ContentObjectError(_("Content object is not existed"))
         elif not hasattr(self.content_object, 'check_before_cancel_einvoice'):
@@ -1955,6 +1958,8 @@ class EInvoice(models.Model):
             raise ContentObjectError(_("Content Object: {} has no 'post_cancel_einvoice' method").format(self.content_object))
         elif 9999 < len(self.details):
             raise EInvoiceDetailsError(_("Max records in details is 9999"))
+        elif over_500_descriptions:
+            raise EInvoiceDetailsError(_("The length of Description over 500: {}").format(", ".join(over_500_descriptions)))
         elif kwargs.get('force_save', False):
             del kwargs['force_save']
             super().save(*args, **kwargs)
