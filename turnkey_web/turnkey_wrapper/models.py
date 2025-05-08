@@ -14,7 +14,7 @@ TAIPEI_TIMEZONE = pytz.timezone('Asia/Taipei')
 EITurnkeyBatchEInvoice_CAN_NOT_DUPLICATES_EXIST_IN_STATUSS = ["G", "C"]
 EI_WELL_STATUSS = ["P", "G", "C"]
 EI_STATUSS = ["C", "G", "P", "E", "I"]
-MIG_NOS = ["C0401", "C0501", "C0701", "F0401", "F0501", "F0701"]
+MIG_NOS = ["F0401", "F0501", "F0701", "E0402", "C0401", "C0501", "C0701", ]
 XML_VERSION_RE = re.compile('<\?xml +version=[\'"][0-9\.]+[\'"][^>]+>', re.I)
 WILL_REMOVE_DFAJDLFZX_RE = re.compile('</?will_remove_dfajdlfzx>', re.I)
 
