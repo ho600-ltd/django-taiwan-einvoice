@@ -93,6 +93,7 @@ class TURNKEY_MESSAGE_LOGFilter(filters.FilterSet):
             "SEQNO": ("icontains", ),
             "SUBSEQNO": ("icontains", ),
             "STATUS": ("exact", ),
+            "MESSAGE_TYPE": ("exact", ),
             "FROM_ROUTING_ID": ("exact", ),
             "INVOICE_IDENTIFIER": ("exact", "icontains", ),
         }
