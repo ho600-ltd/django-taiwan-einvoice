@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-22 14:17+0800\n"
+"POT-Creation-Date: 2025-07-26 11:58+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -308,6 +308,9 @@ msgstr "內容物件: {} 無「post_cancel_einvoice」方法"
 
 msgid "Max records in details is 9999"
 msgstr "明細最多只能有 9999 筆紀錄"
+
+msgid "The length of Description over 500: {}"
+msgstr "品名長度超過 500: {}"
 
 #, python-brace-format
 msgid "{total_amount} is bigger than Forbidden Amount({forbidden_above_amount})"
@@ -807,8 +810,11 @@ msgstr "列印"
 msgid "Note: Cancel E-Invoice could not be rollback. The track no. will be deprecated."
 msgstr "注意: 作廢電子發票後，是無法回復，該發票的字軌號碼將會被棄用。"
 
-msgid "Note: If the customer lost the original copy of E-Invoice, then please cancel this E-Invoice after you get the statement from the customer."
-msgstr "注意: 如果消費者遺失紙本電子發票證明聯，請先拿到該消費者的聲明書方才作廢發票。"
+msgid "Note: It can cancel E-Invoice after you get back the original copy of E-Invoice.  If the customer lost the original copy of E-Invoice, please cancel this E-Invoice after you receive the statement from the customer."
+msgstr "注意: 作廢電子發票前，請先取回該消費者的電子發票證明聯正本。如果消費者遺失電子發票證明聯正本，請先拿到該消費者的聲明書方才作廢發票。"
+
+msgid "Note: Note: If the customer stores E-invoice with personal vehicle or simply donates it, E-invoice can only be cancelled with the consumer's consent."
+msgstr "注意：如果客戶使用個人載具儲存電子發票或捐贈電子發票，則在消費者同意作廢的情況下才能作廢電子發票。"
 
 msgid "Cancel Reason Example"
 msgstr "作廢原因範例"
@@ -2011,6 +2017,9 @@ msgstr "上傳批次狀態錯誤"
 
 msgid "Upload Batch Status != \"f\""
 msgstr "上傳批次狀態 != \"f\""
+
+#~ msgid "Note: It can just cancel E-invoice with consumer's conmition, If the customer stores E-Invoice with vehicle or just donating."
+#~ msgstr "注意: 如果消費者使用載具儲存電子發票或是捐贈電子發票，那可以作廢發票。"
 
 #~ msgid "Choose .csv"
 #~ msgstr "選擇 .csv"
