@@ -1158,8 +1158,12 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
+            if request.user.is_superuser:
+                timedelta = datetime.timedelta(hours=48)
+            else:
+                timedelta = datetime.timedelta(hours=6)
             if (einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).day != NOW.astimezone(TAIPEI_TIMEZONE).day
-                and NOW - einvoice.generate_time >= datetime.timedelta(hours=6)):
+                and NOW - einvoice.generate_time >= timedelta):
                 return Response({"error_title": _("Void Error"),
                                  "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
                                 }, status=status.HTTP_403_FORBIDDEN)
