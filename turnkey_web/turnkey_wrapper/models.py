@@ -1134,10 +1134,12 @@ class EITurnkeyDailySummaryResultXML(models.Model):
                 else:
                     invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
                 for invoice in invoices:
-                    invoice_identifier1 = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], report_date)
-                    invoice_identifier2 = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
+                    if mig_no in ["F0701", "F0501", "C0501"]:
+                        invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], report_date)
+                    else:
+                        invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
                     try:
-                        tml = TURNKEY_MESSAGE_LOG.objects.get(UUID=uuid, INVOICE_IDENTIFIER__in=(invoice_identifier1, invoice_identifier2))
+                        tml = TURNKEY_MESSAGE_LOG.objects.get(UUID=uuid, INVOICE_IDENTIFIER=invoice_identifier)
                     except TURNKEY_MESSAGE_LOG.DoesNotExist:
                         if not ignore_very_old_TURNKEY_MESSAGE_LOG:
                             report_datetime = TAIPEI_TIMEZONE.localize(datetime.datetime.strptime(report_date+report_time+"000", "%Y%m%d%H%M%S%f"))
