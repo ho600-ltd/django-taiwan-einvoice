@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-26 11:58+0800\n"
+"POT-Creation-Date: 2026-02-03 18:03+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1948,6 +1948,12 @@ msgstr "重印電子發票錯誤"
 
 msgid "Expired time: over next day AM00:00 and 6 hours past the generate time."
 msgstr "逾時: 超過隔日零時且超過開立時間 6 小時。"
+
+msgid "Print E-Invoice Error"
+msgstr "列印電子發票錯誤"
+
+msgid "The E-Invoice that both set mobile-barcode and buyer identifier can not print out if they are not printed within 36 hours of generation."
+msgstr "同時設定了手機條碼和統一編號的電子發票，在開立後的 36 小時內未列印的話，則超過 36 小時後就無法列印。"
 
 msgid "E-Invoice Error"
 msgstr "電子發票錯誤"

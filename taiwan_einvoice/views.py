@@ -941,6 +941,16 @@ class EInvoiceModelViewSet(ModelViewSet):
                     return Response({"error_title": _("Re-print E-Invoice Error"),
                                      "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
                                     }, status=status.HTTP_403_FORBIDDEN)
+            else:
+                if '3J0002' == ei.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != ei.buyer_identifier:
+                    NOW = now()
+                    if not ei.print_mark:
+                        if NOW - ei.generate_time < datetime.timedelta(hours=36):
+                            pass #TODO: TRADE#377-1
+                        else:
+                            return Response({"error_title": _("Print E-Invoice Error"),
+                                            "error_message": _("The E-Invoice that both set mobile-barcode and buyer identifier can not print out if they are not printed within 36 hours of generation."),
+                                            }, status=status.HTTP_403_FORBIDDEN)
             if escpos_print_scripts.get('is_canceled', False):
                 escpos_print_scripts['re_print_original_copy'] = True
             return Response(escpos_print_scripts)
