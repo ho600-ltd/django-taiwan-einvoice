@@ -1045,6 +1045,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                         return Response(er, status=status.HTTP_403_FORBIDDEN)
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
+            #TODO: CMEC2-1000: no need to set_print_mark_true before upload
             einvoice.set_print_mark_true()
         dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
@@ -1202,6 +1203,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             return Response(er, status=status.HTTP_403_FORBIDDEN)
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
+            #TODO: CMEC2-1000: no need to set_print_mark_true before upload
             einvoice.set_print_mark_true()
         dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
