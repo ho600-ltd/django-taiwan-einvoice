@@ -941,7 +941,7 @@ class EInvoiceModelViewSet(ModelViewSet):
                     return Response({"error_title": _("Re-print E-Invoice Error"),
                                      "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
                                     }, status=status.HTTP_403_FORBIDDEN)
-            if escpos_print_scripts.get('is_canceled', False):
+            if escpos_print_scripts.get('is_canceled', False) or escpos_print_scripts.get('is_voided', False):
                 escpos_print_scripts['re_print_original_copy'] = True
             return Response(escpos_print_scripts)
         else:

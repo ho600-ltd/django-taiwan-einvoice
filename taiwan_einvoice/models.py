@@ -1695,6 +1695,7 @@ class EInvoice(models.Model):
         _d = {
             "meet_to_tw_einvoice_standard": True,
             "is_canceled": self.is_canceled,
+            "is_voided": self.is_voided,
             "buyer_is_business_entity": self.buyer_is_business_entity,
             "print_mark": self.print_mark,
             "id": self.id,
