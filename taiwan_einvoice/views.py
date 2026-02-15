@@ -1046,6 +1046,8 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
             #TODO: CMEC2-1000: no need to set_print_mark_true before upload
+            # My note: remove "einvoice.set_print_mark_true()",
+            # and add einvoice.remove_or_update_from_upload_batch()
             einvoice.set_print_mark_true()
         dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
