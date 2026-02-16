@@ -1770,6 +1770,7 @@ class EInvoice(models.Model):
                 ub.save()
                 bei.batch = ub
                 bei.save()
+        self.set_print_mark_true()
 
 
     def in_cp_np_or_wp(self):
