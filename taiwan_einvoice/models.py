@@ -1742,6 +1742,28 @@ class EInvoice(models.Model):
         return "{}".format(self.track_no)
 
 
+    def remove_and_update_from_upload_batch(self, old_kind='', new_kind='', executor=None):
+        ct = ContentType.objects.get_for_model(self)
+        obj_id = self.id
+        bei = BatchEInvoice.objects.filter(content_type=ct, object_id=obj_id, body="").last()
+        if bei and old_kind == bei.batch.kind:
+            _ub = bei.batch
+            if not _ub.batcheinvoice_set.exclude(id=bei.id).exists():
+                _ub.kind = new_kind
+                _ub.executor = executor
+                _ub.save()
+            else:
+                ub = UploadBatch(turnkey_service=self.seller_invoice_track_no.turnkey_service,
+                                 mig_type=_ub.mig_type,
+                                 kind=new_kind,
+                                 status='0',
+                                 executor=executor,
+                                )
+                ub.save()
+                bei.batch = ub
+                bei.save()
+
+
     def in_cp_np_or_wp(self):
         if '3J0002' == self.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != self.buyer_identifier:
             kind = 'cp'
