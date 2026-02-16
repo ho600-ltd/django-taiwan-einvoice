@@ -1134,7 +1134,7 @@ class EITurnkeyDailySummaryResultXML(models.Model):
                 else:
                     invoices = [message['ResultType'][key]['ResultDetailType']['Invoices']['Invoice']]
                 for invoice in invoices:
-                    if mig_no in ["F0501", "C0501"]:
+                    if mig_no in ["F0701", "F0501", "C0501"]:
                         invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], report_date)
                     else:
                         invoice_identifier = "{}{}{}".format(mig_no, invoice['ReferenceNumber'], invoice['InvoiceDate'])
@@ -1147,7 +1147,7 @@ class EITurnkeyDailySummaryResultXML(models.Model):
                             if first_eitbei and report_datetime < first_eitbei.upload_to_ei_time:
                                 self.is_parsed = True
                                 return None
-                    eitbei = EITurnkeyBatchEInvoice.objects.get(invoice_identifier=invoice_identifier, upload_to_ei_time=tml.MESSAGE_DTS_datetime)
+                    eitbei = EITurnkeyBatchEInvoice.objects.get(invoice_identifier=tml.INVOICE_IDENTIFIER, upload_to_ei_time=tml.MESSAGE_DTS_datetime)
                     if eitbei.batch_einvoice_id not in batch_einvoice_idss[key]:
                         counts[key] += 1
                         batch_einvoice_idss[key].append(eitbei.batch_einvoice_id)

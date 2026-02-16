@@ -1703,6 +1703,7 @@ class EInvoice(models.Model):
         _d = {
             "meet_to_tw_einvoice_standard": True,
             "is_canceled": self.is_canceled,
+            "is_voided": self.is_voided,
             "buyer_is_business_entity": self.buyer_is_business_entity,
             "print_mark": self.print_mark,
             "id": self.id,
@@ -1747,6 +1748,28 @@ class EInvoice(models.Model):
 
     def __str__(self):
         return "{}".format(self.track_no)
+
+
+    def remove_and_update_from_upload_batch(self, old_kind='', new_kind='', executor=None):
+        ct = ContentType.objects.get_for_model(self)
+        obj_id = self.id
+        bei = BatchEInvoice.objects.filter(content_type=ct, object_id=obj_id, body="").last()
+        if bei and old_kind == bei.batch.kind:
+            _ub = bei.batch
+            if not _ub.batcheinvoice_set.exclude(id=bei.id).exists():
+                _ub.kind = new_kind
+                _ub.executor = executor
+                _ub.save()
+            else:
+                ub = UploadBatch(turnkey_service=self.seller_invoice_track_no.turnkey_service,
+                                 mig_type=_ub.mig_type,
+                                 kind=new_kind,
+                                 status='0',
+                                 executor=executor,
+                                )
+                ub.save()
+                bei.batch = ub
+                bei.save()
 
 
     def in_cp_np_or_wp(self):
