@@ -13,7 +13,7 @@ from rest_framework.renderers import BrowsableAPIRenderer, HTMLFormRenderer
 
 from taiwan_einvoice.models import (User,
                                     Seller,
-                                    TurnkeyService,
+                                    LegalEntity,
                                     SellerInvoiceTrackNo,
                                     EInvoice,
                                     CancelEInvoice,
@@ -220,6 +220,7 @@ class EInvoiceHtmlRenderer(TEOriginHTMLRenderer):
         res['type_choices'] = SellerInvoiceTrackNo.type_choices
         creator_ids = EInvoice.objects.filter(seller_invoice_track_no__turnkey_service__in=turnkey_services).values_list("creator", flat=True)
         res['creators'] = User.objects.filter(id__in=creator_ids).order_by('first_name')
+        res['GENERAL_CONSUMER_IDENTIFIER'] = LegalEntity.GENERAL_CONSUMER_IDENTIFIER
         return  res
 
 
