@@ -965,7 +965,7 @@ class EInvoiceModelViewSet(ModelViewSet):
                             return Response({"error_title": _("Print E-Invoice Error"),
                                              "error_message": _("The E-Invoice that both set mobile-barcode and buyer identifier can not print out if they are not printed within {} hours of generation. Please cancel this E-Invoice and create a new one as same time, then print the new one.").format(COULD_PRINT_TIME_MARGIN.total_seconds()/3600),
                                             }, status=status.HTTP_403_FORBIDDEN)
-            if escpos_print_scripts.get('is_canceled', False):
+            if escpos_print_scripts.get('is_canceled', False) or escpos_print_scripts.get('is_voided', False):
                 escpos_print_scripts['re_print_original_copy'] = True
             return Response(escpos_print_scripts)
         else:
@@ -1069,7 +1069,7 @@ class CancelEInvoiceModelViewSet(ModelViewSet):
                         return Response(er, status=status.HTTP_403_FORBIDDEN)
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
-            einvoice.set_print_mark_true()
+            einvoice.remove_and_update_from_upload_batch(old_kind='wp', new_kind='np', executor=request.user)
         dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
         data['creator'] = request.user.id
@@ -1227,7 +1227,7 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             return Response(er, status=status.HTTP_403_FORBIDDEN)
 
         if "wp" == einvoice.in_cp_np_or_wp() and not einvoice.print_mark:
-            einvoice.set_print_mark_true()
+            einvoice.remove_and_update_from_upload_batch(old_kind='wp', new_kind='np', executor=request.user)
         dev_null = UploadBatch.append_to_the_upload_batch(einvoice, executor=request.user)
 
         if cancel_before_void:
