@@ -129,7 +129,10 @@ from taiwan_einvoice.paginations import (
     TenTo1000PerPagePagination,
 )
 
-
+from taiwan_einvoice.models import COULD_PRINT_TIME_MARGIN
+SUPERUSER_CAN_VOID_EI_HOURS = 48
+USER_CAN_VOID_EI_HOURS = 6
+RE_PRINT_ORIGINAL_COPY_HOURS = 6
 
 class OneHundredPerPagePagination(TenTo100PerPagePagination):
     page_size = 100
@@ -948,10 +951,20 @@ class EInvoiceModelViewSet(ModelViewSet):
                 escpos_print_scripts['re_print_original_copy'] = True
                 NOW = now()
                 if (ei.generate_time.astimezone(TAIPEI_TIMEZONE).day != NOW.astimezone(TAIPEI_TIMEZONE).day
-                    and NOW - ei.generate_time >= datetime.timedelta(hours=6)):
+                    and NOW - ei.generate_time >= datetime.timedelta(hours=RE_PRINT_ORIGINAL_COPY_HOURS)):
                     return Response({"error_title": _("Re-print E-Invoice Error"),
-                                     "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
+                                     "error_message": _("Expired time: over next day AM00:00 and {} hours past the generate time.").format(RE_PRINT_ORIGINAL_COPY_HOURS),
                                     }, status=status.HTTP_403_FORBIDDEN)
+            else:
+                if '3J0002' == ei.carrier_type and LegalEntity.GENERAL_CONSUMER_IDENTIFIER != ei.buyer_identifier:
+                    NOW = now()
+                    if not ei.print_mark:
+                        if NOW - ei.generate_time < COULD_PRINT_TIME_MARGIN - datetime.timedelta(minutes=15):
+                            pass # print normally
+                        else:
+                            return Response({"error_title": _("Print E-Invoice Error"),
+                                             "error_message": _("The E-Invoice that both set mobile-barcode and buyer identifier can not print out if they are not printed within {} hours of generation. Please cancel this E-Invoice and create a new one as same time, then print the new one.").format(COULD_PRINT_TIME_MARGIN.total_seconds()/3600),
+                                            }, status=status.HTTP_403_FORBIDDEN)
             if escpos_print_scripts.get('is_canceled', False):
                 escpos_print_scripts['re_print_original_copy'] = True
             return Response(escpos_print_scripts)
@@ -1170,13 +1183,14 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             return Response(er, status=status.HTTP_403_FORBIDDEN)
         else:
             if request.user.is_superuser:
-                timedelta = datetime.timedelta(hours=48)
+                hours = SUPERUSER_CAN_VOID_EI_HOURS
             else:
-                timedelta = datetime.timedelta(hours=6)
+                hours = USER_CAN_VOID_EI_HOURS
+            timedelta = datetime.timedelta(hours=hours)
             if (einvoice.generate_time.astimezone(TAIPEI_TIMEZONE).day != NOW.astimezone(TAIPEI_TIMEZONE).day
                 and NOW - einvoice.generate_time >= timedelta):
                 return Response({"error_title": _("Void Error"),
-                                 "error_message": _("Expired time: over next day AM00:00 and 6 hours past the generate time."),
+                                 "error_message": _("Expired time: over next day AM00:00 and {} hours past the generate time.").format(hours),
                                 }, status=status.HTTP_403_FORBIDDEN)
             if einvoice.is_voided:
                 er = {
