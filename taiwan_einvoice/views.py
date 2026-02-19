@@ -190,22 +190,33 @@ class TEAStaffProfileModelViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = request.data
-        if TEAStaffProfile.objects.filter(user__username=data['user.username']).exists():
+        username = data.get('user.username', None)
+        user_id = data.get('user', -99999999)
+        if TEAStaffProfile.objects.filter(Q(user__username=username)
+                                          |Q(id=user_id)).exists():
             er = {
                 "error_title": _("Staff exist"),
                 "error_message": _("Staff exist"),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
-        try:
-            data['user'] = User.objects.get(username=data['user.username']).id
-        except User.DoesNotExist:
+        elif username or user_id:
+            try:
+                data['user'] = User.objects.get(Q(username=username)
+                                                |Q(id=user_id)).id
+            except User.DoesNotExist:
+                er = {
+                    "error_title": _("User does not exist"),
+                    "error_message": _("Please check the username(Or id), this field is case-sensitive"),
+                }
+                return Response(er, status=status.HTTP_403_FORBIDDEN)
+            if 'user.username' in data:
+                del data['user.username']
+        else:
             er = {
-                "error_title": _("Username does not exist"),
-                "error_message": _("Please check the username, this field is case-sensitive"),
+                "error_title": _("ID/Username Error"),
+                "error_message": _("Please input the username(Or id)."),
             }
             return Response(er, status=status.HTTP_403_FORBIDDEN)
-        else:
-            del data['user.username']
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
