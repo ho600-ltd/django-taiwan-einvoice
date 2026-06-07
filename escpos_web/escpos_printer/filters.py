@@ -3,7 +3,8 @@ import rest_framework_filters as filters
 
 from django.db.models import Q
 from django.contrib.auth.models import User
-from django.utils.timezone import now, utc
+utc = datetime.timezone.utc
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
 
 
