@@ -14,7 +14,8 @@ from django.db.models import Max, F, Count, Q
 from django.contrib.auth.models import User, Group
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils import translation
-from django.utils.timezone import now, utc
+utc = datetime.timezone.utc
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext, pgettext
 from simple_history.models import HistoricalRecords

@@ -6,7 +6,8 @@ from django.shortcuts import render, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.models import Permission, User, Group
 from django.contrib.contenttypes.models import ContentType
-from django.utils.timezone import now, utc
+utc = datetime.timezone.utc
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from guardian.shortcuts import get_objects_for_user, get_perms, get_users_with_perms, remove_perm, assign_perm
