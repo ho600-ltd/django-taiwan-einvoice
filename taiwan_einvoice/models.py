@@ -649,7 +649,7 @@ class LegalEntity(models.Model, IdentifierRule):
     customer_number_char = models.CharField(max_length=20, default='', db_index=True)
     @property
     def customer_number(self):
-        if not self.customer_number_char:
+        if not self.customer_number_char or self.customer_number_char.startswith('+Update-'):
             return ("$:{}".format(self.pk))[:20]
         else:
             return self.customer_number_char[:20]
