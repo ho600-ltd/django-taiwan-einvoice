@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 21:24+0800\n"
+"POT-Creation-Date: 2026-09-05 10:17+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1096,6 +1096,9 @@ msgstr "使用「\"<span id=\"default_escpos_print_name\"></span>\"」列印電�
 msgid "Generate Time"
 msgstr "開立時間"
 
+msgid "Buyer Identifier"
+msgstr "買方統編"
+
 msgid "Canceled?"
 msgstr "作<br/>廢<br/>?"
 
@@ -1717,13 +1720,16 @@ msgid "Void Time"
 msgstr "註銷時間"
 
 msgid "Note 1st: Void E-Invoice could not be rollback. The track no. will be the same as previous one."
-msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會相同的。"
+msgstr "注意 1: 註銷電子發票後，是無法回復，而新開立發票的字軌號碼將會是相同的。"
 
-msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
-msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
+msgid "Note 2nd: Only use 'Void E-Invoice' for updating donate-mark, buyer identifier, buyer name, mobile-barcode and natural person barcode.  The fields: track_no, generate_no, generate_time, amount, details in the new E-Invoice will be same as the previous one."
+msgstr "注意 2: 註銷電子發票功能僅用於更改捐贈碼、買方統編、買方抬頭、手機條碼、自然人條碼上。而新開立的電子發票，在欄位: 字軌號碼、追蹤編號、開立時間、金額、明細皆與被註銷發票一致。"
 
-msgid "Note 3rd: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time."
-msgstr "注意 3: 無法同時設定捐贈碼及買方統編；也無法同時設定手機條碼及自然人憑證條碼。"
+msgid "Note 3rd: Buyer name depends on the value of the legal entity record of the buyer, it does not be updated in this form."
+msgstr "注意 3: 買方抬頭以買受人紀錄為準，無法在此表單中更新。"
+
+msgid "Note 4th: It could not set donate-mark and buyer identifier at the same time. Also, it could not set mobile-barcode and natural person barcode at the same time."
+msgstr "注意 4: 無法同時設定捐贈碼及買方統編；也無法同時設定手機條碼及自然人憑證條碼。"
 
 msgctxt "void_einvoice"
 msgid "Reason(Required)"
@@ -1732,9 +1738,6 @@ msgstr "註銷原因(必填)"
 msgctxt "void_einvoice"
 msgid "Please one"
 msgstr "請選擇 1 項"
-
-msgid "Buyer Identifier"
-msgstr "買方統編"
 
 msgid "Please input 8 digits number"
 msgstr "請輸入 8 碼數字"
@@ -1792,11 +1795,17 @@ msgstr "無權限或是頁面尚未完成"
 msgid "Staff exist"
 msgstr "工作人員已存在"
 
-msgid "Username does not exist"
-msgstr "{} 帳號不存在"
+msgid "User does not exist"
+msgstr "使用者不存在"
 
-msgid "Please check the username, this field is case-sensitive"
-msgstr "請檢查帳號，此欄位有大小寫之分"
+msgid "Please check the username(Or id), this field is case-sensitive"
+msgstr "請檢查帳號(或ID)，此欄位有大小寫之分"
+
+msgid "ID/Username Error"
+msgstr "ID/帳號錯誤"
+
+msgid "Please input the username(Or id)."
+msgstr "請輸入帳號(或ID)"
 
 msgid "Turnkey Service Error"
 msgstr "Turnkey 服務錯誤"
