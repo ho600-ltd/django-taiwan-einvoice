@@ -131,7 +131,7 @@ from taiwan_einvoice.paginations import (
 )
 
 from taiwan_einvoice.models import COULD_PRINT_TIME_MARGIN
-SUPERUSER_CAN_VOID_EI_HOURS = 48
+SUPERUSER_CAN_VOID_EI_HOURS = 360
 USER_CAN_VOID_EI_HOURS = 6
 RE_PRINT_ORIGINAL_COPY_HOURS = 6
 
@@ -1297,9 +1297,8 @@ class VoidEInvoiceModelViewSet(ModelViewSet):
             _d['npoban'] = data['npoban']
         elif data['buyer_identifier']:
             _d['buyer_identifier'] = data['buyer_identifier']
-            try:
-                buyer_legal_entity = LegalEntity.objects.get(identifier=_d['buyer_identifier'])
-            except LegalEntity.DoesNotExist:
+            buyer_legal_entity = LegalEntity.objects.filter(identifier=_d['buyer_identifier']).last()
+            if not buyer_legal_entity:
                 buyer_legal_entity = LegalEntity(identifier=_d['buyer_identifier'], name=_d['buyer_identifier'])
                 buyer_legal_entity.save()
             _d["buyer"] = buyer_legal_entity
