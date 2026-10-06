@@ -6,12 +6,12 @@ django-guardian>=2.4,<2.5
 djangorestframework>=3.17,<3.18
 djangorestframework-filters==1.0.0.dev2
 django-simple-history>=3.0,<3.1
-mysqlclient>=2.0,<2.1 #with python-3.10
+mysqlclient>=2.1,<2.2 #with python-3.14
 pycryptodome>=3.10,<3.11
 pyotp>=2.6,<2.7
 daphne>=4.0,<4.1
 channels>=4.3,<4.4
-channels-redis>=4.3,<4.4
+channels-valkey>=0.3,<0.4
 requests>=2.26,<2.27
 https://github.com/ho600-ltd/ho600-ltd-python-libraries/archive/refs/tags/0.0.3.zip
 git+ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/django-ho600_lib2
