@@ -106,6 +106,7 @@ DATABASES = {
         'OPTIONS': {
             'charset': 'utf8mb4',
         },
+        'CONN_MAX_AGE': 14400, # unit: seconds
     },
 }
 
