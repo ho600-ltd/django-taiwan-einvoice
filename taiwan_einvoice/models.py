@@ -218,12 +218,14 @@ class EInvoiceSellerAPI(models.Model):
         _s = "&".join(s)
         data['signature'] = self.get_hmacsha256_sign(_s)
 
-        requests.packages.urllib3.disable_warnings()
-        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
-        try:
-            requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
-        except AttributeError:
-            pass
+        #INFO>>> Incompatible with urllib3>=2.0
+        # requests.packages.urllib3.disable_warnings()
+        # requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+        # try:
+        #     requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += ':HIGH:!DH:!aNULL'
+        # except AttributeError:
+        #     pass
+        # <<< INFO
         for _proxy in self.proxy.split(';'):
             client_kw = {}
             if _proxy:
